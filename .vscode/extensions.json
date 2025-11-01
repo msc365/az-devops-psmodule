@@ -1,0 +1,11 @@
+{
+    "recommendations": [
+        "bewhite.psrule-vscode",
+        "ms-azuretools.vscode-bicep",
+        "ms-vscode.powershell",
+        "pspester.pester-test",
+        "redhat.vscode-yaml",
+        "streetsidesoftware.code-spell-checker",
+        "yzhang.markdown-all-in-one"
+    ]
+}

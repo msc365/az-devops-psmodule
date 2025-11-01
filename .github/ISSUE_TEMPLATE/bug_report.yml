@@ -1,0 +1,84 @@
+---
+name: "Bug report \U0001F41B"
+description: Report errors or unexpected behavior
+title: 'Bug: '
+labels: ['needs triage :wave:', 'bug :beetle:']
+body:
+  - type: checkboxes
+    attributes:
+      label: Is there an existing issue for this?
+      description: Please search to see if an issue already exists for the bug you encountered.
+      options:
+        - label: I have searched the existing issues
+          required: true
+  - type: input
+    attributes:
+      label: PowerShell version
+      description: Please provide the version of the PowerShell you are using if relevant.
+    validations:
+      required: false
+  - type: input
+    attributes:
+      label: Azure IDP Toolbox version
+      description: Please provide the version of the IPD Toolbox Module you are using.
+    validations:
+      required: true
+  - type: dropdown
+    attributes:
+      label: Related function
+      description: Which function are you using?
+      multiple: false
+      options:
+        - New-RandomPassword
+        - Other
+        - Not relevant
+    validations:
+      required: true
+  - type: dropdown
+    attributes:
+      label: Infra as Code type
+      description: Are you using Bicep or Terraform?
+      multiple: false
+      options:
+        - Bicep
+        - Terraform
+        - Both
+        - Not relevant
+    validations:
+      required: false
+  - type: textarea
+    id: inputs
+    attributes:
+      label: Input arguments of the related function
+      description: Please provide any relevant input arguments of the MSc365.Idp.Toolbox Module that can reproduce the issue.
+    validations:
+      required: false
+  - type: textarea
+    id: debug
+    attributes:
+      label: Debug output
+      description: |
+        For long debug logs please provide a link to a GitHub Gist containing the complete debug output. Please do NOT paste the debug output in the issue; just paste a link to the Gist.
+      render: shell
+    validations:
+      required: false
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What should have happened?
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: What actually happened?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: |
+        Please list the steps required to reproduce the issue.
