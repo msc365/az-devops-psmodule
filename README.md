@@ -11,9 +11,6 @@
 
 This repository provides a PowerShell module that wraps the Azure DevOps REST API into clean, task-oriented cmdlets. It simplifies automation and scripting across your DevOps workflows, making it easier to manage pipelines, repositories, builds, releases, and work items directly from PowerShell.
 
-![logo small martin swinkels cloud](.assets/logo-small.png)  
-<small>Part of Martin's Cloud on GitHub</small>
-
 <!-- > [!WARNING]
 > This module provides experimental features, allowing you to test and provide feedback on new functionalities before they become stable. These features are not finalized and may undergo breaking changes, so they are not recommended for production use. -->
 
@@ -32,6 +29,17 @@ This repository provides a PowerShell module that wraps the Azure DevOps REST AP
 - Automate DevOps workflows and resource deployments
 - Accelerate onboarding and standardization for cloud teams
 - Implement end-to-end governance from CI/CD pipelines to Azure Resource Manager
+
+<!-- omit from toc -->
+## Table of Contents
+
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Commands](#commands)
+- [Requirements](#requirements)
+- [Development](#development)
+- [License](#license)
+- [Disclaimer](#disclaimer)
 
 ## Installation
 
@@ -100,6 +108,10 @@ Get-AdoProject -ProjectId 'my-project'
 
 This gets the project as a `<System.Object>` with all available details.
 
+## Commands
+
+See all available [Commands](docs/_Index.md) documentation for more detailed information.
+
 ## Requirements
 
 - **PowerShell**: 7.4 or later
@@ -126,3 +138,14 @@ Invoke-psake .\src\Build.ps1 -taskList Publish
 # Clean up module dir
 Invoke-psake .\src\Build.ps1 -taskList Clean
 ```
+
+## License
+
+![logo small martin swinkels cloud](.assets/logo-small.png)  
+<small>Part of Martin's Cloud on GitHub</small>
+
+[MIT License](LICENSE) | Copyright (c) 2025 MSc365.eu by Martin Swinkels
+
+## Disclaimer
+
+Sample only – this is not an official supported module. Use at your own risk.
