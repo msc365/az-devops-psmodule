@@ -1,5 +1,5 @@
 <!-- omit from toc -->
-# Azure DevOps PowerShell Module `[Azure.DevOps.PSModule]`
+# Azure DevOps PowerShell Module
 
 <!-- cSpell: words psake psmodule -->
 <!-- markdownlint-disable no-duplicate-heading -->
@@ -10,6 +10,8 @@
 [![license](https://img.shields.io/badge/License-MIT-purple.svg)](LICENSE)
 
 This repository provides a PowerShell module that wraps the Azure DevOps REST API into clean, task-oriented cmdlets. It simplifies automation and scripting across your DevOps workflows, making it easier to manage pipelines, repositories, builds, releases, and work items directly from PowerShell.
+
+![logo small martin swinkels cloud](.assets/logo-small.png)
 
 <!-- > [!WARNING]
 > This module provides experimental features, allowing you to test and provide feedback on new functionalities before they become stable. These features are not finalized and may undergo breaking changes, so they are not recommended for production use. -->
@@ -23,8 +25,12 @@ This repository provides a PowerShell module that wraps the Azure DevOps REST AP
 <!-- omit from toc -->
 ## Use Cases
 
+> [!TIP]
+> See the [msc365/az-devops-governance](https://github.com/msc365/az-devops-governance) repository for sample scripts that demonstrate a complete Azure governance model. These examples showcase how to implement end-to-end governance from CI/CD pipelines to Azure Resource Manager deployments, aligning with best practices for enterprise-grade cloud architecture.
+
 - Automate DevOps workflows and resource deployments
 - Accelerate onboarding and standardization for cloud teams
+- Implement end-to-end governance from CI/CD pipelines to Azure Resource Manager
 
 ## Installation
 
