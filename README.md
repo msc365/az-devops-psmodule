@@ -1,17 +1,121 @@
-# PowerShell Module for Azure DevOps REST API
+<!-- omit from toc -->
+# Azure DevOps PowerShell Module `[Azure.DevOps.PSModule]`
+
+<!-- cSpell: words psake psmodule -->
+<!-- markdownlint-disable no-duplicate-heading -->
+
+[![GitHub release (latest)](https://img.shields.io/github/v/release/msc365/az-devops-psmodule?include_prereleases&logo=github)](https://github.com/msc365/az-devops-psmodule/releases)
+[![PowerShell Gallery Version](https://img.shields.io/powershellgallery/v/Azure.DevOps.PSModule?include_prereleases)](https://www.powershellgallery.com/packages/Azure.DevOps.PSModule)
+[![PowerShell Gallery Downloads](https://img.shields.io/powershellgallery/dt/Azure.DevOps.PSModule.svg)](https://www.powershellgallery.com/packages/Azure.DevOps.PSModule)
+[![license](https://img.shields.io/badge/License-MIT-purple.svg)](LICENSE)
+
 This repository provides a PowerShell module that wraps the Azure DevOps REST API into clean, task-oriented cmdlets. It simplifies automation and scripting across your DevOps workflows, making it easier to manage pipelines, repositories, builds, releases, and work items directly from PowerShell.
 
-In addition to the module, the repository includes sample scripts that demonstrate a complete Azure governance model. These examples showcase how to implement end-to-end governance from CI/CD pipelines to Azure Resource Manager deployments, aligning with best practices for enterprise-grade cloud architecture.
+<!-- > [!WARNING]
+> This module provides experimental features, allowing you to test and provide feedback on new functionalities before they become stable. These features are not finalized and may undergo breaking changes, so they are not recommended for production use. -->
 
+<!-- omit from toc -->
 ## Features
+
 - Intuitive PowerShell cmdlets for Azure DevOps REST API
 - Secure authentication with Workload Identity Federation
-- Modular design for easy extension and customization
-- Sample scripts for CI/CD, resource provisioning, and policy enforcement
-- Practical guidance for implementing Azure governance at scale
 
+<!-- omit from toc -->
 ## Use Cases
+
 - Automate DevOps workflows and resource deployments
-- Enforce governance policies across environments
-- Integrate Azure DevOps with PowerShell and infrastructure-as-code practices
 - Accelerate onboarding and standardization for cloud teams
+
+## Installation
+
+### PowerShell Gallery (recommended)
+
+```powershell
+# Install for current user
+Install-Module -Name Azure.DevOps.PSModule -Scope CurrentUser -Force
+
+# Install prerelease
+Install-Module -Name Azure.DevOps.PSModule -Scope CurrentUser -AllowPrerelease -Force
+
+# Install for all users (requires admin)
+Install-Module -Name Azure.DevOps.PSModule -Scope AllUsers -Force
+```
+
+### From Source
+
+```powershell
+# Clone the repository
+git clone 'https://github.com/msc365/az-devops-psmodule.git'
+cd 'az-devops-psmodule'
+
+# Import the module
+Import-Module -Name '.\src\Azure.DevOps.PSModule' -Force
+
+# Verify the module
+Get-Module -Name 'Azure.DevOps.PSModule'
+
+# List all commands imported from the Azure DevOps module
+Get-Command -Name '*-Ado*'
+
+```
+
+## Quick Start
+
+### Sign in to Azure
+
+To sign in, use the Connect-AzAccount cmdlet.
+
+```powershell
+  $azAccountSplat = @{
+      TenantId = '<YOUR_TENANT_ID>'
+      SubscriptionId = '<YOUR_SUBSCRIPTION_ID>'
+  }
+  Connect-AzAccount @azAccountSplat
+```
+
+### Connect
+
+#### PowerShell
+
+```powershell
+Connect-AdoOrganization -Organization 'my-org' -PAT '******'
+```
+
+This connects to an Azure DevOps organization using a personal access token (PAT). If you don't provide a PAT, the module will attempt to authenticate using the Azure DevOps service principal. Make sure the service principal (Azure Account) used has the required permissions in Azure DevOps.
+
+### Get project details
+
+#### PowerShell
+
+```powershell
+Get-AdoProject -ProjectId 'my-project'
+```
+
+This gets the project as a `<System.Object>` with all available details.
+
+## Requirements
+
+- **PowerShell**: 7.4 or later
+- **Az.Accounts**: 3.0.5 or later
+
+## Development
+
+### Building the Module
+
+```powershell
+# Run tests
+Invoke-psake .\src\Build.ps1 -taskList Test
+
+# Build module
+Invoke-psake .\src\Build.ps1 -taskList Build
+
+# Build and publish
+Invoke-psake .\src\Build.ps1 -taskList Publish
+```
+
+### Clean up
+
+```powershell
+# Clean up module dir
+Invoke-psake .\src\Build.ps1 -taskList Clean
+```

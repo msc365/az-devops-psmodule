@@ -1,0 +1,54 @@
+{
+	"Baseline PowerShell Function": {
+		"scope": "powershell",
+		"prefix": "baseline-posh-function",
+		"description": "A sample function that's aligned to baseline coding guidelines.",
+		"body": [
+			"function ${1:Verb-Noun} {",
+			"    <#",
+			"    .SYNOPSIS",
+			"",
+			"    .DESCRIPTION",
+			"",
+			"    .PARAMETER ParamName",
+			"    A brief description of the parameter.",
+			"",
+			"    .OUTPUTS",
+			"",
+			"    .EXAMPLE",
+			"",
+			"    #>",
+			"    [CmdletBinding()]",
+			"    param (",
+			"        [Parameter(HelpMessage = 'A brief description of the parameter')]",
+			"        [string]${2:\\$ParamName} = ''",
+			"    )",
+			"",
+			"    begin {",
+			"        Write-Debug ('Command : {0}' -f \\$MyInvocation.MyCommand.Name)",
+			"    }",
+			"",
+			"    process {",
+			"        try {",
+			"",
+			"        } catch {",
+			"            throw \\$_",
+			"        }",
+			"    }",
+			"",
+			"    end {",
+			"        Write-Debug ('Exit : {0}' -f \\$MyInvocation.MyCommand.Name)",
+			"    }",
+			"}"
+		]
+	},
+	"Baseline PowerShell Parameter": {
+		"scope": "powershell",
+		"prefix": "baseline-posh-parameter",
+		"description": "A sample parameter that's aligned to baseline coding guidelines.",
+		"body": [
+			"[Parameter(HelpMessage = 'A brief description of the parameter')]",
+			"[string]\\$ParamName = ''"
+		]
+	}
+}

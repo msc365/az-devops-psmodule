@@ -1,0 +1,68 @@
+{
+    "[json]": {
+        "editor.insertSpaces": true,
+        "editor.tabSize": 4,
+        "editor.detectIndentation": false
+    },
+    "[markdown]": {
+        "files.encoding": "utf8",
+        "files.trimTrailingWhitespace": false
+    },
+    "[powershell]": {
+        "editor.insertSpaces": true,
+        "editor.tabSize": 4,
+        "files.encoding": "utf8bom",
+        "editor.formatOnSave": true
+    },
+    "[yaml]": {
+        "editor.insertSpaces": true,
+        "editor.tabSize": 2
+    },
+    "editor.formatOnPaste": true,
+    "editor.formatOnSave": true,
+    "editor.insertSpaces": true,
+    "files.insertFinalNewline": true,
+    "files.trimTrailingWhitespace": true,
+    "markdown.extension.toc.levels": "1..2",
+    "markdown.extension.tableFormatter.enabled": false,
+    "markdownlint.config": {
+        "MD004": false,
+        "MD007": {
+            "indent": 2
+        },
+        "MD009": {
+            "br_spaces": 2,
+            "strict": false
+        },
+        "MD013": {
+            "line_length": 999
+        },
+        "MD025": {
+            "front_matter_title": ""
+        },
+        "MD026": {
+            "punctuation": ".,;:!。，；:"
+        },
+        "MD028": false,
+        "MD029": false,
+        "MD033": false,
+        "MD034": true,
+        "MD036": false,
+        "MD053": false,
+        "blank_lines": false
+    },
+    "powershell.codeFormatting.autoCorrectAliases": true,
+    "powershell.codeFormatting.newLineAfterCloseBrace": false,
+    "powershell.codeFormatting.pipelineIndentationStyle": "IncreaseIndentationForFirstPipeline",
+    "powershell.codeFormatting.preset": "OTBS",
+    "powershell.codeFormatting.trimWhitespaceAroundPipe": true,
+    "powershell.codeFormatting.useConstantStrings": true,
+    "powershell.codeFormatting.useCorrectCasing": true,
+    "powershell.codeFormatting.whitespaceBetweenParameters": true,
+    // Use a custom PowerShell Script Analyzer settings file for this workspace.
+    // Relative paths for this setting are always relative to the workspace root dir.
+    "powershell.scriptAnalysis.settingsPath": "./src/PSScriptAnalyzerSettings.psd1",
+    "javascript.preferences.quoteStyle": "single",
+    "typescript.preferences.quoteStyle": "single",
+    "yaml.format.singleQuote": true
+}
