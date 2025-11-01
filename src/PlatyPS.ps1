@@ -34,7 +34,7 @@ A brief description of the parameter.
 None
 
 .EXAMPLE
-.\src\PlatyPS.ps1 -UpdateExisting
+.\src\PlatyPS.ps1 -UpdateExisting -WithModulePage
 
 Generates markdown help files for the 'Azure.DevOps.PSModule' module and updates existing files if they exist.
 
@@ -86,7 +86,7 @@ process {
         } else {
             # Create the markdown help files
             $mdHelpSplat = @{
-                ModuleInfo     = Get-Module -Name $ModuleName
+                ModuleInfo     = (Get-Module -Name $ModuleName)
                 OutputFolder   = $OutputFolder
                 HelpVersion    = $HelpVersion
                 WithModulePage = $WithModulePage
