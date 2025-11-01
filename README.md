@@ -11,7 +11,8 @@
 
 This repository provides a PowerShell module that wraps the Azure DevOps REST API into clean, task-oriented cmdlets. It simplifies automation and scripting across your DevOps workflows, making it easier to manage pipelines, repositories, builds, releases, and work items directly from PowerShell.
 
-![logo small martin swinkels cloud](.assets/logo-small.png)
+![logo small martin swinkels cloud](.assets/logo-small.png)  
+<small>Part of Martin's Cloud on GitHub</small>
 
 <!-- > [!WARNING]
 > This module provides experimental features, allowing you to test and provide feedback on new functionalities before they become stable. These features are not finalized and may undergo breaking changes, so they are not recommended for production use. -->
