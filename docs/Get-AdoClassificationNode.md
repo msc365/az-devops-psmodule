@@ -1,4 +1,4 @@
-﻿---
+﻿<!--
 document type: cmdlet
 external help file: Azure.DevOps.PSModule-Help.xml
 HelpUri: https://learn.microsoft.com/en-us/rest/api/azure/devops/wit/classification-nodes/get
@@ -7,7 +7,7 @@ Module Name: Azure.DevOps.PSModule
 ms.date: 11/01/2025
 PlatyPS schema version: 2024-05-01
 title: Get-AdoClassificationNode
----
+-->
 
 # Get-AdoClassificationNode
 

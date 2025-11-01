@@ -1,4 +1,4 @@
-﻿---
+<!--
 document type: module
 Help Version: 0.0.1
 HelpInfoUri: 
@@ -8,7 +8,7 @@ Module Name: Azure.DevOps.PSModule
 ms.date: 11/01/2025
 PlatyPS schema version: 2024-05-01
 title: Azure.DevOps.PSModule Module
----
+-->
 
 # Azure.DevOps.PSModule Module
 
