@@ -110,7 +110,7 @@ This gets the project as a `<System.Object>` with all available details.
 
 ## Commands
 
-See all available [Commands](docs/_Index.md) documentation for more detailed information.
+See all available [Commands](docs/Azure.DevOps.PSModule.md) documentation for more detailed information.
 
 ## Requirements
 
