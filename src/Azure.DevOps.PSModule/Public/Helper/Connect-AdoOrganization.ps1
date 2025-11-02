@@ -67,13 +67,13 @@
             if ($null -ne $PersonalAccessToken) {
                 $headers = @{
                     'Accept'        = 'application/json'
-                    'Authorization' = 'Basic {0}' -f [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(":$($PersonalAccessToken)"))
+                    'Authorization' = ('Basic {0}' -f [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(":$($PersonalAccessToken)")))
                 }
             } else {
                 $token = Get-AdoAccessToken
                 $headers = @{
                     'Accept'        = 'application/json'
-                    'Authorization' = 'Bearer {0}' -f (ConvertFrom-SecureString -SecureString $token -AsPlainText)
+                    'Authorization' = ('Bearer {0}' -f (ConvertFrom-SecureString -SecureString $token -AsPlainText))
                 }
             }
 
@@ -88,18 +88,19 @@
 
             $response = Invoke-RestMethod @params -Verbose:$VerbosePreference
 
-            if ($response.GetType().Name -ne 'String') {
-
-                $secureHeaders = ($headers |
-                        ConvertTo-Json -Depth 5 -Compress |
-                        ConvertTo-SecureString -AsPlainText -Force)
-
-                Set-Variable -Name 'AzDevOpsIsConnected' -Value $true -Scope Global;
-                Set-Variable -Name 'AzDevOpsOrganization' -Value $org -Scope Global;
-                Set-Variable -Name 'AzDevOpsHeaders' -Value $secureHeaders -Scope Global;
-
-                return ('Connected to {0}' -f $AzDevOpsOrganization)
+            if ($response.GetType().Name -ne 'PSCustomObject') {
+                throw 'Failed to connect to the Azure DevOps organization.'
             }
+
+            $secureHeaders = ($headers |
+                    ConvertTo-Json -Depth 5 -Compress |
+                    ConvertTo-SecureString -AsPlainText -Force)
+
+            Set-Variable -Name 'AzDevOpsIsConnected' -Value $true -Scope Global;
+            Set-Variable -Name 'AzDevOpsOrganization' -Value $org -Scope Global;
+            Set-Variable -Name 'AzDevOpsHeaders' -Value $secureHeaders -Scope Global;
+
+            return ('Connected to {0}' -f $AzDevOpsOrganization)
 
         } catch {
             throw $_
