@@ -61,11 +61,8 @@
 
             if ($null -eq $azAccessToken) { return $null }
 
-            # Convert token part to SecureString
-            $tokenAsSecureString = $azAccessToken.Token | ConvertTo-SecureString -AsPlainText -Force
             Write-Verbose ('Retrieved access token successfully.')
-
-            return $tokenAsSecureString
+            return $azAccessToken.Token
 
         } catch {
             throw $_
