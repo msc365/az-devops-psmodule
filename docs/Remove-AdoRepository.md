@@ -127,4 +127,4 @@ Boolean indicating success.
 
 ## RELATED LINKS
 
-- <https://learn.microsoft.com/en-us/rest/api/azure/devops/git/repositories/delete?view=azure-devops>
+- <https://learn.microsoft.com/en-us/rest/api/azure/devops/git/repositories/delete>

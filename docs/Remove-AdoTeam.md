@@ -36,7 +36,7 @@ This function removes a team from an Azure DevOps project through REST API.
 
 ### EXAMPLE 1
 
-Get-AdoTeam -ProjectId 'my-project-001' -TeamId '00000000-0000-0000-0000-000000000000'
+Remove-AdoTeam -ProjectId 'my-project-001' -TeamId '00000000-0000-0000-0000-000000000000'
 
 ## PARAMETERS
 
@@ -120,9 +120,9 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### System.Object
+### System.Boolean
 
-The team details object.
+Boolean indicating success.
 
 ## NOTES
 
@@ -130,4 +130,4 @@ The team details object.
 
 ## RELATED LINKS
 
-- <https://learn.microsoft.com/en-us/rest/api/azure/devops/core/teams/get>
+- <https://learn.microsoft.com/en-us/rest/api/azure/devops/core/teams/delete>

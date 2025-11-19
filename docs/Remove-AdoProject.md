@@ -35,7 +35,7 @@ This function removes a project from an Azure DevOps organization through REST A
 
 ### EXAMPLE 1
 
-Remove-AdoProject -Project $objProject
+Remove-AdoProject -Project $projectId
 
 ## PARAMETERS
 
@@ -97,9 +97,9 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### System.String
+### System.Boolean
 
-A message indicating the project removal status.
+Boolean indicating success.
 
 ## NOTES
 
