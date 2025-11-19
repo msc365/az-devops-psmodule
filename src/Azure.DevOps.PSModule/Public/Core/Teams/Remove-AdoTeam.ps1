@@ -21,13 +21,13 @@
         The team details object.
 
     .LINK
-        https://learn.microsoft.com/en-us/rest/api/azure/devops/core/teams/get
+        https://learn.microsoft.com/en-us/rest/api/azure/devops/core/teams/delete
 
     .EXAMPLE
-        $team = Get-AdoTeam -ProjectId 'my-project-001' -TeamId '00000000-0000-0000-0000-000000000000'
+        Remove-AdoTeam -ProjectId 'my-project-001' -TeamId 'my-team-001'
     #>
     [CmdletBinding()]
-    [OutputType([object])]
+    [OutputType([boolean])]
     param (
         [Parameter(Mandatory)]
         [string]$ProjectId,
@@ -66,23 +66,9 @@
                 Headers = ((ConvertFrom-SecureString -SecureString $global:AzDevOpsHeaders -AsPlainText) | ConvertFrom-Json -AsHashtable)
             }
 
-            $response = Invoke-RestMethod @params -Verbose:$VerbosePreference
+            Invoke-RestMethod @params -Verbose:$VerbosePreference | Out-Null
 
-            $status = $response.status
-
-            while ($status -ne 'succeeded') {
-                Write-Verbose 'Checking team deletion status...'
-                Start-Sleep -Seconds 2
-
-                $response = Invoke-RestMethod -Method GET -Uri $response.url -Headers $params.Headers -Verbose:$VerbosePreference
-                $status = $response.status
-
-                if ($status -eq 'failed') {
-                    Write-Error -Message ('Team deletion failed {0}' -f $PSItem.Exception.Message)
-                }
-            }
-
-            return ('Team {0} removed' -f $TeamId)
+            return $true
 
         } catch {
             throw $_
