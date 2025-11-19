@@ -13,18 +13,18 @@
         Optional. The API version to use.
 
     .OUTPUTS
-        System.String
+        System.Boolean
 
-        A message indicating the project removal status.
+        Indicates whether the project was successfully removed.
 
     .LINK
         https://learn.microsoft.com/en-us/rest/api/azure/devops/core/projects/delete
 
     .EXAMPLE
-        Remove-AdoProject -Project $objProject
+        Remove-AdoProject -ProjectId 'my-project-001'
     #>
     [CmdletBinding()]
-    [OutputType([String])]
+    [OutputType([boolean])]
     param (
         [Parameter(Mandatory)]
         [string]$ProjectId,
@@ -58,7 +58,7 @@
                 Headers = ((ConvertFrom-SecureString -SecureString $global:AzDevOpsHeaders -AsPlainText) | ConvertFrom-Json -AsHashtable)
             }
 
-            $response = Invoke-RestMethod @params -ContentType 'application/json' -Verbose:$VerbosePreference
+            $response = Invoke-RestMethod @params -Verbose:$VerbosePreference
 
             $status = $response.status
 
@@ -74,7 +74,7 @@
                 }
             }
 
-            return ('Project {0} removed' -f $ProjectId)
+            return $true
 
         } catch {
             throw $_
