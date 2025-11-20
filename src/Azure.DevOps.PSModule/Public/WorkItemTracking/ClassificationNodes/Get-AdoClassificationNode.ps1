@@ -34,14 +34,14 @@ function Get-AdoClassificationNode {
         - Requires an active connection to Azure DevOps using Connect-AdoOrganization.
 
     .EXAMPLE
-        $classificationNode = Get-AdoClassificationNode -ProjectId 'my-project-001'
+        $classificationNode = Get-AdoClassificationNode -ProjectId 'my-project-001' -StructureType 'Areas'
 
-        This example retrieves the root classification node for the specified project.
+        This example retrieves the root area for the specified project.
 
     .EXAMPLE
-        $classificationNode = Get-AdoClassificationNode -ProjectId 'my-project-001' -Path 'Area/SubArea' -Depth 2
+        $classificationNode = Get-AdoClassificationNode -ProjectId 'my-project-001' -StructureType 'Areas' -Path 'Area/SubArea' -Depth 2
 
-        This example retrieves the classification node at the specified path with a depth of 2.
+        This example retrieves the area at the specified path with a depth of 2.
     #>
     [CmdletBinding()]
     [OutputType([object])]
