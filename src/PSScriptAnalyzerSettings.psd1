@@ -32,9 +32,13 @@
     #ExcludeRules = @('PSAvoidUsingWriteHost')
 
     # You can use rule configuration to configure rules that support it:
-    #Rules = @{
-    #    PSAvoidUsingCmdletAliases = @{
-    #        Whitelist = @('cd')
-    #    }
-    #}
+    Rules        = @{
+        # PSAvoidUsingCmdletAliases = @{
+        #     Whitelist = @('cd')
+        # }
+        PSUseSingularNouns = @{
+            Enable        = $true
+            NounAllowList = 'Data', 'Windows', 'Settings'
+        }
+    }
 }
