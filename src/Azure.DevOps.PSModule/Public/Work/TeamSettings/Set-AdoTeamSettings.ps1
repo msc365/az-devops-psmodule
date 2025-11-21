@@ -1,0 +1,100 @@
+﻿# cSpell: ignore teamsettings
+function Set-AdoTeamSettings {
+    <#
+    .SYNOPSIS
+        Update the settings for a team in Azure DevOps.
+
+    .DESCRIPTION
+        Update the settings for a team in Azure DevOps by sending a PATCH request to the Azure DevOps REST API.
+
+    .PARAMETER ProjectId
+        The ID or name of the project containing the team.
+
+    .PARAMETER TeamId
+        The ID or name of the team to update.
+
+    .PARAMETER TeamSettings
+        An object representing the team settings to be updated.
+
+    .PARAMETER ApiVersion
+        The API version to use for the request. Default is '7.1'.
+
+    .EXAMPLE
+        $params = @{
+            bugsBehavior          = 'asRequirements'
+            backlogVisibilities   = @{
+                'Microsoft.EpicCategory'        = $false
+                'Microsoft.FeatureCategory'     = $true
+                'Microsoft.RequirementCategory' = $true
+            }
+            defaultIterationMacro = '@currentIteration'
+            workingDays           = @(
+                'monday'
+                'tuesday'
+                'wednesday'
+                'thursday'
+                'friday'
+            )
+            backlogIteration      = '00000000-0000-0000-0000-000000000000'
+        }
+
+        Set-AdoTeamSettings -ProjectId 'my-project' -TeamId 'my-other-team' -TeamSettings $params
+    #>
+    [CmdletBinding()]
+    [OutputType([object])]
+    param (
+        [Parameter(Mandatory)]
+        [string]$ProjectId,
+
+        [Parameter(Mandatory)]
+        [string]$TeamId,
+
+        [Parameter(Mandatory)]
+        [object]$TeamSettings,
+
+        [Parameter(Mandatory = $false)]
+        [Alias('api')]
+        [ValidateSet('7.1', '7.2-preview.1')]
+        [string]$ApiVersion = '7.1'
+    )
+
+    begin {
+        Write-Debug ('Command        : {0}' -f $MyInvocation.MyCommand.Name)
+        Write-Debug ('  ProjectId    : {0}' -f $ProjectId)
+        Write-Debug ('  TeamId       : {0}' -f $TeamId)
+        Write-Debug ('  ApiVersion   : {0}' -f $ApiVersion)
+    }
+
+    process {
+        try {
+            $ErrorActionPreference = 'Stop'
+
+            if (-not $global:AzDevOpsIsConnected) {
+                throw 'Not connected to Azure DevOps. Please connect using Connect-AdoOrganization.'
+            }
+
+            $uriFormat = '{0}/{1}/{2}/_apis/work/teamsettings?api-version={3}'
+            $azDevOpsUri = ($uriFormat -f [uri]::new($global:AzDevOpsOrganization), [uri]::EscapeUriString($ProjectId),
+                [uri]::EscapeUriString($TeamId), $ApiVersion)
+
+            $params = @{
+                Method      = 'PATCH'
+                Uri         = $azDevOpsUri
+                ContentType = 'application/json'
+                Headers     = ((ConvertFrom-SecureString -SecureString $global:AzDevOpsHeaders -AsPlainText) | ConvertFrom-Json -AsHashtable)
+                Body        = ($TeamSettings | ConvertTo-Json -Depth 3)
+            }
+
+            $response = Invoke-RestMethod @params -Verbose:$VerbosePreference
+
+            return $response
+
+        } catch {
+            throw $_
+        }
+    }
+
+    end {
+        Write-Debug ('{0} exited' -f $MyInvocation.MyCommand)
+    }
+}
