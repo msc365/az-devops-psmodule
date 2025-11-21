@@ -59,8 +59,9 @@
     # RequiredAssemblies = @()
 
     # Script files (.ps1) that are run in the caller's environment prior to importing this module.
-    ScriptsToProcess = @(
+    ScriptsToProcess     = @(
         'Private\Invoke-TeamFieldValueClasses.ps1'
+        'Private\Invoke-TeamSettingsClasses.ps1'
     )
 
     # Type files (.ps1xml) to be loaded when importing this module
@@ -112,6 +113,8 @@
         'Set-AdoClassificationNode'
         'Get-AdoTeamFieldValue'
         'Set-AdoTeamFieldValue'
+        'Get-AdoTeamSettings'
+        'Set-AdoTeamSettings'
     )
 
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
