@@ -53,10 +53,10 @@ function Get-AdoTeamFieldValue {
     )
 
     begin {
-        Write-Debug ('Command        : {0}' -f $MyInvocation.MyCommand.Name)
-        Write-Debug ('  ProjectId    : {0}' -f $ProjectId)
-        Write-Debug ('  Team         : {0}' -f $Team)
-        Write-Debug ('  ApiVersion   : {0}' -f $ApiVersion)
+        Write-Debug ('Command      : {0}' -f $MyInvocation.MyCommand.Name)
+        Write-Debug ('  ProjectId  : {0}' -f $ProjectId)
+        Write-Debug ('  TeamId     : {0}' -f $TeamId)
+        Write-Debug ('  ApiVersion : {0}' -f $ApiVersion)
     }
 
     process {

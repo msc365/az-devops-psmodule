@@ -70,7 +70,7 @@ function Set-AdoTeamFieldValue {
                 includeChildren = $false
             }
         )
-        Set-AdoTeamFieldValue -ProjectId 'e2egov-fantastic-four' -Team 'Mister Fantastic' -DefaultValue $defaultValue -Values $values
+        Set-AdoTeamFieldValue -ProjectId 'e2egov-fantastic-four' -TeamId 'Mister Fantastic' -DefaultValue $defaultValue -Values $values
 
         This example sets the team field value for the 'Mister Fantastic' team in the specified project.
     #>
@@ -98,7 +98,7 @@ function Set-AdoTeamFieldValue {
     begin {
         Write-Debug ('Command        : {0}' -f $MyInvocation.MyCommand.Name)
         Write-Debug ('  ProjectId    : {0}' -f $ProjectId)
-        Write-Debug ('  Team         : {0}' -f $Team)
+        Write-Debug ('  TeamId       : {0}' -f $TeamId)
         Write-Debug ('  DefaultValue : {0}' -f $DefaultValue)
         Write-Debug ('  ValuesCount  : {0}' -f $Values.Count)
         Write-Debug ('  ApiVersion   : {0}' -f $ApiVersion)
