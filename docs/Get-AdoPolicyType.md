@@ -9,6 +9,8 @@ PlatyPS schema version: 2024-05-01
 title: Get-AdoPolicyType
 -->
 
+<!-- cSpell: ignore dontshow -->
+
 # Get-AdoPolicyType
 
 ## SYNOPSIS
@@ -19,7 +21,7 @@ Gets policy types for an Azure DevOps project.
 
 ### __AllParameterSets
 
-```
+```text
 Get-AdoPolicyType [-ProjectId] <string> [-PolicyType] <string> [[-ApiVersion] <string>]
  [<CommonParameters>]
 ```
@@ -36,7 +38,11 @@ This function retrieves policy types for an Azure DevOps project through REST AP
 
 ### EXAMPLE 1
 
-\$policyTypes = Get-AdoPolicyType -ProjectId 'my-project-001' -PolicyType '00000000-0000-0000-0000-000000000000'
+#### PowerShell
+
+```powershell
+Get-AdoPolicyType -ProjectId 'my-project' -PolicyType '00000000-0000-0000-0000-000000000000'
+```
 
 ## PARAMETERS
 
@@ -121,7 +127,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## NOTES
 
-- N/A
+- Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
 
 ## RELATED LINKS
 

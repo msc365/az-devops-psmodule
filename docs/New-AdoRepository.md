@@ -9,6 +9,8 @@ PlatyPS schema version: 2024-05-01
 title: New-AdoRepository
 -->
 
+<!-- cSpell: ignore dontshow -->
+
 # New-AdoRepository
 
 ## SYNOPSIS
@@ -19,7 +21,7 @@ Create a new repository in an Azure DevOps project.
 
 ### __AllParameterSets
 
-```
+```text
 New-AdoRepository [-ProjectId] <string> [-Name] <string> [[-SourceRef] <string>]
  [[-ApiVersion] <string>] [<CommonParameters>]
 ```
@@ -36,7 +38,13 @@ This function creates a new repository in an Azure DevOps project through REST A
 
 ### EXAMPLE 1
 
+#### PowerShell
+
+```powershell
 New-AdoRepository -ProjectId $project.id -Name 'my-other-001'
+```
+
+Creates a new repository named 'my-other-001' in the specified project.
 
 ## PARAMETERS
 
@@ -146,7 +154,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## NOTES
 
-- N/A
+- Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
 
 ## RELATED LINKS
 

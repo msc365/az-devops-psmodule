@@ -9,6 +9,8 @@ PlatyPS schema version: 2024-05-01
 title: Get-AdoDescriptor
 -->
 
+<!-- cSpell: ignore dontshow -->
+
 # Get-AdoDescriptor
 
 ## SYNOPSIS
@@ -19,7 +21,7 @@ Resolve a storage key to a descriptor.
 
 ### __AllParameterSets
 
-```
+```text
 Get-AdoDescriptor [-StorageKey] <string> [[-ApiVersion] <string>] [<CommonParameters>]
 ```
 
@@ -35,7 +37,11 @@ This function resolves a storage key to a descriptor through REST API.
 
 ### EXAMPLE 1
 
-\$descriptor = Get-AdoDescriptor -StorageKey '00000000-0000-0000-0000-000000000000'
+#### PowerShell
+
+```powershell
+Get-AdoDescriptor -StorageKey '00000000-0000-0000-0000-000000000000'
+```
 
 ## PARAMETERS
 
@@ -103,7 +109,7 @@ Object representing the descriptor information.
 
 ## NOTES
 
-- N/A
+- Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
 
 ## RELATED LINKS
 

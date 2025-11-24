@@ -9,6 +9,9 @@ PlatyPS schema version: 2024-05-01
 title: Get-AdoTeamFieldValue
 -->
 
+<!-- markdownlint-disable MD024 -->
+<!-- cSpell: ignore dontshow -->
+
 # Get-AdoTeamFieldValue
 
 ## SYNOPSIS
@@ -19,7 +22,7 @@ Gets the team field value settings for a team in an Azure DevOps project.
 
 ### __AllParameterSets
 
-```
+```text
 Get-AdoTeamFieldValue [-ProjectId] <string> [[-TeamId] <string>] [[-ApiVersion] <string>]
  [<CommonParameters>]
 ```
@@ -36,13 +39,21 @@ This function retrieves the team field value settings for a specified team in an
 
 ### EXAMPLE 1
 
+#### PowerShell
+
+```powershell
 Get-AdoTeamFieldValue -ProjectId 'e2egov-fantastic-four
+```
 
 This example retrieves the team field values for the default team in the specified project.
 
 ### EXAMPLE 2
 
+#### PowerShell
+
+```powershell
 Get-AdoTeamFieldValue -ProjectId 'e2egov-fantastic-four' -TeamId 'Mister Fantastic'
+```
 
 This example retrieves the team field values for the specified team in the specified project.
 
@@ -133,7 +144,7 @@ The team field value settings for the specified team.
 
 ## NOTES
 
-- Requires an active connection to Azure DevOps using Connect-AdoOrganization.
+- Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
 
 ## RELATED LINKS
 

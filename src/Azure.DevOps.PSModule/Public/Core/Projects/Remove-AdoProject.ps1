@@ -21,7 +21,9 @@
         https://learn.microsoft.com/en-us/rest/api/azure/devops/core/projects/delete
 
     .EXAMPLE
-        Remove-AdoProject -ProjectId 'my-project-001'
+        Remove-AdoProject -ProjectId 'my-project'
+
+        Removes the project with ID 'my-project' from the connected Azure DevOps organization.
     #>
     [CmdletBinding()]
     [OutputType([boolean])]

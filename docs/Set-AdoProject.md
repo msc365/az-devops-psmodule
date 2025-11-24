@@ -9,6 +9,8 @@ PlatyPS schema version: 2024-05-01
 title: Set-AdoProject
 -->
 
+<!-- cSpell: ignore dontshow -->
+
 # Set-AdoProject
 
 ## SYNOPSIS
@@ -19,7 +21,7 @@ Updates an existing Azure DevOps project through REST API.
 
 ### __AllParameterSets
 
-```
+```text
 Set-AdoProject [-ProjectId] <string> [[-Name] <string>] [[-Description] <string>]
  [[-Visibility] <string>] [[-ApiVersion] <string>] [<CommonParameters>]
 ```
@@ -36,7 +38,13 @@ This function updates an existing Azure DevOps project through REST API.
 
 ### EXAMPLE 1
 
+#### PowerShell
+
+```powershell
 Set-AdoProject -ProjectId 'my-project-002' -Name 'my-project-updated-name'
+```
+
+Updates the name of the Azure DevOps project with ID 'my-project-002' to 'my-project-updated-name'.
 
 ## PARAMETERS
 
@@ -88,7 +96,8 @@ HelpMessage: ''
 
 ### -Name
 
-{{ Fill Name Description }}
+Optional.
+The name of the project to update.
 
 ```yaml
 Type: System.String
@@ -171,7 +180,7 @@ The updated project object.
 
 ## NOTES
 
-- N/A
+- Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
 
 ## RELATED LINKS
 

@@ -9,6 +9,9 @@ PlatyPS schema version: 2024-05-01
 title: Get-AdoProject
 -->
 
+<!-- markdownlint-disable MD024 -->
+<!-- cSpell: ignore dontshow -->
+
 # Get-AdoProject
 
 ## SYNOPSIS
@@ -19,7 +22,7 @@ Get project details.
 
 ### __AllParameterSets
 
-```
+```text
 Get-AdoProject [-ProjectId] <string> [[-ApiVersion] <string>] [-IncludeCapabilities]
  [-IncludeHistory] [<CommonParameters>]
 ```
@@ -36,11 +39,23 @@ This function retrieves the project details for a given Azure DevOps project thr
 
 ### EXAMPLE 1
 
-\$project = Get-AdoProject -ProjectName 'my-project-001'
+#### PowerShell
+
+```powershell
+Get-AdoProject -ProjectName 'my-project'
+```
+
+Gets the project details for the specified project.
 
 ### EXAMPLE 2
 
-\$project =  Get-AdoProject -ProjectName 'my-project-001' -IncludeCapabilities -IncludeHistory
+#### PowerShell
+
+```powershell
+Get-AdoProject -ProjectName 'my-project' -IncludeCapabilities -IncludeHistory
+```
+
+Gets the project details for the specified project, including capabilities and searching within renamed projects.
 
 ## PARAMETERS
 
@@ -152,7 +167,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## NOTES
 
-- N/A
+- Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
 
 ## RELATED LINKS
 

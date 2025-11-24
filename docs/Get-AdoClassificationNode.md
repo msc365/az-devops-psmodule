@@ -9,6 +9,9 @@ PlatyPS schema version: 2024-05-01
 title: Get-AdoClassificationNode
 -->
 
+<!-- markdownlint-disable MD024 -->
+<!-- cSpell: ignore dontshow -->
+
 # Get-AdoClassificationNode
 
 ## SYNOPSIS
@@ -19,7 +22,7 @@ Gets classification nodes for a project in Azure DevOps.
 
 ### __AllParameterSets
 
-```
+```text
 Get-AdoClassificationNode [-ProjectId] <string> [-StructureType] <string> [[-Path] <string>]
  [[-Depth] <int>] [[-ApiVersion] <string>] [<CommonParameters>]
 ```
@@ -36,13 +39,21 @@ This function retrieves classification nodes for a specified project in Azure De
 
 ### EXAMPLE 1
 
-$classificationNode = Get-AdoClassificationNode -ProjectId 'my-project-001'
+#### PowerShell
+
+```powershell
+Get-AdoClassificationNode -ProjectId 'my-project'
+```
 
 This example retrieves the root classification node for the specified project.
 
 ### EXAMPLE 2
 
-$classificationNode = Get-AdoClassificationNode -ProjectId 'my-project-001' -Path 'Area/SubArea' -Depth 2
+#### PowerShell
+
+```powershell
+Get-AdoClassificationNode -ProjectId 'my-project' -Path 'Area/SubArea' -Depth 2
+```
 
 This example retrieves the classification node at the specified path with a depth of 2.
 
@@ -181,7 +192,7 @@ The classification node object retrieved from Azure DevOps.
 
 ## NOTES
 
-- Requires an active connection to Azure DevOps using Connect-AdoOrganization.
+- Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
 
 ## RELATED LINKS
 

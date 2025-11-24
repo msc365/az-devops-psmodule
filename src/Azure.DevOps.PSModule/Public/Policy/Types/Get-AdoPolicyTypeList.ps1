@@ -13,7 +13,7 @@
         https://learn.microsoft.com/en-us/rest/api/azure/devops/policy/types/list
 
     .EXAMPLE
-        $policyTypes = Get-AdoPolicyType -ProjectId 'my-project-001'
+        $policyTypes = Get-AdoPolicyType -ProjectId 'my-project'
     #>
     [CmdletBinding()]
     [OutputType([String])]

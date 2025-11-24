@@ -9,17 +9,19 @@ PlatyPS schema version: 2024-05-01
 title: New-AdoGroup
 -->
 
+<!-- cSpell: ignore dontshow -->
+
 # New-AdoGroup
 
 ## SYNOPSIS
 
-Create a new group in Azure DevOps.
+Adds an AAD Group as member of a group.
 
 ## SYNTAX
 
 ### __AllParameterSets
 
-```
+```text
 New-AdoGroup [-GroupDescriptor] <string> [-GroupId] <string> [[-ApiVersion] <string>]
  [<CommonParameters>]
 ```
@@ -30,13 +32,19 @@ New-AdoGroup [-GroupDescriptor] <string> [-GroupId] <string> [[-ApiVersion] <str
 
 ## DESCRIPTION
 
-This function joins a built-in group and entra group in Azure DevOps through REST API.
+This function adds an AAD Group as member of a group in Azure DevOps through REST API.
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 
+#### PowerShell
+
+```powershell
 New-AdoGroupMembership -GroupDescriptor 'vssgp.00000000-0000-0000-0000-000000000000' -GroupId '00000000-0000-0000-0000-000000000000'
+```
+
+Adds an AAD Group as member of a group.
 
 ## PARAMETERS
 
@@ -123,7 +131,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## NOTES
 
-- N/A
+- Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
 
 ## RELATED LINKS
 

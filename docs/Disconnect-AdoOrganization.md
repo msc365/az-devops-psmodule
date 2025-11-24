@@ -9,6 +9,8 @@ PlatyPS schema version: 2024-05-01
 title: Disconnect-AdoOrganization
 -->
 
+<!-- cSpell: ignore hashtable dontshow -->
+
 # Disconnect-AdoOrganization
 
 ## SYNOPSIS
@@ -19,7 +21,7 @@ Disconnect from the Azure DevOps organization.
 
 ### __AllParameterSets
 
-```
+```text
 Disconnect-AdoOrganization [<CommonParameters>]
 ```
 
@@ -35,7 +37,11 @@ This function removes global variables related to the Azure DevOps connection, e
 
 ### EXAMPLE 1
 
+#### PowerShell
+
+```powershell
 Disconnect-AdoOrganization
+```
 
 This disconnects from the currently connected Azure DevOps organization by removing the relevant variables.
 

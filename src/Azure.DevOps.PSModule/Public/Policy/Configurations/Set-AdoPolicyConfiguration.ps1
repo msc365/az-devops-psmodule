@@ -50,7 +50,9 @@
             }
         }
 
-        $policy = Set-AdoPolicyConfiguration -ProjectName 'my-project-001' -ConfigurationId 24 -Configuration $config
+        Set-AdoPolicyConfiguration -ProjectName 'my-project' -ConfigurationId 24 -Configuration $config
+
+        Sets the policy configuration with ID 24 in the 'my-project' project using the specified configuration.
     #>
     [CmdletBinding()]
     [OutputType([String])]

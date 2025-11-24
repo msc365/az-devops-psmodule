@@ -9,6 +9,8 @@ PlatyPS schema version: 2024-05-01
 title: Set-AdoClassificationNode
 -->
 
+<!-- cSpell: ignore dontshow -->
+
 # Set-AdoClassificationNode
 
 ## SYNOPSIS
@@ -19,7 +21,7 @@ Updates a classification node for a project in Azure DevOps.
 
 ### __AllParameterSets
 
-```
+```text
 Set-AdoClassificationNode [-ProjectId] <string> [-StructureType] <string> [-Name] <string>
  [[-Path] <string>] [[-ApiVersion] <string>] [<CommonParameters>]
 ```
@@ -36,7 +38,11 @@ This function updates the name of a classification node for a specified project 
 
 ### EXAMPLE 1
 
-Set-AdoClassificationNode -ProjectId 'my-project-001' -Name 'New Area Name' -Path 'Area/SubArea'
+#### PowerShell
+
+```powershell
+Set-AdoClassificationNode -ProjectId 'my-project' -Name 'New Area Name' -Path 'Area/SubArea'
+```
 
 This example updates the name of the specified area node.
 
@@ -174,7 +180,7 @@ The updated classification node object.
 
 ## NOTES
 
-- Requires an active connection to Azure DevOps using Connect-AdoOrganization.
+- Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
 
 ## RELATED LINKS
 

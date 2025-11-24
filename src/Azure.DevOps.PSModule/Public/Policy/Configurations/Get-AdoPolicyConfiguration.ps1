@@ -19,7 +19,7 @@
         https://learn.microsoft.com/en-us/rest/api/azure/devops/policy/configurations/get
 
     .EXAMPLE
-        $configuration = Get-AdoPolicyConfiguration -ProjectId 'my-project-001' -PolicyType '00000000-0000-0000-0000-000000000000'
+        $configuration = Get-AdoPolicyConfiguration -ProjectId 'my-project' -PolicyType '00000000-0000-0000-0000-000000000000'
     #>
     [CmdletBinding()]
     [OutputType([String])]

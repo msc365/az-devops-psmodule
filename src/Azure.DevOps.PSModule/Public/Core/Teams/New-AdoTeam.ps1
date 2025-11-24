@@ -30,10 +30,14 @@
         https://learn.microsoft.com/en-us/rest/api/azure/devops/core/teams/create
 
     .EXAMPLE
-        $team = New-AdoTeam -ProjectId 'my-project-001' -Name 'my-team-001'
+        New-AdoTeam -ProjectId 'my-project' -Name 'my-team'
+
+        Creates a new team named 'my-team' in the project with ID 'my-project'.
 
     .EXAMPLE
-        $team = New-AdoTeam -ProjectId 'my-project-001' -Name 'my-team-001' -Description 'My new team'
+        New-AdoTeam -ProjectId 'my-project' -Name 'my-team' -Description 'My new team'
+
+        Creates a new team named 'my-team' with the description 'My new team' in the project with ID 'my-project'.
     #>
     [CmdletBinding()]
     [OutputType([object])]

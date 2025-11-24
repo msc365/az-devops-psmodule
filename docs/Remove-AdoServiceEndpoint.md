@@ -9,6 +9,8 @@ PlatyPS schema version: 2024-05-01
 title: Remove-AdoServiceEndpoint
 -->
 
+<!-- cSpell: ignore dontshow -->
+
 # Remove-AdoServiceEndpoint
 
 ## SYNOPSIS
@@ -19,7 +21,7 @@ Remove a service endpoint from an Azure DevOps project.
 
 ### __AllParameterSets
 
-```
+```text
 Remove-AdoServiceEndpoint [-EndpointId] <string> [-ProjectIds] <string[]> [[-ApiVersion] <string>]
  [<CommonParameters>]
 ```
@@ -36,7 +38,13 @@ This function removes a service endpoint from an Azure DevOps project through RE
 
 ### EXAMPLE 1
 
+#### PowerShell
+
+```powershell
 Remove-AdoServiceEndpoint -EndPointId $endpoint.id -ProjectIds $project.id
+```
+
+Removes the specified service endpoint from the given project.
 
 ## PARAMETERS
 
@@ -126,7 +134,7 @@ Boolean indicating success or failure.
 
 ## NOTES
 
-- N/A
+- Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
 
 ## RELATED LINKS
 

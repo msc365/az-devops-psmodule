@@ -9,6 +9,9 @@ PlatyPS schema version: 2024-05-01
 title: Get-AdoProcess
 -->
 
+<!-- markdownlint-disable MD024 -->
+<!-- cSpell: ignore dontshow -->
+
 # Get-AdoProcess
 
 ## SYNOPSIS
@@ -19,7 +22,7 @@ Get the process details.
 
 ### __AllParameterSets
 
-```
+```text
 Get-AdoProcess [[-Process] <string>] [[-ApiVersion] <string>] [<CommonParameters>]
 ```
 
@@ -35,11 +38,23 @@ This function retrieves the process details for an Azure DevOps process through 
 
 ### EXAMPLE 1
 
-$processes = Get-AdoProcess
+#### PowerShell
+
+```powershell
+Get-AdoProcess
+```
+
+Gets all available processes.
 
 ### EXAMPLE 2
 
-\$process = Get-AdoProcess -Process 'Agile'
+#### PowerShell
+
+```powershell
+Get-AdoProcess -Process 'Agile'
+```
+
+Gets the details of the 'Agile' process.
 
 ## PARAMETERS
 
@@ -108,7 +123,7 @@ The process details object.
 
 ## NOTES
 
-- N/A
+- Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
 
 ## RELATED LINKS
 

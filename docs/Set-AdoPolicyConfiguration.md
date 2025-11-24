@@ -9,6 +9,8 @@ PlatyPS schema version: 2024-05-01
 title: Set-AdoPolicyConfiguration
 -->
 
+<!-- cSpell: ignore dontshow -->
+
 # Set-AdoPolicyConfiguration
 
 ## SYNOPSIS
@@ -19,7 +21,7 @@ Update a policy configuration for an Azure DevOps project.
 
 ### __AllParameterSets
 
-```
+```text
 Set-AdoPolicyConfiguration [-ProjectId] <string> [-ConfigurationId] <int> [-Configuration] <Object>
  [[-ApiVersion] <string>] [<CommonParameters>]
 ```
@@ -36,32 +38,38 @@ This function updates a policy configuration for an Azure DevOps project through
 
 ### EXAMPLE 1
 
-\$config = @{
-    "isEnabled": true,
-    "isBlocking": true,
-    "type": @{
-        "id": "fa4e907d-c16b-4a4c-9dfa-4906e5d171dd"
-    },
-    "settings": @{
-        "minimumApproverCount": 1,
-        "creatorVoteCounts": true,
-        "allowDownvotes": false,
-        "resetOnSourcePush": false,
-        "requireVoteOnLastIteration": false,
-        "resetRejectionsOnSourcePush": false,
-        "blockLastPusherVote": false,
-        "requireVoteOnEachIteration": false,
-        "scope": @(
-            {
-                "repositoryId": null,
-                "refName": null,
-                "matchKind": "DefaultBranch"
-            }
-        )
-    }
-}
+#### PowerShell
 
-Set-AdoPolicyConfiguration -ProjectName 'my-project-001' -ConfigurationId 24 -Configuration $config
+```powershell
+$config = @{
+  "isEnabled": true,
+  "isBlocking": true,
+  "type": @{
+    "id": "fa4e907d-c16b-4a4c-9dfa-4906e5d171dd"
+  },
+  "settings": @{
+    "minimumApproverCount": 1,
+    "creatorVoteCounts": true,
+    "allowDownvotes": false,
+    "resetOnSourcePush": false,
+    "requireVoteOnLastIteration": false,
+    "resetRejectionsOnSourcePush": false,
+    "blockLastPusherVote": false,
+    "requireVoteOnEachIteration": false,
+    "scope": @(
+        {
+          "repositoryId": null,
+          "refName": null,
+          "matchKind": "DefaultBranch"
+        }
+      )
+    }
+  }
+
+Set-AdoPolicyConfiguration -ProjectName 'my-project' -ConfigurationId 24 -Configuration $config
+```
+
+Sets the policy configuration with ID 24 in the 'my-project' project using the specified configuration.
 
 ## PARAMETERS
 
@@ -173,6 +181,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## NOTES
 
 - The configuration object should be a valid JSON object.
+- Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
 
 ## RELATED LINKS
 

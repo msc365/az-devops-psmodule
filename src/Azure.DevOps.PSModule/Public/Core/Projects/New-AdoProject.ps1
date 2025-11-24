@@ -33,7 +33,9 @@
         https://learn.microsoft.com/en-us/rest/api/azure/devops/core/projects/create
 
     .EXAMPLE
-        $project = New-AdoProject -Name 'my-project-002' -Description 'My new project'
+        New-AdoProject -Name 'my-project-002' -Description 'My new project'
+
+        Creates a new project named 'my-project-002' with the description 'My new project'.
     #>
     [CmdletBinding()]
     [OutputType([object])]

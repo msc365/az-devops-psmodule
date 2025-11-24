@@ -9,6 +9,8 @@ PlatyPS schema version: 2024-05-01
 title: Get-AdoTeamList
 -->
 
+<!-- cSpell: ignore dontshow -->
+
 # Get-AdoTeamList
 
 ## SYNOPSIS
@@ -19,7 +21,7 @@ Get all teams for a given Azure DevOps project.
 
 ### __AllParameterSets
 
-```
+```text
 Get-AdoTeamList [-ProjectId] <string> [[-Skip] <int>] [[-Top] <int>] [[-ApiVersion] <string>]
  [<CommonParameters>]
 ```
@@ -36,7 +38,11 @@ This function retrieves all teams for a given Azure DevOps project through REST 
 
 ### EXAMPLE 1
 
-Get-AdoTeamList -ProjectId 'my-project-001'
+#### PowerShell
+
+```powershell
+Get-AdoTeamList -ProjectId 'my-project'
+```
 
 ## PARAMETERS
 
@@ -142,7 +148,7 @@ A list of team objects.
 
 ## NOTES
 
-- N/A
+- Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
 
 ## RELATED LINKS
 

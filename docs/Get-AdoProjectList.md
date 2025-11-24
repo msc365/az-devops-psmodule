@@ -9,6 +9,8 @@ PlatyPS schema version: 2024-05-01
 title: Get-AdoProjectList
 -->
 
+<!-- cSpell: ignore dontshow -->
+
 # Get-AdoProjectList
 
 ## SYNOPSIS
@@ -19,7 +21,7 @@ Get all projects.
 
 ### __AllParameterSets
 
-```
+```text
 Get-AdoProjectList [[-Skip] <int>] [[-Top] <int>] [[-ApiVersion] <string>] [<CommonParameters>]
 ```
 
@@ -35,7 +37,11 @@ This function retrieves all projects for a given Azure DevOps organization throu
 
 ### EXAMPLE 1
 
-\$projects = Get-AdoProjectList -ApiVersion '7.1'
+#### PowerShell
+
+```powershell
+Get-AdoProjectList -ApiVersion '7.1'
+```
 
 ## PARAMETERS
 
@@ -119,7 +125,7 @@ A list of project objects.
 
 ## NOTES
 
-- N/A
+- Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
 
 ## RELATED LINKS
 

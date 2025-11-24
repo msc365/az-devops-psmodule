@@ -30,7 +30,9 @@
         https://learn.microsoft.com/en-us/rest/api/azure/devops/core/teams/update
 
     .EXAMPLE
-        $team = Set-AdoTeam -ProjectId 'my-project-001' -TeamId '00000000-0000-0000-0000-000000000000' -Name 'my-team-001'
+        Set-AdoTeam -ProjectId 'my-project' -TeamId '00000000-0000-0000-0000-000000000000' -Name 'my-team'
+
+        Update the team with the specified TeamId in the given project to have the name 'my-team'.
     #>
     [CmdletBinding()]
     [OutputType([object])]

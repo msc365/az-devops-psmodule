@@ -16,14 +16,20 @@
         System.Object
 
         The process details object.
+
     .LINK
         https://learn.microsoft.com/en-us/rest/api/azure/devops/core/processes
 
     .EXAMPLE
         $processes = Get-AdoProcess
 
+        Gets all available processes.
+
     .EXAMPLE
         $process = Get-AdoProcess -Process 'Agile'
+
+        Gets the details of the 'Agile' process.
+
     #>
     [CmdletBinding()]
     [OutputType([object])]

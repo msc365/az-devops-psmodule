@@ -25,6 +25,8 @@
 
     .EXAMPLE
         Remove-AdoServiceEndpoint -EndPointId $endpoint.id -ProjectIds $project.id
+
+        Removes the specified service endpoint from the given project.
     #>
     [CmdletBinding()]
     [OutputType([boolean])]

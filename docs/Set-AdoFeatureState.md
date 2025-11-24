@@ -9,6 +9,8 @@ PlatyPS schema version: 2024-05-01
 title: Set-AdoFeatureState
 -->
 
+<!-- cSpell: ignore dontshow -->
+
 # Set-AdoFeatureState
 
 ## SYNOPSIS
@@ -19,7 +21,7 @@ Set the feature state for an Azure DevOps project feature.
 
 ### __AllParameterSets
 
-```
+```text
 Set-AdoFeatureState [-ProjectId] <string> [-Feature] <string> [[-FeatureState] <string>]
  [[-ApiVersion] <string>] [<CommonParameters>]
 ```
@@ -36,7 +38,13 @@ This function sets the feature state for an Azure DevOps project feature through
 
 ### EXAMPLE 1
 
+#### PowerShell
+
+```powershell
 Set-AdoFeatureState -ProjectId 'my-project-002' -Feature 'Boards' -FeatureState 'Disabled'
+```
+
+Sets the feature state for Boards to Disabled for the specified project.
 
 ## PARAMETERS
 
@@ -153,6 +161,7 @@ Object representing the response from the Azure DevOps REST API.
 
 - Turning off a feature hides this service for all members of this project.
   If you choose to enable this service later, all your existing data will be available.
+- Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
 
 ## RELATED LINKS
 

@@ -1,10 +1,10 @@
 ﻿function New-AdoGroup {
     <#
     .SYNOPSIS
-        Create a new group in Azure DevOps.
+        Adds an AAD Group as member of a group.
 
     .DESCRIPTION
-        This function joins a built-in group and entra group in Azure DevOps through REST API.
+        This function adds an AAD Group as member of a group in Azure DevOps through REST API.
 
     .PARAMETER GroupDescriptor
         A comma separated list of descriptors referencing groups you want the graph group to join.
@@ -19,7 +19,9 @@
         https://learn.microsoft.com/en-us/rest/api/azure/devops/graph/groups/create
 
     .EXAMPLE
-        $entraGroup = New-AdoGroupMembership -GroupDescriptor 'vssgp.00000000-0000-0000-0000-000000000000' -GroupId '00000000-0000-0000-0000-000000000000'
+        New-AdoGroup -GroupDescriptor 'vssgp.00000000-0000-0000-0000-000000000000' -GroupId '00000000-0000-0000-0000-000000000000'
+
+        Adds an AAD Group as member of a group.
     #>
     [CmdletBinding()]
     [OutputType([String])]

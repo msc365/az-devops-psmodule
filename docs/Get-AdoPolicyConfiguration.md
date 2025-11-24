@@ -9,6 +9,8 @@ PlatyPS schema version: 2024-05-01
 title: Get-AdoPolicyConfiguration
 -->
 
+<!-- cSpell: ignore dontshow -->
+
 # Get-AdoPolicyConfiguration
 
 ## SYNOPSIS
@@ -19,7 +21,7 @@ Gets policy configurations for an Azure DevOps project.
 
 ### __AllParameterSets
 
-```
+```text
 Get-AdoPolicyConfiguration [-ProjectId] <string> [-PolicyType] <string> [[-ApiVersion] <string>]
  [<CommonParameters>]
 ```
@@ -36,7 +38,11 @@ This function retrieves policy configurations for an Azure DevOps project throug
 
 ### EXAMPLE 1
 
-\$configuration = Get-AdoPolicyConfiguration -ProjectId 'my-project-001' -PolicyType '00000000-0000-0000-0000-000000000000'
+#### PowerShell
+
+```powershell
+Get-AdoPolicyConfiguration -ProjectId 'my-project' -PolicyType '00000000-0000-0000-0000-000000000000'
+```
 
 ## PARAMETERS
 
@@ -125,7 +131,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## NOTES
 
-- N/A
+- Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
 
 ## RELATED LINKS
 

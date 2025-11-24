@@ -9,6 +9,8 @@ PlatyPS schema version: 2024-05-01
 title: Get-AdoGroupList
 -->
 
+<!-- cSpell: ignore dontshow -->
+
 # Get-AdoGroupList
 
 ## SYNOPSIS
@@ -19,7 +21,7 @@ Get groups in an Azure DevOps organization.
 
 ### __AllParameterSets
 
-```
+```text
 Get-AdoGroupList [-ScopeDescriptor] <string> [[-SubjectTypes] <string[]>]
  [[-ContinuationToken] <string>] [[-ApiVersion] <string>] [<CommonParameters>]
 ```
@@ -36,7 +38,11 @@ This function retrieves groups in an Azure DevOps organization through REST API.
 
 ### EXAMPLE 1
 
-\$groups = Get-AdoGroup -ScopeDescriptor $projectDescriptor -SubjectTypes 'vssgp', 'aadgp'
+#### PowerShell
+
+```powershell
+Get-AdoGroup -ScopeDescriptor $projectDescriptor -SubjectTypes 'vssgp', 'aadgp'
+```
 
 ## PARAMETERS
 
@@ -146,7 +152,7 @@ An object representing the groups in the specified scope.
 
 ## NOTES
 
-- N/A
+- Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
 
 ## RELATED LINKS
 

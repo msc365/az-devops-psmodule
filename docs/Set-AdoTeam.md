@@ -9,6 +9,8 @@ PlatyPS schema version: 2024-05-01
 title: Set-AdoTeam
 -->
 
+<!-- cSpell: ignore dontshow -->
+
 # Set-AdoTeam
 
 ## SYNOPSIS
@@ -19,7 +21,7 @@ Update a team in an Azure DevOps project.
 
 ### __AllParameterSets
 
-```
+```text
 Set-AdoTeam [-ProjectId] <string> [-TeamId] <string> [-Name] <string> [[-Description] <string>]
  [[-ApiVersion] <string>] [<CommonParameters>]
 ```
@@ -36,7 +38,13 @@ This function updates a team in an Azure DevOps project through REST API.
 
 ### EXAMPLE 1
 
-Set-AdoTeam -ProjectId 'my-project-001' -TeamId '00000000-0000-0000-0000-000000000000' -Name 'my-team-001'
+#### PowerShell
+
+```powershell
+Set-AdoTeam -ProjectId 'my-project' -TeamId '00000000-0000-0000-0000-000000000000' -Name 'my-team'
+```
+
+Update the team with the specified TeamId in the given project to have the name 'my-team'.
 
 ## PARAMETERS
 
@@ -170,7 +178,7 @@ The updated team object.
 
 ## NOTES
 
-- N/A
+- Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
 
 ## RELATED LINKS
 

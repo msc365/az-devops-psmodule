@@ -9,6 +9,8 @@ PlatyPS schema version: 2024-05-01
 title: Remove-AdoTeam
 -->
 
+<!-- cSpell: ignore dontshow -->
+
 # Remove-AdoTeam
 
 ## SYNOPSIS
@@ -19,7 +21,7 @@ Remove a team from an Azure DevOps project.
 
 ### __AllParameterSets
 
-```
+```text
 Remove-AdoTeam [-ProjectId] <string> [-TeamId] <string> [[-ApiVersion] <string>]
  [<CommonParameters>]
 ```
@@ -36,7 +38,13 @@ This function removes a team from an Azure DevOps project through REST API.
 
 ### EXAMPLE 1
 
-Remove-AdoTeam -ProjectId 'my-project-001' -TeamId '00000000-0000-0000-0000-000000000000'
+#### PowerShell
+
+```powershell
+Remove-AdoTeam -ProjectId 'my-project' -TeamId '00000000-0000-0000-0000-000000000000'
+```
+
+Removes the specified team from the specified project.
 
 ## PARAMETERS
 
@@ -126,7 +134,7 @@ Boolean indicating success.
 
 ## NOTES
 
-- N/A
+- Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
 
 ## RELATED LINKS
 

@@ -9,6 +9,8 @@ PlatyPS schema version: 2024-05-01
 title: Get-AdoContext
 -->
 
+<!-- cSpell: ignore hashtable dontshow -->
+
 # Get-AdoContext
 
 ## SYNOPSIS
@@ -19,7 +21,7 @@ Get the current Azure DevOps connection context.
 
 ### __AllParameterSets
 
-```
+```text
 Get-AdoContext [<CommonParameters>]
 ```
 
@@ -35,7 +37,11 @@ This function retrieves the current connection context for Azure DevOps, includi
 
 ### EXAMPLE 1
 
+#### PowerShell
+
+```powershell
 Get-AdoContext
+```
 
 Retrieves the current Azure DevOps connection context.
 
@@ -58,7 +64,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## NOTES
 
-- N/A
+- Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
 
 ## RELATED LINKS
 

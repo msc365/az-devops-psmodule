@@ -9,6 +9,9 @@ PlatyPS schema version: 2024-05-01
 title: Get-AdoServiceEndpointByName
 -->
 
+<!-- markdownlint-disable MD024 -->
+<!-- cSpell: ignore hashtable dontshow -->
+
 # Get-AdoServiceEndpointByName
 
 ## SYNOPSIS
@@ -19,7 +22,7 @@ Get the service endpoint details for an Azure DevOps service endpoint.
 
 ### __AllParameterSets
 
-```
+```text
 Get-AdoServiceEndpointByName [-ProjectId] <string> [-EndpointNames] <string[]>
  [[-ApiVersion] <string>] [<CommonParameters>]
 ```
@@ -36,15 +39,23 @@ This function retrieves the service endpoint details for an Azure DevOps service
 
 ### EXAMPLE 1
 
-\$endpoint = Get-AdoServiceEndpoint -ProjectId 'my-project-001' -EndpointNames 'id-my-adortagent'
+#### PowerShell
 
-Retrieves the service endpoint with the name 'id-my-adortagent' in the project 'my-project-001'.
+```powershell
+Get-AdoServiceEndpoint -ProjectId 'my-project' -EndpointNames 'id-my-adortagent'
+```
+
+Retrieves the service endpoint with the name 'id-my-adortagent' in the project 'my-project'.
 
 ### EXAMPLE 2
 
-\$endpoints = Get-AdoServiceEndpoint -ProjectId 'my-project-001' -EndpointNames 'id-my-adortagent', 'id-my-other-endpoint'
+#### PowerShell
 
-Retrieves the service endpoints with the names 'id-my-adortagent' and 'id-my-other-endpoint' in the project 'my-project-001'.
+```powershell
+Get-AdoServiceEndpoint -ProjectId 'my-project' -EndpointNames 'id-my-adortagent', 'id-my-other-endpoint'
+```
+
+Retrieves the service endpoints with the names 'id-my-adortagent' and 'id-my-other-endpoint' in the project 'my-project'.
 
 ## PARAMETERS
 
@@ -132,7 +143,7 @@ Objects representing the service endpoints.
 
 ## NOTES
 
-- N/A
+- Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
 
 ## RELATED LINKS
 

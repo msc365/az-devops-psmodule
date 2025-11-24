@@ -9,6 +9,9 @@ PlatyPS schema version: 2024-05-01
 title: Connect-AdoOrganization
 -->
 
+<!-- markdownlint-disable MD024 -->
+<!-- cSpell: ignore dontshow -->
+
 # Connect-AdoOrganization
 
 ## SYNOPSIS
@@ -19,7 +22,7 @@ Connect to an Azure DevOps organization.
 
 ### __AllParameterSets
 
-```
+```text
 Connect-AdoOrganization [-Organization] <string> [[-PersonalAccessToken] <securestring>]
  [[-ApiVersion] <string>] [<CommonParameters>]
 ```
@@ -36,13 +39,21 @@ This function connects to an Azure DevOps organization using a personal access t
 
 ### EXAMPLE 1
 
+#### PowerShell
+
+```powershell
 Connect-AdoOrganization -Organization 'my-org'
+```
 
 Connects to the specified Azure DevOps organization using a service principal.
 
 ### EXAMPLE 2
 
+#### PowerShell
+
+```powershell
 Connect-AdoOrganization -Organization 'my-org' -PersonalAccessToken $PAT
+```
 
 Connects to the specified Azure DevOps organization using the provided personal access token (PAT).
 

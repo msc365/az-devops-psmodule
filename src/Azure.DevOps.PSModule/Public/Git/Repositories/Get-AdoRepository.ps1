@@ -16,7 +16,9 @@
         https://learn.microsoft.com/en-us/rest/api/azure/devops/git/repositories/get-repository
 
     .EXAMPLE
-        $repo = Get-AdoRepository -ProjectName 'my-project-001' -Name 'my-project-001'
+        Get-AdoRepository -ProjectId 'my-project' -Name 'my-repo-001'
+
+        Retrieves the repository 'my-repo-001' from project 'my-project'.
     #>
     [CmdletBinding()]
     [OutputType([pscustomobject])]

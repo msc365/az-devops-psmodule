@@ -31,7 +31,9 @@
         https://learn.microsoft.com/en-us/rest/api/azure/devops/feature-management/featurestatesquery
 
     .EXAMPLE
-        $featureState = Set-AdoFeatureState -ProjectId 'my-project-002' -Feature 'Boards' -FeatureState 'Disabled'
+        Set-AdoFeatureState -ProjectId 'my-project-002' -Feature 'Boards' -FeatureState 'Disabled'
+
+        Sets the feature state for Boards to Disabled for the specified project.
     #>
     [CmdletBinding()]
     [OutputType([object])]

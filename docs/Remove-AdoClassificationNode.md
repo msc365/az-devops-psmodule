@@ -9,6 +9,9 @@ PlatyPS schema version: 2024-05-01
 title: Remove-AdoClassificationNode
 -->
 
+<!-- markdownlint-disable MD024 -->
+<!-- cSpell: ignore dontshow -->
+
 # Remove-AdoClassificationNode
 
 ## SYNOPSIS
@@ -19,7 +22,7 @@ Removes a classification node from a project in Azure DevOps.
 
 ### __AllParameterSets
 
-```
+```text
 Remove-AdoClassificationNode [-ProjectId] <string> [-StructureType] <string> [-Path] <string>
  [[-ReclassifyId] <int>] [[-ApiVersion] <string>] [<CommonParameters>]
 ```
@@ -36,24 +39,37 @@ This function removes a classification node from a specified project in Azure De
 
 ### EXAMPLE 1
 
-Remove-AdoClassificationNode -ProjectId 'my-project-001' -Path 'Area/SubArea'
+#### PowerShell
+
+```powershell
+Remove-AdoClassificationNode -ProjectId 'my-project' -Path 'Area/SubArea'
+```
 
 This example removes the area node at the specified path from the specified project.
 
 ### EXAMPLE 2
 
-Remove-AdoClassificationNode -ProjectId 'my-project-001' -Path 'Area'
+#### PowerShell
+
+```powershell
+Remove-AdoClassificationNode -ProjectId 'my-project' -Path 'Area'
+```
 
 This example removes the area node named 'Area' from the specified project including its 'SubArea' child node.
 
 ### EXAMPLE 3
 
-Remove-AdoClassificationNode -ProjectId 'my-project-001' -Path 'Area/SubArea' -ReclassifyId 658
+#### PowerShell
+
+```powershell
+Remove-AdoClassificationNode -ProjectId 'my-project' -Path 'Area/SubArea' -ReclassifyId 658
+```
 
 This example removes the area node at the specified path and reassigns (reclassifies) the work items that were associated with that node to another existing node, the node with ID 658.
 
-Without $reclassifyId, deleting a node could leave work items orphaned or unclassified.
-This parameter ensures a smooth transition by automatically moving them to a valid node.
+> [!NOTE] Note  
+> Without `-ReclassifyId`, deleting a node could leave work items orphaned or unclassified.  
+> This parameter ensures a smooth transition by automatically moving them to a valid node.
 
 ## PARAMETERS
 
@@ -187,7 +203,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## NOTES
 
-- Requires an active connection to Azure DevOps using Connect-AdoOrganization.
+- Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
 
 ## RELATED LINKS
 

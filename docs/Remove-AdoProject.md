@@ -9,6 +9,8 @@ PlatyPS schema version: 2024-05-01
 title: Remove-AdoProject
 -->
 
+<!-- cSpell: ignore dontshow -->
+
 # Remove-AdoProject
 
 ## SYNOPSIS
@@ -19,7 +21,7 @@ Remove a project from an Azure DevOps organization.
 
 ### __AllParameterSets
 
-```
+```text
 Remove-AdoProject [-ProjectId] <string> [[-ApiVersion] <string>] [<CommonParameters>]
 ```
 
@@ -35,7 +37,13 @@ This function removes a project from an Azure DevOps organization through REST A
 
 ### EXAMPLE 1
 
+#### PowerShell
+
+```powershell
 Remove-AdoProject -Project $projectId
+```
+
+Removes the project with ID 'my-project' from the connected Azure DevOps organization.
 
 ## PARAMETERS
 
@@ -103,7 +111,7 @@ Boolean indicating success.
 
 ## NOTES
 
-- N/A
+- Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
 
 ## RELATED LINKS
 

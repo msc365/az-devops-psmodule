@@ -9,6 +9,8 @@ PlatyPS schema version: 2024-05-01
 title: New-AdoProject
 -->
 
+<!-- cSpell: ignore dontshow -->
+
 # New-AdoProject
 
 ## SYNOPSIS
@@ -19,7 +21,7 @@ Create a new project in an Azure DevOps organization.
 
 ### __AllParameterSets
 
-```
+```text
 New-AdoProject [-Name] <string> [[-Description] <string>] [[-Process] <string>]
  [[-SourceControl] <string>] [[-Visibility] <string>] [[-ApiVersion] <string>] [<CommonParameters>]
 ```
@@ -36,7 +38,13 @@ This function creates a new project in an Azure DevOps organization through REST
 
 ### EXAMPLE 1
 
+#### PowerShell
+
+```powershell
 New-AdoProject -Name 'my-project-002' -Description 'My new project'
+```
+
+Creates a new project named 'my-project-002' with the description 'My new project'.
 
 ## PARAMETERS
 
@@ -196,7 +204,7 @@ An object representing the created project.
 
 ## NOTES
 
-- N/A
+- Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
 
 ## RELATED LINKS
 

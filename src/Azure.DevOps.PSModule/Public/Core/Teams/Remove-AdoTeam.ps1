@@ -24,7 +24,9 @@
         https://learn.microsoft.com/en-us/rest/api/azure/devops/core/teams/delete
 
     .EXAMPLE
-        Remove-AdoTeam -ProjectId 'my-project-001' -TeamId 'my-team-001'
+        Remove-AdoTeam -ProjectId 'my-project' -TeamId 'my-team'
+
+        Removes the specified team from the specified project.
     #>
     [CmdletBinding()]
     [OutputType([boolean])]

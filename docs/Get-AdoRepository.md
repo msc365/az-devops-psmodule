@@ -9,6 +9,8 @@ PlatyPS schema version: 2024-05-01
 title: Get-AdoRepository
 -->
 
+<!-- cSpell: ignore dontshow -->
+
 # Get-AdoRepository
 
 ## SYNOPSIS
@@ -19,7 +21,7 @@ Get the repository.
 
 ### __AllParameterSets
 
-```
+```text
 Get-AdoRepository [-ProjectId] <string> [-Name] <string> [[-ApiVersion] <string>]
  [<CommonParameters>]
 ```
@@ -36,7 +38,13 @@ This function retrieves the repository details as GitRepository object for an Az
 
 ### EXAMPLE 1
 
-\$repo = Get-AdoRepository -ProjectName 'my-project-001' -Name 'my-project-001'
+#### PowerShell
+
+```powershell
+Get-AdoRepository -ProjectId 'my-project' -Name 'my-repo-001'
+```
+
+Retrieves the repository 'my-repo-001' from project 'my-project'.
 
 ## PARAMETERS
 
@@ -121,7 +129,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## NOTES
 
-- N/A
+- Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
 
 ## RELATED LINKS
 

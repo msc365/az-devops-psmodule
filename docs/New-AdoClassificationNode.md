@@ -9,6 +9,9 @@ PlatyPS schema version: 2024-05-01
 title: New-AdoClassificationNode
 -->
 
+<!-- markdownlint-disable MD024 -->
+<!-- cSpell: ignore dontshow -->
+
 # New-AdoClassificationNode
 
 ## SYNOPSIS
@@ -19,7 +22,7 @@ Creates a new classification node for a project in Azure DevOps.
 
 ### __AllParameterSets
 
-```
+```text
 New-AdoClassificationNode [-ProjectId] <string> [-Name] <string> [-StructureType] <string>
  [[-Path] <string>] [[-ApiVersion] <string>] [<CommonParameters>]
 ```
@@ -36,13 +39,21 @@ This function creates a new classification node under a specified path for a pro
 
 ### EXAMPLE 1
 
-New-AdoClassificationNode -Name 'NewArea' -ProjectId 'my-project-001'
+#### PowerShell
+
+```powershell
+New-AdoClassificationNode -Name 'NewArea' -ProjectId 'my-project'
+```
 
 This example creates a new area node named 'NewArea' at the root level of the specified project.
 
 ### EXAMPLE 2
 
-New-AdoClassificationNode -Name 'SubArea' -Path 'ExistingArea' -ProjectId 'my-project-001'
+#### PowerShell
+
+```powershell
+New-AdoClassificationNode -Name 'SubArea' -Path 'ExistingArea' -ProjectId 'my-project'
+```
 
 This example creates a new area node named 'SubArea' under the existing area node 'ExistingArea' in the specified project.
 
@@ -178,7 +189,7 @@ Object representing the created classification node.
 
 ## NOTES
 
-- Requires an active connection to Azure DevOps using Connect-AdoOrganization.
+- Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
 
 ## RELATED LINKS
 

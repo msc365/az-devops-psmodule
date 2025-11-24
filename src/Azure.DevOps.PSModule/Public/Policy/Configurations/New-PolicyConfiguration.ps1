@@ -47,7 +47,7 @@
             }
         }
 
-        $policy = New-AdoPolicyConfiguration -ProjectName 'my-project-001' -Configuration $config
+        $policy = New-AdoPolicyConfiguration -ProjectName 'my-project' -Configuration $config
     #>
     [CmdletBinding()]
     [OutputType([String])]

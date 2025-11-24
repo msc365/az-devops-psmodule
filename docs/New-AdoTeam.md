@@ -9,6 +9,9 @@ PlatyPS schema version: 2024-05-01
 title: New-AdoTeam
 -->
 
+<!-- markdownlint-disable MD024 -->
+<!-- cSpell: ignore dontshow -->
+
 # New-AdoTeam
 
 ## SYNOPSIS
@@ -19,7 +22,7 @@ Create a new team in an Azure DevOps project.
 
 ### __AllParameterSets
 
-```
+```text
 New-AdoTeam [-ProjectId] <string> [-Name] <string> [[-Description] <string>]
  [[-ApiVersion] <string>] [<CommonParameters>]
 ```
@@ -36,11 +39,23 @@ This function creates a new team in an Azure DevOps project through REST API.
 
 ### EXAMPLE 1
 
-New-AdoTeam -ProjectId 'my-project-001' -Name 'my-team-001'
+#### PowerShell
+
+```powershell
+New-AdoTeam -ProjectId 'my-project' -Name 'my-team'
+```
+
+Creates a new team named 'my-team' in the project with ID 'my-project'.
 
 ### EXAMPLE 2
 
-New-AdoTeam -ProjectId 'my-project-001' -Name 'my-team-001' -Description 'My new team'
+#### PowerShell
+
+```powershell
+New-AdoTeam -ProjectId 'my-project' -Name 'my-team' -Description 'My new team'
+```
+
+Creates a new team named 'my-team' with the description 'My new team' in the project with ID 'my-project'.
 
 ## PARAMETERS
 
@@ -153,6 +168,7 @@ The created team object.
 ## NOTES
 
 - The team name must be unique within the project.
+- Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
 
 ## RELATED LINKS
 

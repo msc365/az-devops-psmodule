@@ -49,13 +49,15 @@
                     name             = 'id-msc-adortagnt-prd'
                     projectReference = [ordered]@{
                         id   = '33333333-3333-3333-3333-333333333333'
-                        name = 'my-project-001'
+                        name = 'my-project'
                     }
                 }
             )
         } | ConvertTo-Json -Depth 4
 
-        $endpoint = New-AdoServiceEndpoint -Configuration $objConfig
+        New-AdoServiceEndpoint -Configuration $objConfig
+
+        This example demonstrates how to create a new Azure Resource Manager service endpoint in an Azure DevOps project using a configuration object.
     #>
     [CmdletBinding()]
     [OutputType([object])]

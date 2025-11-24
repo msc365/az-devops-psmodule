@@ -48,6 +48,7 @@ A PowerShell module that wraps the Azure DevOps REST API into clean, task-orient
 | [Get-AdoTeam](Get-AdoTeam.md) | Get teams or the team details for a given Azure DevOps project. |
 | [Get-AdoTeamFieldValue](Get-AdoTeamFieldValue.md) | Gets the team field value settings for a team in an Azure DevOps project. |
 | [Get-AdoTeamList](Get-AdoTeamList.md) | Get all teams for a given Azure DevOps project. |
+| [Get-AdoTeamSettings](Get-AdoTeamSettings.md) | Gets the settings for a team in an Azure DevOps project. |
 | [New-AdoClassificationNode](New-AdoClassificationNode.md) | Creates a new classification node for a project in Azure DevOps. |
 | [New-AdoGroup](New-AdoGroup.md) | Create a new group in Azure DevOps. |
 | [New-AdoProject](New-AdoProject.md) | Create a new project in an Azure DevOps organization. |
@@ -64,3 +65,4 @@ A PowerShell module that wraps the Azure DevOps REST API into clean, task-orient
 | [Set-AdoPolicyConfiguration](Set-AdoPolicyConfiguration.md) | Update a policy configuration for an Azure DevOps project. |
 | [Set-AdoProject](Set-AdoProject.md) | Updates an existing Azure DevOps project through REST API. |
 | [Set-AdoTeam](Set-AdoTeam.md) | Update a team in an Azure DevOps project. |
+| [Set-AdoTeamSettings](Set-AdoTeamSettings.md) | Update the settings for a team in Azure DevOps. |

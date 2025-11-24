@@ -9,6 +9,8 @@ PlatyPS schema version: 2024-05-01
 title: Get-AdoFeatureState
 -->
 
+<!-- cSpell: ignore dontshow -->
+
 # Get-AdoFeatureState
 
 ## SYNOPSIS
@@ -19,7 +21,7 @@ Get the feature states for an Azure DevOps project.
 
 ### __AllParameterSets
 
-```
+```text
 Get-AdoFeatureState [-ProjectId] <string> [[-ApiVersion] <string>] [<CommonParameters>]
 ```
 
@@ -35,7 +37,11 @@ This function retrieves the feature states for an Azure DevOps project through R
 
 ### EXAMPLE 1
 
-\$featureState = Get-AdoFeatureState -ProjectName 'my-project-002'
+#### PowerShell
+
+```powershell
+Get-AdoFeatureState -ProjectName 'my-project-002'
+```
 
 ## PARAMETERS
 
@@ -103,7 +109,7 @@ An object representing the feature states.
 
 ## NOTES
 
-- N/A
+- Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
 
 ## RELATED LINKS
 

@@ -9,6 +9,9 @@
     .PARAMETER ProjectId
         Optional. Project ID or project name.
 
+    .PARAMETER Name
+        Optional. The name of the project to update.
+
     .PARAMETER Description
         Optional. The description of the project to update.
 
@@ -26,7 +29,9 @@
         https://learn.microsoft.com/en-us/rest/api/azure/devops/core/projects/update
 
     .EXAMPLE
-        $project = Set-AdoProject -ProjectId 'my-project-002' -Name 'my-project-updated-name'
+        Set-AdoProject -ProjectId 'my-project-002' -Name 'my-project-updated-name'
+
+        Updates the name of the Azure DevOps project with ID 'my-project-002' to 'my-project-updated-name'.
     #>
     [CmdletBinding()]
     [OutputType([object])]

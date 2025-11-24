@@ -21,7 +21,7 @@
         https://learn.microsoft.com/en-us/rest/api/azure/devops/core/teams/get-teams
 
     .EXAMPLE
-        $teams = Get-AdoTeamList -ProjectId 'my-project-001'
+        $teams = Get-AdoTeamList -ProjectId 'my-project'
     #>
     [CmdletBinding()]
     [OutputType([object[]])]

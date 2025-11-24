@@ -9,6 +9,8 @@ PlatyPS schema version: 2024-05-01
 title: New-AdoServiceEndpoint
 -->
 
+<!-- cSpell: ignore dontshow -->
+
 # New-AdoServiceEndpoint
 
 ## SYNOPSIS
@@ -19,7 +21,7 @@ Create a new service endpoint in an Azure DevOps project.
 
 ### __AllParameterSets
 
-```
+```text
 New-AdoServiceEndpoint [-Configuration] <string> [[-ApiVersion] <string>] [<CommonParameters>]
 ```
 
@@ -35,7 +37,10 @@ This function creates a new service endpoint in an Azure DevOps project through 
 
 ### EXAMPLE 1
 
-\$config = [ordered]@{
+#### PowerShell
+
+```powershell
+$config = [ordered]@{
     data                             = [ordered]@{
         creationMode     = 'Manual'
         environment      = 'AzureCloud'
@@ -63,13 +68,16 @@ This function creates a new service endpoint in an Azure DevOps project through 
             name             = 'id-msc-adortagnt-prd'
             projectReference = [ordered]@{
                 id   = '33333333-3333-3333-3333-333333333333'
-                name = 'my-project-001'
+                name = 'my-project'
             }
         }
     )
 } | ConvertTo-Json -Depth 4
 
 New-AdoServiceEndpoint -Configuration $objConfig
+```
+
+This example demonstrates how to create a new Azure Resource Manager service endpoint in an Azure DevOps project using a configuration object.
 
 ## PARAMETERS
 
@@ -137,7 +145,7 @@ The created service endpoint object.
 
 ## NOTES
 
-- N/A
+- Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
 
 ## RELATED LINKS
 

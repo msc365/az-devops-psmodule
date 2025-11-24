@@ -24,7 +24,7 @@
         https://learn.microsoft.com/en-us/rest/api/azure/devops/git/repositories/delete?view=azure-devops
 
     .EXAMPLE
-        Remove-AdoRepository -ProjectName 'my-project-001' -RepositoryId $repo.id
+        Remove-AdoRepository -ProjectName 'my-project' -RepositoryId $repo.id
     #>
     [CmdletBinding()]
     [OutputType([boolean])]

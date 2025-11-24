@@ -9,6 +9,8 @@ PlatyPS schema version: 2024-05-01
 title: Remove-AdoRepository
 -->
 
+<!-- cSpell: ignore dontshow -->
+
 # Remove-AdoRepository
 
 ## SYNOPSIS
@@ -19,7 +21,7 @@ Remove a repository from an Azure DevOps project.
 
 ### __AllParameterSets
 
-```
+```text
 Remove-AdoRepository [-ProjectId] <string> [-RepositoryId] <string> [[-ApiVersion] <string>]
  [<CommonParameters>]
 ```
@@ -36,7 +38,13 @@ This function removes a repository from an Azure DevOps project through REST API
 
 ### EXAMPLE 1
 
-Remove-AdoRepository -ProjectName 'my-project-001' -RepositoryId $repo.id
+#### PowerShell
+
+```powershell
+Remove-AdoRepository -ProjectName 'my-project' -RepositoryId $repo.id
+```
+
+Removes the specified team from the specified project.
 
 ## PARAMETERS
 
@@ -123,7 +131,7 @@ Boolean indicating success.
 
 ## NOTES
 
-- N/A
+- Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
 
 ## RELATED LINKS
 

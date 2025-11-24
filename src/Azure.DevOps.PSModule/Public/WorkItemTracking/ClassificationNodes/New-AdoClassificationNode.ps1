@@ -34,12 +34,12 @@ function New-AdoClassificationNode {
         - Requires an active connection to Azure DevOps using Connect-AdoOrganization.
 
     .EXAMPLE
-        $newAreaNode = New-AdoClassificationNode -Name 'NewArea' -ProjectId 'my-project-001' -StructureType 'Areas'
+        $newAreaNode = New-AdoClassificationNode -Name 'NewArea' -ProjectId 'my-project' -StructureType 'Areas'
 
         This example creates a new area node named 'NewArea' at the root level of the specified project.
 
     .EXAMPLE
-        $newAreaNode = New-AdoClassificationNode -Name 'SubArea' -Path 'ExistingArea' -ProjectId 'my-project-001' -StructureType 'Areas'
+        $newAreaNode = New-AdoClassificationNode -Name 'SubArea' -Path 'ExistingArea' -ProjectId 'my-project' -StructureType 'Areas'
 
         This example creates a new area node named 'SubArea' under the existing area node 'ExistingArea' in the specified project.
     #>

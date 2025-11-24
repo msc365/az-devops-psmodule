@@ -22,7 +22,9 @@
         https://learn.microsoft.com/en-us/rest/api/azure/devops/git/repositories/create?view=azure-devops
 
     .EXAMPLE
-        $repo = New-AdoRepository -ProjectId $project.id -Name 'my-other-001'
+        New-AdoRepository -ProjectId $project.id -Name 'my-other-001'
+
+        Creates a new repository named 'my-other-001' in the specified project.
     #>
     [CmdletBinding()]
     [OutputType([pscustomobject])]

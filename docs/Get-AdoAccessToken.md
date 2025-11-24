@@ -9,6 +9,9 @@ PlatyPS schema version: 2024-05-01
 title: Get-AdoAccessToken
 -->
 
+<!-- markdownlint-disable MD024 -->
+<!-- cSpell: ignore dontshow -->
+
 # Get-AdoAccessToken
 
 ## SYNOPSIS
@@ -19,7 +22,7 @@ Get secure access token for Azure DevOps service principal.
 
 ### __AllParameterSets
 
-```
+```text
 Get-AdoAccessToken [[-TenantId] <string>] [<CommonParameters>]
 ```
 
@@ -35,13 +38,21 @@ The function gets an access token for the Azure DevOps service principal using t
 
 ### EXAMPLE 1
 
+#### PowerShell
+
+```powershell
 Get-AdoAccessToken
+```
 
 This example retrieves an access token for Azure DevOps using the tenant ID from the current Azure context.
 
 ### EXAMPLE 2
 
+#### PowerShell
+
+```powershell
 Get-AdoAccessToken -TenantId "00000000-0000-0000-0000-000000000000"
+```
 
 This example retrieves an access token for Azure DevOps using the specified tenant ID.
 
