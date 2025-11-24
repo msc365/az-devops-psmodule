@@ -19,7 +19,10 @@ function Set-AdoTeamSettings {
     .PARAMETER ApiVersion
         The API version to use for the request. Default is '7.1'.
 
-    .EXAMPLE
+    .LINK
+        https://learn.microsoft.com/en-us/rest/api/azure/devops/work/teamsettings/update
+
+        .EXAMPLE
         $params = @{
             bugsBehavior          = 'asRequirements'
             backlogVisibilities   = @{
@@ -39,6 +42,10 @@ function Set-AdoTeamSettings {
         }
 
         Set-AdoTeamSettings -ProjectId 'my-project' -TeamId 'my-other-team' -TeamSettings $params
+
+        Updates the settings for the team "my-other-team" in the project "my-project" with the specified parameters.
+
+        The backlogIteration is set to the root iteration, bugs are treated as requirements, and working days are set to Monday through Friday.
     #>
     [CmdletBinding()]
     [OutputType([object])]

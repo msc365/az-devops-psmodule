@@ -16,6 +16,9 @@ function Get-AdoTeamSettings {
     .PARAMETER ApiVersion
         The API version to use for the request. Default is '7.1'.
 
+    .LINK
+        https://learn.microsoft.com/en-us/rest/api/azure/devops/work/teamsettings/get
+
     .EXAMPLE
         Get-AdoTeamSettings -ProjectId "my-project" -TeamId "my-team"
 
