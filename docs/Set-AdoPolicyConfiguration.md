@@ -28,6 +28,7 @@ Set-AdoPolicyConfiguration [-ProjectId] <string> [-ConfigurationId] <int> [-Conf
 
 ## ALIASES
 
+This cmdlet has the following aliases,
 - N/A
 
 ## DESCRIPTION

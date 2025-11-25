@@ -28,6 +28,7 @@ Get-AdoRepository [-ProjectId] <string> [-Name] <string> [[-ApiVersion] <string>
 
 ## ALIASES
 
+This cmdlet has the following aliases,
 - N/A
 
 ## DESCRIPTION

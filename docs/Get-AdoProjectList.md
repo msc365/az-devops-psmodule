@@ -27,6 +27,7 @@ Get-AdoProjectList [[-Skip] <int>] [[-Top] <int>] [[-ApiVersion] <string>] [<Com
 
 ## ALIASES
 
+This cmdlet has the following aliases,
 - N/A
 
 ## DESCRIPTION

@@ -29,6 +29,7 @@ Get-AdoTeamFieldValue [-ProjectId] <string> [[-TeamId] <string>] [[-ApiVersion] 
 
 ## ALIASES
 
+This cmdlet has the following aliases,
 - N/A
 
 ## DESCRIPTION

@@ -28,6 +28,7 @@ Remove-AdoRepository [-ProjectId] <string> [-RepositoryId] <string> [[-ApiVersio
 
 ## ALIASES
 
+This cmdlet has the following aliases,
 - N/A
 
 ## DESCRIPTION

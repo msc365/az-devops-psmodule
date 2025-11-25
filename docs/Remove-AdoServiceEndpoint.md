@@ -28,6 +28,7 @@ Remove-AdoServiceEndpoint [-EndpointId] <string> [-ProjectIds] <string[]> [[-Api
 
 ## ALIASES
 
+This cmdlet has the following aliases,
 - N/A
 
 ## DESCRIPTION

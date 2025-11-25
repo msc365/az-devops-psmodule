@@ -28,6 +28,7 @@ Set-AdoTeam [-ProjectId] <string> [-TeamId] <string> [-Name] <string> [[-Descrip
 
 ## ALIASES
 
+This cmdlet has the following aliases,
 - N/A
 
 ## DESCRIPTION

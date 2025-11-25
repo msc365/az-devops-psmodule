@@ -28,6 +28,7 @@ Set-AdoProject [-ProjectId] <string> [[-Name] <string>] [[-Description] <string>
 
 ## ALIASES
 
+This cmdlet has the following aliases,
 - N/A
 
 ## DESCRIPTION

@@ -28,6 +28,7 @@ Get-AdoTeamList [-ProjectId] <string> [[-Skip] <int>] [[-Top] <int>] [[-ApiVersi
 
 ## ALIASES
 
+This cmdlet has the following aliases,
 - N/A
 
 ## DESCRIPTION

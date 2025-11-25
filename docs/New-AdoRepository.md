@@ -28,6 +28,7 @@ New-AdoRepository [-ProjectId] <string> [-Name] <string> [[-SourceRef] <string>]
 
 ## ALIASES
 
+This cmdlet has the following aliases,
 - N/A
 
 ## DESCRIPTION

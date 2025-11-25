@@ -27,6 +27,7 @@ Get-AdoFeatureState [-ProjectId] <string> [[-ApiVersion] <string>] [<CommonParam
 
 ## ALIASES
 
+This cmdlet has the following aliases,
 - N/A
 
 ## DESCRIPTION

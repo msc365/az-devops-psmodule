@@ -28,6 +28,7 @@ Get-AdoPolicyConfiguration [-ProjectId] <string> [-PolicyType] <string> [[-ApiVe
 
 ## ALIASES
 
+This cmdlet has the following aliases,
 - N/A
 
 ## DESCRIPTION

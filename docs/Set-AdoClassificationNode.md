@@ -28,6 +28,7 @@ Set-AdoClassificationNode [-ProjectId] <string> [-StructureType] <string> [-Name
 
 ## ALIASES
 
+This cmdlet has the following aliases,
 - N/A
 
 ## DESCRIPTION

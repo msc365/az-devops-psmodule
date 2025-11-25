@@ -27,6 +27,7 @@ Remove-AdoProject [-ProjectId] <string> [[-ApiVersion] <string>] [<CommonParamet
 
 ## ALIASES
 
+This cmdlet has the following aliases,
 - N/A
 
 ## DESCRIPTION

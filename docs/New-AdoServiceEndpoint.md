@@ -27,6 +27,7 @@ New-AdoServiceEndpoint [-Configuration] <string> [[-ApiVersion] <string>] [<Comm
 
 ## ALIASES
 
+This cmdlet has the following aliases,
 - N/A
 
 ## DESCRIPTION

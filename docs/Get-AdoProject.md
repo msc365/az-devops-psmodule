@@ -29,6 +29,7 @@ Get-AdoProject [-ProjectId] <string> [[-ApiVersion] <string>] [-IncludeCapabilit
 
 ## ALIASES
 
+This cmdlet has the following aliases,
 - N/A
 
 ## DESCRIPTION

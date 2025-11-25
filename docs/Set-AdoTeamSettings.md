@@ -9,6 +9,8 @@ PlatyPS schema version: 2024-05-01
 title: Set-AdoTeamSettings
 -->
 
+<!-- cSpell: ignore dontshow -->
+
 # Set-AdoTeamSettings
 
 ## SYNOPSIS
@@ -26,6 +28,7 @@ Set-AdoTeamSettings [-ProjectId] <string> [-TeamId] <string> [-TeamSettings] <Ob
 
 ## ALIASES
 
+This cmdlet has the following aliases,
 - N/A
 
 ## DESCRIPTION
@@ -173,7 +176,7 @@ The team details object.
 
 ## NOTES
 
-- N/A
+- Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
 
 ## RELATED LINKS
 

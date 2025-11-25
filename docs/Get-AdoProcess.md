@@ -28,6 +28,7 @@ Get-AdoProcess [[-Process] <string>] [[-ApiVersion] <string>] [<CommonParameters
 
 ## ALIASES
 
+This cmdlet has the following aliases,
 - N/A
 
 ## DESCRIPTION

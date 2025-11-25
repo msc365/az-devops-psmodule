@@ -28,6 +28,7 @@ Get-AdoTeamSettings [-ProjectId] <string> [-TeamId] <string> [[-ApiVersion] <str
 
 ## ALIASES
 
+This cmdlet has the following aliases,
 - N/A
 
 ## DESCRIPTION

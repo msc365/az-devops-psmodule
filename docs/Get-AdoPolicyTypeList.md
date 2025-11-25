@@ -27,6 +27,7 @@ Get-AdoPolicyTypeList [-ProjectId] <string> [[-ApiVersion] <string>] [<CommonPar
 
 ## ALIASES
 
+This cmdlet has the following aliases,
 - N/A
 
 ## DESCRIPTION

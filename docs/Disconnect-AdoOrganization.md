@@ -27,6 +27,7 @@ Disconnect-AdoOrganization [<CommonParameters>]
 
 ## ALIASES
 
+This cmdlet has the following aliases,
 - N/A
 
 ## DESCRIPTION

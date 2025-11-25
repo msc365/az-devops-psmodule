@@ -28,6 +28,7 @@ New-AdoProject [-Name] <string> [[-Description] <string>] [[-Process] <string>]
 
 ## ALIASES
 
+This cmdlet has the following aliases,
 - N/A
 
 ## DESCRIPTION

@@ -29,6 +29,7 @@ Connect-AdoOrganization [-Organization] <string> [[-PersonalAccessToken] <secure
 
 ## ALIASES
 
+This cmdlet has the following aliases,
 - N/A
 
 ## DESCRIPTION
