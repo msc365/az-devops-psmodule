@@ -34,12 +34,12 @@
     [CmdletBinding()]
     [OutputType([object])]
     param (
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $false)]
         [string]$ScopeDescriptor,
 
         [Parameter(Mandatory = $false)]
         [ValidateSet('vssgp', 'aadgp')]
-        [string[]]$SubjectTypes,
+        [string[]]$SubjectTypes = @('vssgp', 'aadgp'),
 
         [Parameter(Mandatory = $false)]
         [string]$ContinuationToken,
@@ -78,7 +78,10 @@
             $params = @{
                 Method  = 'GET'
                 Uri     = $azDevOpsUri
-                Headers = ((ConvertFrom-SecureString -SecureString $global:AzDevOpsHeaders -AsPlainText) | ConvertFrom-Json -AsHashtable)
+                Headers = @{
+    'Accept'        = 'application/json'
+    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
+}
             }
 
             $response = Invoke-RestMethod @params -Verbose:$VerbosePreference

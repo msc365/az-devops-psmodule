@@ -22,12 +22,12 @@
         https://learn.microsoft.com/en-us/rest/api/azure/devops/core/projects/get?view=azure-devops
 
     .EXAMPLE
-        $project = Get-AdoProject -ProjectName 'my-project'
+        $project = Get-AdoProject -ProjectId 'my-project'
 
         Gets the project details for the specified project.
 
     .EXAMPLE
-        $project =  Get-AdoProject -ProjectName 'my-project' -IncludeCapabilities -IncludeHistory
+        $project =  Get-AdoProject -ProjectId 'my-project' -IncludeCapabilities -IncludeHistory
 
         Gets the project details for the specified project, including capabilities and searching within renamed projects.
     #>
@@ -72,7 +72,10 @@
             $params = @{
                 Method  = 'GET'
                 Uri     = $azDevOpsUri
-                Headers = ((ConvertFrom-SecureString -SecureString $global:AzDevOpsHeaders -AsPlainText) | ConvertFrom-Json -AsHashtable)
+                Headers = @{
+                    'Accept'        = 'application/json'
+                    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
+                }
             }
 
             $response = Invoke-RestMethod @params -Verbose:$VerbosePreference

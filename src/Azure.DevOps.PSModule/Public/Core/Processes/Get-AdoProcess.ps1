@@ -64,7 +64,10 @@
             $params = @{
                 Method  = 'GET'
                 Uri     = $azDevOpsUri
-                Headers = ((ConvertFrom-SecureString -SecureString $global:AzDevOpsHeaders -AsPlainText) | ConvertFrom-Json -AsHashtable)
+                Headers = @{
+                    'Accept'        = 'application/json'
+                    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
+                }
             }
 
             $response = Invoke-RestMethod @params -Verbose:$VerbosePreference
@@ -83,6 +86,6 @@
     }
 
     end {
-        Write-Verbose ('Exit : {0}' -f $MyInvocation.MyCommand.Name)
+        Write-Debug ('Exit : {0}' -f $MyInvocation.MyCommand.Name)
     }
 }

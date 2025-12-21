@@ -58,13 +58,16 @@
                 throw 'Not connected to Azure DevOps. Please connect using Connect-AdoOrganization.'
             }
 
-            $uriFormat = 'https://dev.azure.com/{0}/_apis/serviceendpoint/endpoints/{1}?projectIds={2}&api-version={3}'
+            $uriFormat = '{0}/_apis/serviceendpoint/endpoints/{1}?projectIds={2}&api-version={3}'
             $azDevOpsUri = ($uriFormat -f [uri]::new($global:AzDevOpsOrganization), $EndpointId, ($ProjectIds -join ',') , $ApiVersion)
 
             $params = @{
                 Method  = 'DELETE'
                 Uri     = $azDevOpsUri
-                Headers = ((ConvertFrom-SecureString -SecureString $global:AzDevOpsHeaders -AsPlainText) | ConvertFrom-Json -AsHashtable)
+                Headers = @{
+    'Accept'        = 'application/json'
+    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
+}
             }
 
             Invoke-RestMethod @params -Verbose:$VerbosePreference | Out-Null

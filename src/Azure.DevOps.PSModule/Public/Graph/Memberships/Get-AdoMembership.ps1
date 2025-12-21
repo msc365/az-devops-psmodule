@@ -1,13 +1,16 @@
-﻿function Get-AdoDescriptor {
+﻿function Get-AdoMembership {
     <#
     .SYNOPSIS
-        Resolve a storage key to a descriptor.
+        Get the membership relationship between a subject and a container in Azure DevOps.
 
     .DESCRIPTION
-        This function resolves a storage key to a descriptor through REST API.
+        This cmdlet retrieves the membership relationship between a specified subject and container in Azure DevOps using the Azure DevOps REST API.
 
-    .PARAMETER StorageKey
-        Mandatory. Storage key of the subject (user, group, scope, etc.) to resolve
+    .PARAMETER containerDescriptor
+        Mandatory. A descriptor to the container in the relationship.
+
+    .PARAMETER subjectDescriptor
+        Mandatory. A descriptor to the child subject in the relationship.
 
     .PARAMETER ApiVersion
         Optional. The API version to use.
@@ -15,24 +18,28 @@
     .OUTPUTS
         System.Object
 
-        Object representing the descriptor information.
-
     .LINK
-        https://learn.microsoft.com/en-us/rest/api/azure/devops/graph/descriptors/get
+        https://learn.microsoft.com/en-us/rest/api/azure/devops/graph/memberships/get
 
     .EXAMPLE
-        $descriptor = Get-AdoDescriptor -StorageKey '00000000-0000-0000-0000-000000000000'
+        Get-AdoMembership -containerDescriptor $containerDescriptor -subjectDescriptor $subjectDescriptor
+
+        Retrieves the membership relationship between the specified subject and container.
     #>
     [CmdletBinding()]
     [OutputType([object])]
     param (
+
         [Parameter(Mandatory)]
-        [string]$StorageKey,
+        [string]$subjectDescriptor,
+
+        [Parameter(Mandatory)]
+        [string]$containerDescriptor,
 
         [Parameter(Mandatory = $false)]
         [Alias('Api')]
-        [ValidateSet('7.1', '7.2-preview.1')]
-        [string]$ApiVersion = '7.1'
+        [ValidateSet('7.1-preview.1', '7.2-preview.1')]
+        [string]$ApiVersion = '7.2-preview.1'
     )
 
     begin {
@@ -49,9 +56,9 @@
                 throw 'Not connected to Azure DevOps. Please connect using Connect-AdoOrganization.'
             }
 
-            $uriFormat = '{0}/_apis/graph/descriptors/{1}?api-version={2}'
+            $uriFormat = '{0}/_apis/graph/memberships/{1}/{2}?api-version={3}'
             $AzDevOpsOrganization = $global:AzDevOpsOrganization -replace 'https://', 'https://vssps.'
-            $azDevOpsUri = ($uriFormat -f [uri]::new($AzDevOpsOrganization) , $StorageKey, $ApiVersion)
+            $azDevOpsUri = ($uriFormat -f [uri]::new($AzDevOpsOrganization), $subjectDescriptor, $containerDescriptor, $ApiVersion)
 
             $params = @{
                 Method  = 'GET'

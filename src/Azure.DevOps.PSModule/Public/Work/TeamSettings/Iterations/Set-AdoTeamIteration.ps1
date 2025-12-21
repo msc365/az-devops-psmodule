@@ -72,7 +72,10 @@ function Set-AdoTeamIteration {
                 Method      = 'POST'
                 Uri         = $azDevOpsUri
                 ContentType = 'application/json'
-                Headers     = ((ConvertFrom-SecureString -SecureString $global:AzDevOpsHeaders -AsPlainText) | ConvertFrom-Json -AsHashtable)
+                Headers     = @{
+    'Accept'        = 'application/json'
+    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
+}
                 Body        = @{
                     id = $IterationId
                 } | ConvertTo-Json -Depth 3

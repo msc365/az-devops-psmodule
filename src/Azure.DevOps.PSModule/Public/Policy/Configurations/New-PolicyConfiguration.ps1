@@ -66,10 +66,10 @@
     )
 
     begin {
-        Write-Verbose ('Command         : {0}' -f $MyInvocation.MyCommand.Name)
-        Write-Verbose ('  ProjectId     : {0}' -f $ProjectId)
-        Write-Verbose ('  Configuration : {0}' -f ($Configuration | ConvertTo-Json))
-        Write-Verbose ('  ApiVersion    : {0}' -f $ApiVersion)
+        Write-Debug ('Command         : {0}' -f $MyInvocation.MyCommand.Name)
+        Write-Debug ('  ProjectId     : {0}' -f $ProjectId)
+        Write-Debug ('  Configuration : {0}' -f ($Configuration | ConvertTo-Json))
+        Write-Debug ('  ApiVersion    : {0}' -f $ApiVersion)
     }
 
     process {
@@ -87,7 +87,10 @@
                 Method      = 'POST'
                 Uri         = $azDevOpsUri
                 ContentType = 'application/json'
-                Headers     = ((ConvertFrom-SecureString -SecureString $global:AzDevOpsHeaders -AsPlainText) | ConvertFrom-Json -AsHashtable)
+                Headers     = @{
+    'Accept'        = 'application/json'
+    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
+}
                 Body        = ($Configuration | ConvertTo-Json -Depth 5)
             }
 
