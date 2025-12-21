@@ -70,16 +70,31 @@
             $azDevOpsUri = ($uriFormat -f [uri]::new($global:AzDevOpsOrganization), [uri]::EscapeUriString($ProjectId),
                 $EnvironmentId, $ApiVersion)
 
-            $body = @{
-                name        = $Name
-                description = $Description
-            } | ConvertTo-Json -Depth 10
+            if (($PSBoundParameters.ContainsKey('Name') -and -not [string]::IsNullOrEmpty($Name)) -and
+                ($PSBoundParameters.ContainsKey('Description') -and -not [string]::IsNullOrEmpty($Description))) {
+                $body = @{
+                    name        = $Name
+                    description = $Description
+                }
+            } elseif ($PSBoundParameters.ContainsKey('Name') -and
+                -not [string]::IsNullOrEmpty($Name)) {
+                $body = @{
+                    name = $Name
+                }
+            } elseif ($PSBoundParameters.ContainsKey('Description') -and
+                -not [string]::IsNullOrEmpty($Description)) {
+                $body = @{
+                    description = $Description
+                }
+            } else {
+                throw 'At least one of the parameters -Name or -Description must be provided to update the environment.'
+            }
 
             $params = @{
                 Method      = 'PATCH'
                 Uri         = $azDevOpsUri
                 Headers     = ((ConvertFrom-SecureString -SecureString $global:AzDevOpsHeaders -AsPlainText) | ConvertFrom-Json -AsHashtable)
-                Body        = $body
+                Body        = ($body | ConvertTo-Json -Depth 10)
                 ContentType = 'application/json'
             }
 
