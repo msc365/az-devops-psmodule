@@ -34,12 +34,12 @@
     [CmdletBinding()]
     [OutputType([object])]
     param (
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $false)]
         [string]$ScopeDescriptor,
 
         [Parameter(Mandatory = $false)]
         [ValidateSet('vssgp', 'aadgp')]
-        [string[]]$SubjectTypes,
+        [string[]]$SubjectTypes = @('vssgp', 'aadgp'),
 
         [Parameter(Mandatory = $false)]
         [string]$ContinuationToken,
