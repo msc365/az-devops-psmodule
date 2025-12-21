@@ -58,7 +58,7 @@
                 throw 'Not connected to Azure DevOps. Please connect using Connect-AdoOrganization.'
             }
 
-            $uriFormat = 'https://dev.azure.com/{0}/_apis/serviceendpoint/endpoints/{1}?projectIds={2}&api-version={3}'
+            $uriFormat = '{0}/_apis/serviceendpoint/endpoints/{1}?projectIds={2}&api-version={3}'
             $azDevOpsUri = ($uriFormat -f [uri]::new($global:AzDevOpsOrganization), $EndpointId, ($ProjectIds -join ',') , $ApiVersion)
 
             $params = @{
