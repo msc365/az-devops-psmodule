@@ -22,12 +22,12 @@
         https://learn.microsoft.com/en-us/rest/api/azure/devops/core/projects/get?view=azure-devops
 
     .EXAMPLE
-        $project = Get-AdoProject -ProjectName 'my-project'
+        $project = Get-AdoProject -ProjectId 'my-project'
 
         Gets the project details for the specified project.
 
     .EXAMPLE
-        $project =  Get-AdoProject -ProjectName 'my-project' -IncludeCapabilities -IncludeHistory
+        $project =  Get-AdoProject -ProjectId 'my-project' -IncludeCapabilities -IncludeHistory
 
         Gets the project details for the specified project, including capabilities and searching within renamed projects.
     #>

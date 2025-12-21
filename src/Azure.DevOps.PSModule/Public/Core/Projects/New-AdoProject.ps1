@@ -124,6 +124,7 @@
                 }
             }
 
+            $response = Get-AdoProject -ProjectId $Name -ErrorAction Stop
             return $response
 
         } catch {

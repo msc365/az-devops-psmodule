@@ -13,9 +13,7 @@
         Optional. The API version to use.
 
     .OUTPUTS
-        System.Boolean
-
-        Indicates whether the project was successfully removed.
+        None
 
     .LINK
         https://learn.microsoft.com/en-us/rest/api/azure/devops/core/projects/delete
@@ -26,7 +24,6 @@
         Removes the project with ID 'my-project' from the connected Azure DevOps organization.
     #>
     [CmdletBinding()]
-    [OutputType([boolean])]
     param (
         [Parameter(Mandatory)]
         [string]$ProjectId,
@@ -38,9 +35,9 @@
     )
 
     begin {
-        Write-Verbose ('Command      : {0}' -f $MyInvocation.MyCommand.Name)
-        Write-Verbose ('  ProjectId  : {0}' -f $ProjectId)
-        Write-Verbose ('  ApiVersion : {0}' -f $ApiVersion)
+        Write-Debug ('Command      : {0}' -f $MyInvocation.MyCommand.Name)
+        Write-Debug ('  ProjectId  : {0}' -f $ProjectId)
+        Write-Debug ('  ApiVersion : {0}' -f $ApiVersion)
     }
 
     process {
@@ -76,7 +73,7 @@
                 }
             }
 
-            return $true
+            return
 
         } catch {
             throw $_
@@ -84,6 +81,6 @@
     }
 
     end {
-        Write-Verbose ('Exit : {0}' -f $MyInvocation.MyCommand.Name)
+        Write-Debug ('Exit : {0}' -f $MyInvocation.MyCommand.Name)
     }
 }
