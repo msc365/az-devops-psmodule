@@ -28,9 +28,9 @@
 
             $adoContext = Get-AdoContext
 
-            Remove-Variable -Name 'AzDevOpsIsConnected' -Scope Global -ErrorAction SilentlyContinue
-            Remove-Variable -Name 'AzDevOpsOrganization' -Scope Global -ErrorAction SilentlyContinue
-            Remove-Variable -Name 'AzDevOpsHeaders' -Scope Global -ErrorAction SilentlyContinue
+            Remove-Variable -Name 'AzDevOpsIsConnected' -Scope Global -ErrorAction SilentlyContinue -WhatIf:$false
+            Remove-Variable -Name 'AzDevOpsOrganization' -Scope Global -ErrorAction SilentlyContinue -WhatIf:$false
+            Remove-Variable -Name 'AzDevOpsAuth' -Scope Global -ErrorAction SilentlyContinue -WhatIf:$false
 
             return $null -ne $adoContext ? @{
                 Organization = $adoContext.Organization

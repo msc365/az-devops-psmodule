@@ -93,7 +93,10 @@
             $params = @{
                 Method      = 'PATCH'
                 Uri         = $azDevOpsUri
-                Headers     = ((ConvertFrom-SecureString -SecureString $global:AzDevOpsHeaders -AsPlainText) | ConvertFrom-Json -AsHashtable)
+                Headers     = @{
+    'Accept'        = 'application/json'
+    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
+}
                 Body        = ($body | ConvertTo-Json -Depth 10)
                 ContentType = 'application/json'
             }

@@ -92,13 +92,11 @@
                 throw 'Failed to connect to the Azure DevOps organization.'
             }
 
-            $secureHeaders = ($headers |
-                    ConvertTo-Json -Depth 5 -Compress |
-                    ConvertTo-SecureString -AsPlainText -Force)
+            $secureAuthValue = $headers['Authorization'] | ConvertTo-SecureString -AsPlainText -Force
 
-            Set-Variable -Name 'AzDevOpsIsConnected' -Value $true -Scope Global;
-            Set-Variable -Name 'AzDevOpsOrganization' -Value $org -Scope Global;
-            Set-Variable -Name 'AzDevOpsHeaders' -Value $secureHeaders -Scope Global;
+            Set-Variable -Name 'AzDevOpsIsConnected' -Value $true -Scope Global -WhatIf:$false;
+            Set-Variable -Name 'AzDevOpsOrganization' -Value $org -Scope Global -WhatIf:$false;
+            Set-Variable -Name 'AzDevOpsAuth' -Value $secureAuthValue -Scope Global -WhatIf:$false;
 
             return ('Connected to {0}' -f $AzDevOpsOrganization)
 
