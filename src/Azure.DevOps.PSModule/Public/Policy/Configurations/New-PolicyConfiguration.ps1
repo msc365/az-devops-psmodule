@@ -66,10 +66,10 @@
     )
 
     begin {
-        Write-Verbose ('Command         : {0}' -f $MyInvocation.MyCommand.Name)
-        Write-Verbose ('  ProjectId     : {0}' -f $ProjectId)
-        Write-Verbose ('  Configuration : {0}' -f ($Configuration | ConvertTo-Json))
-        Write-Verbose ('  ApiVersion    : {0}' -f $ApiVersion)
+        Write-Debug ('Command         : {0}' -f $MyInvocation.MyCommand.Name)
+        Write-Debug ('  ProjectId     : {0}' -f $ProjectId)
+        Write-Debug ('  Configuration : {0}' -f ($Configuration | ConvertTo-Json))
+        Write-Debug ('  ApiVersion    : {0}' -f $ApiVersion)
     }
 
     process {
