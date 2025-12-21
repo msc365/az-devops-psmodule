@@ -4,8 +4,8 @@
 <!-- cSpell: words psake psmodule -->
 <!-- markdownlint-disable no-duplicate-heading -->
 
-[![GitHub release (latest)](https://img.shields.io/github/v/release/msc365/az-devops-psmodule?include_prereleases&logo=github)](https://github.com/msc365/az-devops-psmodule/releases)
-[![PowerShell Gallery Version](https://img.shields.io/powershellgallery/v/Azure.DevOps.PSModule?include_prereleases)](https://www.powershellgallery.com/packages/Azure.DevOps.PSModule)
+[![GitHub release (latest)](https://img.shields.io/github/v/release/msc365/az-devops-psmodule?include_prereleases&logo=github&color=blue)](https://github.com/msc365/az-devops-psmodule/releases)
+[![PowerShell Gallery Version](https://img.shields.io/powershellgallery/v/Azure.DevOps.PSModule?include_prereleases&color=blue)](https://www.powershellgallery.com/packages/Azure.DevOps.PSModule)
 [![PowerShell Gallery Downloads](https://img.shields.io/powershellgallery/dt/Azure.DevOps.PSModule.svg)](https://www.powershellgallery.com/packages/Azure.DevOps.PSModule)
 [![license](https://img.shields.io/badge/License-MIT-purple.svg)](LICENSE)
 
