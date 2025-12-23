@@ -142,9 +142,9 @@ function Set-AdoTeamFieldValue {
                 Uri         = $azDevOpsUri
                 ContentType = 'application/json'
                 Headers     = @{
-    'Accept'        = 'application/json'
-    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
-}
+                    'Accept'        = 'application/json'
+                    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
+                }
                 Body        = ($teamFieldValues | ConvertTo-Json -Depth 3)
             }
 

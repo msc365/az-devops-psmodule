@@ -7,7 +7,7 @@
         This function creates a new service endpoint in an Azure DevOps project through REST API.
 
     .PARAMETER Configuration
-        Mandatory. The configuration object for the service endpoint.
+        Mandatory. The configuration JSON for the service endpoint.
 
     .PARAMETER ApiVersion
         Optional. The API version to use.

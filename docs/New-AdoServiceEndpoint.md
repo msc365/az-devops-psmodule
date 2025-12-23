@@ -108,7 +108,7 @@ HelpMessage: ''
 ### -Configuration
 
 Mandatory.
-The configuration object for the service endpoint.
+The configuration JSON for the service endpoint.
 
 ```yaml
 Type: System.String

@@ -10,13 +10,15 @@
         Mandatory. The ID or name of the project.
 
     .PARAMETER Configuration
-        Mandatory. The configuration object for the policy.
+        Mandatory. The configuration JSON for the policy.
 
     .PARAMETER ApiVersion
         Optional. The API version to use.
 
-    .NOTES
-        - The configuration object should be a valid JSON object.
+    .OUTPUTS
+        System.Object
+
+        The created policy configuration object.
 
     .LINK
         https://learn.microsoft.com/en-us/rest/api/azure/devops/policy/configurations/create?view=azure-devops

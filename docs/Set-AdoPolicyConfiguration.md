@@ -100,10 +100,10 @@ HelpMessage: ''
 ### -Configuration
 
 Mandatory.
-The configuration object for the policy.
+The configuration JSON for the policy.
 
 ```yaml
-Type: System.Object
+Type: System.String
 DefaultValue: ''
 SupportsWildcards: false
 Aliases: []
@@ -177,11 +177,10 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### System.String
+### System.Object
 
 ## NOTES
 
-- The configuration object should be a valid JSON object.
 - Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
 
 ## RELATED LINKS

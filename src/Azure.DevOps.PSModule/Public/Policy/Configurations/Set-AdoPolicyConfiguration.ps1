@@ -13,7 +13,7 @@
         Mandatory. The ID of the configuration.
 
     .PARAMETER Configuration
-        Mandatory. The configuration object for the policy.
+        Mandatory. The configuration JSON for the policy.
 
     .PARAMETER ApiVersion
         Optional. The API version to use.
@@ -55,7 +55,7 @@
         Sets the policy configuration with ID 24 in the 'my-project' project using the specified configuration.
     #>
     [CmdletBinding()]
-    [OutputType([String])]
+    [OutputType([object])]
     param (
         [Parameter(Mandatory)]
         [Alias('ProjectName')]

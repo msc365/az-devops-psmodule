@@ -16,7 +16,7 @@ title: New-AdoEnvironment
 
 ## SYNOPSIS
 
-Update an Azure DevOps Pipeline Environment by its ID.
+Create a new Azure DevOps Pipeline Environment.
 
 ## SYNTAX
 
@@ -34,7 +34,7 @@ This cmdlet has the following aliases,
 
 ## DESCRIPTION
 
-This cmdlet updates the details of a specific Azure DevOps Pipeline Environment using its unique identifier within a specified project.
+This cmdlet creates a new Azure DevOps Pipeline Environment within a specified project.
 
 ## EXAMPLES
 
@@ -98,8 +98,8 @@ HelpMessage: ''
 
 ### -Name
 
-Optional.
-The new name for the environment.
+Mandatory.
+The name for the environment.
 
 ```yaml
 Type: System.String
