@@ -48,7 +48,7 @@
                     }
                 )
             }
-        }
+        } | ConvertTo-Json -Depth 5 -Compress
 
         Set-AdoPolicyConfiguration -ProjectName 'my-project' -ConfigurationId 24 -Configuration $config
 
@@ -65,7 +65,7 @@
         [int]$ConfigurationId,
 
         [Parameter(Mandatory)]
-        [object]$Configuration,
+        [string]$Configuration,
 
         [Parameter(Mandatory = $false)]
         [Alias('api')]
@@ -89,8 +89,8 @@
                 throw 'Not connected to Azure DevOps. Please connect using Connect-AdoOrganization.'
             }
 
-            if (0 -eq $ConfigurationId) {
-                throw 'ConfigurationId is required and cannot have value 0.'
+            if (-not (Test-Json $Configuration)) {
+                throw 'Invalid JSON for service endpoint configuration object.'
             }
 
             $uriFormat = '{0}/{1}/_apis/policy/configurations/{2}?api-version={3}'
@@ -102,10 +102,10 @@
                 Uri         = $azDevOpsUri
                 ContentType = 'application/json'
                 Headers     = @{
-    'Accept'        = 'application/json'
-    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
-}
-                Body        = ($Configuration | ConvertTo-Json -Depth 5)
+                    'Accept'        = 'application/json'
+                    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
+                }
+                Body        = $Configuration
             }
 
             $response = Invoke-RestMethod @params -Verbose:$VerbosePreference

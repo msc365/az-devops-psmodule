@@ -96,17 +96,17 @@
                     userScoped   = $false
                 }
                 state     = ($FeatureState -eq 'enabled' ? 1 : 0)
-            } | ConvertTo-Json
+            }
 
             $params = @{
                 Method      = 'PATCH'
                 Uri         = $azDevOpsUri
                 ContentType = 'application/json'
                 Headers     = @{
-    'Accept'        = 'application/json'
-    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
-}
-                Body        = $body
+                    'Accept'        = 'application/json'
+                    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
+                }
+                Body        = ($body | ConvertTo-Json -Depth 3 -Compress)
             }
 
             $response = Invoke-RestMethod @params -Verbose:$VerbosePreference

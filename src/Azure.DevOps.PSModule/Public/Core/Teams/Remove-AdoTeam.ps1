@@ -66,9 +66,9 @@
                 Method  = 'DELETE'
                 Uri     = $azDevOpsUri
                 Headers = @{
-    'Accept'        = 'application/json'
-    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
-}
+                    'Accept'        = 'application/json'
+                    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
+                }
             }
 
             Invoke-RestMethod @params -Verbose:$VerbosePreference | Out-Null

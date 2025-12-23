@@ -73,12 +73,10 @@ function Set-AdoTeamIteration {
                 Uri         = $azDevOpsUri
                 ContentType = 'application/json'
                 Headers     = @{
-    'Accept'        = 'application/json'
-    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
-}
-                Body        = @{
-                    id = $IterationId
-                } | ConvertTo-Json -Depth 3
+                    'Accept'        = 'application/json'
+                    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
+                }
+                Body        = (@{ id = $IterationId } | ConvertTo-Json -Depth 3 -Compress)
             }
 
             $response = Invoke-RestMethod @params -Verbose:$VerbosePreference

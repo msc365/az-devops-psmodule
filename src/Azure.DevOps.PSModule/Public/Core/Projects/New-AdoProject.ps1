@@ -99,7 +99,7 @@
                 }
                 visibility   = $Visibility
 
-            } | ConvertTo-Json -Depth 5 -Compress
+            }
 
             $params = @{
                 Method      = 'POST'
@@ -109,7 +109,7 @@
                     'Accept'        = 'application/json'
                     'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
                 }
-                Body        = $body
+                Body        = ($body | ConvertTo-Json -Depth 5 -Compress)
             }
 
             $response = Invoke-RestMethod @params -Verbose:$VerbosePreference

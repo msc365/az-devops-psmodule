@@ -22,7 +22,7 @@
 
     .EXAMPLE
         $config = [ordered]@{
-            data                             = [ordered]@{
+            data                 = [ordered]@{
                 creationMode     = 'Manual'
                 environment      = 'AzureCloud'
                 scopeLevel       = 'Subscription'
@@ -53,7 +53,7 @@
                     }
                 }
             )
-        } | ConvertTo-Json -Depth 4
+        } | ConvertTo-Json -Depth 5 -Compress
 
         New-AdoServiceEndpoint -Configuration $objConfig
 
@@ -97,9 +97,9 @@
                 Uri         = $azDevopsUri
                 ContentType = 'application/json'
                 Headers     = @{
-    'Accept'        = 'application/json'
-    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
-}
+                    'Accept'        = 'application/json'
+                    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
+                }
                 Body        = $Configuration
             }
 

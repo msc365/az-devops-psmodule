@@ -91,7 +91,7 @@
                     'Accept'        = 'application/json'
                     'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
                 }
-                Body        = ($body | ConvertTo-Json)
+                Body        = ($body | ConvertTo-Json -Depth 3 -Compress)
             }
 
             $response = Invoke-RestMethod @params -Verbose:$VerbosePreference

@@ -72,17 +72,17 @@
             $body = @{
                 name        = $Name
                 description = $Description
-            } | ConvertTo-Json -Depth 10
+            }
 
             $params = @{
                 Method      = 'POST'
                 Uri         = $azDevOpsUri
-                Headers     = @{
-    'Accept'        = 'application/json'
-    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
-}
-                Body        = $body
                 ContentType = 'application/json'
+                Headers     = @{
+                    'Accept'        = 'application/json'
+                    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
+                }
+                Body        = ($body | ConvertTo-Json -Depth 3 -Compress)
             }
 
             $response = Invoke-RestMethod @params -Verbose:$VerbosePreference

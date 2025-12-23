@@ -62,17 +62,17 @@
 
             $body = @{
                 originId = $GroupId
-            } | ConvertTo-Json
+            }
 
             $params = @{
                 Method      = 'POST'
                 Uri         = $azDevOpsUri
                 ContentType = 'application/json'
                 Headers     = @{
-    'Accept'        = 'application/json'
-    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
-}
-                Body        = $body
+                    'Accept'        = 'application/json'
+                    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
+                }
+                Body        = ($body | ConvertTo-Json -Depth 3 -Compress)
             }
 
             $response = Invoke-RestMethod @params -Verbose:$VerbosePreference

@@ -14,7 +14,7 @@ function Set-AdoTeamSettings {
         The ID or name of the team to update.
 
     .PARAMETER TeamSettings
-        An object representing the team settings to be updated.
+        A string representing the team settings to be updated in JSON format.
 
     .PARAMETER ApiVersion
         The API version to use for the request. Default is '7.1'.
@@ -38,8 +38,7 @@ function Set-AdoTeamSettings {
                 'thursday'
                 'friday'
             )
-            backlogIteration      = '00000000-0000-0000-0000-000000000000'
-        }
+        } | ConvertTo-Json -Depth 5 -Compress
 
         Set-AdoTeamSettings -ProjectId 'my-project' -TeamId 'my-other-team' -TeamSettings $params
 
@@ -57,7 +56,7 @@ function Set-AdoTeamSettings {
         [string]$TeamId,
 
         [Parameter(Mandatory)]
-        [object]$TeamSettings,
+        [string]$TeamSettings,
 
         [Parameter(Mandatory = $false)]
         [Alias('api')]
@@ -80,6 +79,10 @@ function Set-AdoTeamSettings {
                 throw 'Not connected to Azure DevOps. Please connect using Connect-AdoOrganization.'
             }
 
+            if (-not (Test-Json $TeamSettings)) {
+                throw 'Invalid JSON for team settings string.'
+            }
+
             $uriFormat = '{0}/{1}/{2}/_apis/work/teamsettings?api-version={3}'
             $azDevOpsUri = ($uriFormat -f [uri]::new($global:AzDevOpsOrganization), [uri]::EscapeUriString($ProjectId),
                 [uri]::EscapeUriString($TeamId), $ApiVersion)
@@ -89,10 +92,10 @@ function Set-AdoTeamSettings {
                 Uri         = $azDevOpsUri
                 ContentType = 'application/json'
                 Headers     = @{
-    'Accept'        = 'application/json'
-    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
-}
-                Body        = ($TeamSettings | ConvertTo-Json -Depth 3)
+                    'Accept'        = 'application/json'
+                    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
+                }
+                Body        = $TeamSettings
             }
 
             $response = Invoke-RestMethod @params -Verbose:$VerbosePreference

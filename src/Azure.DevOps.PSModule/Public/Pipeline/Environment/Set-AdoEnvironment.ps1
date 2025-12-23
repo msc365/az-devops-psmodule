@@ -70,35 +70,29 @@
             $azDevOpsUri = ($uriFormat -f [uri]::new($global:AzDevOpsOrganization), [uri]::EscapeUriString($ProjectId),
                 $EnvironmentId, $ApiVersion)
 
-            if (($PSBoundParameters.ContainsKey('Name') -and -not [string]::IsNullOrEmpty($Name)) -and
-                ($PSBoundParameters.ContainsKey('Description') -and -not [string]::IsNullOrEmpty($Description))) {
-                $body = @{
-                    name        = $Name
-                    description = $Description
-                }
-            } elseif ($PSBoundParameters.ContainsKey('Name') -and
-                -not [string]::IsNullOrEmpty($Name)) {
-                $body = @{
+            $body = @{}
+
+            if ($null -ne $Name) {
+                $body += @{
                     name = $Name
                 }
-            } elseif ($PSBoundParameters.ContainsKey('Description') -and
-                -not [string]::IsNullOrEmpty($Description)) {
-                $body = @{
+            }
+
+            if ($null -ne $Description) {
+                $body += @{
                     description = $Description
                 }
-            } else {
-                throw 'At least one of the parameters -Name or -Description must be provided to update the environment.'
             }
 
             $params = @{
                 Method      = 'PATCH'
                 Uri         = $azDevOpsUri
-                Headers     = @{
-    'Accept'        = 'application/json'
-    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
-}
-                Body        = ($body | ConvertTo-Json -Depth 10)
                 ContentType = 'application/json'
+                Headers     = @{
+                    'Accept'        = 'application/json'
+                    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
+                }
+                Body        = ($body | ConvertTo-Json -Depth 3 -Compress)
             }
 
             $response = Invoke-RestMethod @params -Verbose:$VerbosePreference

@@ -62,9 +62,9 @@ function Get-AdoTeamSettings {
                 Method  = 'GET'
                 Uri     = $azDevOpsUri
                 Headers = @{
-    'Accept'        = 'application/json'
-    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
-}
+                    'Accept'        = 'application/json'
+                    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
+                }
             }
 
             $response = Invoke-RestMethod @params -Verbose:$VerbosePreference

@@ -74,29 +74,27 @@
             $uriFormat = '{0}/_apis/projects/{1}?api-version={2}'
             $azDevOpsUri = ($uriFormat -f [uri]::new($AzDevOpsOrganization), $ProjectId, $ApiVersion)
 
-            $bodyObject = @{}
+            $body = @{}
 
             if ($PSBoundParameters.ContainsKey('Name')) {
-                $bodyObject['name'] = $Name
+                $body['name'] = $Name
             }
             if ($PSBoundParameters.ContainsKey('Description')) {
-                $bodyObject['description'] = $Description
+                $body['description'] = $Description
             }
             if ($PSBoundParameters.ContainsKey('Visibility')) {
-                $bodyObject['visibility'] = $Visibility
+                $body['visibility'] = $Visibility
             }
-
-            $body = $bodyObject | ConvertTo-Json -Depth 3 -Compress
 
             $params = @{
                 Method      = 'PATCH'
                 Uri         = $azDevOpsUri
                 ContentType = 'application/json'
                 Headers     = @{
-    'Accept'        = 'application/json'
-    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
-}
-                Body        = $body
+                    'Accept'        = 'application/json'
+                    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
+                }
+                Body        = ($body | ConvertTo-Json -Depth 3 -Compress)
             }
 
             $response = Invoke-RestMethod @params -Verbose:$VerbosePreference
