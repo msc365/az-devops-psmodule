@@ -9,6 +9,8 @@ PlatyPS schema version: 2024-05-01
 title: Set-AdoTeamFieldValue
 -->
 
+<!-- markdownlint-disable MD024 -->
+
 # Set-AdoTeamFieldValue
 
 ## SYNOPSIS
