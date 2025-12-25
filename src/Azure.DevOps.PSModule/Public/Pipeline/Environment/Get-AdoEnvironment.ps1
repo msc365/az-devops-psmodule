@@ -65,7 +65,7 @@
                 throw 'Not connected to Azure DevOps. Please connect using Connect-AdoOrganization.'
             }
 
-            $uriFormat = '{0}/{1}/_apis/pipelines/environments/{2}?expands={3}&api-version={4}'
+            $uriFormat = '{0}/{1}/_apis/pipelines/environments/{2}?$expands={3}&api-version={4}'
             $azDevOpsUri = ($uriFormat -f [uri]::new($global:AzDevOpsOrganization), [uri]::EscapeUriString($ProjectId),
                 $EnvironmentId, $Expands, $ApiVersion)
 
