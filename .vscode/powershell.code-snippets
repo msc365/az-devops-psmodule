@@ -25,7 +25,7 @@
 			"    )",
 			"",
 			"    begin {",
-			"        Write-Debug ('Command : {0}' -f \\$MyInvocation.MyCommand.Name)",
+			"        Write-Verbose (\"Command: $(\\$MyInvocation.MyCommand.Name)\")",
 			"    }",
 			"",
 			"    process {",
@@ -37,7 +37,7 @@
 			"    }",
 			"",
 			"    end {",
-			"        Write-Debug ('Exit : {0}' -f \\$MyInvocation.MyCommand.Name)",
+			"        Write-Verbose (\"Exit: $(\\$MyInvocation.MyCommand.Name)\")",
 			"    }",
 			"}"
 		]
