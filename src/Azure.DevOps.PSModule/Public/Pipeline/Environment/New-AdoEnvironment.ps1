@@ -6,85 +6,121 @@
     .DESCRIPTION
         This cmdlet creates a new Azure DevOps Pipeline Environment within a specified project.
 
-    .PARAMETER ProjectId
-        Mandatory. The ID or name of the project.
+    .PARAMETER CollectionUri
+        The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/myorganization.
 
-    .PARAMETER Name
-        Optional. The new name for the environment.
+    .PARAMETER ProjectName
+        The name or id of the project.
+
+    .PARAMETER EnvironmentName
+        The name of the environment to filter the results.
 
     .PARAMETER Description
-        Optional. The new description for the environment.
+        The description of the new environment.
 
-    .PARAMETER ApiVersion
-        Optional. The API version to use for the request. Default is '7.2-preview.1'.
+    .PARAMETER Version
+        The API version to use for the request. Default is '7.2-preview.1'.
 
     .LINK
         https://learn.microsoft.com/en-us/rest/api/azure/devops/environments/environments/add
 
     .EXAMPLE
-        Set-AdoEnvironment -ProjectId "MyProject" -EnvironmentId "42" -Name "NewEnvName" -Description "Updated description"
+        $params = @{
+            CollectionUri   = 'https://dev.azure.com/my-org'
+            ProjectName     = 'my-project'
+            EnvironmentName = 'my-environment-tst'
+            Description     = 'Test environment description'
+        }
 
-        Updates the environment with ID 42 in the project "MyProject" to have a new name and description.
+        New-AdoEnvironment @params -Verbose
+
+        Creates a new environment in the specified project using the provided parameters.
+
+    .EXAMPLE
+        $params = @{
+            CollectionUri = 'https://dev.azure.com/my-org'
+            ProjectName   = 'my-project'
+        }
+        @(
+            'my-environment-tst',
+            'my-environment-dev',
+            'my-environment-prd'
+        ) | New-AdoEnvironment @params -Verbose
+
+        Creates multiple new environments in the specified project demonstrating pipeline input.
 
     .NOTES
         This cmdlet requires an active connection to an Azure DevOps organization established via Connect-AdoOrganization.
     #>
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
     param (
-        [Parameter(Mandatory)]
-        [string]$ProjectId,
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
+        [string]$CollectionUri,
 
-        [Parameter(Mandatory)]
-        [string]$Name,
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [Alias('ProjectId')]
+        [string]$ProjectName,
 
-        [Parameter(Mandatory)]
+        [Parameter(ValueFromPipelineByPropertyName, ValueFromPipeline)]
+        [Alias('Name')]
+        [string[]]$EnvironmentName,
+
+        [Parameter()]
         [string]$Description,
 
-        [Parameter(Mandatory = $false)]
-        [Alias('api')]
+        [Parameter()]
+        [Alias('ApiVersion')]
         [ValidateSet('7.2-preview.1')]
-        [string]$ApiVersion = '7.2-preview.1'
+        [string]$Version = '7.2-preview.1'
     )
 
     begin {
-        Write-Debug ('Command         : {0}' -f $MyInvocation.MyCommand.Name)
-        Write-Debug ('  ProjectId     : {0}' -f $ProjectId)
-        Write-Debug ('  Name          : {0}' -f $Name)
-        Write-Debug ('  Description   : {0}' -f $Description)
-        Write-Debug ('  ApiVersion    : {0}' -f $ApiVersion)
+        Write-Verbose ("Command: $($MyInvocation.MyCommand.Name)")
+        Write-Debug ("CollectionUri: $CollectionUri")
+        Write-Debug ("ProjectName: $ProjectName")
+        Write-Debug ("EnvironmentName: $EnvironmentName")
+        Write-Debug ("Version: $Version")
+
+        $result = @()
     }
 
     process {
         try {
-            $ErrorActionPreference = 'Stop'
-
-            if (-not $global:AzDevOpsIsConnected) {
-                throw 'Not connected to Azure DevOps. Please connect using Connect-AdoOrganization.'
-            }
-
-            $uriFormat = '{0}/{1}/_apis/pipelines/environments?api-version={2}'
-            $azDevOpsUri = ($uriFormat -f [uri]::new($global:AzDevOpsOrganization), [uri]::EscapeUriString($ProjectId),
-                $ApiVersion)
-
-            $body = @{
-                name        = $Name
-                description = $Description
-            }
 
             $params = @{
-                Method      = 'POST'
-                Uri         = $azDevOpsUri
-                ContentType = 'application/json'
-                Headers     = @{
-                    'Accept'        = 'application/json'
-                    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
-                }
-                Body        = ($body | ConvertTo-Json -Depth 3 -Compress)
+                Uri     = "$CollectionUri/$ProjectName/_apis/pipelines/environments"
+                Version = $Version
+                Method  = 'POST'
             }
 
-            $response = Invoke-RestMethod @params -Verbose:$VerbosePreference
+            foreach ($name in $EnvironmentName) {
+                $body = @{
+                    name        = $name
+                    description = $Description
+                }
 
-            return $response
+                if ($PSCmdlet.ShouldProcess($ProjectName, "Create Environment(s): $name")) {
+                    try {
+                        $result += ($body | Invoke-AdoRestMethod @params)
+                    } catch {
+                        if ($_ -match 'exists in current project') {
+                            Write-Warning "Environment $name already exists, trying to get it"
+
+                            $params.Method = 'GET'
+                            $params += @{ QueryParameters = "name=$($name)" }
+                            $result += (Invoke-AdoRestMethod @params).value
+                        } else {
+                            Write-AdoError -message $_
+                        }
+                    }
+                } else {
+                    $params += @{
+                        Body = $body
+                    }
+                    Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
+                }
+            }
 
         } catch {
             throw $_
@@ -92,6 +128,17 @@
     }
 
     end {
-        Write-Debug ('Exit : {0}' -f $MyInvocation.MyCommand.Name)
+        if ($result) {
+            $result | ForEach-Object {
+                [PSCustomObject]@{
+                    CollectionUri   = $CollectionUri
+                    ProjectName     = $ProjectName
+                    EnvironmentId   = $_.id
+                    EnvironmentName = $_.name
+                }
+            }
+        }
+
+        Write-Verbose ('Exit: {0}' -f $MyInvocation.MyCommand.Name)
     }
 }

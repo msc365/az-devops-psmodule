@@ -6,68 +6,93 @@
     .DESCRIPTION
         This cmdlet deletes a specific Azure DevOps Pipeline Environment using its unique identifier within a specified project.
 
-    .PARAMETER ProjectId
-        Mandatory. The ID or name of the project.
+    .PARAMETER CollectionUri
+        The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/myorganization.
+
+    .PARAMETER ProjectName
+        The name or id of the project.
 
     .PARAMETER EnvironmentId
-        Mandatory. The ID of the environment to remove.
+        The ID of the environment to remove.
 
-    .PARAMETER ApiVersion
-        Optional. The API version to use for the request. Default is '7.2-preview.1'.
+    .PARAMETER Version
+        The API version to use for the request. Default is '7.2-preview.1'.
 
     .EXAMPLE
-        Remove-AdoEnvironment -ProjectId "MyProject" -EnvironmentId "42"
+        $params = @{
+            CollectionUri = 'https://dev.azure.com/my-org'
+            ProjectName   = 'my-project'
+            EnvironmentId = 1
+        }
+        Remove-AdoEnvironment @params -Verbose
 
-        Deletes the environment with ID 42 from the project "MyProject".
+        Removes the environment with ID 1 from the specified project using the provided parameters.
+    .EXAMPLE
+        $params = @{
+            CollectionUri = 'https://dev.azure.com/my-org'
+            ProjectName   = 'my-project'
+        }
+        @(
+            1, 2, 3
+        ) | Remove-AdoEnvironment @params -Verbose
+
+        Removes the environments with IDs 1, 2, and 3 from the specified project demonstrating pipeline input.
 
     .NOTES
         This cmdlet requires an active connection to an Azure DevOps organization established via Connect-AdoOrganization.
     #>
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
     param (
-        [Parameter(Mandatory)]
-        [string]$ProjectId,
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
+        [string]$CollectionUri,
 
-        [Parameter(Mandatory)]
-        [string]$EnvironmentId,
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [Alias('ProjectId')]
+        [string]$ProjectName,
 
-        [Parameter(Mandatory = $false)]
-        [Alias('api')]
+        [Parameter(ValueFromPipelineByPropertyName, ValueFromPipeline)]
+        [Alias('Id')]
+        [int32[]]$EnvironmentId,
+
+        [Parameter()]
+        [Alias('ApiVersion')]
         [ValidateSet('7.2-preview.1')]
-        [string]$ApiVersion = '7.2-preview.1'
+        [string]$Version = '7.2-preview.1'
     )
 
     begin {
-        Write-Debug ('Command         : {0}' -f $MyInvocation.MyCommand.Name)
-        Write-Debug ('  ProjectId     : {0}' -f $ProjectId)
-        Write-Debug ('  EnvironmentId : {0}' -f $EnvironmentId)
-        Write-Debug ('  ApiVersion    : {0}' -f $ApiVersion)
+        Write-Verbose ("Command: $($MyInvocation.MyCommand.Name)")
+        Write-Debug ("CollectionUri: $CollectionUri")
+        Write-Debug ("ProjectName: $ProjectName")
+        Write-Debug ("EnvironmentId: $EnvironmentId")
+        Write-Debug ("Version: $Version")
+
+        $result = @()
     }
 
     process {
         try {
-            $ErrorActionPreference = 'Stop'
-
-            if (-not $global:AzDevOpsIsConnected) {
-                throw 'Not connected to Azure DevOps. Please connect using Connect-AdoOrganization.'
-            }
-
-            $uriFormat = '{0}/{1}/_apis/pipelines/environments/{2}?api-version={3}'
-            $azDevOpsUri = ($uriFormat -f [uri]::new($global:AzDevOpsOrganization), [uri]::EscapeUriString($ProjectId),
-                $EnvironmentId, $ApiVersion)
-
             $params = @{
+                Uri     = "$CollectionUri/$ProjectName/_apis/pipelines/environments/$EnvironmentId"
+                Version = $Version
                 Method  = 'DELETE'
-                Uri     = $azDevOpsUri
-                Headers = @{
-                    'Accept'        = 'application/json'
-                    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
-                }
             }
 
-            $response = Invoke-RestMethod @params -Verbose:$VerbosePreference
+            if ($PSCmdlet.ShouldProcess($ProjectName, "Delete Environment: $EnvironmentId")) {
+                try {
+                    $result += Invoke-AdoRestMethod @params | Out-Null
+                } catch {
+                    if ($_ -match 'does not exist in current project') {
+                        Write-Warning "Environment with ID $EnvironmentId does not exist, skipping deletion."
+                    } else {
+                        Write-AdoError -message $_
+                    }
+                }
 
-            return $response
+            } else {
+                Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
+            }
 
         } catch {
             throw $_
@@ -75,6 +100,10 @@
     }
 
     end {
-        Write-Debug ('Exit : {0}' -f $MyInvocation.MyCommand.Name)
+        if ($result) {
+            $result
+        }
+
+        Write-Debug ('Exit: {0}' -f $MyInvocation.MyCommand.Name)
     }
 }

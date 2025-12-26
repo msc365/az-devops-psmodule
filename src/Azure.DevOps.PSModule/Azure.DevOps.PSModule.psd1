@@ -60,9 +60,9 @@
 
     # Script files (.ps1) that are run in the caller's environment prior to importing this module.
     ScriptsToProcess     = @(
-        'Private\Invoke-TeamFieldValueClasses.ps1'
-        'Private\Invoke-TeamIterationClasses.ps1'
-        'Private\Invoke-TeamSettingsClasses.ps1'
+        'Private\Classes\Invoke-TeamFieldValueClasses.ps1'
+        'Private\Classes\Invoke-TeamIterationClasses.ps1'
+        'Private\Classes\Invoke-TeamSettingsClasses.ps1'
     )
 
     # Type files (.ps1xml) to be loaded when importing this module
@@ -86,7 +86,6 @@
         'Get-AdoContext'
         'Get-AdoDescriptor'
         'Get-AdoEnvironment'
-        'Get-AdoEnvironmentList'
         'Get-AdoFeatureState'
         'Get-AdoGroupList'
         'Get-AdoMembership'
