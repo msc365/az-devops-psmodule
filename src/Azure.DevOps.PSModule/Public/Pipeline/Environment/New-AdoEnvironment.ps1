@@ -100,16 +100,16 @@
             }
 
             foreach ($name in $EnvironmentName) {
-                $body = @{
-                    name        = $name
-                    description = $Description
+                $body = [PSCustomObject]@{
+                    Name        = $name
+                    Description = $Description
                 }
 
                 if ($PSCmdlet.ShouldProcess($ProjectName, "Create Environment: $name")) {
                     try {
                         $result += ($body | Invoke-AdoRestMethod @params)
                     } catch {
-                        if ($_ -match 'exists in current project') {
+                        if ($_ -match 'already exists') {
                             Write-Warning "Environment $name already exists, trying to get it"
 
                             $params.Method = 'GET'
@@ -136,10 +136,10 @@
         if ($result) {
             $result | ForEach-Object {
                 [PSCustomObject]@{
-                    CollectionUri   = $CollectionUri
-                    ProjectName     = $ProjectName
-                    EnvironmentId   = $_.id
-                    EnvironmentName = $_.name
+                    CollectionUri = $CollectionUri
+                    ProjectName   = $ProjectName
+                    Id            = $_.id
+                    Name          = $_.name
                 }
             }
         }

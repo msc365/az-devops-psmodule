@@ -118,10 +118,10 @@
         if ($result) {
             $result | ForEach-Object {
                 [PSCustomObject]@{
-                    CollectionUri   = $CollectionUri
-                    ProjectName     = $ProjectName
-                    EnvironmentId   = $_.id
-                    EnvironmentName = $_.name
+                    CollectionUri = $CollectionUri
+                    ProjectName   = $ProjectName
+                    Id            = $_.id
+                    Name          = $_.name
                 }
             }
         }

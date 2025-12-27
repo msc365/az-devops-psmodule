@@ -104,16 +104,16 @@
                 Method  = 'PATCH'
             }
 
-            $body = @{
-                name        = $EnvironmentName
-                description = $Description
+            $body = [PSCustomObject]@{
+                Name        = $EnvironmentName
+                Description = $Description
             }
 
             if ($PSCmdlet.ShouldProcess($ProjectName, "Update environment: $EnvironmentId")) {
                 try {
                     $result += ($body | Invoke-AdoRestMethod @params)
                 } catch {
-                    if ($_ -match 'does not exist in current project') {
+                    if ($_ -match 'does not exist') {
                         Write-Warning "Environment with ID $id does not exist, skipping update."
                     } else {
                         Write-AdoError -message $_
@@ -135,10 +135,10 @@
         if ($result) {
             $result | ForEach-Object {
                 [PSCustomObject]@{
-                    CollectionUri   = $CollectionUri
-                    ProjectName     = $ProjectName
-                    EnvironmentId   = $_.id
-                    EnvironmentName = $_.name
+                    CollectionUri = $CollectionUri
+                    ProjectName   = $ProjectName
+                    Id            = $_.id
+                    Name          = $_.name
                 }
             }
         }
