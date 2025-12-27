@@ -48,9 +48,6 @@
         ) | Get-AdoEnvironment @params -Verbose
 
         Retrieves the specified environments from the project, demonstrating pipeline input.
-
-    .NOTES
-        This cmdlet requires an active connection to an Azure DevOps organization established via Connect-AdoOrganization.
     #>
     [CmdletBinding(SupportsShouldProcess)]
     param (

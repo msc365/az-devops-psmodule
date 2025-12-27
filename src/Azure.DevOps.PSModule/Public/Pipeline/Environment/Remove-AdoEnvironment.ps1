@@ -37,9 +37,6 @@
         ) | Remove-AdoEnvironment @params -Verbose
 
         Removes the environments with IDs 1, 2, and 3 from the specified project demonstrating pipeline input.
-
-    .NOTES
-        This cmdlet requires an active connection to an Azure DevOps organization established via Connect-AdoOrganization.
     #>
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
     param (

@@ -48,9 +48,6 @@
         ) | New-AdoEnvironment @params -Verbose
 
         Creates multiple new environments in the specified project demonstrating pipeline input.
-
-    .NOTES
-        This cmdlet requires an active connection to an Azure DevOps organization established via Connect-AdoOrganization.
     #>
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
     param (
