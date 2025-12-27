@@ -7,10 +7,10 @@
         This cmdlet retrieves a list of Azure DevOps Pipeline Environments for a given project, with optional filtering by environment name and pagination support.
 
     .PARAMETER CollectionUri
-        Mandatory. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/myorganization.
+        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/myorganization.
 
     .PARAMETER ProjectName
-        Mandatory. The name or id of the project.
+        Optional. The name or id of the project.
 
     .PARAMETER EnvironmentName
         Optional. The name of the environment to filter the results.
@@ -54,13 +54,13 @@
     #>
     [CmdletBinding(SupportsShouldProcess)]
     param (
-        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
-        [string]$CollectionUri,
+        [string]$CollectionUri = $env:DefaultAdoCollectionUri,
 
-        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [Parameter(ValueFromPipelineByPropertyName)]
         [Alias('ProjectId')]
-        [string]$ProjectName,
+        [string]$ProjectName = $env:DefaultAdoProject,
 
         [Parameter(ValueFromPipelineByPropertyName, ValueFromPipeline)]
         [Alias('Name')]
@@ -82,6 +82,11 @@
         Write-Debug ("EnvironmentName: $EnvironmentName")
         Write-Debug ("Top: $Top")
         Write-Debug ("Version: $Version")
+
+        Confirm-Defaults -Defaults ([ordered]@{
+                'CollectionUri' = $CollectionUri
+                'ProjectName'   = $ProjectName
+            })
 
         $result = @()
     }
@@ -121,6 +126,6 @@
             }
         }
 
-        Write-Verbose ('Exit: {0}' -f $MyInvocation.MyCommand.Name)
+        Write-Verbose ("Exit: $($MyInvocation.MyCommand.Name)")
     }
 }

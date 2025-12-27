@@ -7,19 +7,19 @@
         This cmdlet creates a new Azure DevOps Pipeline Environment within a specified project.
 
     .PARAMETER CollectionUri
-        The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/myorganization.
+        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/myorganization.
 
     .PARAMETER ProjectName
-        The name or id of the project.
+        Optional. The name or id of the project.
 
     .PARAMETER EnvironmentName
-        The name of the environment to filter the results.
+        Optional. The name of the environment to filter the results.
 
     .PARAMETER Description
-        The description of the new environment.
+        Optional. The description of the new environment.
 
     .PARAMETER Version
-        The API version to use for the request. Default is '7.2-preview.1'.
+        Optional. The API version to use for the request. Default is '7.2-preview.1'.
 
     .LINK
         https://learn.microsoft.com/en-us/rest/api/azure/devops/environments/environments/add
@@ -54,13 +54,13 @@
     #>
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
     param (
-        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
-        [string]$CollectionUri,
+        [string]$CollectionUri = $env:DefaultAdoCollectionUri,
 
-        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [Parameter(ValueFromPipelineByPropertyName)]
         [Alias('ProjectId')]
-        [string]$ProjectName,
+        [string]$ProjectName = $env:DefaultAdoProject,
 
         [Parameter(ValueFromPipelineByPropertyName, ValueFromPipeline)]
         [Alias('Name')]
@@ -82,6 +82,11 @@
         Write-Debug ("EnvironmentName: $EnvironmentName")
         Write-Debug ("Version: $Version")
 
+        Confirm-Defaults -Defaults ([ordered]@{
+                'CollectionUri' = $CollectionUri
+                'ProjectName'   = $ProjectName
+            })
+
         $result = @()
     }
 
@@ -100,7 +105,7 @@
                     description = $Description
                 }
 
-                if ($PSCmdlet.ShouldProcess($ProjectName, "Create Environment(s): $name")) {
+                if ($PSCmdlet.ShouldProcess($ProjectName, "Create Environment: $name")) {
                     try {
                         $result += ($body | Invoke-AdoRestMethod @params)
                     } catch {
@@ -139,6 +144,6 @@
             }
         }
 
-        Write-Verbose ('Exit: {0}' -f $MyInvocation.MyCommand.Name)
+        Write-Verbose ("Exit: $($MyInvocation.MyCommand.Name)")
     }
 }

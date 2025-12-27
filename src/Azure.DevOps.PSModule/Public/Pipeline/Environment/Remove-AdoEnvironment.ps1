@@ -10,13 +10,13 @@
         The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/myorganization.
 
     .PARAMETER ProjectName
-        The name or id of the project.
+        Optional. The name or id of the project.
 
     .PARAMETER EnvironmentId
-        The ID of the environment to remove.
+        Mandatory. The ID of the environment to remove.
 
     .PARAMETER Version
-        The API version to use for the request. Default is '7.2-preview.1'.
+        Optional. The API version to use for the request. Default is '7.2-preview.1'.
 
     .EXAMPLE
         $params = @{
@@ -43,15 +43,15 @@
     #>
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
     param (
-        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
-        [string]$CollectionUri,
+        [string]$CollectionUri = $env:DefaultAdoCollectionUri,
 
-        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [Parameter(ValueFromPipelineByPropertyName)]
         [Alias('ProjectId')]
-        [string]$ProjectName,
+        [string]$ProjectName = $env:DefaultAdoProject,
 
-        [Parameter(ValueFromPipelineByPropertyName, ValueFromPipeline)]
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName, ValueFromPipeline)]
         [Alias('Id')]
         [int32[]]$EnvironmentId,
 
@@ -67,6 +67,11 @@
         Write-Debug ("ProjectName: $ProjectName")
         Write-Debug ("EnvironmentId: $EnvironmentId")
         Write-Debug ("Version: $Version")
+
+        Confirm-Defaults -Defaults ([ordered]@{
+                'CollectionUri' = $CollectionUri
+                'ProjectName'   = $ProjectName
+            })
 
         $result = @()
     }
@@ -104,6 +109,6 @@
             $result
         }
 
-        Write-Debug ('Exit: {0}' -f $MyInvocation.MyCommand.Name)
+        Write-Verbose ("Exit: $($MyInvocation.MyCommand.Name)")
     }
 }
