@@ -1,86 +1,137 @@
 ﻿function Get-AdoCheckConfiguration {
     <#
     .SYNOPSIS
-        Get a check configuration by ID.
+        Get a list of check configurations for a specific resource.
 
     .DESCRIPTION
-        This function retrieves a check configuration by its ID within an Azure DevOps project.
+        This function retrieves check configurations for a specified resource within an Azure DevOps project.
+        You need to provide the resource type and resource ID to filter the results.
 
-    .PARAMETER ProjectId
-        The ID or name of the project.
+    .PARAMETER CollectionUri
+        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/myorganization.
 
-    .PARAMETER Id
-        The ID of the resource to retrieve the results.
+    .PARAMETER ProjectName
+        Optional. The name or id of the project.
+
+    .PARAMETER ResourceType
+        Mandatory. The type of the resource to filter the results. E.g., 'environment'.
+
+    .PARAMETER ResourceName
+        Mandatory. The name of the resource to filter the results.
 
     .PARAMETER Expands
-        Specifies additional details to include in the response. Default is 'none'.
+        Optional. Specifies additional details to include in the response. Default is 'none'.
 
         Valid values are 'none' and 'settings'.
 
-    .PARAMETER ApiVersion
-        The API version to use for the request. Default is '7.2-preview.1'.
+    .PARAMETER Version
+        Optional. The API version to use for the request. Default is '7.2-preview.1'.
 
     .LINK
-        https://learn.microsoft.com/en-us/rest/api/azure/devops/approvalsandchecks/check-configurations/get
+        https://learn.microsoft.com/en-us/rest/api/azure/devops/approvalsandchecks/check-configurations/list
 
     .EXAMPLE
-        Get-AdoCheckConfiguration -ProjectId "MyProject" -Id 1 -Expands "settings"
+        $params = @{
+            CollectionUri = 'https://dev.azure.com/my-org'
+            ProjectName   = 'my-project'
+            ResourceType  = 'environment'
+            ResourceName  = 'my-environment-tst'
+        }
+        Get-AdoCheckConfiguration @params
 
-        Retrieves the check configurations for the specified resource in the project "MyProject".
+        Retrieves check configurations for the specified environment within the project using provided parameters.
 
-    .NOTES
-        This cmdlet requires an active connection to an Azure DevOps organization established via Connect-AdoOrganization.
+    .EXAMPLE
+        $params = @{
+            CollectionUri = 'https://dev.azure.com/my-org'
+            ProjectName   = 'my-project'
+            ResourceType  = 'environment'
+            Expands       = 'settings'
+        }
+        @(
+            'my-environment-tst',
+            'my-environment-dev'
+        ) | Get-AdoCheckConfiguration @params
+
+        Retrieves check configurations for the specified environments within the project using provided parameters, demonstrating pipeline input.
     #>
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess)]
     param (
-        [Parameter(Mandatory)]
-        [string]$ProjectId,
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
+        [string]$CollectionUri = $env:DefaultAdoCollectionUri,
 
-        [Parameter(Mandatory)]
-        [int32]$Id,
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [Alias('ProjectId')]
+        [string]$ProjectName = $env:DefaultAdoProject,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [ValidateSet('endpoint', 'environment', 'variablegroup', 'repository')]
+        [string]$ResourceType,
+
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName, ValueFromPipeline)]
+        [string[]]$ResourceName,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateSet('none', 'settings')]
         [string]$Expands = 'none',
 
-        [Parameter(Mandatory = $false)]
-        [Alias('api')]
+        [Parameter()]
+        [Alias('ApiVersion')]
         [ValidateSet('7.2-preview.1')]
-        [string]$ApiVersion = '7.2-preview.1'
+        [string]$Version = '7.2-preview.1'
     )
 
     begin {
-        Write-Debug ('Command      : {0}' -f $MyInvocation.MyCommand.Name)
-        Write-Debug ('  ProjectId  : {0}' -f $ProjectId)
-        Write-Debug ('  Id         : {0}' -f $Id)
-        Write-Debug ('  Expands    : {0}' -f $Expands)
-        Write-Debug ('  ApiVersion : {0}' -f $ApiVersion)
+        Write-Verbose ("Command: $($MyInvocation.MyCommand.Name)")
+        Write-Debug ("CollectionUri: $CollectionUri")
+        Write-Debug ("ProjectName: $ProjectName")
+        Write-Debug ("ResourceType: $ResourceType")
+        Write-Debug ("ResourceName: $ResourceName")
+        Write-Debug ("Expands: $Expands")
+        Write-Debug ("ApiVersion: $Version")
+
+        Confirm-Defaults -Defaults ([ordered]@{
+                'CollectionUri' = $CollectionUri
+                'ProjectName'   = $ProjectName
+            })
+
+        $result = @()
     }
 
     process {
         try {
-            $ErrorActionPreference = 'Stop'
+            foreach ($name in $ResourceName) {
 
-            if (-not $global:AzDevOpsIsConnected) {
-                throw 'Not connected to Azure DevOps. Please connect using Connect-AdoOrganization.'
-            }
+                switch ($ResourceType) {
+                    'environment' {
+                        $typeParams = @{
+                            CollectionUri   = $CollectionUri
+                            ProjectName     = $ProjectName
+                            EnvironmentName = $name
+                        }
+                        $resourceId = (Get-AdoEnvironment @typeParams).Id
+                    }
+                    default {
+                        throw "ResourceType '$ResourceType' is not supported yet."
+                    }
+                }
 
-            $uriFormat = '{0}/{1}/_apis/pipelines/checks/configurations/{2}?$expand={3}&api-version={4}'
-            $azDevOpsUri = ($uriFormat -f [uri]::new($global:AzDevOpsOrganization), [uri]::EscapeUriString($ProjectId),
-                $Id, $Expands, $ApiVersion)
+                $params = @{
+                    Uri             = "$CollectionUri/$ProjectName/_apis/pipelines/checks/configurations"
+                    Version         = $Version
+                    QueryParameters = "resourceType=$ResourceType&resourceId=$resourceId&`$expand=$Expands"
+                    Method          = 'GET'
+                }
 
-            $params = @{
-                Method  = 'GET'
-                Uri     = $azDevOpsUri
-                Headers = @{
-                    'Accept'        = 'application/json'
-                    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
+                if ($PSCmdlet.ShouldProcess($ProjectName, "Get Check Configuration(s) from: $ResourceType/$name")) {
+
+                    $result += (Invoke-AdoRestMethod @params).value
+
+                } else {
+                    Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
                 }
             }
-
-            $response = Invoke-RestMethod @params -Verbose:$VerbosePreference
-
-            return $response
 
         } catch {
             throw $_
@@ -88,6 +139,16 @@
     }
 
     end {
-        Write-Debug ('Exit : {0}' -f $MyInvocation.MyCommand.Name)
+        if ($result) {
+            $result | ForEach-Object {
+                [PSCustomObject]@{
+                    CollectionUri = $CollectionUri
+                    ProjectName   = $ProjectName
+                    Configuration = $_
+                }
+            }
+        }
+
+        Write-Verbose ("Exit: $($MyInvocation.MyCommand.Name)")
     }
 }
