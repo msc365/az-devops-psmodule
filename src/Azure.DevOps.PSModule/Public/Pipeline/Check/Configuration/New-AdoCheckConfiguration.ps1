@@ -123,7 +123,7 @@
                             $params.QueryParameters = "resourceType=$($config.resource.type)&resourceId=$($config.resource.id)&`$expand=settings"
                             $result += (Invoke-AdoRestMethod @params).value | Where-Object { $_.settings.definitionRef.id -eq $config.settings.definitionRef.id }
                         } else {
-                            Write-AdoError -Message $_
+                            throw $_
                         }
                     }
 
@@ -144,7 +144,23 @@
     end {
         if ($result) {
             $result | ForEach-Object {
-                $_
+                $result | ForEach-Object {
+                    $obj = [ordered]@{
+                        id = $_.id
+                    }
+                    if ($_.settings) {
+                        $obj['settings'] = $_.settings
+                    }
+                    $obj['timeout'] = $_.timeout
+                    $obj['type'] = $_.type
+                    $obj['resource'] = $_.resource
+                    $obj['createdBy'] = $_.createdBy.id
+                    $obj['createdOn'] = $_.createdOn
+                    $obj['project'] = $ProjectName
+                    $obj['collectionUri'] = $CollectionUri
+
+                    [PSCustomObject]$obj
+                }
             }
         }
 
