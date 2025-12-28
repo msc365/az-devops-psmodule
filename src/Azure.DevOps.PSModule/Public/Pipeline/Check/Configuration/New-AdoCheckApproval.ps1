@@ -204,23 +204,21 @@
     end {
         if ($result) {
             $result | ForEach-Object {
-                $result | ForEach-Object {
-                    $obj = [ordered]@{
-                        id = $_.id
-                    }
-                    if ($_.settings) {
-                        $obj['settings'] = $_.settings
-                    }
-                    $obj['timeout'] = $_.timeout
-                    $obj['type'] = $_.type
-                    $obj['resource'] = $_.resource
-                    $obj['createdBy'] = $_.createdBy.id
-                    $obj['createdOn'] = $_.createdOn
-                    $obj['project'] = $ProjectName
-                    $obj['collectionUri'] = $CollectionUri
-
-                    [PSCustomObject]$obj
+                $obj = [ordered]@{
+                    id = $_.id
                 }
+                if ($_.settings) {
+                    $obj['settings'] = $_.settings
+                }
+                $obj['timeout'] = $_.timeout
+                $obj['type'] = $_.type
+                $obj['resource'] = $_.resource
+                $obj['createdBy'] = $_.createdBy.id
+                $obj['createdOn'] = $_.createdOn
+                $obj['project'] = $ProjectName
+                $obj['collectionUri'] = $CollectionUri
+
+                [PSCustomObject]$obj
             }
         }
 
