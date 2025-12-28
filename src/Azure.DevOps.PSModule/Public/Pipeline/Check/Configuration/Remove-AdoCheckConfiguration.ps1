@@ -12,7 +12,7 @@
     .PARAMETER ProjectName
         Optional. The name or id of the project.
 
-    .PARAMETER CheckConfigurationId
+    .PARAMETER Id
         Mandatory. The ID of the check configuration to remove.
 
     .PARAMETER Version
@@ -22,7 +22,7 @@
         $params = @{
             CollectionUri = 'https://dev.azure.com/my-org'
             ProjectName   = 'my-project'
-            CheckConfigurationId = 1
+            Id = 1
         }
         Remove-AdoCheckConfiguration @params -Verbose
 
@@ -50,8 +50,7 @@
         [string]$ProjectName = $env:DefaultAdoProject,
 
         [Parameter(Mandatory, ValueFromPipelineByPropertyName, ValueFromPipeline)]
-        [Alias('Id')]
-        [int32[]]$CheckConfigurationId,
+        [int32[]]$Id,
 
         [Parameter()]
         [Alias('ApiVersion')]
@@ -63,7 +62,7 @@
         Write-Verbose ("Command: $($MyInvocation.MyCommand.Name)")
         Write-Debug ("CollectionUri: $CollectionUri")
         Write-Debug ("ProjectName: $ProjectName")
-        Write-Debug ("CheckConfigurationId: $CheckConfigurationId")
+        Write-Debug ("Id: $Id")
         Write-Debug ("Version: $Version")
 
         Confirm-Defaults -Defaults ([ordered]@{
@@ -77,17 +76,17 @@
     process {
         try {
             $params = @{
-                Uri     = "$CollectionUri/$ProjectName/_apis/pipelines/checks/configurations/$CheckConfigurationId"
+                Uri     = "$CollectionUri/$ProjectName/_apis/pipelines/checks/configurations/$Id"
                 Version = $Version
                 Method  = 'DELETE'
             }
 
-            if ($PSCmdlet.ShouldProcess($ProjectName, "Delete Check Configuration: $CheckConfigurationId")) {
+            if ($PSCmdlet.ShouldProcess($ProjectName, "Delete Check Configuration: $Id")) {
                 try {
                     $result += Invoke-AdoRestMethod @params | Out-Null
                 } catch {
                     if ($_ -match 'does not exist') {
-                        Write-Warning "Check Configuration with ID $CheckConfigurationId does not exist, skipping deletion."
+                        Write-Warning "Check Configuration with ID $Id does not exist, skipping deletion."
                     } else {
                         throw $_
                     }
