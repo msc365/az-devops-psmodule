@@ -112,7 +112,7 @@
                             $params += @{ QueryParameters = "name=$($envName)" }
                             $result += (Invoke-AdoRestMethod @params).value
                         } else {
-                            Write-AdoError -message $_
+                            throw $_
                         }
                     }
                 } else {
@@ -132,10 +132,12 @@
         if ($result) {
             $result | ForEach-Object {
                 [PSCustomObject]@{
-                    CollectionUri = $CollectionUri
-                    ProjectName   = $ProjectName
-                    Id            = $_.id
-                    Name          = $_.name
+                    id            = $_.id
+                    name          = $_.name
+                    createdBy     = $_.createdBy.id
+                    createdOn     = $_.createdOn
+                    project       = $ProjectName
+                    collectionUri = $CollectionUri
                 }
             }
         }
