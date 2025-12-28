@@ -77,6 +77,10 @@
         [Parameter(ValueFromPipelineByPropertyName, ValueFromPipeline)]
         [string[]]$DisplayName,
 
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateSet('none', 'settings')]
+        [string]$Expands = 'none',
+
         [Parameter()]
         [Alias('ApiVersion')]
         [ValidateSet('7.2-preview.1')]
@@ -154,7 +158,24 @@
     end {
         if ($result) {
             $result | ForEach-Object {
-                $_
+                $obj = [ordered]@{
+                    displayName   = $_.displayName
+                    principalName = $_.principalName
+                    originId      = $_.originId
+                }
+                if ($Expands -eq 'settings') {
+                    $obj['origin'] = $_.origin
+                    $obj['subjectKind'] = $_.subjectKind
+                    $obj['description'] = $_.description
+                    $obj['principalName'] = $_.principalName
+                    if ($_.mailAddress) {
+                        $obj['mailAddress'] = $_.mailAddress
+                    }
+                    $obj['descriptor'] = $_.descriptor
+                    $obj['collectionUrl'] = $CollectionUri
+                }
+
+                [PSCustomObject]$obj
             }
         }
         Write-Verbose ("Exit: $($MyInvocation.MyCommand.Name)")
