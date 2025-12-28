@@ -23,7 +23,7 @@
     process {
         try {
             if ($Uri -notmatch '^https:\/\/dev\.azure\.com\/\w+') {
-                Write-AdoError "CollectionUri must be a valid Azure DevOps collection URI starting with 'https://dev.azure.com/'"
+                throw  "CollectionUri must be a valid Azure DevOps collection URI starting with 'https://dev.azure.com/'"
             } else {
                 $true
             }

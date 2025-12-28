@@ -28,7 +28,7 @@
                 $DefaultValue = $Defaults[$key]
 
                 if ([string]::IsNullOrEmpty($DefaultValue)) {
-                    Write-AdoError -Message "Parameter '$key' is required. Please set defaults using 'Set-AdoDefaults' or specify it directly."
+                    throw "Parameter '$key' is required. Please set defaults using 'Set-AdoDefaults' or specify it directly."
                 }
             }
 

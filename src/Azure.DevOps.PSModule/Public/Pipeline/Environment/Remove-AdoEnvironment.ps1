@@ -87,7 +87,7 @@
                     if ($_ -match 'does not exist in current project') {
                         Write-Warning "Environment with ID $Id does not exist, skipping deletion."
                     } else {
-                        Write-AdoError -message $_
+                        throw $_
                     }
                 }
 

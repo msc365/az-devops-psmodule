@@ -89,7 +89,7 @@
                     if ($_ -match 'does not exist') {
                         Write-Warning "Check Configuration with ID $CheckConfigurationId does not exist, skipping deletion."
                     } else {
-                        Write-AdoError -message $_
+                        throw $_
                     }
                 }
 

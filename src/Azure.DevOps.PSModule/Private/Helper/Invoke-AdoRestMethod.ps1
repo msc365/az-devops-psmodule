@@ -103,11 +103,7 @@
                 $params.Body = $Body | ConvertTo-Json -Depth 10
             }
             if ($PSCmdlet.ShouldProcess($ProjectName, "Invoke Rest method on: $ProjectName")) {
-                try {
-                    Invoke-RestMethod @params
-                } catch {
-                    Write-AdoError -Message ($_ | ConvertFrom-Json).message
-                }
+                Invoke-RestMethod @params
             }
         } catch {
             throw $_
