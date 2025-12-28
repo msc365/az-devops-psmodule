@@ -26,7 +26,7 @@
         [Parameter(ValueFromPipelineByPropertyName)]
         [string]$CollectionUri = ($env:DefaultAdoCollectionUri -replace 'https://', 'https://vssps.'),
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName, ValueFromPipeline)]
         [string[]]$StorageKey,
 
         [Parameter()]
