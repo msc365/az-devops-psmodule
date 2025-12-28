@@ -144,11 +144,7 @@
     end {
         if ($result) {
             $result | ForEach-Object {
-                [PSCustomObject]@{
-                    CollectionUri = $CollectionUri
-                    ProjectName   = $ProjectName
-                    Configuration = $_
-                }
+                $_
             }
         }
 

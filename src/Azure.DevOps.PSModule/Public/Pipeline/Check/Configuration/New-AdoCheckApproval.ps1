@@ -138,9 +138,9 @@
                 switch ($ResourceType) {
                     'environment' {
                         $typeParams = @{
-                            CollectionUri   = $CollectionUri
-                            ProjectName     = $ProjectName
-                            EnvironmentName = $name
+                            CollectionUri = $CollectionUri
+                            ProjectName   = $ProjectName
+                            Name          = $name
                         }
                         $resourceId = (Get-AdoEnvironment @typeParams).Id
                     }
@@ -203,11 +203,7 @@
     end {
         if ($result) {
             $result | ForEach-Object {
-                [PSCustomObject]@{
-                    CollectionUri = $CollectionUri
-                    ProjectName   = $ProjectName
-                    Configuration = $_
-                }
+                $_
             }
         }
 
