@@ -106,6 +106,7 @@
         'Get-AdoTeamList'
         'Get-AdoTeamSettings'
         'New-AdoCheckApproval'
+        'New-AdoCheckBranchControl'
         'New-AdoCheckConfiguration'
         'New-AdoClassificationNode'
         'New-AdoEnvironment'
