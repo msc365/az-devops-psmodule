@@ -88,7 +88,7 @@
         'Get-AdoDescriptor'
         'Get-AdoEnvironment'
         'Get-AdoFeatureState'
-        'Get-AdoGroupList'
+        'Get-AdoGroup'
         'Get-AdoMembership'
         'Get-AdoPolicyConfiguration'
         'Get-AdoPolicyConfigurationList'

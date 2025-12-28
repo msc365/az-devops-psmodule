@@ -6,16 +6,16 @@ Locale: en-NL
 Module Name: Azure.DevOps.PSModule
 ms.date: 11/01/2025
 PlatyPS schema version: 2024-05-01
-title: Get-AdoGroupList
+title: Get-AdoGroup
 -->
 
 <!-- cSpell: ignore dontshow -->
 
-# Get-AdoGroupList
+# Get-AdoGroup
 
 ## SYNOPSIS
 
-Get groups in an Azure DevOps organization.
+Get a single or multiple groups in an Azure DevOps organization.
 
 ## SYNTAX
 

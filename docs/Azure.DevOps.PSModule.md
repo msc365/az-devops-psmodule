@@ -37,7 +37,7 @@ A PowerShell module that wraps the Azure DevOps REST API into clean, task-orient
 | [Get-AdoEnvironment](Get-AdoEnvironment.md) | Get an Azure DevOps Pipeline Environment by its ID. |
 | [Get-AdoEnvironmentList](Get-AdoEnvironmentList.md) | Get a list of Azure DevOps Pipeline Environments within a specified project. |
 | [Get-AdoFeatureState](Get-AdoFeatureState.md) | Get the feature states for an Azure DevOps project. |
-| [Get-AdoGroupList](Get-AdoGroupList.md) | Get groups in an Azure DevOps organization. |
+| [Get-AdoGroup](Get-AdoGroup.md) | Get a single or multiple groups in an Azure DevOps organization. |
 | [Get-AdoMembership](Get-AdoMembership.md) | Get the membership relationship between a subject and a container in Azure DevOps. |
 | [Get-AdoPolicyConfiguration](Get-AdoPolicyConfiguration.md) | Gets policy configurations for an Azure DevOps project. |
 | [Get-AdoPolicyConfigurationList](Get-AdoPolicyConfigurationList.md) | Gets policy configurations for an Azure DevOps project. |
