@@ -14,7 +14,7 @@
         Optional. The name or id of the project.
 
     .PARAMETER Approvers
-        Mandatory. An array of approvers in the format @{ id = 'approver-id' }.
+        Mandatory. An array of approvers in the format @{ id = 'originId' }.
 
     .PARAMETER ResourceType
         Mandatory. The type of resource to which the check will be applied. Valid values are 'endpoint', 'environment', 'variablegroup', 'repository'.
