@@ -173,7 +173,7 @@
 
                         $exists = $exists | Where-Object {
                             $_.settings.displayName -eq $DisplayName -and
-                            $_.settings.inputs.allowedBranches -eq ($AllowedBranches).ToString()
+                            $_.settings.inputs.allowedBranches -eq $AllowedBranches
                         }
 
                         if (-not $exists) {
