@@ -5,6 +5,7 @@
 
     .DESCRIPTION
         This function creates a new approval check for a specified resource within an Azure DevOps project.
+        When existing configuration is found, it will be returned instead of creating a new one.
 
     .PARAMETER CollectionUri
         Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/myorganization.

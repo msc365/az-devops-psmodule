@@ -5,6 +5,8 @@
 
     .DESCRIPTION
         This function creates a new check configuration for a specified resource within an Azure DevOps project.
+        When existing configuration is found, it will be returned instead of creating a new one.
+
         You need to provide the configuration in JSON format.
 
     .PARAMETER CollectionUri

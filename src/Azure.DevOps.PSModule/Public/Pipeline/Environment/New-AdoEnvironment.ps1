@@ -5,6 +5,7 @@
 
     .DESCRIPTION
         This cmdlet creates a new Azure DevOps Pipeline Environment within a specified project.
+        When an environment with the specified name already exists, it will be returned instead of creating a new one.
 
     .PARAMETER CollectionUri
         Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/myorganization.
