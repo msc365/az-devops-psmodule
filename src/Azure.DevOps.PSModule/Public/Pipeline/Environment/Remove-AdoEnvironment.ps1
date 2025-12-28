@@ -12,7 +12,7 @@
     .PARAMETER ProjectName
         Optional. The name or id of the project.
 
-    .PARAMETER EnvironmentId
+    .PARAMETER Id
         Mandatory. The ID of the environment to remove.
 
     .PARAMETER Version
@@ -22,7 +22,7 @@
         $params = @{
             CollectionUri = 'https://dev.azure.com/my-org'
             ProjectName   = 'my-project'
-            EnvironmentId = 1
+            Id = 1
         }
         Remove-AdoEnvironment @params -Verbose
 
@@ -49,8 +49,7 @@
         [string]$ProjectName = $env:DefaultAdoProject,
 
         [Parameter(Mandatory, ValueFromPipelineByPropertyName, ValueFromPipeline)]
-        [Alias('Id')]
-        [int32[]]$EnvironmentId,
+        [int32[]]$Id,
 
         [Parameter()]
         [Alias('ApiVersion')]
@@ -62,7 +61,7 @@
         Write-Verbose ("Command: $($MyInvocation.MyCommand.Name)")
         Write-Debug ("CollectionUri: $CollectionUri")
         Write-Debug ("ProjectName: $ProjectName")
-        Write-Debug ("EnvironmentId: $EnvironmentId")
+        Write-Debug ("Id: $Id")
         Write-Debug ("Version: $Version")
 
         Confirm-Defaults -Defaults ([ordered]@{
@@ -76,17 +75,17 @@
     process {
         try {
             $params = @{
-                Uri     = "$CollectionUri/$ProjectName/_apis/pipelines/environments/$EnvironmentId"
+                Uri     = "$CollectionUri/$ProjectName/_apis/pipelines/environments/$Id"
                 Version = $Version
                 Method  = 'DELETE'
             }
 
-            if ($PSCmdlet.ShouldProcess($ProjectName, "Delete Environment: $EnvironmentId")) {
+            if ($PSCmdlet.ShouldProcess($ProjectName, "Delete Environment: $Id")) {
                 try {
                     $result += Invoke-AdoRestMethod @params | Out-Null
                 } catch {
                     if ($_ -match 'does not exist in current project') {
-                        Write-Warning "Environment with ID $EnvironmentId does not exist, skipping deletion."
+                        Write-Warning "Environment with ID $Id does not exist, skipping deletion."
                     } else {
                         Write-AdoError -message $_
                     }

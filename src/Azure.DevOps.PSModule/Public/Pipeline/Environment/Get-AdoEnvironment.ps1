@@ -12,7 +12,7 @@
     .PARAMETER ProjectName
         Optional. The name or id of the project.
 
-    .PARAMETER EnvironmentName
+    .PARAMETER Name
         Optional. The name of the environment to filter the results.
 
     .PARAMETER Top
@@ -31,9 +31,9 @@
         }
 
         Get-AdoEnvironment @params -Top 2
-        Get-AdoEnvironment @params -EnvironmentName 'my-environment-tst'
-        Get-AdoEnvironment @params -EnvironmentName '*environment*'
-        Get-AdoEnvironment @params -EnvironmentName 'my-env*' -Top 2
+        Get-AdoEnvironment @params -Name 'my-environment-tst'
+        Get-AdoEnvironment @params -Name '*environment*'
+        Get-AdoEnvironment @params -Name 'my-env*' -Top 2
 
         Retrieves environments from the specified project with various filtering and pagination options.
 
@@ -60,8 +60,7 @@
         [string]$ProjectName = $env:DefaultAdoProject,
 
         [Parameter(ValueFromPipelineByPropertyName, ValueFromPipeline)]
-        [Alias('Name')]
-        [string[]]$EnvironmentName,
+        [string[]]$Name,
 
         [Parameter()]
         [int]$Top = 20,
@@ -76,7 +75,7 @@
         Write-Verbose ("Command: $($MyInvocation.MyCommand.Name)")
         Write-Debug ("CollectionUri: $CollectionUri")
         Write-Debug ("ProjectName: $ProjectName")
-        Write-Debug ("EnvironmentName: $EnvironmentName")
+        Write-Debug ("Name: $Name")
         Write-Debug ("Top: $Top")
         Write-Debug ("Version: $Version")
 
@@ -94,7 +93,7 @@
             $params = @{
                 Uri             = "$CollectionUri/$ProjectName/_apis/pipelines/environments"
                 Version         = $Version
-                QueryParameters = "name=$($EnvironmentName)&`$top=$Top"
+                QueryParameters = "name=$($Name)&`$top=$Top"
                 Method          = 'GET'
             }
 

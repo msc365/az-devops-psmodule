@@ -12,7 +12,7 @@
     .PARAMETER ProjectName
         Optional. The name or id of the project.
 
-    .PARAMETER EnvironmentId
+    .PARAMETER Id
         Mandatory. The ID of the environment to update.
 
     .PARAMETER EnvironmentName
@@ -29,11 +29,11 @@
 
     .EXAMPLE
         $params = @{
-            CollectionUri   = 'https://dev.azure.com/my-org'
-            ProjectName     = 'my-project'
-            EnvironmentId   = 1
-            EnvironmentName = 'my-updated-environment'
-            Description     = 'Updated environment description'
+            CollectionUri = 'https://dev.azure.com/my-org'
+            ProjectName   = 'my-project'
+            Id            = 1
+            Name          = 'my-updated-environment'
+            Description   = 'Updated environment description'
         }
         Set-AdoEnvironment @params -Verbose
 
@@ -46,9 +46,9 @@
         }
 
         [PSCustomObject]@{
-            EnvironmentId   = 1
-            EnvironmentName = 'my-updated-environment'
-            Description     = 'Updated environment description'
+            Id          = 1
+            Name        = 'my-updated-environment'
+            Description = 'Updated environment description'
         } | Set-AdoEnvironment @params -Verbose
 
         Updates the environment with ID 1 in the specified project using the provided parameters in a pipeline.
@@ -65,11 +65,11 @@
 
         [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
         [Alias('Id')]
-        [int32]$EnvironmentId,
+        [int32]$Id,
 
         [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
         [Alias('Name')]
-        [string]$EnvironmentName,
+        [string]$Name,
 
         [Parameter(ValueFromPipelineByPropertyName)]
         [string]$Description,
@@ -84,7 +84,9 @@
         Write-Verbose ("Command: $($MyInvocation.MyCommand.Name)")
         Write-Debug ("CollectionUri: $CollectionUri")
         Write-Debug ("ProjectName: $ProjectName")
-        Write-Debug ("EnvironmentName: $EnvironmentName")
+        Write-Debug ("Id: $Id")
+        Write-Debug ("Name: $Name")
+        Write-Debug ("Description: $Description")
         Write-Debug ("Version: $Version")
 
         Confirm-Defaults -Defaults ([ordered]@{
@@ -99,17 +101,17 @@
         try {
 
             $params = @{
-                Uri     = "$CollectionUri/$ProjectName/_apis/pipelines/environments/$EnvironmentId"
+                Uri     = "$CollectionUri/$ProjectName/_apis/pipelines/environments/$Id"
                 Version = $Version
                 Method  = 'PATCH'
             }
 
             $body = [PSCustomObject]@{
-                Name        = $EnvironmentName
+                Name        = $Name
                 Description = $Description
             }
 
-            if ($PSCmdlet.ShouldProcess($ProjectName, "Update environment: $EnvironmentId")) {
+            if ($PSCmdlet.ShouldProcess($ProjectName, "Update environment: $Id")) {
                 try {
                     $result += ($body | Invoke-AdoRestMethod @params)
                 } catch {

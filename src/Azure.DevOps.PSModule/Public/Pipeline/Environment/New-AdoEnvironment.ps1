@@ -12,7 +12,7 @@
     .PARAMETER ProjectName
         Optional. The name or id of the project.
 
-    .PARAMETER EnvironmentName
+    .PARAMETER Name
         Optional. The name of the environment to filter the results.
 
     .PARAMETER Description
@@ -26,10 +26,10 @@
 
     .EXAMPLE
         $params = @{
-            CollectionUri   = 'https://dev.azure.com/my-org'
-            ProjectName     = 'my-project'
-            EnvironmentName = 'my-environment-tst'
-            Description     = 'Test environment description'
+            CollectionUri = 'https://dev.azure.com/my-org'
+            ProjectName   = 'my-project'
+            Name          = 'my-environment-tst'
+            Description   = 'Test environment description'
         }
 
         New-AdoEnvironment @params -Verbose
@@ -60,8 +60,7 @@
         [string]$ProjectName = $env:DefaultAdoProject,
 
         [Parameter(ValueFromPipelineByPropertyName, ValueFromPipeline)]
-        [Alias('Name')]
-        [string[]]$EnvironmentName,
+        [string[]]$Name,
 
         [Parameter()]
         [string]$Description,
@@ -76,7 +75,7 @@
         Write-Verbose ("Command: $($MyInvocation.MyCommand.Name)")
         Write-Debug ("CollectionUri: $CollectionUri")
         Write-Debug ("ProjectName: $ProjectName")
-        Write-Debug ("EnvironmentName: $EnvironmentName")
+        Write-Debug ("EnvironmentName: $Name")
         Write-Debug ("Version: $Version")
 
         Confirm-Defaults -Defaults ([ordered]@{
@@ -96,21 +95,21 @@
                 Method  = 'POST'
             }
 
-            foreach ($name in $EnvironmentName) {
+            foreach ($envName in $Name) {
                 $body = [PSCustomObject]@{
-                    Name        = $name
+                    Name        = $envName
                     Description = $Description
                 }
 
-                if ($PSCmdlet.ShouldProcess($ProjectName, "Create Environment: $name")) {
+                if ($PSCmdlet.ShouldProcess($ProjectName, "Create Environment: $envName")) {
                     try {
                         $result += ($body | Invoke-AdoRestMethod @params)
                     } catch {
                         if ($_ -match 'already exists') {
-                            Write-Warning "Environment $name already exists, trying to get it"
+                            Write-Warning "Environment $envName already exists, trying to get it"
 
                             $params.Method = 'GET'
-                            $params += @{ QueryParameters = "name=$($name)" }
+                            $params += @{ QueryParameters = "name=$($envName)" }
                             $result += (Invoke-AdoRestMethod @params).value
                         } else {
                             Write-AdoError -message $_
