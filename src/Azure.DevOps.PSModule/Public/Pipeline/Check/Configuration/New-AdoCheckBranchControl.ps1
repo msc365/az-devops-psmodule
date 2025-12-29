@@ -172,14 +172,15 @@
                         } | Get-AdoCheckConfiguration
 
                         $exists = $exists | Where-Object {
-                            $_.settings.displayName -eq $DisplayName -and
-                            $_.settings.inputs.allowedBranches -eq $AllowedBranches
+                            $_.settings.inputs.allowedBranches -eq $AllowedBranches -and
+                            $_.settings.inputs.ensureProtectionOfBranch -eq ($EnsureProtectionOfBranch ? 'true' : 'false') -and
+                            $_.settings.inputs.allowUnknownStatusBranches -eq ($AllowUnknownStatusBranches ? 'true' : 'false')
                         }
 
                         if (-not $exists) {
                             $result += ($body | Invoke-AdoRestMethod @params)
                         } else {
-                            Write-Warning "$($DisplayName) already exists for $ResourceType with ID $resourceId, returning existing."
+                            Write-Warning "$($exists.type.name) '$($exists.settings.displayName)' already exists for $ResourceType with ID $resourceId, returning existing one."
                             $result += $exists
                         }
                     } catch {

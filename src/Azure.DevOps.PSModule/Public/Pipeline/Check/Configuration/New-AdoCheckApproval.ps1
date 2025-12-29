@@ -178,7 +178,7 @@
                         $result += ($body | Invoke-AdoRestMethod @params)
                     } catch {
                         if ($_ -match 'already exists') {
-                            Write-Warning "Configuration $($definitionRef.name) already exists for $ResourceType with ID $resourceId, trying to get it"
+                            Write-Warning "$($definitionRef.name) already exists for $ResourceType with ID $resourceId, trying to get it"
 
                             $params.Method = 'GET'
                             $params.QueryParameters = "resourceType=$ResourceType&resourceId=$resourceId&`$expand=settings"
