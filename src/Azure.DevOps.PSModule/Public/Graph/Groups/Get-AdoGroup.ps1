@@ -135,7 +135,7 @@
 
                 if ($DisplayName) {
                     $groups = foreach ($name in $DisplayName) {
-                        $groups | Where-Object displayName -EQ $name
+                        $groups | Where-Object { $_.displayName -eq $name }
                     }
                 }
 

@@ -46,7 +46,7 @@
 
         [Parameter(ValueFromPipelineByPropertyName, ValueFromPipeline, ParameterSetName = 'ByNameOrId')]
         [Alias('Id', 'ProjectId', 'ProjectName')]
-        [string[]]$Name,
+        [string]$Name,
 
         [Parameter(ParameterSetName = 'ByNameOrId')]
         [switch]$IncludeCapabilities,
