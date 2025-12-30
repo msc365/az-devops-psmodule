@@ -75,7 +75,7 @@
         [string[]]$ResourceName,
 
         [Parameter(ValueFromPipelineByPropertyName)]
-        [ValidateSet('approval', 'precheck')]
+        [ValidateSet('precheck', 'approval', 'postcheck')]
         [string]$ApprovalType = 'approval',
 
         [Parameter(ValueFromPipelineByPropertyName)]
@@ -129,6 +129,12 @@
                         $definitionRef = @{
                             name = 'Pre-check approval'
                             id   = '0f52a19b-c67e-468f-b8eb-0ae83b532c99'
+                        }
+                    }
+                    'postcheck' {
+                        $definitionRef = @{
+                            name = 'Post-check approval'
+                            id   = '06441319-13fb-4756-b198-c2da116894a4'
                         }
                     }
                 }
