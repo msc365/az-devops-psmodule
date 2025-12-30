@@ -1,4 +1,4 @@
-﻿function Remove-AdoDefaults {
+﻿function Remove-AdoDefault {
     <#
     .SYNOPSIS
         Remove default Azure DevOps environment variables.
@@ -7,11 +7,10 @@
         This function removes the default Azure DevOps environment variables from both the current session.
 
     .EXAMPLE
-        Remove-AdoDefaults
+        Remove-AdoDefault
 
         Removes the default Azure DevOps environment variables from both the current session.
     #>
-    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseSingularNouns', 'Remove-AdoDefaults')]
     [CmdletBinding(SupportsShouldProcess)]
     param ()
 

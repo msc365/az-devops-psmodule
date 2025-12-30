@@ -1,4 +1,4 @@
-﻿function Get-AdoDefaults {
+﻿function Get-AdoDefault {
     <#
     .SYNOPSIS
         Get default Azure DevOps environment variables.
@@ -7,11 +7,10 @@
         This function gets the default Azure DevOps environment variables from the current session.
 
     .EXAMPLE
-        Get-AdoDefaults
+        Get-AdoDefault
 
         Gets the default Azure DevOps organization and project context.
     #>
-    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseSingularNouns', 'Get-AdoDefaults')]
     [CmdletBinding()]
     param (
     )

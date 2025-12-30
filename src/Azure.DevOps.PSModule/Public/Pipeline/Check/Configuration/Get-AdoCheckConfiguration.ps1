@@ -91,7 +91,7 @@
         Write-Debug ("Expands: $Expands")
         Write-Debug ("ApiVersion: $Version")
 
-        Confirm-Defaults -Defaults ([ordered]@{
+        Confirm-Default -Defaults ([ordered]@{
                 'CollectionUri' = $CollectionUri
                 'ProjectName'   = $ProjectName
             })

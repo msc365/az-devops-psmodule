@@ -89,7 +89,7 @@
         Write-Debug ("Description: $Description")
         Write-Debug ("Version: $Version")
 
-        Confirm-Defaults -Defaults ([ordered]@{
+        Confirm-Default -Defaults ([ordered]@{
                 'CollectionUri' = $CollectionUri
                 'ProjectName'   = $ProjectName
             })

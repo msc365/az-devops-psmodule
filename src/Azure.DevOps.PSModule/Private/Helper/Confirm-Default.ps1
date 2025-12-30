@@ -1,4 +1,4 @@
-﻿function Confirm-Defaults {
+﻿function Confirm-Default {
     <#
     .SYNOPSIS
         Confirms that required default parameters are set.
@@ -11,7 +11,6 @@
         A hashtable containing the default parameters to be checked.
     #>
     [CmdletBinding()]
-    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseSingularNouns', 'Confirm-Defaults')]
     param (
         [Parameter(Mandatory)]
         [hashtable]$Defaults
@@ -28,7 +27,7 @@
                 $DefaultValue = $Defaults[$key]
 
                 if ([string]::IsNullOrEmpty($DefaultValue)) {
-                    throw "Parameter '$key' is required. Please set defaults using 'Set-AdoDefaults' or specify it directly."
+                    throw "Parameter '$key' is required. Please set defaults using 'Set-AdoDefault' or specify it directly."
                 }
             }
 

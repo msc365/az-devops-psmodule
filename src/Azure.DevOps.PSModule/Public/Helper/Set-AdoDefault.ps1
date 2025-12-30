@@ -1,4 +1,4 @@
-﻿function Set-AdoDefaults {
+﻿function Set-AdoDefault {
     <#
     .SYNOPSIS
         Set default Azure DevOps environment variables.
@@ -7,11 +7,10 @@
         This function sets the default Azure DevOps environment variables for the current session.
 
     .EXAMPLE
-        Set-AdoDefaults -Organization 'my-org' -Project 'my-project'
+        Set-AdoDefault -Organization 'my-org' -Project 'my-project'
 
         Sets the default Azure DevOps default Organization to 'my-org', CollectionUri to "https://dev.azure.com/my-org" and Project to 'my-project'.
     #>
-    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseSingularNouns', 'Set-AdoDefaults')]
     [CmdletBinding(SupportsShouldProcess)]
     param (
         [Parameter(Mandatory)]

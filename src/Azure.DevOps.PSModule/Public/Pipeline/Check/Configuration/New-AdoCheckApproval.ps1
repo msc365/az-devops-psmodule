@@ -102,7 +102,7 @@
         Write-Debug ("Timeout: $Timeout")
         Write-Debug ("ApiVersion: $Version")
 
-        Confirm-Defaults -Defaults ([ordered]@{
+        Confirm-Default -Defaults ([ordered]@{
                 'CollectionUri' = $CollectionUri
                 'ProjectName'   = $ProjectName
             })
