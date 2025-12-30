@@ -118,8 +118,6 @@
             if ($PSCmdlet.ShouldProcess($CollectionUri, $Name ? "Get Project '$($Name)'" : 'Get Projects')) {
 
                 $response = Invoke-AdoRestMethod @params
-                # TODO: Handle continuation token to get all projects
-
                 $projects = if ($Name) { $response } else { $response.value }
 
                 # Output directly to pipeline
@@ -135,6 +133,9 @@
                         $obj['capabilities'] = $prj.capabilities
                     }
                     $obj['collectionUri'] = $CollectionUri
+                    if ($response.continuationToken) {
+                        $obj['continuationToken'] = $response.continuationToken
+                    }
                     [PSCustomObject]$obj
                 }
 

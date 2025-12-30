@@ -131,7 +131,6 @@
             if ($PSCmdlet.ShouldProcess($CollectionUri, 'Get Groups')) {
 
                 $response = Invoke-AdoRestMethod @params
-                # TODO: Handle continuation token to get all groups
                 $groups = $response.value
 
                 if ($DisplayName) {
@@ -140,26 +139,23 @@
                     }
                 }
 
-                foreach ($group in $groups) {
+                foreach ($grp in $groups) {
                     $obj = [ordered]@{
-                        displayName   = $group.displayName
-                        principalName = $group.principalName
-                        originId      = $group.originId
+                        displayName   = $grp.displayName
+                        originId      = $grp.originId
+                        principalName = $grp.principalName
+                        origin        = $grp.origin
+                        subjectKind   = $grp.subjectKind
+                        description   = $grp.description
+                        mailAddress   = $grp.mailAddress
+                        descriptor    = $grp.descriptor
+                        collectionUri = $CollectionUri
                     }
-                    if ($Expands -eq 'settings') {
-                        $obj['origin'] = $group.origin
-                        $obj['subjectKind'] = $group.subjectKind
-                        $obj['description'] = $group.description
-                        $obj['principalName'] = $group.principalName
-                        if ($group.mailAddress) {
-                            $obj['mailAddress'] = $group.mailAddress
-                        }
-                        $obj['descriptor'] = $group.descriptor
+                    if ($response.continuationToken) {
+                        $obj['continuationToken'] = $response.continuationToken
                     }
-                    $obj['collectionUri'] = $CollectionUri
                     [PSCustomObject]$obj
                 }
-
             } else {
                 if ($DisplayName) {
                     $params.DisplayName = ($DisplayName -join ',')
