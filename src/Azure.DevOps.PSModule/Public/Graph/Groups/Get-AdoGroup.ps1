@@ -78,10 +78,6 @@
         [Parameter(ValueFromPipelineByPropertyName, ValueFromPipeline)]
         [string[]]$DisplayName,
 
-        [Parameter(ValueFromPipelineByPropertyName)]
-        [ValidateSet('none', 'settings')]
-        [string]$Expands = 'none',
-
         [Parameter()]
         [Alias('ApiVersion')]
         [ValidateSet('7.2-preview.1')]
