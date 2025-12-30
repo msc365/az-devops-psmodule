@@ -44,8 +44,6 @@
         Confirm-Defaults -Defaults ([ordered]@{
                 'CollectionUri' = $CollectionUri
             })
-
-        $result = @()
     }
 
     process {
@@ -61,9 +59,13 @@
                 if ($PSCmdlet.ShouldProcess($CollectionUri, "Get Descriptor(s) for: $key")) {
 
                     $value = (Invoke-AdoRestMethod @params).value
-                    $result += [PSCustomObject]@{
-                        storageKey = $key
-                        value      = $value
+
+                    if ($null -ne $value) {
+                        [PSCustomObject]@{
+                            storageKey    = $key
+                            value         = $value
+                            collectionUri = $CollectionUri
+                        }
                     }
 
                 } else {
@@ -77,11 +79,6 @@
     }
 
     end {
-        if ($result) {
-            $result | ForEach-Object {
-                $_
-            }
-        }
-        Write-Debug ('Exit : {0}' -f $MyInvocation.MyCommand.Name)
+        Write-Verbose ("Exit: $($MyInvocation.MyCommand.Name)")
     }
 }

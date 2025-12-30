@@ -68,8 +68,6 @@
                 'CollectionUri' = $CollectionUri
                 'ProjectName'   = $ProjectName
             })
-
-        $result = @()
     }
 
     process {
@@ -82,7 +80,7 @@
 
             if ($PSCmdlet.ShouldProcess($ProjectName, "Delete Environment: $Id")) {
                 try {
-                    $result += Invoke-AdoRestMethod @params | Out-Null
+                    Invoke-AdoRestMethod @params | Out-Null
                 } catch {
                     if ($_ -match 'does not exist in current project') {
                         Write-Warning "Environment with ID $Id does not exist, skipping deletion."
@@ -101,10 +99,6 @@
     }
 
     end {
-        if ($result) {
-            $result
-        }
-
         Write-Verbose ("Exit: $($MyInvocation.MyCommand.Name)")
     }
 }

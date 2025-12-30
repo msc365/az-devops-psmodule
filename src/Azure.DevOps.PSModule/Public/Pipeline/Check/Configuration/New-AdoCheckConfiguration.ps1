@@ -99,8 +99,6 @@
                 'CollectionUri' = $CollectionUri
                 'ProjectName'   = $ProjectName
             })
-
-        $result = @()
     }
 
     process {
@@ -116,14 +114,51 @@
 
                 if ($PSCmdlet.ShouldProcess($ProjectName, "Create Configuration on: $($config.resource.type)")) {
                     try {
-                        $result += ($config | Invoke-AdoRestMethod @params)
+                        $result = $config | Invoke-AdoRestMethod @params
+
+                        $obj = [ordered]@{
+                            id = $result.id
+                        }
+                        if ($result.settings) {
+                            $obj['settings'] = $result.settings
+                        }
+                        $obj['timeout'] = $result.timeout
+                        $obj['type'] = $result.type
+                        $obj['resource'] = $result.resource
+                        $obj['createdBy'] = $result.createdBy.id
+                        $obj['createdOn'] = $result.createdOn
+                        $obj['project'] = $ProjectName
+                        $obj['collectionUri'] = $CollectionUri
+                        [PSCustomObject]$obj
+
                     } catch {
                         if ($_ -match 'already exists') {
                             Write-Warning "$($config.type.name) already exists for $($config.resource.type) with ID $($config.resource.id), trying to get it"
 
                             $params.Method = 'GET'
                             $params.QueryParameters = "resourceType=$($config.resource.type)&resourceId=$($config.resource.id)&`$expand=settings"
-                            $result += (Invoke-AdoRestMethod @params).value | Where-Object { $_.settings.definitionRef.id -eq $config.settings.definitionRef.id }
+
+                            $configs = (Invoke-AdoRestMethod @params).value | Where-Object {
+                                $_.settings.definitionRef.id -eq $config.settings.definitionRef.id
+                            }
+
+                            foreach ($result in $configs) {
+                                $obj = [ordered]@{
+                                    id = $result.id
+                                }
+                                if ($result.settings) {
+                                    $obj['settings'] = $result.settings
+                                }
+                                $obj['timeout'] = $result.timeout
+                                $obj['type'] = $result.type
+                                $obj['resource'] = $result.resource
+                                $obj['createdBy'] = $result.createdBy.id
+                                $obj['createdOn'] = $result.createdOn
+                                $obj['project'] = $ProjectName
+                                $obj['collectionUri'] = $CollectionUri
+                                [PSCustomObject]$obj
+
+                            }
                         } else {
                             throw $_
                         }
@@ -144,26 +179,6 @@
     }
 
     end {
-        if ($result) {
-            $result | ForEach-Object {
-                $obj = [ordered]@{
-                    id = $_.id
-                }
-                if ($_.settings) {
-                    $obj['settings'] = $_.settings
-                }
-                $obj['timeout'] = $_.timeout
-                $obj['type'] = $_.type
-                $obj['resource'] = $_.resource
-                $obj['createdBy'] = $_.createdBy.id
-                $obj['createdOn'] = $_.createdOn
-                $obj['project'] = $ProjectName
-                $obj['collectionUri'] = $CollectionUri
-
-                [PSCustomObject]$obj
-            }
-        }
-
         Write-Verbose ("Exit: $($MyInvocation.MyCommand.Name)")
     }
 }

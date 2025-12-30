@@ -69,8 +69,6 @@
                 'CollectionUri' = $CollectionUri
                 'ProjectName'   = $ProjectName
             })
-
-        $result = @()
     }
 
     process {
@@ -83,7 +81,7 @@
 
             if ($PSCmdlet.ShouldProcess($ProjectName, "Delete Check Configuration: $Id")) {
                 try {
-                    $result += Invoke-AdoRestMethod @params | Out-Null
+                    Invoke-AdoRestMethod @params | Out-Null
                 } catch {
                     if ($_ -match 'does not exist') {
                         Write-Warning "Check Configuration with ID $Id does not exist, skipping deletion."
@@ -102,10 +100,6 @@
     }
 
     end {
-        if ($result) {
-            $result
-        }
-
         Write-Verbose ("Exit: $($MyInvocation.MyCommand.Name)")
     }
 }

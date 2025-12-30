@@ -83,8 +83,6 @@
                 'CollectionUri' = $CollectionUri
                 'ProjectName'   = $ProjectName
             })
-
-        $result = @()
     }
 
     process {
@@ -96,22 +94,43 @@
                 Method  = 'POST'
             }
 
-            foreach ($envName in $Name) {
+            foreach ($name_ in $Name) {
+
                 $body = [PSCustomObject]@{
-                    Name        = $envName
-                    Description = $Description
+                    name        = $name_
+                    description = $Description
                 }
 
-                if ($PSCmdlet.ShouldProcess($ProjectName, "Create Environment: $envName")) {
+                if ($PSCmdlet.ShouldProcess($ProjectName, "Create environment: $name_")) {
                     try {
-                        $result += ($body | Invoke-AdoRestMethod @params)
+                        $env = $body | Invoke-AdoRestMethod @params
+
+                        [PSCustomObject]@{
+                            id            = $env.id
+                            name          = $env.name
+                            createdBy     = $env.createdBy.id
+                            createdOn     = $env.createdOn
+                            projectName   = $ProjectName
+                            collectionUri = $CollectionUri
+                        }
+
                     } catch {
                         if ($_ -match 'already exists') {
-                            Write-Warning "Environment $envName already exists, trying to get it"
+                            Write-Warning "Environment $name_ already exists, trying to get it"
 
                             $params.Method = 'GET'
-                            $params += @{ QueryParameters = "name=$($envName)" }
-                            $result += (Invoke-AdoRestMethod @params).value
+                            $params.QueryParameters = "name=$name_"
+
+                            $env = (Invoke-AdoRestMethod @params).value
+
+                            [PSCustomObject]@{
+                                id            = $env.id
+                                name          = $env.name
+                                createdBy     = $env.createdBy.id
+                                createdOn     = $env.createdOn
+                                projectName   = $ProjectName
+                                collectionUri = $CollectionUri
+                            }
                         } else {
                             throw $_
                         }
@@ -123,26 +142,12 @@
                     Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
                 }
             }
-
         } catch {
             throw $_
         }
     }
 
     end {
-        if ($result) {
-            $result | ForEach-Object {
-                [PSCustomObject]@{
-                    id            = $_.id
-                    name          = $_.name
-                    createdBy     = $_.createdBy.id
-                    createdOn     = $_.createdOn
-                    project       = $ProjectName
-                    collectionUri = $CollectionUri
-                }
-            }
-        }
-
         Write-Verbose ("Exit: $($MyInvocation.MyCommand.Name)")
     }
 }

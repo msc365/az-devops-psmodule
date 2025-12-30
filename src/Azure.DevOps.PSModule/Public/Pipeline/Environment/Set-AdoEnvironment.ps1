@@ -93,8 +93,6 @@
                 'CollectionUri' = $CollectionUri
                 'ProjectName'   = $ProjectName
             })
-
-        $result = @()
     }
 
     process {
@@ -113,7 +111,17 @@
 
             if ($PSCmdlet.ShouldProcess($ProjectName, "Update environment: $Id")) {
                 try {
-                    $result += ($body | Invoke-AdoRestMethod @params)
+                    $env = $body | Invoke-AdoRestMethod @params
+                    [PSCustomObject]@{
+                        id             = $env.id
+                        name           = $env.name
+                        createdBy      = $env.createdBy.id
+                        createdOn      = $env.createdOn
+                        lastModifiedBy = $env.lastModifiedBy.id
+                        lastModifiedOn = $env.lastModifiedOn
+                        projectName    = $ProjectName
+                        collectionUri  = $CollectionUri
+                    }
                 } catch {
                     if ($_ -match 'does not exist') {
                         Write-Warning "Environment with ID $id does not exist, skipping update."
@@ -134,21 +142,6 @@
     }
 
     end {
-        if ($result) {
-            $result | ForEach-Object {
-                [PSCustomObject]@{
-                    id             = $_.id
-                    name           = $_.name
-                    createdBy      = $_.createdBy.id
-                    createdOn      = $_.createdOn
-                    lastModifiedBy = $_.lastModifiedBy.id
-                    lastModifiedOn = $_.lastModifiedOn
-                    project        = $ProjectName
-                    collectionUri  = $CollectionUri
-                }
-            }
-        }
-
         Write-Verbose ("Exit: $($MyInvocation.MyCommand.Name)")
     }
 }

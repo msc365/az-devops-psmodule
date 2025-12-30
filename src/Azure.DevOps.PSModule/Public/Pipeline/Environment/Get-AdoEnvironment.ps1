@@ -83,8 +83,6 @@
                 'CollectionUri' = $CollectionUri
                 'ProjectName'   = $ProjectName
             })
-
-        $result = @()
     }
 
     process {
@@ -99,7 +97,20 @@
 
             if ($PSCmdlet.ShouldProcess($CollectionUri, "Get Environment(s) from: $ProjectName")) {
 
-                $result += (Invoke-AdoRestMethod @params).value
+                $environments = (Invoke-AdoRestMethod @params).value
+
+                foreach ($env in $environments) {
+                    [PSCustomObject]@{
+                        id             = $env.id
+                        name           = $env.name
+                        createdBy      = $env.createdBy.id
+                        createdOn      = $env.createdOn
+                        lastModifiedBy = $env.lastModifiedBy.id
+                        lastModifiedOn = $env.lastModifiedOn
+                        projectName    = $ProjectName
+                        collectionUri  = $CollectionUri
+                    }
+                }
 
             } else {
                 Write-Verbose "Calling Invoke-AdoRestMethod with $($params| ConvertTo-Json -Depth 10)"
@@ -111,21 +122,6 @@
     }
 
     end {
-        if ($result) {
-            $result | ForEach-Object {
-                [PSCustomObject]@{
-                    id             = $_.id
-                    name           = $_.name
-                    createdBy      = $_.createdBy.id
-                    createdOn      = $_.createdOn
-                    lastModifiedBy = $_.lastModifiedBy.id
-                    lastModifiedOn = $_.lastModifiedOn
-                    project        = $ProjectName
-                    collectionUri  = $CollectionUri
-                }
-            }
-        }
-
         Write-Verbose ("Exit: $($MyInvocation.MyCommand.Name)")
     }
 }

@@ -108,8 +108,6 @@
                 'CollectionUri' = $CollectionUri
                 'ProjectName'   = $ProjectName
             })
-
-        $result = @()
     }
 
     process {
@@ -178,10 +176,40 @@
                         }
 
                         if (-not $exists) {
-                            $result += ($body | Invoke-AdoRestMethod @params)
+                            $config = $body | Invoke-AdoRestMethod @params
+
+                            $obj = [ordered]@{
+                                id = $config.id
+                            }
+                            if ($config.settings) {
+                                $obj['settings'] = $config.settings
+                            }
+                            $obj['timeout'] = $config.timeout
+                            $obj['type'] = $config.type
+                            $obj['resource'] = $config.resource
+                            $obj['createdBy'] = $config.createdBy.id
+                            $obj['createdOn'] = $config.createdOn
+                            $obj['project'] = $ProjectName
+                            $obj['collectionUri'] = $CollectionUri
+                            [PSCustomObject]$obj
+
                         } else {
                             Write-Warning "$($exists.type.name) '$($exists.settings.displayName)' already exists for $ResourceType with ID $resourceId, returning existing one."
-                            $result += $exists
+
+                            $obj = [ordered]@{
+                                id = $exists.id
+                            }
+                            if ($exists.settings) {
+                                $obj['settings'] = $exists.settings
+                            }
+                            $obj['timeout'] = $exists.timeout
+                            $obj['type'] = $exists.type
+                            $obj['resource'] = $exists.resource
+                            $obj['createdBy'] = $exists.createdBy.id
+                            $obj['createdOn'] = $exists.createdOn
+                            $obj['project'] = $ProjectName
+                            $obj['collectionUri'] = $CollectionUri
+                            [PSCustomObject]$obj
                         }
                     } catch {
                         throw $_
@@ -201,25 +229,6 @@
     }
 
     end {
-        if ($result) {
-            $result | ForEach-Object {
-                $obj = [ordered]@{
-                    id = $_.id
-                }
-                if ($_.settings) {
-                    $obj['settings'] = $_.settings
-                }
-                $obj['timeout'] = $_.timeout
-                $obj['type'] = $_.type
-                $obj['resource'] = $_.resource
-                $obj['createdBy'] = $_.createdBy.id
-                $obj['createdOn'] = $_.createdOn
-                $obj['project'] = $ProjectName
-                $obj['collectionUri'] = $CollectionUri
-                [PSCustomObject]$obj
-            }
-        }
-
         Write-Verbose ("Exit: $($MyInvocation.MyCommand.Name)")
     }
 }

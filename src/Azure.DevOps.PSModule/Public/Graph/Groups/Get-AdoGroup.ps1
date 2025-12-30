@@ -16,12 +16,13 @@
         Optional. A comma separated list of user subject subtypes to reduce the retrieved results, e.g. Microsoft.IdentityModel.Claims.ClaimsIdentity
 
     .PARAMETER ContinuationToken
-        Optional. An opaque data blob that allows the next page of data to resume immediately after where the previous page ended. The only reliable way to know if there is more data left is the presence of a continuation token.
+        Optional. An opaque data blob that allows the next page of data to resume immediately after where the previous page ended.
+        The only reliable way to know if there is more data left is the presence of a continuation token.
 
     .PARAMETER DisplayName
         Optional. A comma separated list of group display names to filter the retrieved results.
 
-    .PARAMETER ApiVersion
+    .PARAMETER Version
         The API version to use.
 
     .OUTPUTS
@@ -98,28 +99,26 @@
         Confirm-Defaults -Defaults ([ordered]@{
                 'CollectionUri' = $CollectionUri
             })
-
-        $result = @()
     }
 
     process {
         try {
-            $queryParameters = @()
+            $queryParameters = [System.Collections.Generic.List[string]]::new()
 
             if ($ScopeDescriptor) {
-                $queryParameters += "scopeDescriptor=$($ScopeDescriptor)"
+                $queryParameters.Add("scopeDescriptor=$($ScopeDescriptor)")
             }
 
             if ($SubjectTypes) {
-                $queryParameters += "subjectTypes=$([string]::Join(',', $SubjectTypes))"
+                $queryParameters.Add("subjectTypes=$([string]::Join(',', $SubjectTypes))")
             }
 
             if ($ContinuationToken) {
-                $queryParameters += "continuationToken=$ContinuationToken"
+                $queryParameters.Add("continuationToken=$ContinuationToken")
             }
 
             if ($queryParameters.Count -gt 0) {
-                $queryParameters = ($queryParameters -join '&')
+                $queryParameters = $queryParameters -join '&'
             }
 
             $params = @{
@@ -131,16 +130,34 @@
 
             if ($PSCmdlet.ShouldProcess($CollectionUri, 'Get Groups')) {
 
-                $response = (Invoke-AdoRestMethod @params)
+                $response = Invoke-AdoRestMethod @params
                 # TODO: Handle continuation token to get all groups
                 $groups = $response.value
 
                 if ($DisplayName) {
-                    foreach ($name in $DisplayName) {
-                        $result += $groups | Where-Object displayName -EQ $name
+                    $groups = foreach ($name in $DisplayName) {
+                        $groups | Where-Object displayName -EQ $name
                     }
-                } else {
-                    $result += $groups
+                }
+
+                foreach ($group in $groups) {
+                    $obj = [ordered]@{
+                        displayName   = $group.displayName
+                        principalName = $group.principalName
+                        originId      = $group.originId
+                    }
+                    if ($Expands -eq 'settings') {
+                        $obj['origin'] = $group.origin
+                        $obj['subjectKind'] = $group.subjectKind
+                        $obj['description'] = $group.description
+                        $obj['principalName'] = $group.principalName
+                        if ($group.mailAddress) {
+                            $obj['mailAddress'] = $group.mailAddress
+                        }
+                        $obj['descriptor'] = $group.descriptor
+                    }
+                    $obj['collectionUri'] = $CollectionUri
+                    [PSCustomObject]$obj
                 }
 
             } else {
@@ -156,28 +173,6 @@
     }
 
     end {
-        if ($result) {
-            $result | ForEach-Object {
-                $obj = [ordered]@{
-                    displayName   = $_.displayName
-                    principalName = $_.principalName
-                    originId      = $_.originId
-                }
-                if ($Expands -eq 'settings') {
-                    $obj['origin'] = $_.origin
-                    $obj['subjectKind'] = $_.subjectKind
-                    $obj['description'] = $_.description
-                    $obj['principalName'] = $_.principalName
-                    if ($_.mailAddress) {
-                        $obj['mailAddress'] = $_.mailAddress
-                    }
-                    $obj['descriptor'] = $_.descriptor
-                    $obj['collectionUrl'] = $CollectionUri
-                }
-
-                [PSCustomObject]$obj
-            }
-        }
         Write-Verbose ("Exit: $($MyInvocation.MyCommand.Name)")
     }
 }

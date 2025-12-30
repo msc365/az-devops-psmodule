@@ -95,8 +95,6 @@
                 'CollectionUri' = $CollectionUri
                 'ProjectName'   = $ProjectName
             })
-
-        $result = @()
     }
 
     process {
@@ -125,8 +123,24 @@
                 }
 
                 if ($PSCmdlet.ShouldProcess($ProjectName, "Get Check Configuration(s) from: $ResourceType/$name")) {
+                    $configs = (Invoke-AdoRestMethod @params).value
 
-                    $result += (Invoke-AdoRestMethod @params).value
+                    foreach ($config in $configs) {
+                        $obj = [ordered]@{
+                            id = $config.id
+                        }
+                        if ($config.settings) {
+                            $obj['settings'] = $config.settings
+                        }
+                        $obj['timeout'] = $config.timeout
+                        $obj['type'] = $config.type
+                        $obj['resource'] = $config.resource
+                        $obj['createdBy'] = $config.createdBy.id
+                        $obj['createdOn'] = $config.createdOn
+                        $obj['project'] = $ProjectName
+                        $obj['collectionUri'] = $CollectionUri
+                        [PSCustomObject]$obj
+                    }
 
                 } else {
                     Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
@@ -139,26 +153,6 @@
     }
 
     end {
-        if ($result) {
-            $result | ForEach-Object {
-                $obj = [ordered]@{
-                    id = $_.id
-                }
-                if ($_.settings) {
-                    $obj['settings'] = $_.settings
-                }
-                $obj['timeout'] = $_.timeout
-                $obj['type'] = $_.type
-                $obj['resource'] = $_.resource
-                $obj['createdBy'] = $_.createdBy.id
-                $obj['createdOn'] = $_.createdOn
-                $obj['project'] = $ProjectName
-                $obj['collectionUri'] = $CollectionUri
-
-                [PSCustomObject]$obj
-            }
-        }
-
         Write-Verbose ("Exit: $($MyInvocation.MyCommand.Name)")
     }
 }
