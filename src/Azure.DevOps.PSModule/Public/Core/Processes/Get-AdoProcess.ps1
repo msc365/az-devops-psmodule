@@ -1,91 +1,120 @@
 ﻿function Get-AdoProcess {
     <#
     .SYNOPSIS
-        Get the process details.
+        Retrieves Azure DevOps process details.
 
     .DESCRIPTION
-        This function retrieves the process details for an Azure DevOps process through REST API.
+        This cmdlet retrieves details of one or more Azure DevOps processes within a specified organization.
+        You can retrieve all processes or a specific process by name.
 
-    .PARAMETER Process
-        Optional. The name of the process. Default is $null.
+    .PARAMETER CollectionUri
+        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/myorganization.
 
-    .PARAMETER ApiVersion
-        Optional. The API version to use.
+    .PARAMETER Name
+        Optional. The name of the process to retrieve. If not provided, retrieves all processes.
 
-    .OUTPUTS
-        System.Object
-
-        The process details object.
+    .PARAMETER Version
+        Optional. The API version to use for the request. Default is '7.2-preview.1'.
 
     .LINK
-        https://learn.microsoft.com/en-us/rest/api/azure/devops/core/processes
+        https://learn.microsoft.com/en-us/rest/api/azure/devops/core/processes/list
 
     .EXAMPLE
-        $processes = Get-AdoProcess
+        $params = @{
+            CollectionUri = 'https://dev.azure.com/my-org'
+        }
+        Get-AdoProcess @params
 
-        Gets all available processes.
+        Retrieves all available processes from the specified organization.
 
     .EXAMPLE
-        $process = Get-AdoProcess -Process 'Agile'
+        $params = @{
+            CollectionUri = 'https://dev.azure.com/my-org'
+        }
+        Get-AdoProcess @params -Name 'Agile'
 
-        Gets the details of the 'Agile' process.
+        Retrieves the specified process by name.
 
+    .EXAMPLE
+        $params = @{
+            CollectionUri = 'https://dev.azure.com/my-org'
+        }
+        @('Agile', 'Scrum') | Get-AdoProcess @params -Verbose
+
+        Retrieves multiple processes by name demonstrating pipeline input.
     #>
-    [CmdletBinding()]
-    [OutputType([object])]
+    [CmdletBinding(SupportsShouldProcess)]
     param (
-        [Parameter(Mandatory = $false)]
-        [ValidateSet('Agile', 'Scrum', 'CMMI', 'Basic')]
-        [string]$Process,
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
+        [string]$CollectionUri = $env:DefaultAdoCollectionUri,
 
-        [Parameter(Mandatory = $false)]
-        [Alias('Api')]
+        [Parameter(ValueFromPipelineByPropertyName, ValueFromPipeline)]
+        [Alias('Process', 'ProcessName')]
+        [ValidateSet('Agile', 'Scrum', 'CMMI', 'Basic')]
+        [string[]]$Name,
+
+        [Parameter()]
+        [Alias('ApiVersion')]
         [ValidateSet('7.1', '7.2-preview.1')]
-        [string]$ApiVersion = '7.1'
+        [string]$Version = '7.2-preview.1'
     )
 
     begin {
-        Write-Debug ('Command      : {0}' -f $MyInvocation.MyCommand.Name)
-        Write-Debug ('  Process    : {0}' -f $Process)
-        Write-Debug ('  ApiVersion : {0}' -f $ApiVersion)
+        Write-Verbose ("Command: $($MyInvocation.MyCommand.Name)")
+        Write-Debug ("CollectionUri: $CollectionUri")
+        Write-Debug ("Name: $Name")
+        Write-Debug ("Version: $Version")
+
+        Confirm-Default -Defaults ([ordered]@{
+                'CollectionUri' = $CollectionUri
+            })
     }
 
     process {
         try {
-            $ErrorActionPreference = 'Stop'
 
-            if (-not $global:AzDevOpsIsConnected) {
-                throw 'Not connected to Azure DevOps. Please connect using Connect-AdoOrganization.'
-            }
+            foreach ($n_ in $Name) {
 
-            $uriFormat = '{0}/_apis/process/processes?api-version={1}'
-            $azDevOpsUri = ($uriFormat -f [uri]::new($global:AzDevOpsOrganization), $ApiVersion)
-
-            $params = @{
-                Method  = 'GET'
-                Uri     = $azDevOpsUri
-                Headers = @{
-                    'Accept'        = 'application/json'
-                    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
+                $params = @{
+                    Uri     = "$CollectionUri/_apis/process/processes"
+                    Version = $Version
+                    Method  = 'GET'
                 }
-            }
 
-            $response = Invoke-RestMethod @params -Verbose:$VerbosePreference
+                if ($PSCmdlet.ShouldProcess($CollectionUri, $n_ ? "Get Process: $n_" : 'Get Processes')) {
 
-            if ($Process) {
-                return $response.value | Where-Object {
-                    $_.name -eq $Process
+                    $results = Invoke-AdoRestMethod @params
+                    $processes = $results.value
+
+                    if ($n_) {
+                        $processes = $processes | Where-Object { $_.name -eq $n_ }
+                    }
+
+                    foreach ($p_ in $processes) {
+                        [PSCustomObject]@{
+                            id            = $p_.id
+                            name          = $p_.name
+                            description   = $p_.description
+                            url           = $p_.url
+                            type          = $p_.type
+                            isDefault     = $p_.isDefault
+                            collectionUri = $CollectionUri
+                        }
+                    }
+
+                } else {
+                    Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
                 }
-            } else {
-                return $response.value
             }
 
         } catch {
             throw $_
         }
+
     }
 
     end {
-        Write-Debug ('Exit : {0}' -f $MyInvocation.MyCommand.Name)
+        Write-Verbose ("Exit: $($MyInvocation.MyCommand.Name)")
     }
 }
