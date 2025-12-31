@@ -1,7 +1,7 @@
 ---
 document type: module
 Help Version: 0.0.1
-HelpInfoUri: na
+HelpInfoUri: 
 Locale: en-US
 Module Guid: 734c3172-da46-4f59-a2e8-0bc3eeaa27bb
 Module Name: Azure.DevOps.PSModule
