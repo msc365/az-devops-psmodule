@@ -19,8 +19,9 @@ body:
       required: false
   - type: input
     attributes:
-      label: Azure IDP Toolbox version
-      description: Please provide the version of the IPD Toolbox Module you are using.
+      label: Azure.DevOps.PSModule version
+      description: Please provide the version of the Azure.DevOps.PSModule you are using.
+      placeholder: 0.2.0, 0.2.0-alpha1, etc.
     validations:
       required: true
   - type: input
