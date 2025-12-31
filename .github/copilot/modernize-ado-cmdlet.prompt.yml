@@ -1,0 +1,326 @@
+name: Modernize Azure DevOps PowerShell Cmdlet
+description: Modernize and standardize Azure DevOps PowerShell module cmdlets following the established pattern from Core/Projects folder
+version: 1.0.0
+
+rules:
+  - title: Replace Legacy Global Variables
+    pattern: |
+      Remove usage of:
+      - $global:AzDevOpsIsConnected
+      - $global:AzDevOpsOrganization
+      - $AzDevOpsAuth
+      - Direct Invoke-RestMethod calls
+
+      Replace with:
+      - CollectionUri parameter with validation
+      - Invoke-AdoRestMethod helper function
+      - Confirm-Default for default value validation
+
+  - title: Standardize Parameter Naming
+    pattern: |
+      Use consistent parameter naming:
+      - ProjectName (not Project) with ProjectId alias
+      - Get cmdlets: Use -Name for filtering/retrieving
+      - New cmdlets: Use -Name for new item name
+      - Set cmdlets: Use -Id for target, -Name for new name
+      - Remove cmdlets: Use -Id for target to remove
+      - Add backward compatibility aliases (Team, TeamId, TeamName, etc.)
+
+  - title: Add Modern Cmdlet Features
+    pattern: |
+      - Add [CmdletBinding(SupportsShouldProcess)]
+      - Add CollectionUri parameter with ValidateScript
+      - Add pipeline support (ValueFromPipeline, ValueFromPipelineByPropertyName)
+      - Use array parameters with foreach loops
+      - Add proper Write-Verbose and Write-Debug statements
+      - Use Confirm-Default helper in begin block
+
+  - title: Consolidate List Cmdlets
+    pattern: |
+      Merge Get-Ado[Type] and Get-Ado[Type]List into single cmdlet:
+      - Make Name/Id parameter optional
+      - Add Skip and Top parameters for pagination
+      - Use DefaultParameterSetName = 'List[Type]s'
+      - Use ParameterSetName = 'ByName' or 'ByNameOrId' for specific items
+      - Delete the List cmdlet file after consolidation
+
+  - title: Use Efficient Code Structure
+    pattern: |
+      Follow Get-AdoProject pattern for efficiency:
+      - Single foreach ($n_ in $Name) loop handles both scenarios
+      - When $Name is null, loop runs once for list all
+      - Build URI conditionally inside loop
+      - Use List[string] for query parameters
+      - Use ternary operators in ShouldProcess
+      - Normalize results: $items = if ($n_) { @($results) } else { $results.value }
+
+template: |
+  function Get-Ado[Type] {
+      <#
+      .SYNOPSIS
+          Retrieves Azure DevOps [type] details.
+
+      .DESCRIPTION
+          This cmdlet retrieves details of one or more Azure DevOps [type]s within a specified [scope].
+          You can retrieve all [type]s, or specific [type]s by name or ID.
+
+      .PARAMETER CollectionUri
+          Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/myorganization.
+
+      .PARAMETER ProjectName
+          Mandatory. The ID or name of the project.
+
+      .PARAMETER Name
+          Optional. The ID or name of the [type](s) to retrieve. If not provided, retrieves all [type]s.
+
+      .PARAMETER Skip
+          Optional. The number of [type]s to skip. Used for pagination.
+
+      .PARAMETER Top
+          Optional. The number of [type]s to retrieve. Used for pagination. Default is 100.
+
+      .PARAMETER Version
+          Optional. The API version to use for the request. Default is '[version]'.
+
+      .LINK
+          https://learn.microsoft.com/en-us/rest/api/azure/devops/[area]/[resource]
+
+      .EXAMPLE
+          $params = @{
+              CollectionUri = 'https://dev.azure.com/my-org'
+              ProjectName   = 'my-project'
+          }
+          Get-Ado[Type] @params
+
+          Retrieves all [type]s from the specified project.
+
+      .EXAMPLE
+          $params = @{
+              CollectionUri = 'https://dev.azure.com/my-org'
+              ProjectName   = 'my-project'
+          }
+          Get-Ado[Type] @params -Name 'my-[type]'
+
+          Retrieves the specified [type] from the project.
+      #>
+      [CmdletBinding(DefaultParameterSetName = 'List[Type]s', SupportsShouldProcess)]
+      param (
+          [Parameter(ValueFromPipelineByPropertyName)]
+          [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
+          [string]$CollectionUri = $env:DefaultAdoCollectionUri,
+
+          [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+          [Alias('ProjectId')]
+          [string]$ProjectName,
+
+          [Parameter(ValueFromPipelineByPropertyName, ValueFromPipeline, ParameterSetName = 'ByName')]
+          [Alias('[Type]', '[Type]Id', '[Type]Name')]
+          [string[]]$Name,
+
+          [Parameter(ParameterSetName = 'List[Type]s')]
+          [int]$Skip,
+
+          [Parameter(ParameterSetName = 'List[Type]s')]
+          [int]$Top = 100,
+
+          [Parameter()]
+          [Alias('ApiVersion')]
+          [ValidateSet('[versions]')]
+          [string]$Version = '[default-version]'
+      )
+
+      begin {
+          Write-Verbose ("Command: $($MyInvocation.MyCommand.Name)")
+          Write-Debug ("CollectionUri: $CollectionUri")
+          Write-Debug ("ProjectName: $ProjectName")
+          Write-Debug ("Name: $($Name -join ',')")
+          Write-Debug ("Skip: $Skip")
+          Write-Debug ("Top: $Top")
+          Write-Debug ("Version: $Version")
+
+          Confirm-Default -Defaults ([ordered]@{
+                  'CollectionUri' = $CollectionUri
+              })
+      }
+
+      process {
+          try {
+
+              foreach ($n_ in $Name) {
+                  $queryParameters = [System.Collections.Generic.List[string]]::new()
+
+                  if ($n_) {
+                      $uri = "$CollectionUri/_apis/projects/$ProjectName/[resources]/$n_"
+                  } else {
+                      $uri = "$CollectionUri/_apis/projects/$ProjectName/[resources]"
+
+                      # Build query parameters
+                      if ($Skip) {
+                          $queryParameters.Add("`$skip=$Skip")
+                      }
+                      if ($Top) {
+                          $queryParameters.Add("`$top=$Top")
+                      }
+                  }
+
+                  $params = @{
+                      Uri             = $uri
+                      Version         = $Version
+                      QueryParameters = if ($queryParameters.Count -gt 0) { $queryParameters -join '&' } else { $null }
+                      Method          = 'GET'
+                  }
+
+                  if ($PSCmdlet.ShouldProcess($CollectionUri, $n_ ? "Get [Type]: $n_ in Project: $ProjectName" : "Get [Type]s for Project: $ProjectName")) {
+
+                      try {
+                          $results = Invoke-AdoRestMethod @params
+                          $items = if ($n_) { @($results) } else { $results.value }
+
+                          foreach ($i_ in $items) {
+                              [PSCustomObject]@{
+                                  id            = $i_.id
+                                  name          = $i_.name
+                                  description   = $i_.description
+                                  # Add additional properties
+                                  projectName   = $ProjectName
+                                  collectionUri = $CollectionUri
+                              }
+                          }
+
+                      } catch {
+                          if ($_ -match 'does not exist') {
+                              Write-Warning "[Type] with ID $n_ does not exist in project $ProjectName, skipping."
+                          } else {
+                              throw $_
+                          }
+                      }
+
+                  } else {
+                      Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
+                  }
+              }
+
+          } catch {
+              throw $_
+          }
+
+      }
+
+      end {
+          Write-Verbose ("Exit: $($MyInvocation.MyCommand.Name)")
+      }
+  }
+
+examples:
+  - description: Modernize a basic Get cmdlet
+    before: |
+      function Get-AdoTeam {
+          param (
+              [Parameter(Mandatory)]
+              [string]$ProjectId,
+
+              [Parameter(Mandatory)]
+              [string]$TeamId
+          )
+
+          if (-not $global:AzDevOpsIsConnected) {
+              throw 'Not connected'
+          }
+
+          $uri = "$global:AzDevOpsOrganization/_apis/projects/$ProjectId/teams/$TeamId"
+          Invoke-RestMethod -Uri $uri -Headers @{ Authorization = $AzDevOpsAuth }
+      }
+
+    after: |
+      function Get-AdoTeam {
+          [CmdletBinding(DefaultParameterSetName = 'ListTeams', SupportsShouldProcess)]
+          param (
+              [Parameter(ValueFromPipelineByPropertyName)]
+              [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
+              [string]$CollectionUri = $env:DefaultAdoCollectionUri,
+
+              [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+              [Alias('ProjectId')]
+              [string]$ProjectName,
+
+              [Parameter(ValueFromPipelineByPropertyName, ValueFromPipeline, ParameterSetName = 'ByName')]
+              [Alias('Team', 'TeamId', 'TeamName')]
+              [string[]]$Name,
+
+              [Parameter(ParameterSetName = 'ListTeams')]
+              [int]$Skip,
+
+              [Parameter(ParameterSetName = 'ListTeams')]
+              [int]$Top = 100
+          )
+
+          begin {
+              Confirm-Default -Defaults ([ordered]@{
+                  'CollectionUri' = $CollectionUri
+              })
+          }
+
+          process {
+              foreach ($n_ in $Name) {
+                  if ($n_) {
+                      $uri = "$CollectionUri/_apis/projects/$ProjectName/teams/$n_"
+                  } else {
+                      $uri = "$CollectionUri/_apis/projects/$ProjectName/teams"
+                  }
+
+                  $params = @{
+                      Uri     = $uri
+                      Version = '7.2-preview.3'
+                      Method  = 'GET'
+                  }
+
+                  if ($PSCmdlet.ShouldProcess($CollectionUri, "Get Team")) {
+                      $results = Invoke-AdoRestMethod @params
+                      $teams = if ($n_) { @($results) } else { $results.value }
+
+                      foreach ($t_ in $teams) {
+                          [PSCustomObject]@{
+                              id            = $t_.id
+                              name          = $t_.name
+                              collectionUri = $CollectionUri
+                          }
+                      }
+                  }
+              }
+          }
+      }
+
+  - description: Consolidate Get and GetList cmdlets
+    note: |
+      When you have separate Get-Ado[Type] and Get-Ado[Type]List cmdlets:
+      1. Merge functionality into Get-Ado[Type]
+      2. Make Name parameter optional
+      3. Add Skip and Top parameters with ParameterSetName
+      4. Use single foreach loop pattern
+      5. Delete Get-Ado[Type]List.ps1 file
+
+checklist:
+  - Update parameter names (ProjectName, Name/Id pattern)
+  - Add CollectionUri with validation
+  - Replace global variables with parameters
+  - Replace Invoke-RestMethod with Invoke-AdoRestMethod
+  - Add Confirm-Default in begin block
+  - Add SupportsShouldProcess
+  - Add pipeline support attributes
+  - Add parameter set names for Get cmdlets
+  - Use single foreach loop pattern
+  - Add proper error handling with try/catch
+  - Add Write-Verbose and Write-Debug statements
+  - Add backward compatibility aliases
+  - Include collectionUri in output objects
+  - Update help documentation
+  - Update examples to use new pattern
+
+notes:
+  - Always maintain backward compatibility through aliases
+  - Use ternary operators for cleaner conditionals (PowerShell 7+)
+  - Pattern works for Core, Graph, Pipeline, Work, and other folders
+  - Reference Get-AdoProject as the gold standard implementation
+  - Set cmdlets use -Id for target identification, -Name for new name value
+  - Remove cmdlets use -Id for target identification
+  - New cmdlets use -Name for the new item name
