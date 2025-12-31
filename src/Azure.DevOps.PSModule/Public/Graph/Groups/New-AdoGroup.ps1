@@ -4,80 +4,118 @@
         Adds an AAD Group as member of a group.
 
     .DESCRIPTION
-        This function adds an AAD Group as member of a group in Azure DevOps through REST API.
+        This cmdlet adds an AAD Group as member of a group in Azure DevOps.
+
+    .PARAMETER CollectionUri
+        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://vssps.dev.azure.com/myorganization.
 
     .PARAMETER GroupDescriptor
-        A comma separated list of descriptors referencing groups you want the graph group to join.
+        Mandatory. A comma separated list of descriptors referencing groups you want the graph group to join.
 
     .PARAMETER GroupId
-        The OriginId of the entra group to add as a member.
+        Mandatory. The OriginId of the entra group to add as a member.
 
-    .PARAMETER ApiVersion
-        The API version to use.
+    .PARAMETER Version
+        Optional. The API version to use for the request. Default is '7.2-preview.1'.
 
     .LINK
         https://learn.microsoft.com/en-us/rest/api/azure/devops/graph/groups/create
 
     .EXAMPLE
-        New-AdoGroup -GroupDescriptor 'vssgp.00000000-0000-0000-0000-000000000000' -GroupId '00000000-0000-0000-0000-000000000000'
+        $params = @{
+            CollectionUri   = 'https://vssps.dev.azure.com/my-org'
+            GroupDescriptor = 'vssgp.00000000-0000-0000-0000-000000000000'
+            GroupId         = '00000000-0000-0000-0000-000000000000'
+        }
+        New-AdoGroup @params
 
         Adds an AAD Group as member of a group.
+
+    .EXAMPLE
+        $params = @{
+            CollectionUri   = 'https://vssps.dev.azure.com/my-org'
+            GroupDescriptor = 'vssgp.00000000-0000-0000-0000-000000000000'
+        }
+        @('00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000002') | New-AdoGroup @params
+
+        Adds multiple AAD Groups as members demonstrating pipeline input.
     #>
-    [CmdletBinding()]
-    [OutputType([String])]
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
     param (
-        [Parameter(Mandatory)]
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
+        [string]$CollectionUri = ($env:DefaultAdoCollectionUri -replace 'https://', 'https://vssps.'),
+
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
         [Alias('Descriptor')]
         [string]$GroupDescriptor,
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName, ValueFromPipeline)]
         [Alias('OriginId')]
-        [string]$GroupId,
+        [string[]]$GroupId,
 
-        [Parameter(Mandatory = $false)]
-        [Alias('Api')]
-        [ValidateSet('7.1-preview.1', '7.2-preview.1')]
-        [string]$ApiVersion = '7.2-preview.1'
+        [Parameter()]
+        [Alias('ApiVersion')]
+        [ValidateSet('7.2-preview.1')]
+        [string]$Version = '7.2-preview.1'
     )
 
     begin {
-        Write-Debug ('Command              : {0}' -f $MyInvocation.MyCommand.Name)
-        Write-Debug ('  GroupDescriptor    : {0}' -f $GroupDescriptor)
-        Write-Debug ('  GroupId (OriginId) : {0}' -f $GroupId)
-        Write-Debug ('  ApiVersion         : {0}' -f $ApiVersion)
+        Write-Verbose ("Command: $($MyInvocation.MyCommand.Name)")
+        Write-Debug ("CollectionUri: $CollectionUri")
+        Write-Debug ("GroupDescriptor: $GroupDescriptor")
+        Write-Debug ("GroupId: $($GroupId -join ',')")
+        Write-Debug ("Version: $Version")
+
+        Confirm-Default -Defaults ([ordered]@{
+                'CollectionUri' = $CollectionUri
+            })
     }
 
     process {
         try {
-            $ErrorActionPreference = 'Stop'
-
-            if (-not $global:AzDevOpsIsConnected) {
-                throw 'Not connected to Azure DevOps. Please connect using Connect-AdoOrganization.'
-            }
-
-            $AzDevOpsOrganization = $global:AzDevOpsOrganization -replace 'https://', 'https://vssps.'
-
-            $uriFormat = ('{0}/_apis/graph/groups?groupDescriptors={1}&api-version={2}')
-            $azDevOpsUri = ($uriFormat -f [uri]::new($AzDevOpsOrganization), $GroupDescriptor, $ApiVersion)
-
-            $body = @{
-                originId = $GroupId
-            }
 
             $params = @{
-                Method      = 'POST'
-                Uri         = $azDevOpsUri
-                ContentType = 'application/json'
-                Headers     = @{
-                    'Accept'        = 'application/json'
-                    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
-                }
-                Body        = ($body | ConvertTo-Json -Depth 3 -Compress)
+                Uri             = "$CollectionUri/_apis/graph/groups"
+                Version         = $Version
+                QueryParameters = "groupDescriptors=$GroupDescriptor"
+                Method          = 'POST'
             }
 
-            $response = Invoke-RestMethod @params -Verbose:$VerbosePreference
+            foreach ($id in $GroupId) {
 
-            return $response
+                $body = [PSCustomObject]@{
+                    originId = $id
+                }
+
+                if ($PSCmdlet.ShouldProcess($CollectionUri, "Add group with OriginId: $id to descriptor: $GroupDescriptor")) {
+                    try {
+                        $result = $body | Invoke-AdoRestMethod @params
+
+                        [PSCustomObject]@{
+                            displayName   = $result.displayName
+                            originId      = $result.originId
+                            principalName = $result.principalName
+                            origin        = $result.origin
+                            subjectKind   = $result.subjectKind
+                            descriptor    = $result.descriptor
+                            collectionUri = $CollectionUri
+                        }
+
+                    } catch {
+                        if ($_ -match 'already exists') {
+                            Write-Warning "Group with OriginId $id already exists in descriptor $GroupDescriptor"
+                        } else {
+                            throw $_
+                        }
+                    }
+                } else {
+                    $params += @{
+                        Body = $body
+                    }
+                    Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
+                }
+            }
 
         } catch {
             throw $_
@@ -85,6 +123,6 @@
     }
 
     end {
-        Write-Debug ('Exit : {0}' -f $MyInvocation.MyCommand.Name)
+        Write-Verbose ("Exit: $($MyInvocation.MyCommand.Name)")
     }
 }

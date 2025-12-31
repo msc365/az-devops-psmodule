@@ -4,7 +4,11 @@
         Create a new project in an Azure DevOps organization.
 
     .DESCRIPTION
-        This function creates a new project in an Azure DevOps organization through REST API.
+        This cmdlet creates a new Azure DevOps project within a specified organization.
+        When a project with the specified name already exists, it will be returned instead of creating a new one.
+
+    .PARAMETER CollectionUri
+        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/myorganization.
 
     .PARAMETER Name
         Mandatory. The name of the project to create.
@@ -21,114 +25,169 @@
     .PARAMETER Visibility
         Optional. The visibility of the project. Default is 'Private'.
 
-    .PARAMETER ApiVersion
-        Optional. The API version to use. Default is '7.1'.
-
-    .OUTPUTS
-        System.Object
-
-        An object representing the created project.
+    .PARAMETER Version
+        Optional. The API version to use for the request. Default is '7.2-preview.1'.
 
     .LINK
         https://learn.microsoft.com/en-us/rest/api/azure/devops/core/projects/create
 
     .EXAMPLE
-        New-AdoProject -Name 'my-project-002' -Description 'My new project'
+        $params = @{
+            CollectionUri = 'https://dev.azure.com/my-org'
+            Name          = 'my-project'
+            Description   = 'My new project'
+        }
+        New-AdoProject @params -Verbose
 
-        Creates a new project named 'my-project-002' with the description 'My new project'.
+        Creates a new project in the specified organization.
+
+    .EXAMPLE
+        $params = @{
+            CollectionUri = 'https://dev.azure.com/my-org'
+        }
+        @('my-project-1', 'my-project-2') | New-AdoProject @params -Verbose
+
+        Creates multiple projects demonstrating pipeline input.
     #>
-    [CmdletBinding()]
-    [OutputType([object])]
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
     param (
-        [Parameter(Mandatory)]
-        [string]$Name,
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
+        [string]$CollectionUri = $env:DefaultAdoCollectionUri,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName, ValueFromPipeline)]
+        [string[]]$Name,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
         [string]$Description,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet('Agile', 'Scrum', 'CMMI', 'Basic')]
         [string]$Process = 'Agile',
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet('Git', 'Tfvc')]
         [string]$SourceControl = 'Git',
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet('Private', 'Public')]
         [string]$Visibility = 'Private',
 
-        [Parameter(Mandatory = $false)]
-        [Alias('Api')]
-        [ValidateSet('7.1', '7.2-preview.1')]
-        [string]$ApiVersion = '7.1'
+        [Parameter()]
+        [Alias('ApiVersion')]
+        [ValidateSet('7.2-preview.1')]
+        [string]$Version = '7.2-preview.1'
     )
 
     begin {
-        Write-Debug ('Command       : {0}' -f $MyInvocation.MyCommand.Name)
-        Write-Debug ('  Name        : {0}' -f $Name)
-        Write-Debug ('  Description : {0}' -f $Description)
-        Write-Debug ('  Process     : {0}' -f $Process)
-        Write-Debug ('  Visibility  : {0}' -f $Visibility)
-        Write-Debug ('  ApiVersion  : {0}' -f $ApiVersion)
+        Write-Verbose ("Command: $($MyInvocation.MyCommand.Name)")
+        Write-Debug ("CollectionUri: $CollectionUri")
+        Write-Debug ("Name: $Name")
+        Write-Debug ("Description: $Description")
+        Write-Debug ("Process: $Process")
+        Write-Debug ("SourceControl: $SourceControl")
+        Write-Debug ("Visibility: $Visibility")
+        Write-Debug ("Version: $Version")
+
+        Confirm-Default -Defaults ([ordered]@{
+                'CollectionUri' = $CollectionUri
+            })
+
+        # Get process template ID once for efficiency
+        $processTemplate = Get-AdoProcess -Name $Process
+        if (-not $processTemplate) {
+            throw "Process template '$Process' not found."
+        }
     }
 
     process {
         try {
-            $ErrorActionPreference = 'Stop'
-
-            if (-not $global:AzDevOpsIsConnected) {
-                throw 'Not connected to Azure DevOps. Please connect using Connect-AdoOrganization.'
-            }
-
-            $processTemplate = Get-AdoProcess -process $Process
-
-            $uriFormat = '{0}/_apis/projects?api-version={1}'
-            $azDevOpsUri = ($uriFormat -f [uri]::new($AzDevOpsOrganization), $ApiVersion)
-
-            $body = @{
-                name         = $Name
-                description  = $Description
-                capabilities = @{
-                    versioncontrol  = @{
-                        sourceControlType = $SourceControl
-                    }
-                    processTemplate = @{
-                        templateTypeId = $processTemplate.id
-                    }
-                }
-                visibility   = $Visibility
-
-            }
 
             $params = @{
-                Method      = 'POST'
-                Uri         = $azDevOpsUri
-                ContentType = 'application/json'
-                Headers     = @{
-                    'Accept'        = 'application/json'
-                    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
-                }
-                Body        = ($body | ConvertTo-Json -Depth 5 -Compress)
+                Uri     = "$CollectionUri/_apis/projects"
+                Version = $Version
+                Method  = 'POST'
             }
 
-            $response = Invoke-RestMethod @params -Verbose:$VerbosePreference
+            foreach ($n_ in $Name) {
 
-            $status = $response.status
-            while ($status -ne 'succeeded') {
-                Write-Verbose 'Checking project creation status...'
-                Start-Sleep -Seconds 2
+                $body = [PSCustomObject]@{
+                    name         = $n_
+                    description  = $Description
+                    capabilities = @{
+                        versioncontrol  = @{
+                            sourceControlType = $SourceControl
+                        }
+                        processTemplate = @{
+                            templateTypeId = $processTemplate.id
+                        }
+                    }
+                    visibility   = $Visibility
+                }
 
-                $response = Invoke-RestMethod -Method GET -Uri $response.url -Headers $params.Headers
-                $status = $response.status
+                if ($PSCmdlet.ShouldProcess($CollectionUri, "Create project: $n_")) {
+                    try {
+                        $results = $body | Invoke-AdoRestMethod @params
 
-                if ($status -eq 'failed') {
-                    Write-Error -Message ('Project creation failed {0}' -f $PSItem.Exception.Message)
+                        # Poll for completion
+                        $status = $results.status
+
+                        while ($status -notin @('succeeded', 'failed')) {
+                            Write-Verbose 'Checking project creation status...'
+                            Start-Sleep -Seconds 3
+
+                            $pollParams = @{
+                                Uri     = $results.url
+                                Version = $Version
+                                Method  = 'GET'
+                            }
+                            $results = Invoke-AdoRestMethod @pollParams
+                            $status = $results.status
+                        }
+
+                        if ($status -eq 'failed') {
+                            throw 'Project creation failed.'
+                        }
+
+                        # Get the created project details
+                        $results = Get-AdoProject -CollectionUri $CollectionUri -Name $n_
+
+                        [PSCustomObject]@{
+                            id            = $results.id
+                            name          = $results.name
+                            description   = $results.description
+                            visibility    = $results.visibility
+                            state         = $results.state
+                            defaultTeam   = $results.DefaultTeam
+                            collectionUri = $CollectionUri
+                        }
+
+                    } catch {
+                        if ($_ -match 'already exists') {
+                            Write-Warning "Project $n_ already exists, trying to get it"
+
+                            $results = Get-AdoProject -CollectionUri $CollectionUri -Name $n_
+
+                            [PSCustomObject]@{
+                                id            = $results.id
+                                name          = $results.name
+                                description   = $results.description
+                                visibility    = $results.visibility
+                                state         = $results.state
+                                defaultTeam   = $results.DefaultTeam
+                                collectionUri = $CollectionUri
+                            }
+                        } else {
+                            throw $_
+                        }
+                    }
+                } else {
+                    $params += @{
+                        Body = $body
+                    }
+                    Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
                 }
             }
-
-            $response = Get-AdoProject -ProjectId $Name -ErrorAction Stop
-            return $response
 
         } catch {
             throw $_
@@ -136,6 +195,6 @@
     }
 
     end {
-        Write-Debug ('Exit : {0}' -f $MyInvocation.MyCommand.Name)
+        Write-Verbose ("Exit: $($MyInvocation.MyCommand.Name)")
     }
 }

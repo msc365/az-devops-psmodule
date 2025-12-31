@@ -1,119 +1,167 @@
 ﻿function Set-AdoProject {
     <#
     .SYNOPSIS
-        Updates an existing Azure DevOps project through REST API.
+        Updates an existing Azure DevOps project.
 
     .DESCRIPTION
-        This function updates an existing Azure DevOps project through REST API.
+        This cmdlet updates an existing Azure DevOps project within a specified organization.
 
-    .PARAMETER ProjectId
-        Optional. Project ID or project name.
+    .PARAMETER CollectionUri
+        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/myorganization.
+
+    .PARAMETER Id
+        Mandatory. The ID or name of the project to update.
 
     .PARAMETER Name
-        Optional. The name of the project to update.
+        Optional. The new name of the project.
 
     .PARAMETER Description
-        Optional. The description of the project to update.
+        Optional. The new description of the project.
 
     .PARAMETER Visibility
-        Optional. The visibility of the project to update. Default is 'Private'.
+        Optional. The visibility of the project. Default is 'Private'.
 
-    .PARAMETER ApiVersion
-        Optional. The API version to use. Default is '7.1'.
+    .PARAMETER Version
+        Optional. The API version to use for the request. Default is '7.2-preview.1'.
 
-    .OUTPUTS
-        System.Object
-
-        The updated project object.
     .LINK
         https://learn.microsoft.com/en-us/rest/api/azure/devops/core/projects/update
 
     .EXAMPLE
-        Set-AdoProject -ProjectId 'my-project-002' -Name 'my-project-updated-name'
+        $params = @{
+            CollectionUri = 'https://dev.azure.com/my-org'
+            Id            = 'my-project'
+            Name          = 'my-project-updated'
+        }
+        Set-AdoProject @params -Verbose
 
-        Updates the name of the Azure DevOps project with ID 'my-project-002' to 'my-project-updated-name'.
+        Updates the name of the specified project.
+
+    .EXAMPLE
+        $params = @{
+            CollectionUri = 'https://dev.azure.com/my-org'
+        }
+        [PSCustomObject]@{
+            Id          = 'my-project'
+            Name        = 'my-project-updated'
+            Description = 'Updated description'
+        } | Set-AdoProject @params -Verbose
+
+        Updates the project using pipeline input.
     #>
-    [CmdletBinding()]
-    [OutputType([object])]
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
     param (
-        [Parameter(Mandatory)]
-        [string]$ProjectId,
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
+        [string]$CollectionUri = $env:DefaultAdoCollectionUri,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName, ValueFromPipeline)]
+        [Alias('ProjectId', 'ProjectName')]
+        [string[]]$Id,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
         [string]$Name,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter(ValueFromPipelineByPropertyName)]
         [string]$Description,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateSet('Private', 'Public')]
         [string]$Visibility,
 
-        [Parameter(Mandatory = $false)]
-        [Alias('Api')]
-        [ValidateSet('7.1', '7.2-preview.1')]
-        [string]$ApiVersion = '7.1'
+        [Parameter()]
+        [Alias('ApiVersion')]
+        [ValidateSet('7.2-preview.1')]
+        [string]$Version = '7.2-preview.1'
     )
 
     begin {
-        Write-Debug ('Command       : {0}' -f $MyInvocation.MyCommand.Name)
-        Write-Debug ('  Name        : {0}' -f $Name)
-        Write-Debug ('  Description : {0}' -f $Description)
-        Write-Debug ('  Visibility  : {0}' -f $Visibility)
-        Write-Debug ('  ApiVersion  : {0}' -f $ApiVersion)
+        Write-Verbose ("Command: $($MyInvocation.MyCommand.Name)")
+        Write-Debug ("CollectionUri: $CollectionUri")
+        Write-Debug ("Id: $Id")
+        Write-Debug ("Name: $Name")
+        Write-Debug ("Description: $Description")
+        Write-Debug ("Visibility: $Visibility")
+        Write-Debug ("Version: $Version")
+
+        Confirm-Default -Defaults ([ordered]@{
+                'CollectionUri' = $CollectionUri
+            })
     }
 
     process {
         try {
-            $ErrorActionPreference = 'Stop'
 
-            if (-not $global:AzDevOpsIsConnected) {
-                throw 'Not connected to Azure DevOps. Please connect using Connect-AdoOrganization.'
-            }
+            foreach ($id_ in $Id) {
 
-            $uriFormat = '{0}/_apis/projects/{1}?api-version={2}'
-            $azDevOpsUri = ($uriFormat -f [uri]::new($AzDevOpsOrganization), $ProjectId, $ApiVersion)
-
-            $body = @{}
-
-            if ($PSBoundParameters.ContainsKey('Name')) {
-                $body['name'] = $Name
-            }
-            if ($PSBoundParameters.ContainsKey('Description')) {
-                $body['description'] = $Description
-            }
-            if ($PSBoundParameters.ContainsKey('Visibility')) {
-                $body['visibility'] = $Visibility
-            }
-
-            $params = @{
-                Method      = 'PATCH'
-                Uri         = $azDevOpsUri
-                ContentType = 'application/json'
-                Headers     = @{
-                    'Accept'        = 'application/json'
-                    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
+                $params = @{
+                    Uri     = "$CollectionUri/_apis/projects/$id_"
+                    Version = $Version
+                    Method  = 'PATCH'
                 }
-                Body        = ($body | ConvertTo-Json -Depth 3 -Compress)
-            }
 
-            $response = Invoke-RestMethod @params -Verbose:$VerbosePreference
+                $body = [PSCustomObject]@{}
 
-            $status = $response.status
+                if ($PSBoundParameters.ContainsKey('Name')) {
+                    $body | Add-Member -NotePropertyName 'name' -NotePropertyValue $Name
+                }
+                if ($PSBoundParameters.ContainsKey('Description')) {
+                    $body | Add-Member -NotePropertyName 'description' -NotePropertyValue $Description
+                }
+                if ($PSBoundParameters.ContainsKey('Visibility')) {
+                    $body | Add-Member -NotePropertyName 'visibility' -NotePropertyValue $Visibility
+                }
 
-            while ($status -ne 'succeeded') {
-                Write-Verbose 'Checking project update status...'
-                Start-Sleep -Seconds 2
+                if ($PSCmdlet.ShouldProcess($CollectionUri, "Update project: $id_")) {
+                    try {
+                        $results = $body | Invoke-AdoRestMethod @params
 
-                $response = Invoke-RestMethod -Method GET -Uri $response.url -Headers $params.Headers
-                $status = $response.status
+                        # Poll for completion
+                        $status = $results.status
+                        while ($status -notin @('succeeded', 'failed')) {
+                            Write-Verbose 'Checking project update status...'
+                            Start-Sleep -Seconds 3
 
-                if ($status -eq 'failed') {
-                    Write-Error -Message ('Project update failed {0}' -f $PSItem.Exception.Message)
+                            $pollParams = @{
+                                Uri     = $results.url
+                                Version = $Version
+                                Method  = 'GET'
+                            }
+                            $results = Invoke-AdoRestMethod @pollParams
+                            $status = $results.status
+                        }
+
+                        if ($status -eq 'failed') {
+                            throw 'Project update failed.'
+                        }
+
+                        # Get the updated project details
+                        $results = Get-AdoProject -CollectionUri $CollectionUri -Name $id_ -IncludeCapabilities
+
+                        [PSCustomObject]@{
+                            id            = $results.id
+                            name          = $results.name
+                            description   = $results.description
+                            visibility    = $results.visibility
+                            state         = $results.state
+                            defaultTeam   = $results.defaultTeam
+                            collectionUri = $CollectionUri
+                        }
+
+                    } catch {
+                        if ($_ -match 'does not exist') {
+                            Write-Warning "Project with ID $id_ does not exist, skipping update."
+                        } else {
+                            throw $_
+                        }
+                    }
+                } else {
+                    $params += @{
+                        Body = $body
+                    }
+                    Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
                 }
             }
-
-            return $response
 
         } catch {
             throw $_
@@ -121,6 +169,6 @@
     }
 
     end {
-        Write-Debug ('Exit : {0}' -f $MyInvocation.MyCommand.Name)
+        Write-Verbose ("Exit: $($MyInvocation.MyCommand.Name)")
     }
 }
