@@ -4,11 +4,12 @@ external help file: Azure.DevOps.PSModule-Help.xml
 HelpUri: https://learn.microsoft.com/en-us/rest/api/azure/devops/feature-management/featurestatesquery
 Locale: en-NL
 Module Name: Azure.DevOps.PSModule
-ms.date: 11/01/2025
+ms.date: 12/31/2025
 PlatyPS schema version: 2024-05-01
 title: Get-AdoFeatureState
 -->
 
+<!-- markdownlint-disable MD024 -->
 <!-- cSpell: ignore dontshow -->
 
 # Get-AdoFeatureState
@@ -22,17 +23,18 @@ Get the feature states for an Azure DevOps project.
 ### __AllParameterSets
 
 ```text
-Get-AdoFeatureState [-ProjectId] <string> [[-ApiVersion] <string>] [<CommonParameters>]
+Get-AdoFeatureState [[-CollectionUri] <string>] [[-ProjectName] <string>] [[-Version] <string>] [<CommonParameters>]
 ```
 
 ## ALIASES
 
 This cmdlet has the following aliases,
-- N/A
+- ProjectId
 
 ## DESCRIPTION
 
-This function retrieves the feature states for an Azure DevOps project through REST API.
+This cmdlet retrieves the feature states for an Azure DevOps project through REST API.
+Returns the states for Boards, Repos, Pipelines, Test Plans, and Artifacts features.
 
 ## EXAMPLES
 
@@ -41,13 +43,76 @@ This function retrieves the feature states for an Azure DevOps project through R
 #### PowerShell
 
 ```powershell
+$params = @{
+    CollectionUri = 'https://dev.azure.com/my-org'
+    ProjectName   = 'my-project-002'
+}
+Get-AdoFeatureState @params
+```
+
+Retrieves the feature states for the specified project.
+
+### EXAMPLE 2
+
+#### PowerShell
+
+```powershell
 Get-AdoFeatureState -ProjectName 'my-project-002'
 ```
 
+Retrieves the feature states using the default collection URI from environment variable.
+
 ## PARAMETERS
 
-### -ApiVersion
+### -CollectionUri
 
+Optional.
+The collection URI of the Azure DevOps collection/organization, e.g., <https://dev.azure.com/myorganization>.
+
+```yaml
+Type: System.String
+DefaultValue: $env:DefaultAdoCollectionUri
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: (All)
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -ProjectName
+
+Optional.
+The ID or name of the project.
+Defaults to the value of $env:DefaultAdoProject.
+
+```yaml
+Type: System.String
+DefaultValue: $env:DefaultAdoProject
+SupportsWildcards: false
+Aliases:
+- ProjectId
+ParameterSets:
+- Name: (All)
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -Version
+
+Optional.
 The API version to use.
 Default is '4.1-preview.1'.
 
@@ -56,38 +121,17 @@ Type: System.String
 DefaultValue: 4.1-preview.1
 SupportsWildcards: false
 Aliases:
-- Api
+- ApiVersion
 ParameterSets:
 - Name: (All)
-  Position: 1
+  Position: Named
   IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
   ValueFromRemainingArguments: false
 DontShow: false
-AcceptedValues: []
-HelpMessage: ''
-```
-
-### -ProjectId
-
-Mandatory.
-The ID or name of the project.
-
-```yaml
-Type: System.String
-DefaultValue: ''
-SupportsWildcards: false
-Aliases: []
-ParameterSets:
-- Name: (All)
-  Position: 0
-  IsRequired: true
-  ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
-  ValueFromRemainingArguments: false
-DontShow: false
-AcceptedValues: []
+AcceptedValues:
+- 4.1-preview.1
 HelpMessage: ''
 ```
 
@@ -104,13 +148,23 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### System.Object
+### PSCustomObject
 
-An object representing the feature states.
+Returns a collection of feature state objects from the Azure DevOps REST API, each containing:
+- feature: The feature name (Boards, Repos, Pipelines, TestPlans, Artifacts)
+- featureId: The unique identifier for the feature
+- state: The numeric state value (disabled=0, enabled=1)
+- projectName: The name of the project
+- projectId: The ID of the project
+- collectionUri: The collection URI
 
 ## NOTES
 
-- Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
+- Requires an active Azure account login. Use `Connect-AzAccount` to authenticate:
+
+  ```powershell
+  Connect-AzAccount -Tenant '<tenant-id>' -Subscription '<subscription-id>'
+  ```
 
 ## RELATED LINKS
 

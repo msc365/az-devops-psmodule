@@ -4,11 +4,12 @@ external help file: Azure.DevOps.PSModule-Help.xml
 HelpUri: https://learn.microsoft.com/en-us/rest/api/azure/devops/feature-management/featurestatesquery
 Locale: en-NL
 Module Name: Azure.DevOps.PSModule
-ms.date: 11/01/2025
+ms.date: 12/31/2025
 PlatyPS schema version: 2024-05-01
 title: Set-AdoFeatureState
 -->
 
+<!-- markdownlint-disable MD024 -->
 <!-- cSpell: ignore dontshow -->
 
 # Set-AdoFeatureState
@@ -22,18 +23,19 @@ Set the feature state for an Azure DevOps project feature.
 ### __AllParameterSets
 
 ```text
-Set-AdoFeatureState [-ProjectId] <string> [-Feature] <string> [[-FeatureState] <string>]
- [[-ApiVersion] <string>] [<CommonParameters>]
+Set-AdoFeatureState [[-CollectionUri] <string>] [[-ProjectName] <string>] [-Feature] <string>
+ [[-FeatureState] <string>] [[-Version] <string>] [<CommonParameters>]
 ```
 
 ## ALIASES
 
 This cmdlet has the following aliases,
-- N/A
+- ProjectId
 
 ## DESCRIPTION
 
-This function sets the feature state for an Azure DevOps project feature through REST API.
+This cmdlet sets the feature state for an Azure DevOps project feature through REST API.
+Controls whether features like Boards, Repos, Pipelines, Test Plans, and Artifacts are enabled or disabled.
 
 ## EXAMPLES
 
@@ -42,31 +44,69 @@ This function sets the feature state for an Azure DevOps project feature through
 #### PowerShell
 
 ```powershell
-Set-AdoFeatureState -ProjectId 'my-project-002' -Feature 'Boards' -FeatureState 'Disabled'
+$params = @{
+    CollectionUri = 'https://dev.azure.com/my-org'
+    ProjectName   = 'my-project-002'
+    Feature       = 'Boards'
+    FeatureState  = 'Disabled'
+}
+Set-AdoFeatureState @params
 ```
 
 Sets the feature state for Boards to Disabled for the specified project.
 
+### EXAMPLE 2
+
+#### PowerShell
+
+```powershell
+Set-AdoFeatureState -ProjectName 'my-project-002' -Feature 'Repos' -FeatureState 'Enabled'
+```
+
+Enables the Repos feature for the specified project using the default collection URI.
+
 ## PARAMETERS
 
-### -ApiVersion
+### -CollectionUri
 
 Optional.
-The API version to use.
-Default is '4.1-preview.1'.
+The collection URI of the Azure DevOps collection/organization, e.g., <https://dev.azure.com/myorganization>.
 
 ```yaml
 Type: System.String
-DefaultValue: 4.1-preview.1
+DefaultValue: $env:DefaultAdoCollectionUri
 SupportsWildcards: false
-Aliases:
-- Api
+Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 3
+  Position: Named
   IsRequired: false
   ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -ProjectName
+
+Optional.
+The ID or name of the project.
+Defaults to the value of $env:DefaultAdoProject.
+
+```yaml
+Type: System.String
+DefaultValue: $env:DefaultAdoProject
+SupportsWildcards: false
+Aliases:
+- ProjectId
+ParameterSets:
+- Name: (All)
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
   ValueFromRemainingArguments: false
 DontShow: false
 AcceptedValues: []
@@ -77,7 +117,7 @@ HelpMessage: ''
 
 Mandatory.
 The feature to set the state for.
-Valid values are 'Boards', 'Repos', 'Pipelines', 'TestPlans', 'Artifacts'.
+Valid values are 'boards', 'repos', 'pipelines', 'testPlans', 'artifacts'.
 
 ```yaml
 Type: System.String
@@ -86,13 +126,18 @@ SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 1
+  Position: Named
   IsRequired: true
   ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
+  ValueFromPipelineByPropertyName: true
   ValueFromRemainingArguments: false
 DontShow: false
-AcceptedValues: []
+AcceptedValues:
+- boards
+- repos
+- pipelines
+- testPlans
+- artifacts
 HelpMessage: ''
 ```
 
@@ -100,7 +145,8 @@ HelpMessage: ''
 
 Optional.
 The state to set the feature to.
-Default is 'Disabled'.
+Valid values are 'enabled' or 'disabled'.
+Default is 'disabled'.
 
 ```yaml
 Type: System.String
@@ -109,35 +155,40 @@ SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 2
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues:
+- enabled
+- disabled
+HelpMessage: ''
+```
+
+### -Version
+
+Optional.
+The API version to use.
+Default is '4.1-preview.1'.
+
+```yaml
+Type: System.String
+DefaultValue: 4.1-preview.1
+SupportsWildcards: false
+Aliases:
+- ApiVersion
+ParameterSets:
+- Name: (All)
+  Position: Named
   IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
   ValueFromRemainingArguments: false
 DontShow: false
-AcceptedValues: []
-HelpMessage: ''
-```
-
-### -ProjectId
-
-Mandatory.
-The ID or name of the project.
-
-```yaml
-Type: System.String
-DefaultValue: ''
-SupportsWildcards: false
-Aliases: []
-ParameterSets:
-- Name: (All)
-  Position: 0
-  IsRequired: true
-  ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
-  ValueFromRemainingArguments: false
-DontShow: false
-AcceptedValues: []
+AcceptedValues:
+- 4.1-preview.1
 HelpMessage: ''
 ```
 
@@ -154,15 +205,25 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### System.Object
+### PSCustomObject
 
-Object representing the response from the Azure DevOps REST API.
+Returns a custom object with the following properties:
+- featureId: The unique identifier for the feature
+- state: The numeric state value (disabled=0, enabled=1)
+- feature: The feature name that was updated
+- projectName: The name of the project
+- projectId: The ID of the project
+- collectionUri: The collection URI
 
 ## NOTES
 
 - Turning off a feature hides this service for all members of this project.
   If you choose to enable this service later, all your existing data will be available.
-- Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
+- Requires an active Azure account login. Use `Connect-AzAccount` to authenticate:
+
+  ```powershell
+  Connect-AzAccount -Tenant '<tenant-id>' -Subscription '<subscription-id>'
+  ```
 
 ## RELATED LINKS
 

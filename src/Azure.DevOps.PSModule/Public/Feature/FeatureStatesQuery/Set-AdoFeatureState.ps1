@@ -4,24 +4,28 @@
         Set the feature state for an Azure DevOps project feature.
 
     .DESCRIPTION
-        This function sets the feature state for an Azure DevOps project feature through REST API.
+        This cmdlet sets the feature state for an Azure DevOps project feature through REST API.
+        Controls whether features like Boards, Repos, Pipelines, Test Plans, and Artifacts are enabled or disabled.
 
-    .PARAMETER ProjectId
-        Mandatory. The ID or name of the project.
+    .PARAMETER CollectionUri
+        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/myorganization.
+
+    .PARAMETER ProjectName
+        Optional. The ID or name of the project. Defaults to the value of $env:DefaultAdoProject.
 
     .PARAMETER Feature
         Mandatory. The feature to set the state for. Valid values are 'Boards', 'Repos', 'Pipelines', 'TestPlans', 'Artifacts'.
 
     .PARAMETER FeatureState
-        Optional. The state to set the feature to. Default is 'Disabled'.
+        Optional. The state to set the feature to. Valid values are 'Enabled' or 'Disabled'. Default is 'Disabled'.
 
-    .PARAMETER ApiVersion
+    .PARAMETER Version
         Optional. The API version to use. Default is '4.1-preview.1'.
 
     .OUTPUTS
-        System.Object
+        PSCustomObject
 
-        Object representing the response from the Azure DevOps REST API.
+        Object representing the updated feature state for the specified Azure DevOps project.
 
     .NOTES
         - Turning off a feature hides this service for all members of this project.
@@ -31,50 +35,68 @@
         https://learn.microsoft.com/en-us/rest/api/azure/devops/feature-management/featurestatesquery
 
     .EXAMPLE
-        Set-AdoFeatureState -ProjectId 'my-project-002' -Feature 'Boards' -FeatureState 'Disabled'
+        $params = @{
+            CollectionUri = 'https://dev.azure.com/my-org'
+            ProjectName   = 'my-project-002'
+            Feature       = 'Boards'
+            FeatureState  = 'Disabled'
+        }
+        Set-AdoFeatureState @params
 
         Sets the feature state for Boards to Disabled for the specified project.
-    #>
-    [CmdletBinding()]
-    [OutputType([object])]
-    param (
-        [Parameter(Mandatory)]
-        [string]$ProjectId,
 
-        [Parameter(Mandatory)]
+    .EXAMPLE
+        Set-AdoFeatureState -ProjectName 'my-project-002' -Feature 'Repos' -FeatureState 'Enabled'
+
+        Enables the Repos feature for the specified project using the default collection URI.
+    #>
+    [CmdletBinding(SupportsShouldProcess)]
+    [OutputType([PSCustomObject])]
+    param (
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
+        [string]$CollectionUri = $env:DefaultAdoCollectionUri,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [Alias('ProjectId')]
+        [string]$ProjectName = $env:DefaultAdoProject,
+
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
         [ValidateSet('boards', 'repos', 'pipelines', 'testPlans', 'artifacts')]
         [string]$Feature,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateSet('enabled', 'disabled')]
         [string]$FeatureState = 'disabled',
 
-        [Parameter(Mandatory = $false)]
-        [Alias('Api')]
+        [Parameter()]
+        [Alias('ApiVersion')]
         [ValidateSet('4.1-preview.1')]
-        [string]$ApiVersion = '4.1-preview.1'
+        [string]$Version = '4.1-preview.1'
     )
 
     begin {
-        Write-Debug ('Command        : {0}' -f $MyInvocation.MyCommand.Name)
-        Write-Debug ('  ProjectId    : {0}' -f $ProjectId)
-        Write-Debug ('  Feature      : {0}' -f $Feature)
-        Write-Debug ('  FeatureState : {0}' -f $FeatureState)
-        Write-Debug ('  ApiVersion   : {0}' -f $ApiVersion)
+        Write-Verbose ("Command: $($MyInvocation.MyCommand.Name)")
+        Write-Debug ("CollectionUri: $CollectionUri")
+        Write-Debug ("ProjectName: $ProjectName")
+        Write-Debug ("Feature: $Feature")
+        Write-Debug ("FeatureState: $FeatureState")
+        Write-Debug ("Version: $Version")
+
+        Confirm-Default -Defaults ([ordered]@{
+                'CollectionUri' = $CollectionUri
+                'ProjectName'   = $ProjectName
+            })
     }
 
     process {
         try {
-            $ErrorActionPreference = 'Stop'
-
-            if (-not $global:AzDevOpsIsConnected) {
-                throw 'Not connected to Azure DevOps. Please connect using Connect-AdoOrganization.'
-            }
-
+            # Get project ID if name was provided
             try {
-                [System.Guid]::Parse($ProjectId) | Out-Null
+                [System.Guid]::Parse($ProjectName) | Out-Null
+                $projectId = $ProjectName
             } catch {
-                $ProjectId = (Get-AdoProject -ProjectName $ProjectId).Id
+                $projectId = (Get-AdoProject -CollectionUri $CollectionUri -Name $ProjectName).id
             }
 
             # Get the feature ID
@@ -86,8 +108,7 @@
                 'artifacts' { 'ms.azure-artifacts.feature' }
             }
 
-            $uriFormat = '{0}/_apis/FeatureManagement/FeatureStates/host/project/{1}/{2}?api-version={3}'
-            $azDevOpsUri = ($uriFormat -f [uri]::new($global:AzDevOpsOrganization), $ProjectId, $featureId, $ApiVersion)
+            $uri = "$CollectionUri/_apis/FeatureManagement/FeatureStates/host/project/$projectId/$featureId"
 
             $body = @{
                 featureId = $featureId
@@ -99,19 +120,28 @@
             }
 
             $params = @{
+                Uri         = $uri
+                Version     = $Version
                 Method      = 'PATCH'
-                Uri         = $azDevOpsUri
-                ContentType = 'application/json'
-                Headers     = @{
-                    'Accept'        = 'application/json'
-                    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
-                }
                 Body        = ($body | ConvertTo-Json -Depth 3 -Compress)
+                ContentType = 'application/json'
             }
 
-            $response = Invoke-RestMethod @params -Verbose:$VerbosePreference
+            if ($PSCmdlet.ShouldProcess($CollectionUri, "Set Feature State: $Feature to $FeatureState for Project: $ProjectName")) {
+                $results = Invoke-AdoRestMethod @params
 
-            return $response
+                # Add additional context to the output
+                [PSCustomObject]@{
+                    featureId     = $results.featureId
+                    state         = ($results.state -eq 1 ? 'enabled' : 'disabled')
+                    feature       = $Feature
+                    projectName   = $ProjectName
+                    projectId     = $projectId
+                    collectionUri = $CollectionUri
+                }
+            } else {
+                Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
+            }
 
         } catch {
             throw $_
@@ -119,6 +149,6 @@
     }
 
     end {
-        Write-Debug ('Exit : {0}' -f $MyInvocation.MyCommand.Name)
+        Write-Verbose ("Exit: $($MyInvocation.MyCommand.Name)")
     }
 }
