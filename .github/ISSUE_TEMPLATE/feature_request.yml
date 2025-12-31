@@ -15,27 +15,23 @@ body:
       options:
         - label: I have searched the existing issues
           required: true
-  - type: dropdown
+  - type: input
     attributes:
       label: Related function
       description: Which function is related to your request?
-      multiple: false
-      options:
-        - New-RandomPassword
-        - Other
-        - Not relevant
+      placeholder: Set-AdoDefault, New-AdoProject, etc.
     validations:
       required: true
   - type: dropdown
     attributes:
       label: Infra as Code type
-      description: Are you using Bicep or Terraform?
-      multiple: false
+      description: Are you using Bicep, Terraform, or PowerShell?
+      multiple: true
       options:
         - Bicep
         - Terraform
-        - Both
-        - Not relevant
+        - PowerShell
+        - Other
     validations:
       required: false
   - type: textarea
@@ -43,6 +39,18 @@ body:
     attributes:
       label: Use case
       description: Describe the use case for this feature
+      value: |
+        **As a** [Role]
+        Define the role of the user who will benefit from the feature.
+
+        **I want** [Feature]
+        Describe the feature the user wants to use.
+
+        **So that** [Benefit]
+        Explain the benefit that the user will gain from the feature.
+
+        **Notes**
+        Any additional notes or considerations related to the user story.
     validations:
       required: true
   - type: textarea
