@@ -1,7 +1,7 @@
-﻿<!--
+<!--
 document type: cmdlet
 external help file: Azure.DevOps.PSModule-Help.xml
-HelpUri: ''
+HelpUri: 
 Locale: en-NL
 Module Name: Azure.DevOps.PSModule
 ms.date: 11/25/2025
