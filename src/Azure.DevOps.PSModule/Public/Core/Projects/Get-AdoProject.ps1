@@ -83,7 +83,7 @@
         [int]$Skip,
 
         [Parameter(ParameterSetName = 'ListProjects')]
-        [int]$Top = 100,
+        [int]$Top,
 
         [Parameter(ParameterSetName = 'ListProjects')]
         [string]$ContinuationToken,
