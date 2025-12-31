@@ -23,14 +23,14 @@ Remove an Azure DevOps Pipeline Environment by its ID.
 ### __AllParameterSets
 
 ```text
-Remove-AdoEnvironment [-ProjectId] <string> [-EnvironmentId] <string> [[-ApiVersion] <string>]
- [<CommonParameters>]
+Remove-AdoEnvironment [[-CollectionUri] <string>] [[-ProjectName] <string>] [-Id] <int32[]>
+ [[-Version] <string>] [<CommonParameters>]
 ```
 
 ## ALIASES
 
 This cmdlet has the following aliases,
-- N/A
+- ProjectId (for ProjectName)
 
 ## DESCRIPTION
 
@@ -43,14 +43,102 @@ This cmdlet deletes a specific Azure DevOps Pipeline Environment using its uniqu
 #### PowerShell
 
 ```powershell
-Remove-AdoEnvironment -ProjectId "MyProject" -EnvironmentId "42"
+$params = @{
+    CollectionUri = 'https://dev.azure.com/my-org'
+    ProjectName   = 'my-project'
+    Id = 1
+}
+Remove-AdoEnvironment @params -Verbose
 ```
 
-Deletes the environment with ID 42 from the project "MyProject".
+Removes the environment with ID 1 from the specified project using the provided parameters.
+
+### EXAMPLE 2
+
+#### PowerShell
+
+```powershell
+$params = @{
+    CollectionUri = 'https://dev.azure.com/my-org'
+    ProjectName   = 'my-project'
+}
+@(
+    1, 2, 3
+) | Remove-AdoEnvironment @params -Verbose
+```
+
+Removes the environments with IDs 1, 2, and 3 from the specified project demonstrating pipeline input.
 
 ## PARAMETERS
 
-### -ApiVersion
+### -CollectionUri
+
+Optional.
+The collection URI of the Azure DevOps collection/organization, e.g., <https://dev.azure.com/myorganization>.
+
+```yaml
+Type: System.String
+DefaultValue: $env:DefaultAdoCollectionUri
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: (All)
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -ProjectName
+
+Optional.
+The name or id of the project.
+
+```yaml
+Type: System.String
+DefaultValue: $env:DefaultAdoProject
+SupportsWildcards: false
+Aliases:
+- ProjectId
+ParameterSets:
+- Name: (All)
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -Id
+
+Mandatory.
+The ID of the environment to remove.
+
+```yaml
+Type: System.Int32[]
+DefaultValue: 0
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: (All)
+  Position: Named
+  IsRequired: true
+  ValueFromPipeline: true
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -Version
 
 Optional.
 The API version to use for the request.
@@ -61,60 +149,17 @@ Type: System.String
 DefaultValue: 7.2-preview.1
 SupportsWildcards: false
 Aliases:
-- api
+- ApiVersion
 ParameterSets:
 - Name: (All)
-  Position: 2
+  Position: Named
   IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
   ValueFromRemainingArguments: false
 DontShow: false
-AcceptedValues: []
-HelpMessage: ''
-```
-
-### -EnvironmentId
-
-Mandatory.
-The ID of the environment to remove.
-
-```yaml
-Type: System.String
-DefaultValue: ''
-SupportsWildcards: false
-Aliases: []
-ParameterSets:
-- Name: (All)
-  Position: 1
-  IsRequired: true
-  ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
-  ValueFromRemainingArguments: false
-DontShow: false
-AcceptedValues: []
-HelpMessage: ''
-```
-
-### -ProjectId
-
-Mandatory.
-The ID or name of the project.
-
-```yaml
-Type: System.String
-DefaultValue: ''
-SupportsWildcards: false
-Aliases: []
-ParameterSets:
-- Name: (All)
-  Position: 0
-  IsRequired: true
-  ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
-  ValueFromRemainingArguments: false
-DontShow: false
-AcceptedValues: []
+AcceptedValues:
+- 7.2-preview.1
 HelpMessage: ''
 ```
 
@@ -131,13 +176,16 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-- 200 OK Successful operation
+- N/A
 
 ## NOTES
 
-- Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
+- Requires an active Azure account login. Use `Connect-AzAccount` to authenticate:
+
+  ```powershell
+  Connect-AzAccount -Tenant '<tenant-id>' -Subscription '<subscription-id>'
+  ```
 
 ## RELATED LINKS
 
 - <https://learn.microsoft.com/en-us/rest/api/azure/devops/environments/environments/delete>
-

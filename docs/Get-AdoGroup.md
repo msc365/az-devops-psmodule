@@ -22,8 +22,9 @@ Get a single or multiple groups in an Azure DevOps organization.
 ### __AllParameterSets
 
 ```text
-Get-AdoGroupList [-ScopeDescriptor] <string> [[-SubjectTypes] <string[]>]
- [[-ContinuationToken] <string>] [[-ApiVersion] <string>] [<CommonParameters>]
+Get-AdoGroup [[-CollectionUri] <string>] [[-ScopeDescriptor] <string>] [[-SubjectTypes] <string[]>]
+ [[-ContinuationToken] <string>] [[-DisplayName] <string[]>] [[-Version] <string>]
+ [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -33,7 +34,7 @@ This cmdlet has the following aliases,
 
 ## DESCRIPTION
 
-This function retrieves groups in an Azure DevOps organization through REST API.
+This function retrieves a single or multiple groups in an Azure DevOps organization through REST API.
 
 ## EXAMPLES
 
@@ -42,35 +43,120 @@ This function retrieves groups in an Azure DevOps organization through REST API.
 #### PowerShell
 
 ```powershell
-Get-AdoGroup -ScopeDescriptor $projectDescriptor -SubjectTypes 'vssgp', 'aadgp'
+Get-AdoGroup
 ```
+
+Retrieves all groups in the Azure DevOps organization.
+
+### EXAMPLE 2
+
+#### PowerShell
+
+```powershell
+$project = Get-AdoProject -Name 'my-project'
+$projectDescriptor = (Get-AdoDescriptor -StorageKey $project.Id)
+
+$params = @{
+    CollectionUri = 'https://dev.azure.com/my-org'
+    ScopeDescriptor = $projectDescriptor
+    SubjectTypes    = 'vssgp'
+}
+Get-AdoGroup @params
+```
+
+Retrieves all groups in the specified project with subject types 'vssgp'.
+
+### EXAMPLE 3
+
+#### PowerShell
+
+```powershell
+$params = @{
+    CollectionUri = 'https://dev.azure.com/my-org'
+    ScopeDescriptor = $projectDescriptor
+    SubjectTypes    = 'vssgp'
+}
+@(
+    'Project Administrators',
+    'Release Administrators'
+) | Get-AdoGroup @params
+```
+
+Retrieves the 'Project Administrators' and 'Release Administrators' groups of type 'vssgp', demonstrating pipeline input.
 
 ## PARAMETERS
 
-### -ApiVersion
+### -CollectionUri
 
-The API version to use.
+Optional.
+The collection URI of the Azure DevOps collection/organization, e.g., <https://vssps.dev.azure.com/myorganization>.
 
 ```yaml
 Type: System.String
-DefaultValue: 7.1-preview
+DefaultValue: ($env:DefaultAdoCollectionUri -replace 'https://', 'https://vssps.')
 SupportsWildcards: false
-Aliases:
-- Api
+Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 3
+  Position: Named
   IsRequired: false
   ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
+  ValueFromPipelineByPropertyName: true
   ValueFromRemainingArguments: false
 DontShow: false
 AcceptedValues: []
 HelpMessage: ''
 ```
 
+### -ScopeDescriptor
+
+Optional.
+Specify a non-default scope (collection, project) to search for groups.
+
+```yaml
+Type: System.String
+DefaultValue: ''
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: (All)
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -SubjectTypes
+
+Optional.
+A comma separated list of user subject subtypes to reduce the retrieved results, e.g. Microsoft.IdentityModel.Claims.ClaimsIdentity
+
+```yaml
+Type: System.String[]
+DefaultValue: ('vssgp', 'aadgp')
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: (All)
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues:
+- vssgp
+- aadgp
+HelpMessage: ''
+```
+
 ### -ContinuationToken
 
+Optional.
 An opaque data blob that allows the next page of data to resume immediately after where the previous page ended.
 The only reliable way to know if there is more data left is the presence of a continuation token.
 
@@ -81,7 +167,7 @@ SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 2
+  Position: Named
   IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
@@ -91,31 +177,10 @@ AcceptedValues: []
 HelpMessage: ''
 ```
 
-### -ScopeDescriptor
+### -DisplayName
 
-Specify a non-default scope (collection, project) to search for groups.
-
-```yaml
-Type: System.String
-DefaultValue: ''
-SupportsWildcards: false
-Aliases: []
-ParameterSets:
-- Name: (All)
-  Position: 0
-  IsRequired: true
-  ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
-  ValueFromRemainingArguments: false
-DontShow: false
-AcceptedValues: []
-HelpMessage: ''
-```
-
-### -SubjectTypes
-
-A comma separated list of user subject subtypes to reduce the retrieved results, e.g.
-Microsoft.IdentityModel.Claims.ClaimsIdentity
+Optional.
+A comma separated list of group display names to filter the retrieved results.
 
 ```yaml
 Type: System.String[]
@@ -124,13 +189,38 @@ SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 1
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: true
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -Version
+
+Optional.
+The API version to use for the request.
+Default is '7.2-preview.1'.
+
+```yaml
+Type: System.String
+DefaultValue: 7.2-preview.1
+SupportsWildcards: false
+Aliases:
+- ApiVersion
+ParameterSets:
+- Name: (All)
+  Position: Named
   IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
   ValueFromRemainingArguments: false
 DontShow: false
-AcceptedValues: []
+AcceptedValues:
+- 7.2-preview.1
 HelpMessage: ''
 ```
 
@@ -153,8 +243,13 @@ An object representing the groups in the specified scope.
 
 ## NOTES
 
-- Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
+- Requires an active Azure account login. Use `Connect-AzAccount` to authenticate:
+
+  ```powershell
+  Connect-AzAccount -Tenant '<tenant-id>' -Subscription '<subscription-id>'
+  ```
 
 ## RELATED LINKS
 
+- <https://learn.microsoft.com/en-us/rest/api/azure/devops/graph/groups/get>
 - <https://learn.microsoft.com/en-us/rest/api/azure/devops/graph/groups/list>

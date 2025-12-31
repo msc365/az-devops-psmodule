@@ -1,42 +1,42 @@
-﻿<!--
+<!--
 document type: cmdlet
 external help file: Azure.DevOps.PSModule-Help.xml
-HelpUri: ''
+HelpUri: https://learn.microsoft.com/en-us/rest/api/azure/devops/approvalsandchecks/check-configurations/list
 Locale: en-NL
 Module Name: Azure.DevOps.PSModule
-ms.date: 12/05/2025
+ms.date: 12/31/2025
 PlatyPS schema version: 2024-05-01
-title: Set-AdoEnvironment
+title: Get-AdoCheckConfiguration
 -->
 
 <!-- markdownlint-disable MD024 -->
 <!-- cSpell: ignore dontshow -->
 
-# Set-AdoEnvironment
+# Get-AdoCheckConfiguration
 
 ## SYNOPSIS
 
-Create a new Azure DevOps Pipeline Environment.
+Get a list of check configurations for a specific resource.
 
 ## SYNTAX
 
 ### __AllParameterSets
 
 ```text
-Set-AdoEnvironment [[-CollectionUri] <string>] [[-ProjectName] <string>] [-Id] <int32>
- [-Name] <string> [[-Description] <string>] [[-Version] <string>] [<CommonParameters>]
+Get-AdoCheckConfiguration [[-CollectionUri] <string>] [[-ProjectName] <string>]
+ [-ResourceType] <string> [-ResourceName] <string[]> [[-Expands] <string>] [[-Version] <string>]
+ [<CommonParameters>]
 ```
 
 ## ALIASES
 
 This cmdlet has the following aliases,
 - ProjectId (for ProjectName)
-- Id
-- Name
 
 ## DESCRIPTION
 
-This cmdlet creates a new Azure DevOps Pipeline Environment within a specified project.
+This function retrieves check configurations for a specified resource within an Azure DevOps project.
+You need to provide the resource type and resource ID to filter the results.
 
 ## EXAMPLES
 
@@ -48,14 +48,13 @@ This cmdlet creates a new Azure DevOps Pipeline Environment within a specified p
 $params = @{
     CollectionUri = 'https://dev.azure.com/my-org'
     ProjectName   = 'my-project'
-    Id            = 1
-    Name          = 'my-updated-environment'
-    Description   = 'Updated environment description'
+    ResourceType  = 'environment'
+    ResourceName  = 'my-environment-tst'
 }
-Set-AdoEnvironment @params -Verbose
+Get-AdoCheckConfiguration @params
 ```
 
-Updates the environment with ID 1 in the specified project using the provided parameters.
+Retrieves check configurations for the specified environment within the project using provided parameters.
 
 ### EXAMPLE 2
 
@@ -65,16 +64,16 @@ Updates the environment with ID 1 in the specified project using the provided pa
 $params = @{
     CollectionUri = 'https://dev.azure.com/my-org'
     ProjectName   = 'my-project'
+    ResourceType  = 'environment'
+    Expands       = 'settings'
 }
-
-[PSCustomObject]@{
-    Id          = 1
-    Name        = 'my-updated-environment'
-    Description = 'Updated environment description'
-} | Set-AdoEnvironment @params -Verbose
+@(
+    'my-environment-tst',
+    'my-environment-dev'
+) | Get-AdoCheckConfiguration @params
 ```
 
-Updates the environment with ID 1 in the specified project using the provided parameters in a pipeline.
+Retrieves check configurations for the specified environments within the project using provided parameters, demonstrating pipeline input.
 
 ## PARAMETERS
 
@@ -123,40 +122,16 @@ AcceptedValues: []
 HelpMessage: ''
 ```
 
-### -Id
+### -ResourceType
 
 Mandatory.
-The ID of the environment to update.
-
-```yaml
-Type: System.Int32
-DefaultValue: 0
-SupportsWildcards: false
-Aliases:
-- Id
-ParameterSets:
-- Name: (All)
-  Position: Named
-  IsRequired: true
-  ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: true
-  ValueFromRemainingArguments: false
-DontShow: false
-AcceptedValues: []
-HelpMessage: ''
-```
-
-### -Name
-
-Mandatory.
-The name of the environment to update.
+The type of the resource to filter the results. E.g., 'environment'.
 
 ```yaml
 Type: System.String
 DefaultValue: ''
 SupportsWildcards: false
-Aliases:
-- Name
+Aliases: []
 ParameterSets:
 - Name: (All)
   Position: Named
@@ -165,18 +140,47 @@ ParameterSets:
   ValueFromPipelineByPropertyName: true
   ValueFromRemainingArguments: false
 DontShow: false
+AcceptedValues:
+- endpoint
+- environment
+- variablegroup
+- repository
+HelpMessage: ''
+```
+
+### -ResourceName
+
+Mandatory.
+The name of the resource to filter the results.
+
+```yaml
+Type: System.String[]
+DefaultValue: ''
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: (All)
+  Position: Named
+  IsRequired: true
+  ValueFromPipeline: true
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
 AcceptedValues: []
 HelpMessage: ''
 ```
 
-### -Description
+### -Expands
 
 Optional.
-The description of the updated environment.
+Specifies additional details to include in the response.
+Default is 'none'.
+
+Valid values are 'none' and 'settings'.
 
 ```yaml
 Type: System.String
-DefaultValue: ''
+DefaultValue: none
 SupportsWildcards: false
 Aliases: []
 ParameterSets:
@@ -187,7 +191,9 @@ ParameterSets:
   ValueFromPipelineByPropertyName: true
   ValueFromRemainingArguments: false
 DontShow: false
-AcceptedValues: []
+AcceptedValues:
+- none
+- settings
 HelpMessage: ''
 ```
 
@@ -229,7 +235,9 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### System.Object
+### PSCustomObject
+
+An object representing the check configuration.
 
 ## NOTES
 
@@ -239,5 +247,6 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
   Connect-AzAccount -Tenant '<tenant-id>' -Subscription '<subscription-id>'
   ```
 
-- <https://learn.microsoft.com/en-us/rest/api/azure/devops/environments/environments/update>
+## RELATED LINKS
 
+- <https://learn.microsoft.com/en-us/rest/api/azure/devops/approvalsandchecks/check-configurations/list>

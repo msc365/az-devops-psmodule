@@ -22,17 +22,19 @@ Remove a project from an Azure DevOps organization.
 ### __AllParameterSets
 
 ```text
-Remove-AdoProject [-ProjectId] <string> [[-ApiVersion] <string>] [<CommonParameters>]
+Remove-AdoProject [[-CollectionUri] <string>] [-Id] <string[]> [[-Version] <string>]
+ [<CommonParameters>]
 ```
 
 ## ALIASES
 
 This cmdlet has the following aliases,
-- N/A
+- ProjectId
+- ProjectName
 
 ## DESCRIPTION
 
-This function removes a project from an Azure DevOps organization through REST API.
+This cmdlet removes a project from an Azure DevOps organization.
 
 ## EXAMPLES
 
@@ -41,55 +43,98 @@ This function removes a project from an Azure DevOps organization through REST A
 #### PowerShell
 
 ```powershell
-Remove-AdoProject -Project $projectId
+$params = @{
+    CollectionUri = 'https://dev.azure.com/my-org'
+    Id            = 'my-project'
+}
+Remove-AdoProject @params -Verbose
 ```
 
-Removes the project with ID 'my-project' from the connected Azure DevOps organization.
+Removes the specified project from the organization.
+
+### EXAMPLE 2
+
+#### PowerShell
+
+```powershell
+$params = @{
+    CollectionUri = 'https://dev.azure.com/my-org'
+}
+@('my-project-1', 'my-project-2') | Remove-AdoProject @params -Verbose
+```
+
+Removes multiple projects demonstrating pipeline input.
 
 ## PARAMETERS
 
-### -ApiVersion
+### -CollectionUri
 
 Optional.
-The API version to use.
+The collection URI of the Azure DevOps collection/organization, e.g., <https://dev.azure.com/myorganization>.
 
 ```yaml
 Type: System.String
-DefaultValue: 7.1
+DefaultValue: $env:DefaultAdoCollectionUri
 SupportsWildcards: false
-Aliases:
-- Api
+Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 1
+  Position: Named
   IsRequired: false
   ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
+  ValueFromPipelineByPropertyName: true
   ValueFromRemainingArguments: false
 DontShow: false
 AcceptedValues: []
 HelpMessage: ''
 ```
 
-### -ProjectId
+### -Id
 
 Mandatory.
-Project ID from the project to remove.
+The ID or name of the project to remove.
+
+```yaml
+Type: System.String[]
+DefaultValue: ''
+SupportsWildcards: false
+Aliases:
+- ProjectId
+- ProjectName
+ParameterSets:
+- Name: (All)
+  Position: Named
+  IsRequired: true
+  ValueFromPipeline: true
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -Version
+
+Optional.
+The API version to use for the request.
+Default is '7.2-preview.1'.
 
 ```yaml
 Type: System.String
-DefaultValue: ''
+DefaultValue: 7.2-preview.1
 SupportsWildcards: false
-Aliases: []
+Aliases:
+- ApiVersion
 ParameterSets:
 - Name: (All)
-  Position: 0
-  IsRequired: true
+  Position: Named
+  IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
   ValueFromRemainingArguments: false
 DontShow: false
-AcceptedValues: []
+AcceptedValues:
+- 7.2-preview.1
 HelpMessage: ''
 ```
 
@@ -106,13 +151,15 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### System.Boolean
-
-Boolean indicating success.
+- N/A
 
 ## NOTES
 
-- Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
+- Requires an active Azure account login. Use `Connect-AzAccount` to authenticate:
+
+  ```powershell
+  Connect-AzAccount -Tenant '<tenant-id>' -Subscription '<subscription-id>'
+  ```
 
 ## RELATED LINKS
 

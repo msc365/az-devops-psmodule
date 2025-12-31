@@ -1,42 +1,40 @@
-﻿<!--
+<!--
 document type: cmdlet
 external help file: Azure.DevOps.PSModule-Help.xml
-HelpUri: ''
+HelpUri: https://learn.microsoft.com/en-us/rest/api/azure/devops/approvalsandchecks/check-configurations/delete
 Locale: en-NL
 Module Name: Azure.DevOps.PSModule
-ms.date: 12/05/2025
+ms.date: 12/31/2025
 PlatyPS schema version: 2024-05-01
-title: Set-AdoEnvironment
+title: Remove-AdoCheckConfiguration
 -->
 
 <!-- markdownlint-disable MD024 -->
 <!-- cSpell: ignore dontshow -->
 
-# Set-AdoEnvironment
+# Remove-AdoCheckConfiguration
 
 ## SYNOPSIS
 
-Create a new Azure DevOps Pipeline Environment.
+Remove a check configuration by its ID.
 
 ## SYNTAX
 
 ### __AllParameterSets
 
 ```text
-Set-AdoEnvironment [[-CollectionUri] <string>] [[-ProjectName] <string>] [-Id] <int32>
- [-Name] <string> [[-Description] <string>] [[-Version] <string>] [<CommonParameters>]
+Remove-AdoCheckConfiguration [[-CollectionUri] <string>] [[-ProjectName] <string>]
+ [-Id] <int32[]> [[-Version] <string>] [<CommonParameters>]
 ```
 
 ## ALIASES
 
 This cmdlet has the following aliases,
 - ProjectId (for ProjectName)
-- Id
-- Name
 
 ## DESCRIPTION
 
-This cmdlet creates a new Azure DevOps Pipeline Environment within a specified project.
+This cmdlet deletes a specific check configuration using its unique identifier within a specified resource.
 
 ## EXAMPLES
 
@@ -48,14 +46,12 @@ This cmdlet creates a new Azure DevOps Pipeline Environment within a specified p
 $params = @{
     CollectionUri = 'https://dev.azure.com/my-org'
     ProjectName   = 'my-project'
-    Id            = 1
-    Name          = 'my-updated-environment'
-    Description   = 'Updated environment description'
+    Id = 1
 }
-Set-AdoEnvironment @params -Verbose
+Remove-AdoCheckConfiguration @params -Verbose
 ```
 
-Updates the environment with ID 1 in the specified project using the provided parameters.
+Removes the check configuration with ID 1 from the specified resource using the provided parameters.
 
 ### EXAMPLE 2
 
@@ -66,15 +62,12 @@ $params = @{
     CollectionUri = 'https://dev.azure.com/my-org'
     ProjectName   = 'my-project'
 }
-
-[PSCustomObject]@{
-    Id          = 1
-    Name        = 'my-updated-environment'
-    Description = 'Updated environment description'
-} | Set-AdoEnvironment @params -Verbose
+@(
+    1, 2, 3
+) | Remove-AdoCheckConfiguration @params -Verbose
 ```
 
-Updates the environment with ID 1 in the specified project using the provided parameters in a pipeline.
+Removes the check configurations with IDs 1, 2, and 3 from the specified resource demonstrating pipeline input.
 
 ## PARAMETERS
 
@@ -126,64 +119,18 @@ HelpMessage: ''
 ### -Id
 
 Mandatory.
-The ID of the environment to update.
+The ID of the check configuration to remove.
 
 ```yaml
-Type: System.Int32
+Type: System.Int32[]
 DefaultValue: 0
-SupportsWildcards: false
-Aliases:
-- Id
-ParameterSets:
-- Name: (All)
-  Position: Named
-  IsRequired: true
-  ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: true
-  ValueFromRemainingArguments: false
-DontShow: false
-AcceptedValues: []
-HelpMessage: ''
-```
-
-### -Name
-
-Mandatory.
-The name of the environment to update.
-
-```yaml
-Type: System.String
-DefaultValue: ''
-SupportsWildcards: false
-Aliases:
-- Name
-ParameterSets:
-- Name: (All)
-  Position: Named
-  IsRequired: true
-  ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: true
-  ValueFromRemainingArguments: false
-DontShow: false
-AcceptedValues: []
-HelpMessage: ''
-```
-
-### -Description
-
-Optional.
-The description of the updated environment.
-
-```yaml
-Type: System.String
-DefaultValue: ''
 SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
   Position: Named
-  IsRequired: false
-  ValueFromPipeline: false
+  IsRequired: true
+  ValueFromPipeline: true
   ValueFromPipelineByPropertyName: true
   ValueFromRemainingArguments: false
 DontShow: false
@@ -229,7 +176,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### System.Object
+- N/A
 
 ## NOTES
 
@@ -239,5 +186,6 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
   Connect-AzAccount -Tenant '<tenant-id>' -Subscription '<subscription-id>'
   ```
 
-- <https://learn.microsoft.com/en-us/rest/api/azure/devops/environments/environments/update>
+## RELATED LINKS
 
+- <https://learn.microsoft.com/en-us/rest/api/azure/devops/approvalsandchecks/check-configurations/delete>

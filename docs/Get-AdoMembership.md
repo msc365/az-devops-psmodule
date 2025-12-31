@@ -20,8 +20,8 @@ Get the membership relationship between a subject and a container in Azure DevOp
 ### __AllParameterSets
 
 ```text
-Get-AdoMembership [-subjectDescriptor] <string> [-containerDescriptor] <string>
- [[-ApiVersion] <string>] [<CommonParameters>]
+Get-AdoMembership [[-CollectionUri] <string>] [-SubjectDescriptor] <string[]>
+ [-ContainerDescriptor] <string> [[-Version] <string>] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -31,7 +31,7 @@ This cmdlet has the following aliases,
 
 ## DESCRIPTION
 
-This cmdlet retrieves the membership relationship between a specified subject and container in Azure DevOps using the Azure DevOps REST API.
+This cmdlet retrieves the membership relationship between a specified subject and container in Azure DevOps.
 
 ## EXAMPLES
 
@@ -40,37 +40,77 @@ This cmdlet retrieves the membership relationship between a specified subject an
 #### PowerShell
 
 ```powershell
-Get-AdoMembership -containerDescriptor $containerDescriptor -subjectDescriptor $subjectDescriptor
+$params = @{
+    CollectionUri       = 'https://vssps.dev.azure.com/my-org'
+    SubjectDescriptor   = 'aadgp.00000000-0000-0000-0000-000000000000'
+    ContainerDescriptor = 'vssgp.00000000-0000-0000-0000-000000000001'
+}
+Get-AdoMembership @params
 ```
 
 Retrieves the membership relationship between the specified subject and container.
 
+### EXAMPLE 2
+
+#### PowerShell
+
+```powershell
+$params = @{
+    CollectionUri       = 'https://vssps.dev.azure.com/my-org'
+    ContainerDescriptor = 'vssgp.00000000-0000-0000-0000-000000000001'
+}
+@('aadgp.00000000-0000-0000-0000-000000000002', 'aadgp.00000000-0000-0000-0000-000000000003') | Get-AdoMembership @params
+```
+
+Retrieves the membership relationships for multiple subjects demonstrating pipeline input.
+
 ## PARAMETERS
 
-### -ApiVersion
+### -CollectionUri
 
 Optional.
-The API version to use.
+The collection URI of the Azure DevOps collection/organization, e.g., <https://vssps.dev.azure.com/myorganization>.
 
 ```yaml
 Type: System.String
-DefaultValue: 7.2-preview.1
+DefaultValue: ($env:DefaultAdoCollectionUri -replace 'https://', 'https://vssps.')
 SupportsWildcards: false
-Aliases:
-- Api
+Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 2
+  Position: Named
   IsRequired: false
   ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
+  ValueFromPipelineByPropertyName: true
   ValueFromRemainingArguments: false
 DontShow: false
 AcceptedValues: []
 HelpMessage: ''
 ```
 
-### -containerDescriptor
+### -SubjectDescriptor
+
+Mandatory.
+A descriptor to the child subject in the relationship.
+
+```yaml
+Type: System.String[]
+DefaultValue: ''
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: (All)
+  Position: Named
+  IsRequired: true
+  ValueFromPipeline: true
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -ContainerDescriptor
 
 Mandatory.
 A descriptor to the container in the relationship.
@@ -82,35 +122,38 @@ SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 1
+  Position: Named
   IsRequired: true
   ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
+  ValueFromPipelineByPropertyName: true
   ValueFromRemainingArguments: false
 DontShow: false
 AcceptedValues: []
 HelpMessage: ''
 ```
 
-### -subjectDescriptor
+### -Version
 
-Mandatory.
-A descriptor to the child subject in the relationship.
+Optional.
+The API version to use for the request.
+Default is '7.2-preview.1'.
 
 ```yaml
 Type: System.String
-DefaultValue: ''
+DefaultValue: 7.2-preview.1
 SupportsWildcards: false
-Aliases: []
+Aliases:
+- ApiVersion
 ParameterSets:
 - Name: (All)
-  Position: 0
-  IsRequired: true
+  Position: Named
+  IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
   ValueFromRemainingArguments: false
 DontShow: false
-AcceptedValues: []
+AcceptedValues:
+- 7.2-preview.1
 HelpMessage: ''
 ```
 
@@ -127,11 +170,17 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### System.Object
+### PSCustomObject
+
+An object representing the membership relationship.
 
 ## NOTES
 
-- Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
+- Requires an active Azure account login. Use `Connect-AzAccount` to authenticate:
+
+  ```powershell
+  Connect-AzAccount -Tenant '<tenant-id>' -Subscription '<subscription-id>'
+  ```
 
 ## RELATED LINKS
 

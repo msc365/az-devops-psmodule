@@ -16,25 +16,25 @@ title: Get-AdoEnvironment
 
 ## SYNOPSIS
 
-Get an Azure DevOps Pipeline Environment by its ID.
+Get a list of Azure DevOps Pipeline Environments within a specified project.
 
 ## SYNTAX
 
 ### __AllParameterSets
 
 ```text
-Get-AdoEnvironment [-ProjectId] <string> [-EnvironmentId] <string> [[-Expands] <string>]
- [[-ApiVersion] <string>] [<CommonParameters>]
+Get-AdoEnvironment [[-CollectionUri] <string>] [[-ProjectName] <string>] [[-Name] <string[]>]
+ [[-Top] <int>] [[-Version] <string>] [<CommonParameters>]
 ```
 
 ## ALIASES
 
 This cmdlet has the following aliases,
-- N/A
+- ProjectId (for ProjectName)
 
 ## DESCRIPTION
 
-This cmdlet retrieves details of a specific Azure DevOps Pipeline Environment using its unique identifier within a specified project.
+This cmdlet retrieves a list of Azure DevOps Pipeline Environments for a given project, with optional filtering by environment name and pagination support.
 
 ## EXAMPLES
 
@@ -43,14 +43,129 @@ This cmdlet retrieves details of a specific Azure DevOps Pipeline Environment us
 #### PowerShell
 
 ```powershell
-Get-AdoEnvironment -ProjectId "MyProject" -EnvironmentId "42"
+$params = @{
+    CollectionUri = 'https://dev.azure.com/my-org'
+    ProjectName   = 'my-project'
+}
+
+Get-AdoEnvironment @params -Top 2
+Get-AdoEnvironment @params -Name 'my-environment-tst'
+Get-AdoEnvironment @params -Name '*environment*'
+Get-AdoEnvironment @params -Name 'my-env*' -Top 2
 ```
 
-Retrieves the environment with ID 42 from the project "MyProject".
+Retrieves environments from the specified project with various filtering and pagination options.
+
+### EXAMPLE 2
+
+#### PowerShell
+
+```powershell
+$params = @{
+    CollectionUri = 'https://dev.azure.com/my-org'
+    ProjectName   = 'my-project'
+}
+@(
+    'my-environment-tst',
+    'my-environment-dev'
+) | Get-AdoEnvironment @params -Verbose
+```
+
+Retrieves the specified environments from the project, demonstrating pipeline input.
 
 ## PARAMETERS
 
-### -ApiVersion
+### -CollectionUri
+
+Optional.
+The collection URI of the Azure DevOps collection/organization, e.g., <https://dev.azure.com/myorganization>.
+
+```yaml
+Type: System.String
+DefaultValue: $env:DefaultAdoCollectionUri
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: (All)
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -ProjectName
+
+Optional.
+The name or id of the project.
+
+```yaml
+Type: System.String
+DefaultValue: $env:DefaultAdoProject
+SupportsWildcards: false
+Aliases:
+- ProjectId
+ParameterSets:
+- Name: (All)
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -Name
+
+Optional.
+The name of the environment to filter the results.
+
+```yaml
+Type: System.String[]
+DefaultValue: ''
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: (All)
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: true
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -Top
+
+Optional.
+The maximum number of environments to return.
+Default is 20.
+
+```yaml
+Type: System.Int32
+DefaultValue: 20
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: (All)
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: false
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -Version
 
 Optional.
 The API version to use for the request.
@@ -61,85 +176,17 @@ Type: System.String
 DefaultValue: 7.2-preview.1
 SupportsWildcards: false
 Aliases:
-- api
+- ApiVersion
 ParameterSets:
 - Name: (All)
-  Position: 3
+  Position: Named
   IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
   ValueFromRemainingArguments: false
 DontShow: false
-AcceptedValues: []
-HelpMessage: ''
-```
-
-### -EnvironmentId
-
-Mandatory.
-The ID of the environment to retrieve.
-
-```yaml
-Type: System.String
-DefaultValue: ''
-SupportsWildcards: false
-Aliases: []
-ParameterSets:
-- Name: (All)
-  Position: 1
-  IsRequired: true
-  ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
-  ValueFromRemainingArguments: false
-DontShow: false
-AcceptedValues: []
-HelpMessage: ''
-```
-
-### -Expands
-
-Optional.
-Specifies additional details to include in the response.
-Default is 'none'.
-
-Valid values are 'none' and 'resourceReferences'.
-
-```yaml
-Type: System.String
-DefaultValue: none
-SupportsWildcards: false
-Aliases: []
-ParameterSets:
-- Name: (All)
-  Position: 2
-  IsRequired: false
-  ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
-  ValueFromRemainingArguments: false
-DontShow: false
-AcceptedValues: []
-HelpMessage: ''
-```
-
-### -ProjectId
-
-Mandatory.
-The ID or name of the project.
-
-```yaml
-Type: System.String
-DefaultValue: ''
-SupportsWildcards: false
-Aliases: []
-ParameterSets:
-- Name: (All)
-  Position: 0
-  IsRequired: true
-  ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
-  ValueFromRemainingArguments: false
-DontShow: false
-AcceptedValues: []
+AcceptedValues:
+- 7.2-preview.1
 HelpMessage: ''
 ```
 
@@ -159,9 +206,13 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## NOTES
 
-- Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
+- Requires an active Azure account login. Use `Connect-AzAccount` to authenticate:
+
+  ```powershell
+  Connect-AzAccount -Tenant '<tenant-id>' -Subscription '<subscription-id>'
+  ```
 
 ## RELATED LINKS
 
-- <https://learn.microsoft.com/en-us/rest/api/azure/devops/environments/environments/get>
+- <https://learn.microsoft.com/en-us/rest/api/azure/devops/environments/environments/list>
 

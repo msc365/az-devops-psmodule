@@ -1,14 +1,14 @@
-<!--
+---
 document type: module
 Help Version: 0.0.1
-HelpInfoUri: 
+HelpInfoUri: na
 Locale: en-US
 Module Guid: 734c3172-da46-4f59-a2e8-0bc3eeaa27bb
 Module Name: Azure.DevOps.PSModule
 ms.date: 11/01/2025
 PlatyPS schema version: 2024-05-01
 title: Azure.DevOps.PSModule Module
--->
+---
 
 # Azure.DevOps.PSModule Module
 
@@ -31,10 +31,11 @@ A PowerShell module that wraps the Azure DevOps REST API into clean, task-orient
 | [Connect-AdoOrganization](Connect-AdoOrganization.md) | Connect to an Azure DevOps organization. |
 | [Disconnect-AdoOrganization](Disconnect-AdoOrganization.md) | Disconnect from the Azure DevOps organization. |
 | [Get-AdoAccessToken](Get-AdoAccessToken.md) | Get secure access token for Azure DevOps service principal. |
+| [Get-AdoCheckConfiguration](Get-AdoCheckConfiguration.md) | Get check configurations for pipeline resources in Azure DevOps. |
 | [Get-AdoClassificationNode](Get-AdoClassificationNode.md) | Gets classification nodes for a project in Azure DevOps. |
 | [Get-AdoContext](Get-AdoContext.md) | Get the current Azure DevOps connection context. |
 | [Get-AdoDescriptor](Get-AdoDescriptor.md) | Resolve a storage key to a descriptor. |
-| [Get-AdoEnvironment](Get-AdoEnvironment.md) | Get an Azure DevOps Pipeline Environment by its ID. |
+| [Get-AdoEnvironment](Get-AdoEnvironment.md) | Get a list of Azure DevOps Pipeline Environments with optional name filtering. |
 | [Get-AdoEnvironmentList](Get-AdoEnvironmentList.md) | Get a list of Azure DevOps Pipeline Environments within a specified project. |
 | [Get-AdoFeatureState](Get-AdoFeatureState.md) | Get the feature states for an Azure DevOps project. |
 | [Get-AdoGroup](Get-AdoGroup.md) | Get a single or multiple groups in an Azure DevOps organization. |
@@ -44,7 +45,7 @@ A PowerShell module that wraps the Azure DevOps REST API into clean, task-orient
 | [Get-AdoPolicyType](Get-AdoPolicyType.md) | Gets policy types for an Azure DevOps project. |
 | [Get-AdoPolicyTypeList](Get-AdoPolicyTypeList.md) | Gets a list of policy types for an Azure DevOps project. |
 | [Get-AdoProcess](Get-AdoProcess.md) | Get the process details. |
-| [Get-AdoProject](Get-AdoProject.md) | Get project details. |
+| [Get-AdoProject](Get-AdoProject.md) | Get project details with optional list and filter capabilities. |
 | [Get-AdoProjectList](Get-AdoProjectList.md) | Get all projects. |
 | [Get-AdoRepository](Get-AdoRepository.md) | Get the repository. |
 | [Get-AdoServiceEndpointByName](Get-AdoServiceEndpointByName.md) | Get the service endpoint details for an Azure DevOps service endpoint. |
@@ -54,6 +55,7 @@ A PowerShell module that wraps the Azure DevOps REST API into clean, task-orient
 | [Get-AdoTeamIterationList](Get-AdoTeamIterationList.md) | Get the list of team iterations for a given project or team in Azure DevOps. |
 | [Get-AdoTeamList](Get-AdoTeamList.md) | Get all teams for a given Azure DevOps project. |
 | [Get-AdoTeamSettings](Get-AdoTeamSettings.md) | Gets the settings for a team in an Azure DevOps project. |
+| [New-AdoCheckConfiguration](New-AdoCheckConfiguration.md) | Create a new check configuration for pipeline resources in Azure DevOps. |
 | [New-AdoClassificationNode](New-AdoClassificationNode.md) | Creates a new classification node for a project in Azure DevOps. |
 | [New-AdoEnvironment](New-AdoEnvironment.md) | Create a new Azure DevOps Pipeline Environment. |
 | [New-AdoGroup](New-AdoGroup.md) | Create a new group in Azure DevOps. |
@@ -62,6 +64,7 @@ A PowerShell module that wraps the Azure DevOps REST API into clean, task-orient
 | [New-AdoRepository](New-AdoRepository.md) | Create a new repository in an Azure DevOps project. |
 | [New-AdoServiceEndpoint](New-AdoServiceEndpoint.md) | Create a new service endpoint in an Azure DevOps project. |
 | [New-AdoTeam](New-AdoTeam.md) | Create a new team in an Azure DevOps project. |
+| [Remove-AdoCheckConfiguration](Remove-AdoCheckConfiguration.md) | Remove a check configuration from pipeline resources in Azure DevOps. |
 | [Remove-AdoClassificationNode](Remove-AdoClassificationNode.md) | Removes a classification node from a project in Azure DevOps. |
 | [Remove-AdoEnvironment](Remove-AdoEnvironment.md) | Remove an Azure DevOps Pipeline Environment by its ID. |
 | [Remove-AdoProject](Remove-AdoProject.md) | Remove a project from an Azure DevOps organization. |

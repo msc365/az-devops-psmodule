@@ -22,7 +22,8 @@ Resolve a storage key to a descriptor.
 ### __AllParameterSets
 
 ```text
-Get-AdoDescriptor [-StorageKey] <string> [[-ApiVersion] <string>] [<CommonParameters>]
+Get-AdoDescriptor [[-CollectionUri] <string>] [-StorageKey] <string[]> [[-Version] <string>]
+ [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -41,28 +42,49 @@ This function resolves a storage key to a descriptor through REST API.
 #### PowerShell
 
 ```powershell
-Get-AdoDescriptor -StorageKey '00000000-0000-0000-0000-000000000000'
+$params = @{
+    CollectionUri = 'https://dev.azure.com/my-org'
+    StorageKey    = '00000000-0000-0000-0000-000000000000'
+}
+Get-AdoDescriptor
 ```
+
+Resolves the specified storage key to its corresponding descriptor.
+
+### EXAMPLE 2
+
+#### PowerShell
+
+```powershell
+$params = @{
+    CollectionUri = 'https://dev.azure.com/my-org'
+}
+@(
+    '00000000-0000-0000-0000-000000000000',
+    '11111111-1111-1111-1111-111111111111'
+) | Get-AdoDescriptor @params
+```
+
+Resolves multiple storage keys to their corresponding descriptors, demonstrating pipeline input.
 
 ## PARAMETERS
 
-### -ApiVersion
+### -CollectionUri
 
 Optional.
-The API version to use.
+The collection URI of the Azure DevOps collection/organization, e.g., <https://vssps.dev.azure.com/myorganization>.
 
 ```yaml
 Type: System.String
-DefaultValue: 7.1
+DefaultValue: ($env:DefaultAdoCollectionUri -replace 'https://', 'https://vssps.')
 SupportsWildcards: false
-Aliases:
-- Api
+Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 1
+  Position: Named
   IsRequired: false
   ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
+  ValueFromPipelineByPropertyName: true
   ValueFromRemainingArguments: false
 DontShow: false
 AcceptedValues: []
@@ -72,22 +94,47 @@ HelpMessage: ''
 ### -StorageKey
 
 Mandatory.
-Storage key of the subject (user, group, scope, etc.) to resolve
+Storage key (uuid) of the subject (user, group, scope, etc.) to resolve.
 
 ```yaml
-Type: System.String
+Type: System.String[]
 DefaultValue: ''
 SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 0
+  Position: Named
   IsRequired: true
+  ValueFromPipeline: true
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -Version
+
+Optional.
+The API version to use for the request.
+Default is '7.2-preview.1'.
+
+```yaml
+Type: System.String
+DefaultValue: 7.2-preview.1
+SupportsWildcards: false
+Aliases:
+- ApiVersion
+ParameterSets:
+- Name: (All)
+  Position: Named
+  IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
   ValueFromRemainingArguments: false
 DontShow: false
-AcceptedValues: []
+AcceptedValues:
+- 7.2-preview.1
 HelpMessage: ''
 ```
 
@@ -110,7 +157,11 @@ Object representing the descriptor information.
 
 ## NOTES
 
-- Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
+- Requires an active Azure account login. Use `Connect-AzAccount` to authenticate:
+
+  ```powershell
+  Connect-AzAccount -Tenant '<tenant-id>' -Subscription '<subscription-id>'
+  ```
 
 ## RELATED LINKS
 
