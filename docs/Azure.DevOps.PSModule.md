@@ -34,6 +34,7 @@ A PowerShell module that wraps the Azure DevOps REST API into clean, task-orient
 | [Get-AdoCheckConfiguration](Get-AdoCheckConfiguration.md) | Get check configurations for pipeline resources in Azure DevOps. |
 | [Get-AdoClassificationNode](Get-AdoClassificationNode.md) | Gets classification nodes for a project in Azure DevOps. |
 | [Get-AdoContext](Get-AdoContext.md) | Get the current Azure DevOps connection context. |
+| [Get-AdoDefault](Get-AdoDefault.md) | Get default Azure DevOps environment variables. |
 | [Get-AdoDescriptor](Get-AdoDescriptor.md) | Resolve a storage key to a descriptor. |
 | [Get-AdoEnvironment](Get-AdoEnvironment.md) | Get a list of Azure DevOps Pipeline Environments with optional name filtering. |
 | [Get-AdoEnvironmentList](Get-AdoEnvironmentList.md) | Get a list of Azure DevOps Pipeline Environments within a specified project. |
@@ -66,12 +67,14 @@ A PowerShell module that wraps the Azure DevOps REST API into clean, task-orient
 | [New-AdoTeam](New-AdoTeam.md) | Create a new team in an Azure DevOps project. |
 | [Remove-AdoCheckConfiguration](Remove-AdoCheckConfiguration.md) | Remove a check configuration from pipeline resources in Azure DevOps. |
 | [Remove-AdoClassificationNode](Remove-AdoClassificationNode.md) | Removes a classification node from a project in Azure DevOps. |
+| [Remove-AdoDefault](Remove-AdoDefault.md) | Remove default Azure DevOps environment variables. |
 | [Remove-AdoEnvironment](Remove-AdoEnvironment.md) | Remove an Azure DevOps Pipeline Environment by its ID. |
 | [Remove-AdoProject](Remove-AdoProject.md) | Remove a project from an Azure DevOps organization. |
 | [Remove-AdoRepository](Remove-AdoRepository.md) | Remove a repository from an Azure DevOps project. |
 | [Remove-AdoServiceEndpoint](Remove-AdoServiceEndpoint.md) | Remove a service endpoint from an Azure DevOps project. |
 | [Remove-AdoTeam](Remove-AdoTeam.md) | Remove a team from an Azure DevOps project. |
 | [Set-AdoClassificationNode](Set-AdoClassificationNode.md) | Updates a classification node for a project in Azure DevOps. |
+| [Set-AdoDefault](Set-AdoDefault.md) | Set default Azure DevOps environment variables. |
 | [Set-AdoEnvironment](Set-AdoEnvironment.md) | Update an Azure DevOps Pipeline Environment by its ID. |
 | [Set-AdoFeatureState](Set-AdoFeatureState.md) | Set the feature state for an Azure DevOps project feature. |
 | [Set-AdoPolicyConfiguration](Set-AdoPolicyConfiguration.md) | Update a policy configuration for an Azure DevOps project. |
