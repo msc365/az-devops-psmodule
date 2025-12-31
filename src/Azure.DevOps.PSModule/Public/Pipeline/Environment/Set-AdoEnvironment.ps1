@@ -1,103 +1,141 @@
 ﻿function Set-AdoEnvironment {
     <#
     .SYNOPSIS
-        Update an Azure DevOps Pipeline Environment by its ID.
+        Create a new Azure DevOps Pipeline Environment.
 
     .DESCRIPTION
-        This cmdlet updates the details of a specific Azure DevOps Pipeline Environment using its unique identifier within a specified project.
+        This cmdlet creates a new Azure DevOps Pipeline Environment within a specified project.
 
-    .PARAMETER ProjectId
-        Mandatory. The ID or name of the project.
+    .PARAMETER CollectionUri
+        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/myorganization.
 
-    .PARAMETER EnvironmentId
+    .PARAMETER ProjectName
+        Optional. The name or id of the project.
+
+    .PARAMETER Id
         Mandatory. The ID of the environment to update.
 
-    .PARAMETER Name
-        Optional. The new name for the environment.
+    .PARAMETER EnvironmentName
+        Mandatory. The name of the environment to update.
 
     .PARAMETER Description
-        Optional. The new description for the environment.
+        Optional. The description of the updated environment.
 
-    .PARAMETER ApiVersion
+    .PARAMETER Version
         Optional. The API version to use for the request. Default is '7.2-preview.1'.
 
+    .LINK
+        https://learn.microsoft.com/en-us/rest/api/azure/devops/environments/environments/update
+
     .EXAMPLE
-        Set-AdoEnvironment -ProjectId "MyProject" -EnvironmentId "42" -Name "NewEnvName" -Description "Updated description"
+        $params = @{
+            CollectionUri = 'https://dev.azure.com/my-org'
+            ProjectName   = 'my-project'
+            Id            = 1
+            Name          = 'my-updated-environment'
+            Description   = 'Updated environment description'
+        }
+        Set-AdoEnvironment @params -Verbose
 
-        Updates the environment with ID 42 in the project "MyProject" to have a new name and description.
+        Updates the environment with ID 1 in the specified project using the provided parameters.
 
-    .NOTES
-        This cmdlet requires an active connection to an Azure DevOps organization established via Connect-AdoOrganization.
+    .EXAMPLE
+        $params = @{
+            CollectionUri = 'https://dev.azure.com/my-org'
+            ProjectName   = 'my-project'
+        }
+
+        [PSCustomObject]@{
+            Id          = 1
+            Name        = 'my-updated-environment'
+            Description = 'Updated environment description'
+        } | Set-AdoEnvironment @params -Verbose
+
+        Updates the environment with ID 1 in the specified project using the provided parameters in a pipeline.
     #>
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
     param (
-        [Parameter(Mandatory)]
-        [string]$ProjectId,
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
+        [string]$CollectionUri = $env:DefaultAdoCollectionUri,
 
-        [Parameter(Mandatory)]
-        [string]$EnvironmentId,
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [Alias('ProjectId')]
+        [string]$ProjectName = $env:DefaultAdoProject,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [Alias('Id')]
+        [int32]$Id,
+
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [Alias('Name')]
         [string]$Name,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter(ValueFromPipelineByPropertyName)]
         [string]$Description,
 
-        [Parameter(Mandatory = $false)]
-        [Alias('api')]
+        [Parameter()]
+        [Alias('ApiVersion')]
         [ValidateSet('7.2-preview.1')]
-        [string]$ApiVersion = '7.2-preview.1'
+        [string]$Version = '7.2-preview.1'
     )
 
     begin {
-        Write-Debug ('Command         : {0}' -f $MyInvocation.MyCommand.Name)
-        Write-Debug ('  ProjectId     : {0}' -f $ProjectId)
-        Write-Debug ('  EnvironmentId : {0}' -f $EnvironmentId)
-        Write-Debug ('  Name          : {0}' -f $Name)
-        Write-Debug ('  Description   : {0}' -f $Description)
-        Write-Debug ('  ApiVersion    : {0}' -f $ApiVersion)
+        Write-Verbose ("Command: $($MyInvocation.MyCommand.Name)")
+        Write-Debug ("CollectionUri: $CollectionUri")
+        Write-Debug ("ProjectName: $ProjectName")
+        Write-Debug ("Id: $Id")
+        Write-Debug ("Name: $Name")
+        Write-Debug ("Description: $Description")
+        Write-Debug ("Version: $Version")
+
+        Confirm-Default -Defaults ([ordered]@{
+                'CollectionUri' = $CollectionUri
+                'ProjectName'   = $ProjectName
+            })
     }
 
     process {
         try {
-            $ErrorActionPreference = 'Stop'
-
-            if (-not $global:AzDevOpsIsConnected) {
-                throw 'Not connected to Azure DevOps. Please connect using Connect-AdoOrganization.'
-            }
-
-            $uriFormat = '{0}/{1}/_apis/pipelines/environments/{2}?api-version={3}'
-            $azDevOpsUri = ($uriFormat -f [uri]::new($global:AzDevOpsOrganization), [uri]::EscapeUriString($ProjectId),
-                $EnvironmentId, $ApiVersion)
-
-            $body = @{}
-
-            if ($null -ne $Name) {
-                $body += @{
-                    name = $Name
-                }
-            }
-
-            if ($null -ne $Description) {
-                $body += @{
-                    description = $Description
-                }
-            }
 
             $params = @{
-                Method      = 'PATCH'
-                Uri         = $azDevOpsUri
-                ContentType = 'application/json'
-                Headers     = @{
-                    'Accept'        = 'application/json'
-                    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
-                }
-                Body        = ($body | ConvertTo-Json -Depth 3 -Compress)
+                Uri     = "$CollectionUri/$ProjectName/_apis/pipelines/environments/$Id"
+                Version = $Version
+                Method  = 'PATCH'
             }
 
-            $response = Invoke-RestMethod @params -Verbose:$VerbosePreference
+            $body = [PSCustomObject]@{
+                Name        = $Name
+                Description = $Description
+            }
 
-            return $response
+            if ($PSCmdlet.ShouldProcess($ProjectName, "Update environment: $Id")) {
+                try {
+                    $results = $body | Invoke-AdoRestMethod @params
+
+                    [PSCustomObject]@{
+                        id             = $results.id
+                        name           = $results.name
+                        createdBy      = $results.createdBy.id
+                        createdOn      = $results.createdOn
+                        lastModifiedBy = $results.lastModifiedBy.id
+                        lastModifiedOn = $results.lastModifiedOn
+                        projectName    = $ProjectName
+                        collectionUri  = $CollectionUri
+                    }
+                } catch {
+                    if ($_ -match 'does not exist') {
+                        Write-Warning "Environment with ID $id does not exist, skipping update."
+                    } else {
+                        throw $_
+                    }
+                }
+            } else {
+                $params += @{
+                    Body = $body
+                }
+                Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
+            }
 
         } catch {
             throw $_
@@ -105,6 +143,6 @@
     }
 
     end {
-        Write-Debug ('Exit : {0}' -f $MyInvocation.MyCommand.Name)
+        Write-Verbose ("Exit: $($MyInvocation.MyCommand.Name)")
     }
 }

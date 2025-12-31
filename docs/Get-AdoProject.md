@@ -1,4 +1,4 @@
-﻿<!--
+<!--
 document type: cmdlet
 external help file: Azure.DevOps.PSModule-Help.xml
 HelpUri: https://learn.microsoft.com/en-us/rest/api/azure/devops/core/projects/get?view=azure-devops
@@ -16,25 +16,35 @@ title: Get-AdoProject
 
 ## SYNOPSIS
 
-Get project details.
+Retrieves Azure DevOps project details.
 
 ## SYNTAX
 
-### __AllParameterSets
+### ListProjects (Default)
 
 ```text
-Get-AdoProject [-ProjectId] <string> [[-ApiVersion] <string>] [-IncludeCapabilities]
- [-IncludeHistory] [<CommonParameters>]
+Get-AdoProject [[-CollectionUri] <string>] [[-Skip] <int>] [[-Top] <int>]
+ [[-ContinuationToken] <string>] [[-StateFilter] <string>] [[-Version] <string>] [<CommonParameters>]
+```
+
+### ByNameOrId
+
+```text
+Get-AdoProject [[-CollectionUri] <string>] [[-Name] <string[]>] [-IncludeCapabilities]
+ [-IncludeHistory] [[-Version] <string>] [<CommonParameters>]
 ```
 
 ## ALIASES
 
 This cmdlet has the following aliases,
-- N/A
+- Id
+- ProjectId
+- ProjectName
 
 ## DESCRIPTION
 
-This function retrieves the project details for a given Azure DevOps project through REST API.
+This cmdlet retrieves details of one or more Azure DevOps projects within a specified organization.
+You can retrieve all projects, a specific project by name or id, and control the amount of data returned using pagination parameters.
 
 ## EXAMPLES
 
@@ -43,40 +53,83 @@ This function retrieves the project details for a given Azure DevOps project thr
 #### PowerShell
 
 ```powershell
-Get-AdoProject -ProjectName 'my-project'
+$params = @{
+    CollectionUri = 'https://dev.azure.com/my-org'
+}
+Get-AdoProject @params -Top 5
 ```
 
-Gets the project details for the specified project.
+Retrieves the first 5 projects from the specified organization.
 
 ### EXAMPLE 2
 
 #### PowerShell
 
 ```powershell
-Get-AdoProject -ProjectName 'my-project' -IncludeCapabilities -IncludeHistory
+$params = @{
+    CollectionUri = 'https://dev.azure.com/my-org'
+}
+Get-AdoProject @params -Name 'my-project'
 ```
 
-Gets the project details for the specified project, including capabilities and searching within renamed projects.
+Retrieves the specified project by name.
+
+### EXAMPLE 3
+
+#### PowerShell
+
+```powershell
+$params = @{
+    CollectionUri = 'https://dev.azure.com/my-org'
+}
+@('my-project-1', 'my-project-2') | Get-AdoProject @params -Verbose
+```
+
+Retrieves multiple projects by name demonstrating pipeline input.
 
 ## PARAMETERS
 
-### -ApiVersion
+### -CollectionUri
 
 Optional.
-The API version to use.
+The collection URI of the Azure DevOps collection/organization, e.g., <https://dev.azure.com/myorganization>.
 
 ```yaml
 Type: System.String
-DefaultValue: 7.1
+DefaultValue: $env:DefaultAdoCollectionUri
 SupportsWildcards: false
-Aliases:
-- Api
+Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 1
+  Position: Named
   IsRequired: false
   ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -Name
+
+Optional.
+The name or id of the project to retrieve. If not provided, retrieves all projects.
+
+```yaml
+Type: System.String[]
+DefaultValue: ''
+SupportsWildcards: false
+Aliases:
+- Id
+- ProjectId
+- ProjectName
+ParameterSets:
+- Name: ByNameOrId
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: true
+  ValueFromPipelineByPropertyName: true
   ValueFromRemainingArguments: false
 DontShow: false
 AcceptedValues: []
@@ -95,11 +148,11 @@ DefaultValue: False
 SupportsWildcards: false
 Aliases: []
 ParameterSets:
-- Name: (All)
+- Name: ByNameOrId
   Position: Named
   IsRequired: false
   ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
+  ValueFromPipelineByPropertyName: true
   ValueFromRemainingArguments: false
 DontShow: false
 AcceptedValues: []
@@ -118,7 +171,29 @@ DefaultValue: False
 SupportsWildcards: false
 Aliases: []
 ParameterSets:
-- Name: (All)
+- Name: ByNameOrId
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -Skip
+
+Optional.
+The number of projects to skip. Used for pagination when retrieving all projects.
+
+```yaml
+Type: System.Int32
+DefaultValue: 0
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: ListProjects
   Position: Named
   IsRequired: false
   ValueFromPipeline: false
@@ -129,10 +204,33 @@ AcceptedValues: []
 HelpMessage: ''
 ```
 
-### -ProjectId
+### -Top
 
-Required.
-Project ID or project name.
+Optional.
+The number of projects to retrieve. Used for pagination when retrieving all projects.
+
+```yaml
+Type: System.Int32
+DefaultValue: 100
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: ListProjects
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: false
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -ContinuationToken
+
+Optional.
+An opaque data blob that allows the next page of data to resume immediately after where the previous page ended.
+The only reliable way to know if there is more data left is the presence of a continuation token.
 
 ```yaml
 Type: System.String
@@ -140,14 +238,68 @@ DefaultValue: ''
 SupportsWildcards: false
 Aliases: []
 ParameterSets:
-- Name: (All)
-  Position: 0
-  IsRequired: true
+- Name: ListProjects
+  Position: Named
+  IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
   ValueFromRemainingArguments: false
 DontShow: false
 AcceptedValues: []
+HelpMessage: ''
+```
+
+### -StateFilter
+
+Optional.
+A filter for the project state. Possible values are 'deleting', 'new', 'wellFormed', 'createPending', 'all', 'unchanged', 'deleted'.
+
+```yaml
+Type: System.String
+DefaultValue: ''
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: ListProjects
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: false
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues:
+- deleting
+- new
+- wellFormed
+- createPending
+- all
+- unchanged
+- deleted
+HelpMessage: ''
+```
+
+### -Version
+
+Optional.
+The API version to use for the request.
+Default is '7.2-preview.1'.
+
+```yaml
+Type: System.String
+DefaultValue: 7.2-preview.1
+SupportsWildcards: false
+Aliases:
+- ApiVersion
+ParameterSets:
+- Name: (All)
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: false
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues:
+- 7.2-preview.1
 HelpMessage: ''
 ```
 
@@ -168,8 +320,13 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## NOTES
 
-- Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
+- Requires an active Azure account login. Use `Connect-AzAccount` to authenticate:
+
+  ```powershell
+  Connect-AzAccount -Tenant '<tenant-id>' -Subscription '<subscription-id>'
+  ```
 
 ## RELATED LINKS
 
-- <https://learn.microsoft.com/en-us/rest/api/azure/devops/core/projects/get?view=azure-devops>
+- <https://learn.microsoft.com/en-us/rest/api/azure/devops/core/projects/get>
+- <https://learn.microsoft.com/en-us/rest/api/azure/devops/core/projects/list>

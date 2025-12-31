@@ -4,74 +4,97 @@
         Get the membership relationship between a subject and a container in Azure DevOps.
 
     .DESCRIPTION
-        This cmdlet retrieves the membership relationship between a specified subject and container in Azure DevOps using the Azure DevOps REST API.
+        This cmdlet retrieves the membership relationship between a specified subject and container in Azure DevOps.
 
-    .PARAMETER containerDescriptor
-        Mandatory. A descriptor to the container in the relationship.
+    .PARAMETER CollectionUri
+        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://vssps.dev.azure.com/myorganization.
 
-    .PARAMETER subjectDescriptor
+    .PARAMETER SubjectDescriptor
         Mandatory. A descriptor to the child subject in the relationship.
 
-    .PARAMETER ApiVersion
-        Optional. The API version to use.
+    .PARAMETER ContainerDescriptor
+        Mandatory. A descriptor to the container in the relationship.
 
-    .OUTPUTS
-        System.Object
+    .PARAMETER Version
+        Optional. The API version to use for the request. Default is '7.2-preview.1'.
 
     .LINK
         https://learn.microsoft.com/en-us/rest/api/azure/devops/graph/memberships/get
 
     .EXAMPLE
-        Get-AdoMembership -containerDescriptor $containerDescriptor -subjectDescriptor $subjectDescriptor
+        $params = @{
+            CollectionUri       = 'https://vssps.dev.azure.com/my-org'
+            SubjectDescriptor   = 'aadgp.00000000-0000-0000-0000-000000000000'
+            ContainerDescriptor = 'vssgp.00000000-0000-0000-0000-000000000001'
+        }
+        Get-AdoMembership @params
 
         Retrieves the membership relationship between the specified subject and container.
+
+    .EXAMPLE
+        $params = @{
+            CollectionUri       = 'https://vssps.dev.azure.com/my-org'
+            ContainerDescriptor = 'vssgp.00000000-0000-0000-0000-000000000001'
+        }
+        @('aadgp.00000000-0000-0000-0000-000000000002', 'aadgp.00000000-0000-0000-0000-000000000003') | Get-AdoMembership @params
+
+        Retrieves the membership relationships for multiple subjects demonstrating pipeline input.
     #>
-    [CmdletBinding()]
-    [OutputType([object])]
+    [CmdletBinding(SupportsShouldProcess)]
     param (
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
+        [string]$CollectionUri = ($env:DefaultAdoCollectionUri -replace 'https://', 'https://vssps.'),
 
-        [Parameter(Mandatory)]
-        [string]$subjectDescriptor,
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName, ValueFromPipeline)]
+        [string[]]$SubjectDescriptor,
 
-        [Parameter(Mandatory)]
-        [string]$containerDescriptor,
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [string]$ContainerDescriptor,
 
-        [Parameter(Mandatory = $false)]
-        [Alias('Api')]
-        [ValidateSet('7.1-preview.1', '7.2-preview.1')]
-        [string]$ApiVersion = '7.2-preview.1'
+        [Parameter()]
+        [Alias('ApiVersion')]
+        [ValidateSet('7.2-preview.1')]
+        [string]$Version = '7.2-preview.1'
     )
 
     begin {
-        Write-Debug ('Command      : {0}' -f $MyInvocation.MyCommand.Name)
-        Write-Debug ('  StorageKey : {0}' -f $StorageKey)
-        Write-Debug ('  ApiVersion : {0}' -f $ApiVersion)
+        Write-Verbose ("Command: $($MyInvocation.MyCommand.Name)")
+        Write-Debug ("CollectionUri: $CollectionUri")
+        Write-Debug ("SubjectDescriptor: $($SubjectDescriptor -join ',')")
+        Write-Debug ("ContainerDescriptor: $ContainerDescriptor")
+        Write-Debug ("Version: $Version")
+
+        Confirm-Default -Defaults ([ordered]@{
+                'CollectionUri' = $CollectionUri
+            })
     }
 
     process {
         try {
-            $ErrorActionPreference = 'Stop'
 
-            if (-not $global:AzDevOpsIsConnected) {
-                throw 'Not connected to Azure DevOps. Please connect using Connect-AdoOrganization.'
-            }
+            foreach ($subject in $SubjectDescriptor) {
 
-            $uriFormat = '{0}/_apis/graph/memberships/{1}/{2}?api-version={3}'
-            $AzDevOpsOrganization = $global:AzDevOpsOrganization -replace 'https://', 'https://vssps.'
-            $azDevOpsUri = ($uriFormat -f [uri]::new($AzDevOpsOrganization), $subjectDescriptor, $containerDescriptor, $ApiVersion)
+                $params = @{
+                    Uri     = "$CollectionUri/_apis/graph/memberships/$subject/$ContainerDescriptor"
+                    Version = $Version
+                    Method  = 'GET'
+                }
 
-            $params = @{
-                Method  = 'GET'
-                Uri     = $azDevOpsUri
-                Headers = @{
-                    'Accept'        = 'application/json'
-                    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
+                if ($PSCmdlet.ShouldProcess($CollectionUri, "Get Membership for subject: $subject in container: $ContainerDescriptor")) {
+
+                    $result = Invoke-AdoRestMethod @params
+
+                    [PSCustomObject]@{
+                        memberDescriptor    = $result.memberDescriptor
+                        containerDescriptor = $result.containerDescriptor
+                        collectionUri       = $CollectionUri
+                    }
+
+                } else {
+                    Write-Verbose "Calling Invoke-AdoRestMethod with $($params| ConvertTo-Json -Depth 10)"
                 }
             }
-
-            $response = Invoke-RestMethod @params -Verbose:$VerbosePreference
-
-            return $response
 
         } catch {
             throw $_
@@ -79,6 +102,6 @@
     }
 
     end {
-        Write-Debug ('Exit : {0}' -f $MyInvocation.MyCommand.Name)
+        Write-Verbose ("Exit: $($MyInvocation.MyCommand.Name)")
     }
 }

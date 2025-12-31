@@ -1,4 +1,4 @@
-﻿<!--
+<!--
 document type: cmdlet
 external help file: Azure.DevOps.PSModule-Help.xml
 HelpUri: https://learn.microsoft.com/en-us/rest/api/azure/devops/graph/groups/create
@@ -22,18 +22,19 @@ Adds an AAD Group as member of a group.
 ### __AllParameterSets
 
 ```text
-New-AdoGroup [-GroupDescriptor] <string> [-GroupId] <string> [[-ApiVersion] <string>]
- [<CommonParameters>]
+New-AdoGroup [[-CollectionUri] <string>] [-GroupDescriptor] <string> [-GroupId] <string[]>
+ [[-Version] <string>] [<CommonParameters>]
 ```
 
 ## ALIASES
 
 This cmdlet has the following aliases,
-- N/A
+- Descriptor (for GroupDescriptor)
+- OriginId (for GroupId)
 
 ## DESCRIPTION
 
-This function adds an AAD Group as member of a group in Azure DevOps through REST API.
+This cmdlet adds an AAD Group as member of a group in Azure DevOps.
 
 ## EXAMPLES
 
@@ -42,29 +43,48 @@ This function adds an AAD Group as member of a group in Azure DevOps through RES
 #### PowerShell
 
 ```powershell
-New-AdoGroupMembership -GroupDescriptor 'vssgp.00000000-0000-0000-0000-000000000000' -GroupId '00000000-0000-0000-0000-000000000000'
+$params = @{
+    CollectionUri   = 'https://vssps.dev.azure.com/my-org'
+    GroupDescriptor = 'vssgp.00000000-0000-0000-0000-000000000000'
+    GroupId         = '00000000-0000-0000-0000-000000000000'
+}
+New-AdoGroup @params
 ```
 
 Adds an AAD Group as member of a group.
 
+### EXAMPLE 2
+
+#### PowerShell
+
+```powershell
+$params = @{
+    CollectionUri   = 'https://vssps.dev.azure.com/my-org'
+    GroupDescriptor = 'vssgp.00000000-0000-0000-0000-000000000000'
+}
+@('00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000002') | New-AdoGroup @params
+```
+
+Adds multiple AAD Groups as members demonstrating pipeline input.
+
 ## PARAMETERS
 
-### -ApiVersion
+### -CollectionUri
 
-The API version to use.
+Optional.
+The collection URI of the Azure DevOps collection/organization, e.g., <https://vssps.dev.azure.com/myorganization>.
 
 ```yaml
 Type: System.String
-DefaultValue: 7.1
+DefaultValue: ($env:DefaultAdoCollectionUri -replace 'https://', 'https://vssps.')
 SupportsWildcards: false
-Aliases:
-- Api
+Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 2
+  Position: Named
   IsRequired: false
   ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
+  ValueFromPipelineByPropertyName: true
   ValueFromRemainingArguments: false
 DontShow: false
 AcceptedValues: []
@@ -73,6 +93,7 @@ HelpMessage: ''
 
 ### -GroupDescriptor
 
+Mandatory.
 A comma separated list of descriptors referencing groups you want the graph group to join.
 
 ```yaml
@@ -83,10 +104,10 @@ Aliases:
 - Descriptor
 ParameterSets:
 - Name: (All)
-  Position: 0
+  Position: Named
   IsRequired: true
   ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
+  ValueFromPipelineByPropertyName: true
   ValueFromRemainingArguments: false
 DontShow: false
 AcceptedValues: []
@@ -95,23 +116,49 @@ HelpMessage: ''
 
 ### -GroupId
 
+Mandatory.
 The OriginId of the entra group to add as a member.
 
 ```yaml
-Type: System.String
+Type: System.String[]
 DefaultValue: ''
 SupportsWildcards: false
 Aliases:
 - OriginId
 ParameterSets:
 - Name: (All)
-  Position: 1
+  Position: Named
   IsRequired: true
+  ValueFromPipeline: true
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -Version
+
+Optional.
+The API version to use for the request.
+Default is '7.2-preview.1'.
+
+```yaml
+Type: System.String
+DefaultValue: 7.2-preview.1
+SupportsWildcards: false
+Aliases:
+- ApiVersion
+ParameterSets:
+- Name: (All)
+  Position: Named
+  IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
   ValueFromRemainingArguments: false
 DontShow: false
-AcceptedValues: []
+AcceptedValues:
+- 7.2-preview.1
 HelpMessage: ''
 ```
 
@@ -128,11 +175,17 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### System.String
+### PSCustomObject
+
+An object representing the added group.
 
 ## NOTES
 
-- Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
+- Requires an active Azure account login. Use `Connect-AzAccount` to authenticate:
+
+  ```powershell
+  Connect-AzAccount -Tenant '<tenant-id>' -Subscription '<subscription-id>'
+  ```
 
 ## RELATED LINKS
 

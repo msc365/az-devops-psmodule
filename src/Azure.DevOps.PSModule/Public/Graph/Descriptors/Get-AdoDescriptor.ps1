@@ -7,64 +7,88 @@
         This function resolves a storage key to a descriptor through REST API.
 
     .PARAMETER StorageKey
-        Mandatory. Storage key of the subject (user, group, scope, etc.) to resolve
+        Mandatory. Storage key (uuid) of the subject (user, group, scope, etc.) to resolve.
 
     .PARAMETER ApiVersion
         Optional. The API version to use.
 
     .OUTPUTS
-        System.Object
-
-        Object representing the descriptor information.
+        PSCustomObject
 
     .LINK
         https://learn.microsoft.com/en-us/rest/api/azure/devops/graph/descriptors/get
 
     .EXAMPLE
-        $descriptor = Get-AdoDescriptor -StorageKey '00000000-0000-0000-0000-000000000000'
-    #>
-    [CmdletBinding()]
-    [OutputType([object])]
-    param (
-        [Parameter(Mandatory)]
-        [string]$StorageKey,
+        $params = @{
+            CollectionUri = 'https://dev.azure.com/my-org'
+            StorageKey    = '00000000-0000-0000-0000-000000000000'
+        }
+        Get-AdoDescriptor
 
-        [Parameter(Mandatory = $false)]
-        [Alias('Api')]
-        [ValidateSet('7.1', '7.2-preview.1')]
-        [string]$ApiVersion = '7.1'
+        Resolves the specified storage key to its corresponding descriptor.
+
+    .EXAMPLE
+        $params = @{
+            CollectionUri = 'https://dev.azure.com/my-org'
+        }
+        @(
+            '00000000-0000-0000-0000-000000000000',
+            '11111111-1111-1111-1111-111111111111'
+        ) | Get-AdoDescriptor @params
+
+        Resolves multiple storage keys to their corresponding descriptors, demonstrating pipeline input.
+    #>
+    [CmdletBinding(SupportsShouldProcess)]
+    param (
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [string]$CollectionUri = ($env:DefaultAdoCollectionUri -replace 'https://', 'https://vssps.'),
+
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName, ValueFromPipeline)]
+        [string[]]$StorageKey,
+
+        [Parameter()]
+        [Alias('ApiVersion')]
+        [ValidateSet('7.2-preview.1')]
+        [string]$Version = '7.2-preview.1'
     )
 
     begin {
-        Write-Debug ('Command      : {0}' -f $MyInvocation.MyCommand.Name)
-        Write-Debug ('  StorageKey : {0}' -f $StorageKey)
-        Write-Debug ('  ApiVersion : {0}' -f $ApiVersion)
+        Write-Verbose ("Command: $($MyInvocation.MyCommand.Name)")
+        Write-Debug ("CollectionUri: $CollectionUri")
+        Write-Debug ("StorageKey: $($StorageKey -join ',')")
+        Write-Debug ("Version: $Version")
+
+        Confirm-Default -Defaults ([ordered]@{
+                'CollectionUri' = $CollectionUri
+            })
     }
 
     process {
         try {
-            $ErrorActionPreference = 'Stop'
+            foreach ($key in $StorageKey) {
 
-            if (-not $global:AzDevOpsIsConnected) {
-                throw 'Not connected to Azure DevOps. Please connect using Connect-AdoOrganization.'
-            }
+                $params = @{
+                    Uri     = "$CollectionUri/_apis/graph/descriptors/$key"
+                    Version = $Version
+                    Method  = 'GET'
+                }
 
-            $uriFormat = '{0}/_apis/graph/descriptors/{1}?api-version={2}'
-            $AzDevOpsOrganization = $global:AzDevOpsOrganization -replace 'https://', 'https://vssps.'
-            $azDevOpsUri = ($uriFormat -f [uri]::new($AzDevOpsOrganization) , $StorageKey, $ApiVersion)
+                if ($PSCmdlet.ShouldProcess($CollectionUri, "Get Descriptor(s) for: $key")) {
 
-            $params = @{
-                Method  = 'GET'
-                Uri     = $azDevOpsUri
-                Headers = @{
-                    'Accept'        = 'application/json'
-                    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
+                    $result = (Invoke-AdoRestMethod @params).value
+
+                    if ($null -ne $result) {
+                        [PSCustomObject]@{
+                            storageKey    = $key
+                            value         = $result
+                            collectionUri = $CollectionUri
+                        }
+                    }
+
+                } else {
+                    Write-Verbose "Calling Invoke-AdoRestMethod with $($params| ConvertTo-Json -Depth 10)"
                 }
             }
-
-            $response = Invoke-RestMethod @params -Verbose:$VerbosePreference
-
-            return $response
 
         } catch {
             throw $_
@@ -72,6 +96,6 @@
     }
 
     end {
-        Write-Debug ('Exit : {0}' -f $MyInvocation.MyCommand.Name)
+        Write-Verbose ("Exit: $($MyInvocation.MyCommand.Name)")
     }
 }
