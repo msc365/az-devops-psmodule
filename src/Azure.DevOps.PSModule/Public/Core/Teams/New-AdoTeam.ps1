@@ -1,10 +1,16 @@
 ﻿function New-AdoTeam {
     <#
     .SYNOPSIS
-        Create a new team in an Azure DevOps project.
+        Creates a new team in an Azure DevOps project.
 
     .DESCRIPTION
-        This function creates a new team in an Azure DevOps project through REST API.
+        This cmdlet creates a new Azure DevOps team within a specified project.
+
+    .PARAMETER CollectionUri
+        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/myorganization.
+
+    .PARAMETER ProjectName
+        Mandatory. The ID or name of the project.
 
     .PARAMETER Name
         Mandatory. The name of the team to create.
@@ -12,97 +18,110 @@
     .PARAMETER Description
         Optional. The description of the team.
 
-    .PARAMETER ProjectId
-        Mandatory. The unique identifier or name of the project.
-
-    .PARAMETER ApiVersion
-        Optional. The API version to use.
-
-    .OUTPUTS
-        System.Object
-
-        The created team object.
-
-    .NOTES
-        - The team name must be unique within the project.
+    .PARAMETER Version
+        Optional. The API version to use for the request. Default is '7.2-preview.3'.
 
     .LINK
         https://learn.microsoft.com/en-us/rest/api/azure/devops/core/teams/create
 
     .EXAMPLE
-        New-AdoTeam -ProjectId 'my-project' -Name 'my-team'
+        $params = @{
+            CollectionUri = 'https://dev.azure.com/my-org'
+            ProjectName   = 'my-project'
+            Name          = 'my-team'
+        }
+        New-AdoTeam @params -Verbose
 
-        Creates a new team named 'my-team' in the project with ID 'my-project'.
+        Creates a new team in the specified project.
 
     .EXAMPLE
-        New-AdoTeam -ProjectId 'my-project' -Name 'my-team' -Description 'My new team'
+        $params = @{
+            CollectionUri = 'https://dev.azure.com/my-org'
+            ProjectName   = 'my-project'
+        }
+        @('team-1', 'team-2') | New-AdoTeam @params -Verbose
 
-        Creates a new team named 'my-team' with the description 'My new team' in the project with ID 'my-project'.
+        Creates multiple teams demonstrating pipeline input.
     #>
-    [CmdletBinding()]
-    [OutputType([object])]
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
     param (
-        [Parameter(Mandatory)]
-        [string]$ProjectId,
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
+        [string]$CollectionUri = $env:DefaultAdoCollectionUri,
 
-        [Parameter(Mandatory)]
-        [string]$Name,
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [Alias('ProjectId')]
+        [string]$ProjectName,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName, ValueFromPipeline)]
+        [Alias('TeamName')]
+        [string[]]$Name,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
         [string]$Description,
 
-        [Parameter(Mandatory = $false)]
-        [Alias('api')]
+        [Parameter()]
+        [Alias('ApiVersion')]
         [ValidateSet('5.1', '7.1-preview.4', '7.2-preview.3')]
-        [string]$ApiVersion = '7.1'
+        [string]$Version = '7.2-preview.3'
     )
 
     begin {
-        Write-Debug ('Command      : {0}' -f $MyInvocation.MyCommand.Name)
-        Write-Debug ('  ProjectId  : {0}' -f $ProjectId)
-        Write-Debug ('  Name       : {0}' -f $Name)
-        Write-Debug ('  Description: {0}' -f $Description)
-        Write-Debug ('  ApiVersion : {0}' -f $ApiVersion)
+        Write-Verbose ("Command: $($MyInvocation.MyCommand.Name)")
+        Write-Debug ("CollectionUri: $CollectionUri")
+        Write-Debug ("ProjectName: $ProjectName")
+        Write-Debug ("Name: $Name")
+        Write-Debug ("Description: $Description")
+        Write-Debug ("Version: $Version")
+
+        Confirm-Default -Defaults ([ordered]@{
+                'CollectionUri' = $CollectionUri
+            })
     }
 
     process {
         try {
-            $ErrorActionPreference = 'Stop'
 
-            if (-not $global:AzDevOpsIsConnected) {
-                throw 'Not connected to Azure DevOps. Please connect using Connect-AdoOrganization.'
-            }
+            foreach ($n_ in $Name) {
 
-            $uriFormat = '{0}/_apis/projects/{1}/teams?api-version={2}'
-            $azDevOpsUri = ($uriFormat -f [uri]::new($global:AzDevOpsOrganization), [uri]::EscapeUriString($ProjectId),
-                $ApiVersion)
-
-            $body = @{
-                name        = $Name
-                description = $Description
-            }
-
-            $params = @{
-                Method      = 'POST'
-                Uri         = $azDevOpsUri
-                ContentType = 'application/json'
-                Headers     = @{
-                    'Accept'        = 'application/json'
-                    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
+                $params = @{
+                    Uri     = "$CollectionUri/_apis/projects/$ProjectName/teams"
+                    Version = $Version
+                    Method  = 'POST'
                 }
-                Body        = ($body | ConvertTo-Json -Depth 3 -Compress)
+
+                $body = [PSCustomObject]@{
+                    name        = $n_
+                    description = $Description
+                }
+
+                if ($PSCmdlet.ShouldProcess($CollectionUri, "Create Team: $n_ in Project: $ProjectName")) {
+
+                    $results = $body | Invoke-AdoRestMethod @params
+
+                    [PSCustomObject]@{
+                        id            = $results.id
+                        name          = $results.name
+                        description   = $results.description
+                        url           = $results.url
+                        identityUrl   = $results.identityUrl
+                        projectId     = $results.projectId
+                        projectName   = $results.projectName
+                        collectionUri = $CollectionUri
+                    }
+
+                } else {
+                    Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
+                }
             }
-
-            $response = Invoke-RestMethod @params -Verbose:$VerbosePreference
-
-            return $response
 
         } catch {
             throw $_
         }
+
     }
 
     end {
-        Write-Debug ('Exit : {0}' -f $MyInvocation.MyCommand.Name)
+        Write-Verbose ("Exit: $($MyInvocation.MyCommand.Name)")
     }
 }

@@ -1,109 +1,143 @@
 ﻿function Set-AdoTeam {
     <#
     .SYNOPSIS
-        Update a team in an Azure DevOps project.
+        Updates an existing Azure DevOps team.
 
     .DESCRIPTION
-        This function updates a team in an Azure DevOps project through REST API.
+        This cmdlet updates an existing Azure DevOps team within a specified project.
 
-    .PARAMETER ProjectId
-        Mandatory. The unique identifier or name of the project.
+    .PARAMETER CollectionUri
+        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/myorganization.
 
-    .PARAMETER TeamId
-        Mandatory. The unique identifier of the team.
+    .PARAMETER ProjectName
+        Mandatory. The ID or name of the project.
+
+    .PARAMETER Id
+        Mandatory. The ID or name of the team to update.
 
     .PARAMETER Name
-        Mandatory. The name of the team.
+        Optional. The new name of the team.
 
     .PARAMETER Description
-        Optional. The description of the team.
+        Optional. The new description of the team.
 
-    .PARAMETER ApiVersion
-        Optional. The API version to use.
-
-    .OUTPUTS
-        System.Object
-
-        The updated team object.
+    .PARAMETER Version
+        Optional. The API version to use for the request. Default is '7.2-preview.3'.
 
     .LINK
         https://learn.microsoft.com/en-us/rest/api/azure/devops/core/teams/update
 
     .EXAMPLE
-        Set-AdoTeam -ProjectId 'my-project' -TeamId '00000000-0000-0000-0000-000000000000' -Name 'my-team'
+        $params = @{
+            CollectionUri = 'https://dev.azure.com/my-org'
+            ProjectName   = 'my-project'
+            Id            = 'my-team'
+            Name          = 'my-team-updated'
+        }
+        Set-AdoTeam @params -Verbose
 
-        Update the team with the specified TeamId in the given project to have the name 'my-team'.
+        Updates the name of the specified team.
+
+    .EXAMPLE
+        $params = @{
+            CollectionUri = 'https://dev.azure.com/my-org'
+            ProjectName   = 'my-project'
+        }
+        [PSCustomObject]@{
+            Id          = 'my-team'
+            Name        = 'my-team-updated'
+            Description = 'Updated description'
+        } | Set-AdoTeam @params -Verbose
+
+        Updates the team using pipeline input.
     #>
-    [CmdletBinding()]
-    [OutputType([object])]
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
     param (
-        [Parameter(Mandatory)]
-        [string]$ProjectId,
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
+        [string]$CollectionUri = $env:DefaultAdoCollectionUri,
 
-        [Parameter(Mandatory)]
-        [string]$TeamId,
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [Alias('ProjectId')]
+        [string]$ProjectName,
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName, ValueFromPipeline)]
+        [Alias('Team', 'TeamId', 'TeamName')]
+        [string[]]$Id,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
         [string]$Name,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter(ValueFromPipelineByPropertyName)]
         [string]$Description,
 
-        [Parameter(Mandatory = $false)]
-        [Alias('Api')]
+        [Parameter()]
+        [Alias('ApiVersion')]
         [ValidateSet('7.1', '7.2-preview.3')]
-        [string]$ApiVersion = '7.1'
+        [string]$Version = '7.2-preview.3'
     )
 
     begin {
-        Write-Debug ('Command       : {0}' -f $MyInvocation.MyCommand.Name)
-        Write-Debug ('  ProjectId   : {0}' -f $ProjectId)
-        Write-Debug ('  TeamId      : {0}' -f $TeamId)
-        Write-Debug ('  Name        : {0}' -f $Name)
-        Write-Debug ('  Description : {0}' -f $Description)
-        Write-Debug ('  ApiVersion  : {0}' -f $ApiVersion)
+        Write-Verbose ("Command: $($MyInvocation.MyCommand.Name)")
+        Write-Debug ("CollectionUri: $CollectionUri")
+        Write-Debug ("ProjectName: $ProjectName")
+        Write-Debug ("Id: $Id")
+        Write-Debug ("Name: $Name")
+        Write-Debug ("Description: $Description")
+        Write-Debug ("Version: $Version")
+
+        Confirm-Default -Defaults ([ordered]@{
+                'CollectionUri' = $CollectionUri
+            })
     }
 
     process {
         try {
-            $ErrorActionPreference = 'Stop'
 
-            if (-not $global:AzDevOpsIsConnected) {
-                throw 'Not connected to Azure DevOps. Please connect using Connect-AdoOrganization.'
-            }
+            foreach ($t_ in $Id) {
 
-            $uriFormat = '{0}/_apis/projects/{1}/teams/{2}?api-version={3}'
-            $azDevOpsUri = ($uriFormat -f [uri]::new($global:AzDevOpsOrganization), $ProjectId, $TeamId, $ApiVersion)
-
-            $body = @{
-                name = $Name
-            }
-
-            if (-not [string]::IsNullOrEmpty($Description)) {
-                $body.Description = $Description
-            }
-
-            $params = @{
-                Method      = 'PATCH'
-                Uri         = $azDevOpsUri
-                ContentType = 'application/json'
-                Headers     = @{
-                    'Accept'        = 'application/json'
-                    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
+                $params = @{
+                    Uri     = "$CollectionUri/_apis/projects/$ProjectName/teams/$t_"
+                    Version = $Version
+                    Method  = 'PATCH'
                 }
-                Body        = ($body | ConvertTo-Json -Depth 3 -Compress)
+
+                $body = [PSCustomObject]@{}
+
+                if ($PSBoundParameters.ContainsKey('Name')) {
+                    $body | Add-Member -NotePropertyName 'name' -NotePropertyValue $Name
+                }
+                if ($PSBoundParameters.ContainsKey('Description')) {
+                    $body | Add-Member -NotePropertyName 'description' -NotePropertyValue $Description
+                }
+
+                if ($PSCmdlet.ShouldProcess($CollectionUri, "Update Team: $t_ in Project: $ProjectName")) {
+
+                    $results = $body | Invoke-AdoRestMethod @params
+
+                    [PSCustomObject]@{
+                        id            = $results.id
+                        name          = $results.name
+                        description   = $results.description
+                        url           = $results.url
+                        identityUrl   = $results.identityUrl
+                        projectId     = $results.projectId
+                        projectName   = $results.projectName
+                        collectionUri = $CollectionUri
+                    }
+
+                } else {
+                    Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
+                }
             }
-
-            $response = Invoke-RestMethod @params -Verbose:$VerbosePreference
-
-            return $response
 
         } catch {
             throw $_
         }
+
     }
 
     end {
-        Write-Debug ('Exit : {0}' -f $MyInvocation.MyCommand.Name)
+        Write-Verbose ("Exit: $($MyInvocation.MyCommand.Name)")
     }
 }

@@ -1,86 +1,112 @@
 ﻿function Remove-AdoTeam {
     <#
     .SYNOPSIS
-        Remove a team from an Azure DevOps project.
+        Removes a team from an Azure DevOps project.
 
     .DESCRIPTION
-        This function removes a team from an Azure DevOps project through REST API.
+        This cmdlet removes a team from an Azure DevOps project.
 
-    .PARAMETER ProjectId
+    .PARAMETER CollectionUri
+        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/myorganization.
+
+    .PARAMETER ProjectName
         Mandatory. The ID or name of the project.
 
-    .PARAMETER TeamId
-        Mandatory. The ID or name of the team.
+    .PARAMETER Id
+        Mandatory. The ID or name of the team to remove.
 
-    .PARAMETER ApiVersion
-        Optional. The API version to use.
-
-    .OUTPUTS
-        System.Object
-
-        The team details object.
+    .PARAMETER Version
+        Optional. The API version to use for the request. Default is '7.2-preview.3'.
 
     .LINK
         https://learn.microsoft.com/en-us/rest/api/azure/devops/core/teams/delete
 
     .EXAMPLE
-        Remove-AdoTeam -ProjectId 'my-project' -TeamId 'my-team'
+        $params = @{
+            CollectionUri = 'https://dev.azure.com/my-org'
+            ProjectName   = 'my-project'
+        }
+        Remove-AdoTeam @params -Id 'my-team' -Verbose
 
-        Removes the specified team from the specified project.
+        Removes the specified team from the project.
+
+    .EXAMPLE
+        $params = @{
+            CollectionUri = 'https://dev.azure.com/my-org'
+            ProjectName   = 'my-project'
+        }
+        @('team-1', 'team-2') | Remove-AdoTeam @params -Verbose
+
+        Removes multiple teams demonstrating pipeline input.
     #>
-    [CmdletBinding()]
-    [OutputType([boolean])]
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
     param (
-        [Parameter(Mandatory)]
-        [string]$ProjectId,
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
+        [string]$CollectionUri = $env:DefaultAdoCollectionUri,
 
-        [Parameter(Mandatory)]
-        [string]$TeamId,
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [Alias('ProjectId')]
+        [string]$ProjectName,
 
-        [Parameter(Mandatory = $false)]
-        [Alias('api')]
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName, ValueFromPipeline)]
+        [Alias('Team', 'TeamId', 'TeamName')]
+        [string[]]$Id,
+
+        [Parameter()]
+        [Alias('ApiVersion')]
         [ValidateSet('5.1', '7.1-preview.4', '7.2-preview.3')]
-        [string]$ApiVersion = '7.1'
+        [string]$Version = '7.2-preview.3'
     )
 
     begin {
-        Write-Debug ('Command       : {0}' -f $MyInvocation.MyCommand.Name)
-        Write-Debug ('  ProjectId   : {0}' -f $ProjectId)
-        Write-Debug ('  TeamId      : {0}' -f $TeamId)
-        Write-Debug ('  ApiVersion  : {0}' -f $ApiVersion)
+        Write-Verbose ("Command: $($MyInvocation.MyCommand.Name)")
+        Write-Debug ("CollectionUri: $CollectionUri")
+        Write-Debug ("ProjectName: $ProjectName")
+        Write-Debug ("Id: $Id")
+        Write-Debug ("Version: $Version")
+
+        Confirm-Default -Defaults ([ordered]@{
+                'CollectionUri' = $CollectionUri
+            })
     }
 
     process {
         try {
-            $ErrorActionPreference = 'Stop'
 
-            if (-not $global:AzDevOpsIsConnected) {
-                throw 'Not connected to Azure DevOps. Please connect using Connect-AdoOrganization.'
-            }
+            foreach ($t_ in $Id) {
 
-            $uriFormat = '{0}/_apis/projects/{1}/teams/{2}?api-version={3}'
-            $azDevOpsUri = ($uriFormat -f [uri]::new($global:AzDevOpsOrganization), [uri]::EscapeUriString($ProjectId),
-                $TeamId, $ApiVersion)
+                $params = @{
+                    Uri     = "$CollectionUri/_apis/projects/$ProjectName/teams/$t_"
+                    Version = $Version
+                    Method  = 'DELETE'
+                }
 
-            $params = @{
-                Method  = 'DELETE'
-                Uri     = $azDevOpsUri
-                Headers = @{
-                    'Accept'        = 'application/json'
-                    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
+                if ($PSCmdlet.ShouldProcess($CollectionUri, "Delete Team: $t_ from Project: $ProjectName")) {
+
+                    try {
+                        Invoke-AdoRestMethod @params | Out-Null
+
+                    } catch {
+                        if ($_ -match 'does not exist') {
+                            Write-Warning "Team with ID $t_ does not exist in project $ProjectName, skipping deletion."
+                        } else {
+                            throw $_
+                        }
+                    }
+
+                } else {
+                    Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
                 }
             }
-
-            Invoke-RestMethod @params -Verbose:$VerbosePreference | Out-Null
-
-            return $true
 
         } catch {
             throw $_
         }
+
     }
 
     end {
-        Write-Debug ('Exit : {0}' -f $MyInvocation.MyCommand.Name)
+        Write-Verbose ("Exit: $($MyInvocation.MyCommand.Name)")
     }
 }
