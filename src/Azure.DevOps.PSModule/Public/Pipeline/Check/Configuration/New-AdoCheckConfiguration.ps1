@@ -25,15 +25,11 @@
         https://learn.microsoft.com/en-us/rest/api/azure/devops/approvalsandchecks/check-configurations/add
 
     .EXAMPLE
-        Initialize variables
-
         $approverId = 0000000-0000-0000-0000-000000000000
         $environmentId = 1
 
         $definitionRefId = '26014962-64a0-49f4-885b-4b874119a5cc' # Approval
         $definitionRefId = '0f52a19b-c67e-468f-b8eb-0ae83b532c99' # Pre-check approval
-
-        Create configuration JSON
 
         $configJson = @{
             settings = @{
@@ -110,50 +106,50 @@
                 Method  = 'POST'
             }
 
-            foreach ($config in $Configuration) {
+            foreach ($c_ in $Configuration) {
 
-                if ($PSCmdlet.ShouldProcess($ProjectName, "Create Configuration on: $($config.resource.type)")) {
+                if ($PSCmdlet.ShouldProcess($ProjectName, "Create Configuration on: $($c_.resource.type)")) {
                     try {
-                        $result = $config | Invoke-AdoRestMethod @params
+                        $results = $c_ | Invoke-AdoRestMethod @params
 
                         $obj = [ordered]@{
-                            id = $result.id
+                            id = $results.id
                         }
-                        if ($result.settings) {
-                            $obj['settings'] = $result.settings
+                        if ($results.settings) {
+                            $obj['settings'] = $results.settings
                         }
-                        $obj['timeout'] = $result.timeout
-                        $obj['type'] = $result.type
-                        $obj['resource'] = $result.resource
-                        $obj['createdBy'] = $result.createdBy.id
-                        $obj['createdOn'] = $result.createdOn
+                        $obj['timeout'] = $results.timeout
+                        $obj['type'] = $results.type
+                        $obj['resource'] = $results.resource
+                        $obj['createdBy'] = $results.createdBy.id
+                        $obj['createdOn'] = $results.createdOn
                         $obj['project'] = $ProjectName
                         $obj['collectionUri'] = $CollectionUri
                         [PSCustomObject]$obj
 
                     } catch {
                         if ($_ -match 'already exists') {
-                            Write-Warning "$($config.type.name) already exists for $($config.resource.type) with ID $($config.resource.id), trying to get it"
+                            Write-Warning "$($c_.type.name) already exists for $($c_.resource.type) with ID $($c_.resource.id), trying to get it"
 
                             $params.Method = 'GET'
-                            $params.QueryParameters = "resourceType=$($config.resource.type)&resourceId=$($config.resource.id)&`$expand=settings"
+                            $params.QueryParameters = "resourceType=$($c_.resource.type)&resourceId=$($c_.resource.id)&`$expand=settings"
 
-                            $configs = (Invoke-AdoRestMethod @params).value | Where-Object {
-                                $_.settings.definitionRef.id -eq $config.settings.definitionRef.id
+                            $results = (Invoke-AdoRestMethod @params).value | Where-Object {
+                                $_.settings.definitionRef.id -eq $c_.settings.definitionRef.id
                             }
 
-                            foreach ($result in $configs) {
+                            foreach ($r_ in $results) {
                                 $obj = [ordered]@{
-                                    id = $result.id
+                                    id = $r_.id
                                 }
-                                if ($result.settings) {
-                                    $obj['settings'] = $result.settings
+                                if ($r_.settings) {
+                                    $obj['settings'] = $r_.settings
                                 }
-                                $obj['timeout'] = $result.timeout
-                                $obj['type'] = $result.type
-                                $obj['resource'] = $result.resource
-                                $obj['createdBy'] = $result.createdBy.id
-                                $obj['createdOn'] = $result.createdOn
+                                $obj['timeout'] = $r_.timeout
+                                $obj['type'] = $r_.type
+                                $obj['resource'] = $r_.resource
+                                $obj['createdBy'] = $r_.createdBy.id
+                                $obj['createdOn'] = $r_.createdOn
                                 $obj['project'] = $ProjectName
                                 $obj['collectionUri'] = $CollectionUri
                                 [PSCustomObject]$obj

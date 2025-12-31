@@ -19,7 +19,24 @@
         https://learn.microsoft.com/en-us/rest/api/azure/devops/graph/descriptors/get
 
     .EXAMPLE
-        Get-AdoDescriptor -StorageKey '00000000-0000-0000-0000-000000000000'
+        $params = @{
+            CollectionUri = 'https://dev.azure.com/my-org'
+            StorageKey    = '00000000-0000-0000-0000-000000000000'
+        }
+        Get-AdoDescriptor
+
+        Resolves the specified storage key to its corresponding descriptor.
+
+    .EXAMPLE
+        $params = @{
+            CollectionUri = 'https://dev.azure.com/my-org'
+        }
+        @(
+            '00000000-0000-0000-0000-000000000000',
+            '11111111-1111-1111-1111-111111111111'
+        ) | Get-AdoDescriptor @params
+
+        Resolves multiple storage keys to their corresponding descriptors, demonstrating pipeline input.
     #>
     [CmdletBinding(SupportsShouldProcess)]
     param (
@@ -58,12 +75,12 @@
 
                 if ($PSCmdlet.ShouldProcess($CollectionUri, "Get Descriptor(s) for: $key")) {
 
-                    $value = (Invoke-AdoRestMethod @params).value
+                    $result = (Invoke-AdoRestMethod @params).value
 
-                    if ($null -ne $value) {
+                    if ($null -ne $result) {
                         [PSCustomObject]@{
                             storageKey    = $key
-                            value         = $value
+                            value         = $result
                             collectionUri = $CollectionUri
                         }
                     }

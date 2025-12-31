@@ -38,15 +38,22 @@
         Retrieves all groups in the Azure DevOps organization.
 
     .EXAMPLE
-        $project = Get-AdoProject -ProjectName 'my-project'
+        $project = Get-AdoProject -Name 'my-project'
         $projectDescriptor = (Get-AdoDescriptor -StorageKey $project.Id)
 
-        Get-AdoGroup -ScopeDescriptor $projectDescriptor -SubjectTypes 'vssgp'
+        $params = @{
+            CollectionUri = 'https://dev.azure.com/my-org'
+            ScopeDescriptor = $projectDescriptor
+            SubjectTypes    = 'vssgp'
+        }
+        Get-AdoGroup @params
 
         Retrieves all groups in the specified project with subject types 'vssgp'.
 
     .EXAMPLE
         $params = @{
+            CollectionUri = 'https://dev.azure.com/my-org'
+            ScopeDescriptor = $projectDescriptor
             SubjectTypes    = 'vssgp'
         }
         @(
@@ -126,29 +133,29 @@
 
             if ($PSCmdlet.ShouldProcess($CollectionUri, 'Get Groups')) {
 
-                $response = Invoke-AdoRestMethod @params
-                $groups = $response.value
+                $result = Invoke-AdoRestMethod @params
+                $groups = $result.value
 
                 if ($DisplayName) {
-                    $groups = foreach ($name in $DisplayName) {
-                        $groups | Where-Object { $_.displayName -eq $name }
+                    $groups = foreach ($n_ in $DisplayName) {
+                        $groups | Where-Object { $_.displayName -eq $n_ }
                     }
                 }
 
-                foreach ($grp in $groups) {
+                foreach ($g_ in $groups) {
                     $obj = [ordered]@{
-                        displayName   = $grp.displayName
-                        originId      = $grp.originId
-                        principalName = $grp.principalName
-                        origin        = $grp.origin
-                        subjectKind   = $grp.subjectKind
-                        description   = $grp.description
-                        mailAddress   = $grp.mailAddress
-                        descriptor    = $grp.descriptor
+                        displayName   = $g_.displayName
+                        originId      = $g_.originId
+                        principalName = $g_.principalName
+                        origin        = $g_.origin
+                        subjectKind   = $g_.subjectKind
+                        description   = $g_.description
+                        mailAddress   = $g_.mailAddress
+                        descriptor    = $g_.descriptor
                         collectionUri = $CollectionUri
                     }
-                    if ($response.continuationToken) {
-                        $obj['continuationToken'] = $response.continuationToken
+                    if ($result.continuationToken) {
+                        $obj['continuationToken'] = $result.continuationToken
                     }
                     [PSCustomObject]$obj
                 }

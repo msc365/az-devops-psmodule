@@ -179,19 +179,19 @@
 
                 if ($PSCmdlet.ShouldProcess($ProjectName, "Create $($definitionRef.name) for: $name")) {
                     try {
-                        $config = $body | Invoke-AdoRestMethod @params
+                        $results = $body | Invoke-AdoRestMethod @params
 
                         $obj = [ordered]@{
-                            id = $config.id
+                            id = $results.id
                         }
-                        if ($config.settings) {
-                            $obj['settings'] = $config.settings
+                        if ($results.settings) {
+                            $obj['settings'] = $results.settings
                         }
-                        $obj['timeout'] = $config.timeout
-                        $obj['type'] = $config.type
-                        $obj['resource'] = $config.resource
-                        $obj['createdBy'] = $config.createdBy.id
-                        $obj['createdOn'] = $config.createdOn
+                        $obj['timeout'] = $results.timeout
+                        $obj['type'] = $results.type
+                        $obj['resource'] = $results.resource
+                        $obj['createdBy'] = $results.createdBy.id
+                        $obj['createdOn'] = $results.createdOn
                         $obj['project'] = $ProjectName
                         $obj['collectionUri'] = $CollectionUri
                         [PSCustomObject]$obj
@@ -203,21 +203,21 @@
                             $params.Method = 'GET'
                             $params.QueryParameters = "resourceType=$ResourceType&resourceId=$resourceId&`$expand=settings"
 
-                            $config = (Invoke-AdoRestMethod @params).value | Where-Object {
+                            $results = (Invoke-AdoRestMethod @params).value | Where-Object {
                                 $_.settings.definitionRef.id -eq $definitionRef.id
                             }
 
                             $obj = [ordered]@{
-                                id = $config.id
+                                id = $results.id
                             }
-                            if ($config.settings) {
-                                $obj['settings'] = $config.settings
+                            if ($results.settings) {
+                                $obj['settings'] = $results.settings
                             }
-                            $obj['timeout'] = $config.timeout
-                            $obj['type'] = $config.type
-                            $obj['resource'] = $config.resource
-                            $obj['createdBy'] = $config.createdBy.id
-                            $obj['createdOn'] = $config.createdOn
+                            $obj['timeout'] = $results.timeout
+                            $obj['type'] = $results.type
+                            $obj['resource'] = $results.resource
+                            $obj['createdBy'] = $results.createdBy.id
+                            $obj['createdOn'] = $results.createdOn
                             $obj['project'] = $ProjectName
                             $obj['collectionUri'] = $CollectionUri
                             [PSCustomObject]$obj

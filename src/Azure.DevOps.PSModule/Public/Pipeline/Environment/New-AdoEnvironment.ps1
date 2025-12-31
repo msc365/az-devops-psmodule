@@ -94,40 +94,40 @@
                 Method  = 'POST'
             }
 
-            foreach ($name_ in $Name) {
+            foreach ($n_ in $Name) {
 
                 $body = [PSCustomObject]@{
-                    name        = $name_
+                    name        = $n_
                     description = $Description
                 }
 
-                if ($PSCmdlet.ShouldProcess($ProjectName, "Create environment: $name_")) {
+                if ($PSCmdlet.ShouldProcess($ProjectName, "Create environment: $n_")) {
                     try {
-                        $env = $body | Invoke-AdoRestMethod @params
+                        $results = $body | Invoke-AdoRestMethod @params
 
                         [PSCustomObject]@{
-                            id            = $env.id
-                            name          = $env.name
-                            createdBy     = $env.createdBy.id
-                            createdOn     = $env.createdOn
+                            id            = $results.id
+                            name          = $results.name
+                            createdBy     = $results.createdBy.id
+                            createdOn     = $results.createdOn
                             projectName   = $ProjectName
                             collectionUri = $CollectionUri
                         }
 
                     } catch {
                         if ($_ -match 'already exists') {
-                            Write-Warning "Environment $name_ already exists, trying to get it"
+                            Write-Warning "Environment $n_ already exists, trying to get it"
 
                             $params.Method = 'GET'
-                            $params.QueryParameters = "name=$name_"
+                            $params.QueryParameters = "name=$n_"
 
-                            $env = (Invoke-AdoRestMethod @params).value
+                            $results = (Invoke-AdoRestMethod @params).value
 
                             [PSCustomObject]@{
-                                id            = $env.id
-                                name          = $env.name
-                                createdBy     = $env.createdBy.id
-                                createdOn     = $env.createdOn
+                                id            = $results.id
+                                name          = $results.name
+                                createdBy     = $results.createdBy.id
+                                createdOn     = $results.createdOn
                                 projectName   = $ProjectName
                                 collectionUri = $CollectionUri
                             }

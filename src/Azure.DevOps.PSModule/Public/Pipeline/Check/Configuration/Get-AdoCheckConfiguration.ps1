@@ -123,20 +123,21 @@
                 }
 
                 if ($PSCmdlet.ShouldProcess($ProjectName, "Get Check Configuration(s) from: $ResourceType/$name")) {
-                    $configs = (Invoke-AdoRestMethod @params).value
 
-                    foreach ($config in $configs) {
+                    $results = (Invoke-AdoRestMethod @params).value
+
+                    foreach ($c_ in $results) {
                         $obj = [ordered]@{
-                            id = $config.id
+                            id = $c_.id
                         }
-                        if ($config.settings) {
-                            $obj['settings'] = $config.settings
+                        if ($c_.settings) {
+                            $obj['settings'] = $c_.settings
                         }
-                        $obj['timeout'] = $config.timeout
-                        $obj['type'] = $config.type
-                        $obj['resource'] = $config.resource
-                        $obj['createdBy'] = $config.createdBy.id
-                        $obj['createdOn'] = $config.createdOn
+                        $obj['timeout'] = $c_.timeout
+                        $obj['type'] = $c_.type
+                        $obj['resource'] = $c_.resource
+                        $obj['createdBy'] = $c_.createdBy.id
+                        $obj['createdOn'] = $c_.createdOn
                         $obj['project'] = $ProjectName
                         $obj['collectionUri'] = $CollectionUri
                         [PSCustomObject]$obj

@@ -111,14 +111,15 @@
 
             if ($PSCmdlet.ShouldProcess($ProjectName, "Update environment: $Id")) {
                 try {
-                    $env = $body | Invoke-AdoRestMethod @params
+                    $results = $body | Invoke-AdoRestMethod @params
+
                     [PSCustomObject]@{
-                        id             = $env.id
-                        name           = $env.name
-                        createdBy      = $env.createdBy.id
-                        createdOn      = $env.createdOn
-                        lastModifiedBy = $env.lastModifiedBy.id
-                        lastModifiedOn = $env.lastModifiedOn
+                        id             = $results.id
+                        name           = $results.name
+                        createdBy      = $results.createdBy.id
+                        createdOn      = $results.createdOn
+                        lastModifiedBy = $results.lastModifiedBy.id
+                        lastModifiedOn = $results.lastModifiedOn
                         projectName    = $ProjectName
                         collectionUri  = $CollectionUri
                     }

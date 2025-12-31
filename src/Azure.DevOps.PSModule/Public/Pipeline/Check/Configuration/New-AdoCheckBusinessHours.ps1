@@ -49,14 +49,16 @@
 
     .EXAMPLE
         $params = @{
-            DisplayName  = 'Business Hours'
-            ResourceType = 'environment'
-            ResourceName = 'my-environment-tst'
-            BusinessDays = @('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday')
-            TimeZone     = 'UTC'
-            StartTime    = '04:00'
-            EndTime      = '11:00'
-            Timeout      = 1440
+            CollectionUri = 'https://dev.azure.com/my-org'
+            ProjectName   = 'my-project'
+            DisplayName   = 'Business Hours'
+            ResourceType  = 'environment'
+            ResourceName  = 'my-environment-tst'
+            BusinessDays  = @('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday')
+            TimeZone      = 'UTC'
+            StartTime     = '04:00'
+            EndTime       = '11:00'
+            Timeout       = 1440
         }
         New-AdoCheckBusinessHours @params
 
@@ -277,14 +279,14 @@
                 Method  = 'POST'
             }
 
-            foreach ($name in $ResourceName) {
+            foreach ($n_ in $ResourceName) {
                 # Get resource ID
                 switch ($ResourceType) {
                     'environment' {
                         $typeParams = @{
                             CollectionUri = $CollectionUri
                             ProjectName   = $ProjectName
-                            Name          = $name
+                            Name          = $n_
                         }
                         $resourceId = (Get-AdoEnvironment @typeParams).Id
                     }
@@ -321,12 +323,12 @@
                     }
                 }
 
-                if ($PSCmdlet.ShouldProcess($ProjectName, "Create $($DisplayName) for: $name")) {
+                if ($PSCmdlet.ShouldProcess($ProjectName, "Create $($DisplayName) for: $n_")) {
                     try {
                         # Check if configuration already exists
                         $exists = [PSCustomObject]@{
                             ResourceType = $ResourceType
-                            ResourceName = $name
+                            ResourceName = $n_
                             Expands      = 'settings'
                         } | Get-AdoCheckConfiguration
 
@@ -338,18 +340,18 @@
                         }
 
                         if (-not $exists) {
-                            $config = $body | Invoke-AdoRestMethod @params
+                            $results = $body | Invoke-AdoRestMethod @params
                             $obj = [ordered]@{
-                                id = $config.id
+                                id = $results.id
                             }
-                            if ($config.settings) {
-                                $obj['settings'] = $config.settings
+                            if ($results.settings) {
+                                $obj['settings'] = $results.settings
                             }
-                            $obj['timeout'] = $config.timeout
-                            $obj['type'] = $config.type
-                            $obj['resource'] = $config.resource
-                            $obj['createdBy'] = $config.createdBy.id
-                            $obj['createdOn'] = $config.createdOn
+                            $obj['timeout'] = $results.timeout
+                            $obj['type'] = $results.type
+                            $obj['resource'] = $results.resource
+                            $obj['createdBy'] = $results.createdBy.id
+                            $obj['createdOn'] = $results.createdOn
                             $obj['project'] = $ProjectName
                             $obj['collectionUri'] = $CollectionUri
                             [PSCustomObject]$obj

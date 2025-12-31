@@ -97,16 +97,16 @@
 
             if ($PSCmdlet.ShouldProcess($CollectionUri, "Get Environment(s) from: $ProjectName")) {
 
-                $environments = (Invoke-AdoRestMethod @params).value
+                $results = (Invoke-AdoRestMethod @params).value
 
-                foreach ($env in $environments) {
+                foreach ($e_ in $results) {
                     [PSCustomObject]@{
-                        id             = $env.id
-                        name           = $env.name
-                        createdBy      = $env.createdBy.id
-                        createdOn      = $env.createdOn
-                        lastModifiedBy = $env.lastModifiedBy.id
-                        lastModifiedOn = $env.lastModifiedOn
+                        id             = $e_.id
+                        name           = $e_.name
+                        createdBy      = $e_.createdBy.id
+                        createdOn      = $e_.createdOn
+                        lastModifiedBy = $e_.lastModifiedBy.id
+                        lastModifiedOn = $e_.lastModifiedOn
                         projectName    = $ProjectName
                         collectionUri  = $CollectionUri
                     }
