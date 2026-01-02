@@ -4,25 +4,34 @@ external help file: Azure.DevOps.PSModule-Help.xml
 HelpUri: https://learn.microsoft.com/en-us/rest/api/azure/devops/core/teams/get
 Locale: en-NL
 Module Name: Azure.DevOps.PSModule
-ms.date: 11/01/2025
+ms.date: 01/02/2026
 PlatyPS schema version: 2024-05-01
 title: Get-AdoTeam
 -->
 
+<!-- markdownlint-disable MD024 -->
 <!-- cSpell: ignore dontshow -->
 
 # Get-AdoTeam
 
 ## SYNOPSIS
 
-Get teams or the team details for a given Azure DevOps project.
+Retrieves Azure DevOps team details.
 
 ## SYNTAX
 
-### __AllParameterSets
+### ListTeams (Default)
 
 ```text
-Get-AdoTeam [-ProjectId] <string> [-TeamId] <string> [[-ApiVersion] <string>] [<CommonParameters>]
+Get-AdoTeam [[-CollectionUri] <string>] [[-ProjectName] <string>] [[-Skip] <int>]
+ [[-Top] <int>] [[-Version] <string>] [<CommonParameters>]
+```
+
+### ByNameOrId
+
+```text
+Get-AdoTeam [[-CollectionUri] <string>] [[-ProjectName] <string>] [[-Name] <string>]
+ [[-Version] <string>] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -32,7 +41,7 @@ This cmdlet has the following aliases,
 
 ## DESCRIPTION
 
-This function retrieves all teams or the team details for a given Azure DevOps project through REST API.
+This cmdlet retrieves details of one or more Azure DevOps teams within a given project. You can retrieve all teams in a project, or specific teams by name or ID. Supports pagination when retrieving all teams.
 
 ## EXAMPLES
 
@@ -41,25 +50,120 @@ This function retrieves all teams or the team details for a given Azure DevOps p
 #### PowerShell
 
 ```powershell
-Get-AdoTeam -ProjectId 'my-project' -TeamId '00000000-0000-0000-0000-000000000000'
+$params = @{
+    CollectionUri = 'https://dev.azure.com/my-org'
+    ProjectName   = 'my-project'
+}
+Get-AdoTeam @params
 ```
+
+Retrieves all teams from the specified project.
+
+### EXAMPLE 2
+
+#### PowerShell
+
+```powershell
+Get-AdoTeam -Name 'my-team'
+```
+
+Retrieves the specified team using default CollectionUri and ProjectName from environment variables.
+
+### EXAMPLE 3
+
+#### PowerShell
+
+```powershell
+'team-1' | Get-AdoTeam -ProjectName 'my-project'
+```
+
+Retrieves a team demonstrating pipeline input.
 
 ## PARAMETERS
 
-### -ApiVersion
+### -CollectionUri
 
-Optional.
-The API version to use.
+The collection URI of the Azure DevOps collection/organization.
+Defaults to the value of $env:DefaultAdoCollectionUri if not provided.
 
 ```yaml
 Type: System.String
-DefaultValue: 7.1
+DefaultValue: $env:DefaultAdoCollectionUri
 SupportsWildcards: false
-Aliases:
-- api
+Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 2
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -ProjectName
+
+The ID or name of the project.
+Defaults to the value of $env:DefaultAdoProject if not provided.
+
+```yaml
+Type: System.String
+DefaultValue: $env:DefaultAdoProject
+SupportsWildcards: false
+Aliases:
+- ProjectId
+ParameterSets:
+- Name: (All)
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -Name
+
+The ID or name of the team to retrieve.
+If not provided, retrieves all teams.
+
+```yaml
+Type: System.String
+DefaultValue: ''
+SupportsWildcards: false
+Aliases:
+- TeamName
+- Id
+- TeamId
+ParameterSets:
+- Name: ByNameOrId
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: true
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -Skip
+
+The number of teams to skip.
+Used for pagination when retrieving all teams.
+
+```yaml
+Type: System.Int32
+DefaultValue: 0
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: ListTeams
+  Position: Named
   IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
@@ -69,20 +173,20 @@ AcceptedValues: []
 HelpMessage: ''
 ```
 
-### -ProjectId
+### -Top
 
-Mandatory.
-The ID or name of the project.
+The number of teams to retrieve.
+Used for pagination when retrieving all teams.
 
 ```yaml
-Type: System.String
-DefaultValue: ''
+Type: System.Int32
+DefaultValue: 0
 SupportsWildcards: false
 Aliases: []
 ParameterSets:
-- Name: (All)
-  Position: 0
-  IsRequired: true
+- Name: ListTeams
+  Position: Named
+  IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
   ValueFromRemainingArguments: false
@@ -91,25 +195,28 @@ AcceptedValues: []
 HelpMessage: ''
 ```
 
-### -TeamId
+### -Version
 
-Mandatory.
-The ID or name of the team.
+The API version to use for the request.
+Default is '7.1'.
 
 ```yaml
 Type: System.String
-DefaultValue: ''
+DefaultValue: 7.1
 SupportsWildcards: false
-Aliases: []
+Aliases:
+- ApiVersion
 ParameterSets:
 - Name: (All)
-  Position: 1
-  IsRequired: true
+  Position: Named
+  IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
   ValueFromRemainingArguments: false
 DontShow: false
-AcceptedValues: []
+AcceptedValues:
+- 7.1
+- 7.2-preview.3
 HelpMessage: ''
 ```
 
@@ -122,17 +229,25 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
-- N/A
+- System.String
 
 ## OUTPUTS
 
-### System.Object
+### PSCustomObject
 
-The team details object.
+Returns one or more team objects with the following properties:
+- id: The unique identifier of the team
+- name: The name of the team
+- description: The description of the team
+- url: The REST API URL for the team
+- identityUrl: The identity URL for the team
+- projectId: The unique identifier of the project the team belongs to
+- projectName: The name of the project the team belongs to
+- collectionUri: The collection URI the team belongs to
 
 ## NOTES
 
-- Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
+- Both CollectionUri and ProjectName parameters can be set as environment variables ($env:DefaultAdoCollectionUri and $env:DefaultAdoProject) to avoid specifying them in each call
 
 ## RELATED LINKS
 

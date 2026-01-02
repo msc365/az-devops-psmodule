@@ -11,7 +11,7 @@
         Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/myorganization.
 
     .PARAMETER ProjectName
-        Mandatory. The ID or name of the project.
+        Optional. The ID or name of the project. If not specified, the default project is used.
 
     .PARAMETER Name
         Optional. The ID or name of the team(s) to retrieve. If not provided, retrieves all teams.
@@ -23,7 +23,7 @@
         Optional. The number of teams to retrieve. Used for pagination when retrieving all teams
 
     .PARAMETER Version
-        Optional. The API version to use for the request. Default is '7.2-preview.3'.
+        Optional. The API version to use for the request. Default is '7.1'.
 
     .LINK
         https://learn.microsoft.com/en-us/rest/api/azure/devops/core/teams/get
@@ -52,9 +52,17 @@
             CollectionUri = 'https://dev.azure.com/my-org'
             ProjectName   = 'my-project'
         }
-        @('team-1', 'team-2') | Get-AdoTeam @params -Verbose
+        'team-1' | Get-AdoTeam @params -Verbose
 
-        Retrieves multiple teams demonstrating pipeline input.
+        Retrieves a team demonstrating pipeline input.
+
+    .EXAMPLE
+        Get-AdoTeam | Where-Object {
+            'team-1' -in $_.name -or
+            'team-2' -in $_.name
+        }
+
+        Retrieves multiple teams by their names.
 
     .EXAMPLE
         $params = @{
@@ -71,13 +79,13 @@
         [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
         [string]$CollectionUri = $env:DefaultAdoCollectionUri,
 
-        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [Parameter(ValueFromPipelineByPropertyName)]
         [Alias('ProjectId')]
-        [string]$ProjectName,
+        [string]$ProjectName = $env:DefaultAdoProject,
 
-        [Parameter(ValueFromPipelineByPropertyName, ValueFromPipeline, ParameterSetName = 'ByName')]
-        [Alias('Team', 'TeamId', 'TeamName')]
-        [string[]]$Name,
+        [Parameter(ValueFromPipelineByPropertyName, ValueFromPipeline, ParameterSetName = 'ByNameOrId')]
+        [Alias('TeamName', 'Id', 'TeamId')]
+        [string]$Name,
 
         [Parameter(ParameterSetName = 'ListTeams')]
         [int]$Skip,
@@ -87,8 +95,8 @@
 
         [Parameter()]
         [Alias('ApiVersion')]
-        [ValidateSet('5.1', '7.1-preview.4', '7.2-preview.3')]
-        [string]$Version = '7.2-preview.3'
+        [ValidateSet('7.1', '7.2-preview.3')]
+        [string]$Version = '7.1'
     )
 
     begin {
@@ -102,72 +110,65 @@
 
         Confirm-Default -Defaults ([ordered]@{
                 'CollectionUri' = $CollectionUri
+                'ProjectName'   = $ProjectName
             })
     }
 
     process {
         try {
 
-            foreach ($n_ in $Name) {
-                $queryParameters = [System.Collections.Generic.List[string]]::new()
+            $queryParameters = [System.Collections.Generic.List[string]]::new()
 
-                if ($n_) {
-                    $uri = "$CollectionUri/_apis/projects/$ProjectName/teams/$n_"
-                } else {
-                    $uri = "$CollectionUri/_apis/projects/$ProjectName/teams"
+            if ($Name) {
+                $uri = "$CollectionUri/_apis/projects/$ProjectName/teams/$Name"
+            } else {
+                $uri = "$CollectionUri/_apis/projects/$ProjectName/teams"
 
-                    # Build query parameters
-                    if ($Skip) {
-                        $queryParameters.Add("`$skip=$Skip")
-                    }
-                    if ($Top) {
-                        $queryParameters.Add("`$top=$Top")
-                    }
+                # Build query parameters
+                if ($Skip) {
+                    $queryParameters.Add("`$skip=$Skip")
                 }
-
-                $params = @{
-                    Uri             = $uri
-                    Version         = $Version
-                    QueryParameters = if ($queryParameters.Count -gt 0) { $queryParameters -join '&' } else { $null }
-                    Method          = 'GET'
-                }
-
-                if ($PSCmdlet.ShouldProcess($CollectionUri, $n_ ? "Get Team: $n_ in Project: $ProjectName" : "Get Teams for Project: $ProjectName")) {
-
-                    try {
-                        $results = Invoke-AdoRestMethod @params
-                        $teams = if ($n_) { @($results) } else { $results.value }
-
-                        foreach ($t_ in $teams) {
-                            [PSCustomObject]@{
-                                id            = $t_.id
-                                name          = $t_.name
-                                description   = $t_.description
-                                url           = $t_.url
-                                identityUrl   = $t_.identityUrl
-                                projectId     = $t_.projectId
-                                projectName   = $t_.projectName
-                                collectionUri = $CollectionUri
-                            }
-                        }
-
-                    } catch {
-                        if ($_ -match 'does not exist') {
-                            Write-Warning "Team with ID $n_ does not exist in project $ProjectName, skipping."
-                        } else {
-                            throw $_
-                        }
-                    }
-
-                } else {
-                    Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
+                if ($Top) {
+                    $queryParameters.Add("`$top=$Top")
                 }
             }
 
+            $params = @{
+                Uri             = $uri
+                Version         = $Version
+                QueryParameters = if ($queryParameters.Count -gt 0) { $queryParameters -join '&' } else { $null }
+                Method          = 'GET'
+            }
+
+            if ($PSCmdlet.ShouldProcess($CollectionUri, $Name ? "Get Team: $Name in Project: $ProjectName" : "Get Teams for Project: $ProjectName")) {
+                try {
+                    $results = Invoke-AdoRestMethod @params
+                    $teams = if ($Name) { @($results) } else { $results.value }
+                    foreach ($t_ in $teams) {
+                        [PSCustomObject]@{
+                            id            = $t_.id
+                            name          = $t_.name
+                            description   = $t_.description
+                            url           = $t_.url
+                            identityUrl   = $t_.identityUrl
+                            projectId     = $t_.projectId
+                            projectName   = $t_.projectName
+                            collectionUri = $CollectionUri
+                        }
+                    }
+                } catch {
+                    if ($_.ErrorDetails.Message -match 'TeamNotFoundException') {
+                        Write-Warning "Team with ID $Name does not exist, skipping."
+                    } else {
+                        throw $_
+                    }
+                }
+            } else {
+                Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
+            }
         } catch {
             throw $_
         }
-
     }
 
     end {
