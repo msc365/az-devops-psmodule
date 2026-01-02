@@ -10,7 +10,7 @@
         Mandatory. Storage key (uuid) of the subject (user, group, scope, etc.) to resolve.
 
     .PARAMETER ApiVersion
-        Optional. The API version to use.
+        Optional. The API version to use. Default is '7.1'.
 
     .OUTPUTS
         PSCustomObject
@@ -21,7 +21,7 @@
     .EXAMPLE
         $params = @{
             CollectionUri = 'https://dev.azure.com/my-org'
-            StorageKey    = '00000000-0000-0000-0000-000000000000'
+            StorageKey    = '00000000-0000-0000-0000-000000000001'
         }
         Get-AdoDescriptor
 
@@ -32,8 +32,8 @@
             CollectionUri = 'https://dev.azure.com/my-org'
         }
         @(
-            '00000000-0000-0000-0000-000000000000',
-            '11111111-1111-1111-1111-111111111111'
+            '00000000-0000-0000-0000-000000000001',
+            '00000000-0000-0000-0000-000000000002'
         ) | Get-AdoDescriptor @params
 
         Resolves multiple storage keys to their corresponding descriptors, demonstrating pipeline input.
@@ -44,12 +44,12 @@
         [string]$CollectionUri = ($env:DefaultAdoCollectionUri -replace 'https://', 'https://vssps.'),
 
         [Parameter(Mandatory, ValueFromPipelineByPropertyName, ValueFromPipeline)]
-        [string[]]$StorageKey,
+        [string]$StorageKey,
 
         [Parameter()]
         [Alias('ApiVersion')]
-        [ValidateSet('7.2-preview.1')]
-        [string]$Version = '7.2-preview.1'
+        [ValidateSet('7.1', '7.2-preview.1')]
+        [string]$Version = '7.1'
     )
 
     begin {
@@ -65,31 +65,33 @@
 
     process {
         try {
-            foreach ($key in $StorageKey) {
+            $params = @{
+                Uri     = "$CollectionUri/_apis/graph/descriptors/$StorageKey"
+                Version = $Version
+                Method  = 'GET'
+            }
 
-                $params = @{
-                    Uri     = "$CollectionUri/_apis/graph/descriptors/$key"
-                    Version = $Version
-                    Method  = 'GET'
-                }
-
-                if ($PSCmdlet.ShouldProcess($CollectionUri, "Get Descriptor(s) for: $key")) {
-
+            if ($PSCmdlet.ShouldProcess($CollectionUri, "Get Descriptor(s) for: $StorageKey")) {
+                try {
                     $result = (Invoke-AdoRestMethod @params).value
 
                     if ($null -ne $result) {
                         [PSCustomObject]@{
-                            storageKey    = $key
+                            storageKey    = $StorageKey
                             value         = $result
                             collectionUri = $CollectionUri
                         }
                     }
-
-                } else {
-                    Write-Verbose "Calling Invoke-AdoRestMethod with $($params| ConvertTo-Json -Depth 10)"
+                } catch {
+                    if ($_.ErrorDetails.Message -match 'SubjectDescriptorNotFound') {
+                        Write-Warning "StorageKey with ID $StorageKey does not exist in $CollectionUri, skipping."
+                    } else {
+                        throw $_
+                    }
                 }
+            } else {
+                Write-Verbose "Calling Invoke-AdoRestMethod with $($params| ConvertTo-Json -Depth 10)"
             }
-
         } catch {
             throw $_
         }

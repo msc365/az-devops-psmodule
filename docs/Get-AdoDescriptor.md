@@ -4,11 +4,12 @@ external help file: Azure.DevOps.PSModule-Help.xml
 HelpUri: https://learn.microsoft.com/en-us/rest/api/azure/devops/graph/descriptors/get
 Locale: en-NL
 Module Name: Azure.DevOps.PSModule
-ms.date: 11/01/2025
+ms.date: 01/02/2026
 PlatyPS schema version: 2024-05-01
 title: Get-AdoDescriptor
 -->
 
+<!-- markdownlint-disable MD024 -->
 <!-- cSpell: ignore dontshow -->
 
 # Get-AdoDescriptor
@@ -22,8 +23,8 @@ Resolve a storage key to a descriptor.
 ### __AllParameterSets
 
 ```text
-Get-AdoDescriptor [[-CollectionUri] <string>] [-StorageKey] <string[]> [[-Version] <string>]
- [<CommonParameters>]
+Get-AdoDescriptor [[-CollectionUri] <string>] [-StorageKey] <string> [[-Version] <string>]
+ [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -44,9 +45,9 @@ This function resolves a storage key to a descriptor through REST API.
 ```powershell
 $params = @{
     CollectionUri = 'https://dev.azure.com/my-org'
-    StorageKey    = '00000000-0000-0000-0000-000000000000'
+    StorageKey    = '00000000-0000-0000-0000-000000000001'
 }
-Get-AdoDescriptor
+Get-AdoDescriptor @params
 ```
 
 Resolves the specified storage key to its corresponding descriptor.
@@ -60,8 +61,8 @@ $params = @{
     CollectionUri = 'https://dev.azure.com/my-org'
 }
 @(
-    '00000000-0000-0000-0000-000000000000',
-    '11111111-1111-1111-1111-111111111111'
+    '00000000-0000-0000-0000-000000000001',
+    '00000000-0000-0000-0000-000000000002'
 ) | Get-AdoDescriptor @params
 ```
 
@@ -97,7 +98,7 @@ Mandatory.
 Storage key (uuid) of the subject (user, group, scope, etc.) to resolve.
 
 ```yaml
-Type: System.String[]
+Type: System.String
 DefaultValue: ''
 SupportsWildcards: false
 Aliases: []
@@ -117,11 +118,11 @@ HelpMessage: ''
 
 Optional.
 The API version to use for the request.
-Default is '7.2-preview.1'.
+Default is '7.1'.
 
 ```yaml
 Type: System.String
-DefaultValue: 7.2-preview.1
+DefaultValue: '7.1'
 SupportsWildcards: false
 Aliases:
 - ApiVersion
@@ -134,7 +135,8 @@ ParameterSets:
   ValueFromRemainingArguments: false
 DontShow: false
 AcceptedValues:
-- 7.2-preview.1
+- '7.1'
+- '7.2-preview.1'
 HelpMessage: ''
 ```
 
@@ -151,9 +153,12 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### System.Object
+### PSCustomObject
 
-Object representing the descriptor information.
+Returns a PSCustomObject with the following properties:
+- **storageKey**: The storage key that was resolved
+- **value**: The descriptor value returned by the API
+- **collectionUri**: The collection URI used for the request
 
 ## NOTES
 
