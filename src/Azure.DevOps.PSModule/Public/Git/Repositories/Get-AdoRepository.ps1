@@ -1,77 +1,158 @@
 ﻿function Get-AdoRepository {
     <#
     .SYNOPSIS
-        Get the repository.
+        Retrieves Azure DevOps repository details.
 
     .DESCRIPTION
-        This function retrieves the repository details as GitRepository object for an Azure DevOps repository through REST API.
+        This cmdlet retrieves details of one or more Azure DevOps repositories within a specified project.
+        You can retrieve all repositories, or specific repositories by name or ID.
 
-    .PARAMETER ProjectId
+    .PARAMETER CollectionUri
+        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/myorganization.
+
+    .PARAMETER ProjectName
         Mandatory. The ID or name of the project.
 
     .PARAMETER Name
-        Mandatory. The ID or name of the repository.
+        Optional. The ID or name of the repository(s) to retrieve. If not provided, retrieves all repositories.
+
+    .PARAMETER Skip
+        Optional. The number of repositories to skip. Used for pagination.
+
+    .PARAMETER Top
+        Optional. The number of repositories to retrieve. Used for pagination. Default is 100.
+
+    .PARAMETER Version
+        Optional. The API version to use for the request. Default is '7.1'.
 
     .LINK
         https://learn.microsoft.com/en-us/rest/api/azure/devops/git/repositories/get-repository
 
     .EXAMPLE
-        Get-AdoRepository -ProjectId 'my-project' -Name 'my-repo-001'
+        $params = @{
+            CollectionUri = 'https://dev.azure.com/my-org'
+            ProjectName   = 'my-project'
+        }
+        Get-AdoRepository @params
 
-        Retrieves the repository 'my-repo-001' from project 'my-project'.
+        Retrieves all repositories from the specified project.
+
+    .EXAMPLE
+        $params = @{
+            CollectionUri = 'https://dev.azure.com/my-org'
+            ProjectName   = 'my-project'
+        }
+        Get-AdoRepository @params -Name 'my-repository-1'
+
+        Retrieves the specified repository from the project.
     #>
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName = 'ListRepositories', SupportsShouldProcess)]
     [OutputType([pscustomobject])]
     param (
-        [Parameter(Mandatory)]
-        [string]$ProjectId,
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
+        [string]$CollectionUri = $env:DefaultAdoCollectionUri,
 
-        [Parameter(Mandatory)]
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [Alias('ProjectId')]
+        [string]$ProjectName = $env:DefaultAdoProject,
+
+        [Parameter(ValueFromPipelineByPropertyName, ValueFromPipeline, ParameterSetName = 'ByNameOrId')]
+        [Alias('Repository', 'RepositoryId', 'RepositoryName')]
         [string]$Name,
 
-        [Parameter(Mandatory = $false)]
-        [Alias('Api')]
-        [ValidateSet('7.1', '7.2-preview.1')]
-        [string]$ApiVersion = '7.1'
+        [Parameter(ParameterSetName = 'ListRepositories')]
+        [switch]$IncludeLinks,
+
+        [Parameter(ParameterSetName = 'ListRepositories')]
+        [switch]$IncludeHidden,
+
+        [Parameter(ParameterSetName = 'ListRepositories')]
+        [switch]$IncludeAllUrls,
+
+        [Parameter()]
+        [Alias('ApiVersion')]
+        [ValidateSet('7.1', '7.2-preview.2')]
+        [string]$Version = '7.1'
     )
 
     begin {
-        Write-Debug ('Command      : {0}' -f $MyInvocation.MyCommand.Name)
-        Write-Debug ('  ProjectId  : {0}' -f $ProjectId)
-        Write-Debug ('  Name       : {0}' -f $Name)
-        Write-Debug ('  ApiVersion : {0}' -f $ApiVersion)
+        Write-Verbose ("Command: $($MyInvocation.MyCommand.Name)")
+        Write-Debug ("CollectionUri: $CollectionUri")
+        Write-Debug ("ProjectName: $ProjectName")
+        Write-Debug ("Name: $($Name -join ',')")
+        Write-Debug ("IncludeLinks: $IncludeLinks")
+        Write-Debug ("IncludeHidden: $IncludeHidden")
+        Write-Debug ("IncludeAllUrls: $IncludeAllUrls")
+        Write-Debug ("Version: $Version")
+
+        Confirm-Default -Defaults ([ordered]@{
+                'CollectionUri' = $CollectionUri
+                'ProjectName'   = $ProjectName
+            })
     }
 
     process {
         try {
-            $ErrorActionPreference = 'Stop'
+            $queryParameters = [System.Collections.Generic.List[string]]::new()
 
-            if (-not $global:AzDevOpsIsConnected) {
-                throw 'Not connected to Azure DevOps. Please connect using Connect-AdoOrganization.'
-            }
+            if ($Name) {
+                $uri = "$CollectionUri/$ProjectName/_apis/git/repositories/$Name"
+            } else {
+                $uri = "$CollectionUri/$ProjectName/_apis/git/repositories"
 
-            $uriFormat = '{0}/{1}/_apis/git/repositories/{2}?api-version={3}'
-            $azDevOpsUri = ($uriFormat -f [uri]::new($global:AzDevOpsOrganization), [uri]::EscapeDataString($ProjectId), [uri]::EscapeDataString($Name), $ApiVersion)
-
-            $params = @{
-                Method  = 'GET'
-                Uri     = $azDevOpsUri
-                Headers = @{
-                    'Accept'        = 'application/json'
-                    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
+                # Build query parameters
+                if ($IncludeLinks) {
+                    $queryParameters.Add("includeLinks=$true")
+                }
+                if ($IncludeHidden) {
+                    $queryParameters.Add("includeHidden=$true")
+                }
+                if ($IncludeAllUrls) {
+                    $queryParameters.Add("includeAllUrls=$true")
                 }
             }
 
-            $response = Invoke-RestMethod @params -Verbose:$VerbosePreference
+            $params = @{
+                Uri             = $uri
+                Version         = $Version
+                QueryParameters = if ($queryParameters.Count -gt 0) { $queryParameters -join '&' } else { $null }
+                Method          = 'GET'
+            }
 
-            return $response
+            if ($PSCmdlet.ShouldProcess($CollectionUri, $Name ? "Get Repository '$($Name)' in project '$($ProjectName)'" : "Get Repositories for project '$($ProjectName)'")) {
 
+                try {
+                    $results = Invoke-AdoRestMethod @params
+                    $repos = if ($Name) { @($results) } else { $results.value }
+                    foreach ($r_ in $repos) {
+                        [PSCustomObject]@{
+                            id            = $r_.id
+                            name          = $r_.name
+                            project       = $r_.project
+                            defaultBranch = $r_.defaultBranch
+                            url           = $r_.url
+                            remoteUrl     = $r_.remoteUrl
+                            projectName   = $ProjectName
+                            collectionUri = $CollectionUri
+                        }
+                    }
+                } catch {
+                    if ($_.ErrorDetails.Message -match 'RepositoryNotFound') {
+                        Write-Warning "Repository with ID $Name does not exist in project $ProjectName, skipping."
+                    } else {
+                        throw $_
+                    }
+                }
+            } else {
+                Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
+            }
         } catch {
             throw $_
         }
     }
 
     end {
-        Write-Debug ('Exit : {0}' -f $MyInvocation.MyCommand.Name)
+        Write-Verbose ("Exit: $($MyInvocation.MyCommand.Name)")
     }
 }

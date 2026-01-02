@@ -4,26 +4,32 @@ external help file: Azure.DevOps.PSModule-Help.xml
 HelpUri: https://learn.microsoft.com/en-us/rest/api/azure/devops/git/repositories/get-repository
 Locale: en-NL
 Module Name: Azure.DevOps.PSModule
-ms.date: 11/01/2025
+ms.date: 01/02/2026
 PlatyPS schema version: 2024-05-01
 title: Get-AdoRepository
 -->
 
+<!-- markdownlint-disable MD024 -->
 <!-- cSpell: ignore dontshow -->
 
 # Get-AdoRepository
 
 ## SYNOPSIS
 
-Get the repository.
+Retrieves Azure DevOps repository details.
 
 ## SYNTAX
 
-### __AllParameterSets
+### ListRepositories
 
 ```text
-Get-AdoRepository [-ProjectId] <string> [-Name] <string> [[-ApiVersion] <string>]
- [<CommonParameters>]
+Get-AdoRepository [[-CollectionUri] <string>] [[-ProjectName] <string>] [-IncludeLinks] [-IncludeHidden] [-IncludeAllUrls] [[-Version] <string>] [<CommonParameters>]
+```
+
+### ByNameOrId
+
+```text
+Get-AdoRepository [[-CollectionUri] <string>] [[-ProjectName] <string>] [[-Name] <string>] [[-Version] <string>] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -33,7 +39,7 @@ This cmdlet has the following aliases,
 
 ## DESCRIPTION
 
-This function retrieves the repository details as GitRepository object for an Azure DevOps repository through REST API.
+This cmdlet retrieves details of one or more Azure DevOps repositories within a specified project. You can retrieve all repositories, or specific repositories by name or ID.
 
 ## EXAMPLES
 
@@ -42,24 +48,123 @@ This function retrieves the repository details as GitRepository object for an Az
 #### PowerShell
 
 ```powershell
-Get-AdoRepository -ProjectId 'my-project' -Name 'my-repo-001'
+$params = @{
+    CollectionUri = 'https://dev.azure.com/my-org'
+    ProjectName   = 'my-project'
+}
+Get-AdoRepository @params
 ```
 
-Retrieves the repository 'my-repo-001' from project 'my-project'.
+Retrieves all repositories from the specified project.
+
+### EXAMPLE 2
+
+#### PowerShell
+
+```powershell
+$params = @{
+    CollectionUri = 'https://dev.azure.com/my-org'
+    ProjectName   = 'my-project'
+    Name          = 'my-repository-1'
+}
+Get-AdoRepository @params
+```
+
+Retrieves the specified repository from the project.
+
+### EXAMPLE 3
+
+#### PowerShell
+
+```powershell
+Get-AdoRepository -Name 'my-repository-1'
+```
+
+Retrieves a specific repository using the default collection URI and project name from environment variables.
 
 ## PARAMETERS
 
-### -ApiVersion
+### -CollectionUri
+
+Optional. The collection URI of the Azure DevOps collection/organization, e.g., <https://dev.azure.com/myorganization>.
+Defaults to the value of $env:DefaultAdoCollectionUri.
 
 ```yaml
 Type: System.String
-DefaultValue: 7.1
+DefaultValue: $env:DefaultAdoCollectionUri
 SupportsWildcards: false
-Aliases:
-- Api
+Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 2
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -ProjectName
+
+Optional. The ID or name of the project.
+Defaults to the value of $env:DefaultAdoProject.
+
+```yaml
+Type: System.String
+DefaultValue: $env:DefaultAdoProject
+SupportsWildcards: false
+Aliases:
+- ProjectId
+ParameterSets:
+- Name: (All)
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -Name
+
+Optional. The ID or name of the repository(s) to retrieve. If not provided, retrieves all repositories.
+
+```yaml
+Type: System.String
+DefaultValue: ''
+SupportsWildcards: false
+Aliases:
+- Repository
+- RepositoryId
+- RepositoryName
+ParameterSets:
+- Name: ByNameOrId
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: true
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -IncludeLinks
+
+Optional switch. Include additional links in the response.
+
+```yaml
+Type: System.Management.Automation.SwitchParameter
+DefaultValue: False
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: ListRepositories
+  Position: Named
   IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
@@ -69,20 +174,19 @@ AcceptedValues: []
 HelpMessage: ''
 ```
 
-### -Name
+### -IncludeHidden
 
-Mandatory.
-The ID or name of the repository.
+Optional switch. Include hidden repositories in the response.
 
 ```yaml
-Type: System.String
-DefaultValue: ''
+Type: System.Management.Automation.SwitchParameter
+DefaultValue: False
 SupportsWildcards: false
 Aliases: []
 ParameterSets:
-- Name: (All)
-  Position: 1
-  IsRequired: true
+- Name: ListRepositories
+  Position: Named
+  IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
   ValueFromRemainingArguments: false
@@ -91,25 +195,48 @@ AcceptedValues: []
 HelpMessage: ''
 ```
 
-### -ProjectId
+### -IncludeAllUrls
 
-Mandatory.
-The ID or name of the project.
+Optional switch. Include all URLs in the response.
 
 ```yaml
-Type: System.String
-DefaultValue: ''
+Type: System.Management.Automation.SwitchParameter
+DefaultValue: False
 SupportsWildcards: false
 Aliases: []
 ParameterSets:
-- Name: (All)
-  Position: 0
-  IsRequired: true
+- Name: ListRepositories
+  Position: Named
+  IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
   ValueFromRemainingArguments: false
 DontShow: false
 AcceptedValues: []
+HelpMessage: ''
+```
+
+### -Version
+
+Optional. The API version to use for the request. Default is '7.1'.
+
+```yaml
+Type: System.String
+DefaultValue: '7.1'
+SupportsWildcards: false
+Aliases:
+- ApiVersion
+ParameterSets:
+- Name: (All)
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: false
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues:
+- '7.1'
+- '7.2-preview.2'
 HelpMessage: ''
 ```
 
@@ -126,11 +253,22 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### System.Management.Automation.PSObject
+### PSCustomObject
+
+Returns a custom object with the following properties:
+- id: The unique identifier of the repository
+- name: The name of the repository
+- project: The project object containing repository details
+- defaultBranch: The default branch of the repository
+- url: The URL of the repository
+- remoteUrl: The remote URL for cloning the repository
+- projectName: The name of the project containing the repository
+- collectionUri: The collection URI of the Azure DevOps organization
 
 ## NOTES
 
 - Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
+- If a repository is not found, a warning is displayed and the cmdlet continues processing.
 
 ## RELATED LINKS
 
