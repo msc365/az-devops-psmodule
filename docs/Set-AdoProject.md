@@ -4,11 +4,12 @@ external help file: Azure.DevOps.PSModule-Help.xml
 HelpUri: https://learn.microsoft.com/en-us/rest/api/azure/devops/core/projects/update
 Locale: en-NL
 Module Name: Azure.DevOps.PSModule
-ms.date: 11/01/2025
+ms.date: 01/02/2026
 PlatyPS schema version: 2024-05-01
 title: Set-AdoProject
 -->
 
+<!-- markdownlint-disable MD024 -->
 <!-- cSpell: ignore dontshow -->
 
 # Set-AdoProject
@@ -96,16 +97,15 @@ HelpMessage: ''
 
 ### -Id
 
-Mandatory.
-The ID or name of the project to update.
+The ID (uuid) or name of the project to update.
+The cmdlet will automatically resolve project names to IDs.
 
 ```yaml
-Type: System.String[]
+Type: System.String
 DefaultValue: ''
 SupportsWildcards: false
 Aliases:
 - ProjectId
-- ProjectName
 ParameterSets:
 - Name: (All)
   Position: Named
@@ -120,8 +120,7 @@ HelpMessage: ''
 
 ### -Description
 
-Optional.
-The description of the project to update.
+The new description for the project.
 
 ```yaml
 Type: System.String
@@ -130,10 +129,10 @@ SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 2
+  Position: Named
   IsRequired: false
   ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
+  ValueFromPipelineByPropertyName: true
   ValueFromRemainingArguments: false
 DontShow: false
 AcceptedValues: []
@@ -142,20 +141,20 @@ HelpMessage: ''
 
 ### -Name
 
-Optional.
-The name of the project to update.
+The new name for the project.
 
 ```yaml
 Type: System.String
 DefaultValue: ''
 SupportsWildcards: false
-Aliases: []
+Aliases:
+- ProjectName
 ParameterSets:
 - Name: (All)
-  Position: 1
+  Position: Named
   IsRequired: false
   ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
+  ValueFromPipelineByPropertyName: true
   ValueFromRemainingArguments: false
 DontShow: false
 AcceptedValues: []
@@ -189,13 +188,12 @@ HelpMessage: ''
 
 ### -Version
 
-Optional.
 The API version to use for the request.
-Default is '7.2-preview.1'.
+Default is '7.1'.
 
 ```yaml
 Type: System.String
-DefaultValue: 7.2-preview.1
+DefaultValue: 7.1
 SupportsWildcards: false
 Aliases:
 - ApiVersion
@@ -208,7 +206,8 @@ ParameterSets:
   ValueFromRemainingArguments: false
 DontShow: false
 AcceptedValues:
-- 7.2-preview.1
+- 7.1
+- 7.2-preview.4
 HelpMessage: ''
 ```
 
@@ -221,15 +220,28 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
-- N/A
+- System.String
+- PSCustomObject
 
 ## OUTPUTS
 
-### System.Object
+### PSCustomObject
 
-The updated project object.
+Returns the updated project object with the following properties:
+- id: The unique identifier of the project
+- name: The updated name of the project
+- description: The updated description of the project
+- visibility: The visibility of the project (Private or Public)
+- state: The state of the project
+- defaultTeam: Information about the default team for the project
+- collectionUri: The collection URI the project belongs to
 
 ## NOTES
+
+- The cmdlet accepts either a project ID (GUID) or project name for the Id parameter
+- The cmdlet automatically polls for update completion before returning
+- Only properties that are explicitly provided will be updated
+- Requires ShouldProcess confirmation due to ConfirmImpact = 'High'
 
 - Requires an active Azure account login. Use `Connect-AzAccount` to authenticate:
 

@@ -10,7 +10,7 @@
         Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/myorganization.
 
     .PARAMETER Id
-        Mandatory. The ID or name of the project to update.
+        Mandatory. The ID (uuid) of the project to update.
 
     .PARAMETER Name
         Optional. The new name of the project.
@@ -22,7 +22,7 @@
         Optional. The visibility of the project. Default is 'Private'.
 
     .PARAMETER Version
-        Optional. The API version to use for the request. Default is '7.2-preview.1'.
+        Optional. The API version to use for the request. Default is '7.1'.
 
     .LINK
         https://learn.microsoft.com/en-us/rest/api/azure/devops/core/projects/update
@@ -30,7 +30,7 @@
     .EXAMPLE
         $params = @{
             CollectionUri = 'https://dev.azure.com/my-org'
-            Id            = 'my-project'
+            Id            = '00000000-0000-0000-0000-000000000000'
             Name          = 'my-project-updated'
         }
         Set-AdoProject @params -Verbose
@@ -42,7 +42,7 @@
             CollectionUri = 'https://dev.azure.com/my-org'
         }
         [PSCustomObject]@{
-            Id          = 'my-project'
+            Id          = '00000000-0000-0000-0000-000000000000'
             Name        = 'my-project-updated'
             Description = 'Updated description'
         } | Set-AdoProject @params -Verbose
@@ -56,10 +56,11 @@
         [string]$CollectionUri = $env:DefaultAdoCollectionUri,
 
         [Parameter(Mandatory, ValueFromPipelineByPropertyName, ValueFromPipeline)]
-        [Alias('ProjectId', 'ProjectName')]
-        [string[]]$Id,
+        [Alias('ProjectId')]
+        [string]$Id,
 
         [Parameter(ValueFromPipelineByPropertyName)]
+        [Alias('ProjectName')]
         [string]$Name,
 
         [Parameter(ValueFromPipelineByPropertyName)]
@@ -71,8 +72,8 @@
 
         [Parameter()]
         [Alias('ApiVersion')]
-        [ValidateSet('7.2-preview.1')]
-        [string]$Version = '7.2-preview.1'
+        [ValidateSet('7.1', '7.2-preview.4')]
+        [string]$Version = '7.1'
     )
 
     begin {
@@ -91,78 +92,82 @@
 
     process {
         try {
-
-            foreach ($id_ in $Id) {
-
-                $params = @{
-                    Uri     = "$CollectionUri/_apis/projects/$id_"
-                    Version = $Version
-                    Method  = 'PATCH'
-                }
-
-                $body = [PSCustomObject]@{}
-
-                if ($PSBoundParameters.ContainsKey('Name')) {
-                    $body | Add-Member -NotePropertyName 'name' -NotePropertyValue $Name
-                }
-                if ($PSBoundParameters.ContainsKey('Description')) {
-                    $body | Add-Member -NotePropertyName 'description' -NotePropertyValue $Description
-                }
-                if ($PSBoundParameters.ContainsKey('Visibility')) {
-                    $body | Add-Member -NotePropertyName 'visibility' -NotePropertyValue $Visibility
-                }
-
-                if ($PSCmdlet.ShouldProcess($CollectionUri, "Update project: $id_")) {
-                    try {
-                        $results = $body | Invoke-AdoRestMethod @params
-
-                        # Poll for completion
-                        $status = $results.status
-                        while ($status -notin @('succeeded', 'failed')) {
-                            Write-Verbose 'Checking project update status...'
-                            Start-Sleep -Seconds 3
-
-                            $pollParams = @{
-                                Uri     = $results.url
-                                Version = $Version
-                                Method  = 'GET'
-                            }
-                            $results = Invoke-AdoRestMethod @pollParams
-                            $status = $results.status
-                        }
-
-                        if ($status -eq 'failed') {
-                            throw 'Project update failed.'
-                        }
-
-                        # Get the updated project details
-                        $results = Get-AdoProject -CollectionUri $CollectionUri -Name $id_ -IncludeCapabilities
-
-                        [PSCustomObject]@{
-                            id            = $results.id
-                            name          = $results.name
-                            description   = $results.description
-                            visibility    = $results.visibility
-                            state         = $results.state
-                            defaultTeam   = $results.defaultTeam
-                            collectionUri = $CollectionUri
-                        }
-
-                    } catch {
-                        if ($_ -match 'does not exist') {
-                            Write-Warning "Project with ID $id_ does not exist, skipping update."
-                        } else {
-                            throw $_
-                        }
-                    }
-                } else {
-                    $params += @{
-                        Body = $body
-                    }
-                    Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
-                }
+            # Get id when name was provided, id is required for deletion
+            try {
+                [System.Guid]::Parse($Id) | Out-Null
+                $projectId = $Id
+            } catch {
+                $projectId = (Get-AdoProject -CollectionUri $CollectionUri -Name $Id).id
+                if (-not $projectId) { continue }
             }
 
+            $params = @{
+                Uri     = "$CollectionUri/_apis/projects/$projectId"
+                Version = $Version
+                Method  = 'PATCH'
+            }
+
+            $body = [PSCustomObject]@{}
+
+            if ($PSBoundParameters.ContainsKey('Name')) {
+                $body | Add-Member -NotePropertyName 'name' -NotePropertyValue $Name
+            }
+            if ($PSBoundParameters.ContainsKey('Description')) {
+                $body | Add-Member -NotePropertyName 'description' -NotePropertyValue $Description
+            }
+            if ($PSBoundParameters.ContainsKey('Visibility')) {
+                $body | Add-Member -NotePropertyName 'visibility' -NotePropertyValue $Visibility
+            }
+
+            if ($PSCmdlet.ShouldProcess($CollectionUri, "Update project: $Id")) {
+                try {
+                    $results = $body | Invoke-AdoRestMethod @params
+
+                    # Poll for completion
+                    $status = $results.status
+                    while ($status -notin @('succeeded', 'failed')) {
+                        Write-Verbose 'Checking project update status...'
+                        Start-Sleep -Seconds 3
+
+                        $pollParams = @{
+                            Uri     = $results.url
+                            Version = $Version
+                            Method  = 'GET'
+                        }
+                        $results = Invoke-AdoRestMethod @pollParams
+                        $status = $results.status
+                    }
+
+                    if ($status -eq 'failed') {
+                        throw 'Project update failed.'
+                    }
+
+                    # Get the updated project details
+                    $results = Get-AdoProject -CollectionUri $CollectionUri -Id $projectId -IncludeCapabilities
+
+                    [PSCustomObject]@{
+                        id            = $results.id
+                        name          = $results.name
+                        description   = $results.description
+                        visibility    = $results.visibility
+                        state         = $results.state
+                        defaultTeam   = $results.defaultTeam
+                        collectionUri = $CollectionUri
+                    }
+
+                } catch {
+                    if ($_.ErrorDetails.Message -match 'ProjectDoesNotExistWithNameException') {
+                        Write-Warning "Project with ID $Id does not exist, skipping."
+                    } else {
+                        throw $_
+                    }
+                }
+            } else {
+                $params += @{
+                    Body = $body
+                }
+                Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
+            }
         } catch {
             throw $_
         }
