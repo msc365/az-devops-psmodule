@@ -10,7 +10,7 @@
         Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/myorganization.
 
     .PARAMETER ProjectName
-        Mandatory. The ID or name of the project.
+        Optional. The ID or name of the project. If not specified, the default project is used.
 
     .PARAMETER Name
         Mandatory. The name of the team to create.
@@ -49,21 +49,21 @@
         [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
         [string]$CollectionUri = $env:DefaultAdoCollectionUri,
 
-        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [Parameter(ValueFromPipelineByPropertyName)]
         [Alias('ProjectId')]
-        [string]$ProjectName,
+        [string]$ProjectName = $env:DefaultAdoProject,
 
         [Parameter(Mandatory, ValueFromPipelineByPropertyName, ValueFromPipeline)]
         [Alias('TeamName')]
-        [string[]]$Name,
+        [string]$Name,
 
         [Parameter(ValueFromPipelineByPropertyName)]
         [string]$Description,
 
         [Parameter()]
         [Alias('ApiVersion')]
-        [ValidateSet('5.1', '7.1-preview.4', '7.2-preview.3')]
-        [string]$Version = '7.2-preview.3'
+        [ValidateSet('7.1', '7.2-preview.3')]
+        [string]$Version = '7.1'
     )
 
     begin {
@@ -81,22 +81,19 @@
 
     process {
         try {
+            $params = @{
+                Uri     = "$CollectionUri/_apis/projects/$ProjectName/teams"
+                Version = $Version
+                Method  = 'POST'
+            }
 
-            foreach ($n_ in $Name) {
+            $body = [PSCustomObject]@{
+                name        = $Name
+                description = $Description
+            }
 
-                $params = @{
-                    Uri     = "$CollectionUri/_apis/projects/$ProjectName/teams"
-                    Version = $Version
-                    Method  = 'POST'
-                }
-
-                $body = [PSCustomObject]@{
-                    name        = $n_
-                    description = $Description
-                }
-
-                if ($PSCmdlet.ShouldProcess($CollectionUri, "Create Team: $n_ in Project: $ProjectName")) {
-
+            if ($PSCmdlet.ShouldProcess($CollectionUri, "Create Team: $Name in Project: $ProjectName")) {
+                try {
                     $results = $body | Invoke-AdoRestMethod @params
 
                     [PSCustomObject]@{
@@ -109,16 +106,32 @@
                         projectName   = $results.projectName
                         collectionUri = $CollectionUri
                     }
+                } catch {
+                    if ($_.ErrorDetails.Message -match 'TeamAlreadyExistsException') {
+                        Write-Warning "Team $Name already exists, trying to get it."
 
-                } else {
-                    Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
+                        $results = Get-AdoTeam -CollectionUri $CollectionUri -ProjectName $ProjectName -Name $Name
+
+                        [PSCustomObject]@{
+                            id            = $results.id
+                            name          = $results.name
+                            description   = $results.description
+                            url           = $results.url
+                            identityUrl   = $results.identityUrl
+                            projectId     = $results.projectId
+                            projectName   = $results.projectName
+                            collectionUri = $CollectionUri
+                        }
+                    } else {
+                        throw $_
+                    }
                 }
+            } else {
+                Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
             }
-
         } catch {
             throw $_
         }
-
     }
 
     end {
