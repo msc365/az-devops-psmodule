@@ -21,7 +21,7 @@
     .EXAMPLE
         $params = @{
             CollectionUri = 'https://dev.azure.com/my-org'
-            Id            = 'my-project'
+            Name          = 'my-project'
         }
         Remove-AdoProject @params -Verbose
 
@@ -41,9 +41,9 @@
         [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
         [string]$CollectionUri = $env:DefaultAdoCollectionUri,
 
-        [Parameter(Mandatory, ValueFromPipelineByPropertyName, ValueFromPipeline)]
-        [Alias('ProjectId')]
-        [string[]]$Id,
+        [Parameter(ValueFromPipelineByPropertyName, ValueFromPipeline)]
+        [Alias('Id', 'ProjectId', 'ProjectName')]
+        [string]$Name,
 
         [Parameter()]
         [Alias('ApiVersion')]
@@ -64,56 +64,54 @@
 
     process {
         try {
-            foreach ($id_ in $Id) {
-                # Get id when name was provided, id is required for deletion
+            # Get id when name was provided, id is required for deletion
+            try {
+                [System.Guid]::Parse($Name) | Out-Null
+                $projectId = $Name
+            } catch {
+                $projectId = (Get-AdoProject -CollectionUri $CollectionUri -Name $Name).id
+                if (-not $projectId) { continue }
+            }
+
+            $params = @{
+                Uri     = "$CollectionUri/_apis/projects/$projectId"
+                Version = $Version
+                Method  = 'DELETE'
+            }
+
+            if ($PSCmdlet.ShouldProcess($CollectionUri, "Delete project: $Name")) {
                 try {
-                    [System.Guid]::Parse($id_) | Out-Null
-                    $projectId = $id_
-                } catch {
-                    $projectId = (Get-AdoProject -CollectionUri $CollectionUri -Name $id_).id
-                    if (-not $projectId) { continue }
-                }
+                    $results = Invoke-AdoRestMethod @params
 
-                $params = @{
-                    Uri     = "$CollectionUri/_apis/projects/$projectId"
-                    Version = $Version
-                    Method  = 'DELETE'
-                }
+                    # Poll for completion
+                    $status = $results.status
 
-                if ($PSCmdlet.ShouldProcess($CollectionUri, "Delete project: $id_")) {
-                    try {
-                        $results = Invoke-AdoRestMethod @params
+                    while ($status -notin @('succeeded', 'failed')) {
+                        Write-Verbose 'Checking project deletion status...'
+                        Start-Sleep -Seconds 3
 
-                        # Poll for completion
+                        $pollParams = @{
+                            Uri     = $results.url
+                            Version = $Version
+                            Method  = 'GET'
+                        }
+                        $results = Invoke-AdoRestMethod @pollParams
                         $status = $results.status
-
-                        while ($status -notin @('succeeded', 'failed')) {
-                            Write-Verbose 'Checking project deletion status...'
-                            Start-Sleep -Seconds 3
-
-                            $pollParams = @{
-                                Uri     = $results.url
-                                Version = $Version
-                                Method  = 'GET'
-                            }
-                            $results = Invoke-AdoRestMethod @pollParams
-                            $status = $results.status
-                        }
-
-                        if ($status -eq 'failed') {
-                            throw 'Project deletion failed.'
-                        }
-
-                    } catch {
-                        if ($_.ErrorDetails.Message -match 'ProjectDoesNotExistWithNameException') {
-                            Write-Warning "Project with ID $id_ does not exist, skipping."
-                        } else {
-                            throw $_
-                        }
                     }
-                } else {
-                    Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
+
+                    if ($status -eq 'failed') {
+                        throw 'Project deletion failed.'
+                    }
+
+                } catch {
+                    if ($_.ErrorDetails.Message -match 'ProjectDoesNotExistWithNameException') {
+                        Write-Warning "Project with ID $Name does not exist, skipping."
+                    } else {
+                        throw $_
+                    }
                 }
+            } else {
+                Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
             }
         } catch {
             throw $_
