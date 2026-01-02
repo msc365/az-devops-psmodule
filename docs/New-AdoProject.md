@@ -4,11 +4,12 @@ external help file: Azure.DevOps.PSModule-Help.xml
 HelpUri: https://learn.microsoft.com/en-us/rest/api/azure/devops/core/projects/create
 Locale: en-NL
 Module Name: Azure.DevOps.PSModule
-ms.date: 11/01/2025
+ms.date: 01/02/2026
 PlatyPS schema version: 2024-05-01
 title: New-AdoProject
 -->
 
+<!-- markdownlint-disable MD024 -->
 <!-- cSpell: ignore dontshow -->
 
 # New-AdoProject
@@ -115,7 +116,6 @@ HelpMessage: ''
 
 ### -Description
 
-Optional.
 The description of the project.
 
 ```yaml
@@ -125,10 +125,10 @@ SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 1
+  Position: Named
   IsRequired: false
   ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
+  ValueFromPipelineByPropertyName: true
   ValueFromRemainingArguments: false
 DontShow: false
 AcceptedValues: []
@@ -137,8 +137,7 @@ HelpMessage: ''
 
 ### -Process
 
-Optional.
-The process to use for the project.
+The process template to use for the project.
 Default is 'Agile'.
 
 ```yaml
@@ -148,19 +147,22 @@ SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 2
+  Position: Named
   IsRequired: false
   ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
+  ValueFromPipelineByPropertyName: true
   ValueFromRemainingArguments: false
 DontShow: false
-AcceptedValues: []
+AcceptedValues:
+- Agile
+- Scrum
+- CMMI
+- Basic
 HelpMessage: ''
 ```
 
 ### -SourceControl
 
-Optional.
 The source control type to use for the project.
 Default is 'Git'.
 
@@ -171,19 +173,20 @@ SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 3
+  Position: Named
   IsRequired: false
   ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
+  ValueFromPipelineByPropertyName: true
   ValueFromRemainingArguments: false
 DontShow: false
-AcceptedValues: []
+AcceptedValues:
+- Git
+- Tfvc
 HelpMessage: ''
 ```
 
 ### -Visibility
 
-Optional.
 The visibility of the project.
 Default is 'Private'.
 
@@ -197,7 +200,7 @@ ParameterSets:
   Position: Named
   IsRequired: false
   ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
+  ValueFromPipelineByPropertyName: true
   ValueFromRemainingArguments: false
 DontShow: false
 AcceptedValues:
@@ -208,13 +211,12 @@ HelpMessage: ''
 
 ### -Version
 
-Optional.
 The API version to use for the request.
-Default is '7.2-preview.1'.
+Default is '7.1'.
 
 ```yaml
 Type: System.String
-DefaultValue: 7.2-preview.1
+DefaultValue: 7.1
 SupportsWildcards: false
 Aliases:
 - ApiVersion
@@ -227,7 +229,8 @@ ParameterSets:
   ValueFromRemainingArguments: false
 DontShow: false
 AcceptedValues:
-- 7.2-preview.1
+- 7.1
+- 7.2-preview.4
 HelpMessage: ''
 ```
 
@@ -240,15 +243,26 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
-- N/A
+- System.String
 
 ## OUTPUTS
 
-### System.Object
+### PSCustomObject
 
-An object representing the created project.
+Returns a project object with the following properties:
+- id: The unique identifier of the created project
+- name: The name of the project
+- description: The description of the project
+- visibility: The visibility of the project (Private or Public)
+- state: The state of the project (typically 'wellFormed' after successful creation)
+- defaultTeam: Information about the default team created with the project
+- collectionUri: The collection URI the project belongs to
 
 ## NOTES
+
+- The cmdlet automatically polls for project creation completion before returning
+- If a project with the same name already exists, it returns the existing project instead of throwing an error
+- Requires ShouldProcess confirmation due to ConfirmImpact = 'High'
 
 - Requires an active Azure account login. Use `Connect-AzAccount` to authenticate:
 

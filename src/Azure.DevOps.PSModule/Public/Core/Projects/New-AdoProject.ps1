@@ -26,7 +26,7 @@
         Optional. The visibility of the project. Default is 'Private'.
 
     .PARAMETER Version
-        Optional. The API version to use for the request. Default is '7.2-preview.1'.
+        Optional. The API version to use for the request. Default is '7.1'.
 
     .LINK
         https://learn.microsoft.com/en-us/rest/api/azure/devops/core/projects/create
@@ -61,22 +61,22 @@
         [Parameter(ValueFromPipelineByPropertyName)]
         [string]$Description,
 
-        [Parameter()]
+        [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateSet('Agile', 'Scrum', 'CMMI', 'Basic')]
         [string]$Process = 'Agile',
 
-        [Parameter()]
+        [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateSet('Git', 'Tfvc')]
         [string]$SourceControl = 'Git',
 
-        [Parameter()]
+        [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateSet('Private', 'Public')]
         [string]$Visibility = 'Private',
 
         [Parameter()]
         [Alias('ApiVersion')]
-        [ValidateSet('7.2-preview.1')]
-        [string]$Version = '7.2-preview.1'
+        [ValidateSet('7.1', '7.2-preview.4')]
+        [string]$Version = '7.1'
     )
 
     begin {
@@ -102,17 +102,16 @@
 
     process {
         try {
-
             $params = @{
                 Uri     = "$CollectionUri/_apis/projects"
                 Version = $Version
                 Method  = 'POST'
             }
 
-            foreach ($n_ in $Name) {
+            foreach ($name_ in $Name) {
 
                 $body = [PSCustomObject]@{
-                    name         = $n_
+                    name         = $name_
                     description  = $Description
                     capabilities = @{
                         versioncontrol  = @{
@@ -125,7 +124,7 @@
                     visibility   = $Visibility
                 }
 
-                if ($PSCmdlet.ShouldProcess($CollectionUri, "Create project: $n_")) {
+                if ($PSCmdlet.ShouldProcess($CollectionUri, "Create project: $name_")) {
                     try {
                         $results = $body | Invoke-AdoRestMethod @params
 
@@ -150,7 +149,7 @@
                         }
 
                         # Get the created project details
-                        $results = Get-AdoProject -CollectionUri $CollectionUri -Name $n_
+                        $results = Get-AdoProject -CollectionUri $CollectionUri -Name $name_
 
                         [PSCustomObject]@{
                             id            = $results.id
@@ -163,10 +162,10 @@
                         }
 
                     } catch {
-                        if ($_ -match 'already exists') {
-                            Write-Warning "Project $n_ already exists, trying to get it"
+                        if ($_.ErrorDetails.Message -match 'ProjectAlreadyExistsException') {
+                            Write-Warning "Project $name_ already exists, trying to get it"
 
-                            $results = Get-AdoProject -CollectionUri $CollectionUri -Name $n_
+                            $results = Get-AdoProject -CollectionUri $CollectionUri -Name $name_
 
                             [PSCustomObject]@{
                                 id            = $results.id
@@ -188,7 +187,6 @@
                     Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
                 }
             }
-
         } catch {
             throw $_
         }
