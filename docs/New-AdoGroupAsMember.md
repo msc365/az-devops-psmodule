@@ -4,14 +4,15 @@ external help file: Azure.DevOps.PSModule-Help.xml
 HelpUri: https://learn.microsoft.com/en-us/rest/api/azure/devops/graph/groups/create
 Locale: en-NL
 Module Name: Azure.DevOps.PSModule
-ms.date: 11/01/2025
+ms.date: 01/02/2026
 PlatyPS schema version: 2024-05-01
-title: New-AdoGroup
+title: New-AdoGroupAsMember
 -->
 
+<!-- markdownlint-disable MD024 -->
 <!-- cSpell: ignore dontshow -->
 
-# New-AdoGroup
+# New-AdoGroupAsMember
 
 ## SYNOPSIS
 
@@ -22,19 +23,18 @@ Adds an AAD Group as member of a group.
 ### __AllParameterSets
 
 ```text
-New-AdoGroup [[-CollectionUri] <string>] [-GroupDescriptor] <string> [-GroupId] <string[]>
- [[-Version] <string>] [<CommonParameters>]
+New-AdoGroupAsMember [[-CollectionUri] <string>] -GroupDescriptor <string> -OriginId <string>
+ [[-Version] <string>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## ALIASES
 
 This cmdlet has the following aliases,
-- Descriptor (for GroupDescriptor)
-- OriginId (for GroupId)
+- N/A
 
 ## DESCRIPTION
 
-This cmdlet adds an AAD Group as member of a group in Azure DevOps.
+This cmdlet adds an AAD Group as member of a group in Azure DevOps. It creates a new group membership by linking an Azure Active Directory (AAD) group to an existing Azure DevOps group using the origin ID and group descriptor.
 
 ## EXAMPLES
 
@@ -45,10 +45,10 @@ This cmdlet adds an AAD Group as member of a group in Azure DevOps.
 ```powershell
 $params = @{
     CollectionUri   = 'https://vssps.dev.azure.com/my-org'
-    GroupDescriptor = 'vssgp.00000000-0000-0000-0000-000000000000'
-    GroupId         = '00000000-0000-0000-0000-000000000000'
+    GroupDescriptor = 'vssgp.00000000-0000-0000-0000-000000000001'
+    OriginId        = '00000000-0000-0000-0000-000000000001'
 }
-New-AdoGroup @params
+New-AdoGroupAsMember @params
 ```
 
 Adds an AAD Group as member of a group.
@@ -60,9 +60,12 @@ Adds an AAD Group as member of a group.
 ```powershell
 $params = @{
     CollectionUri   = 'https://vssps.dev.azure.com/my-org'
-    GroupDescriptor = 'vssgp.00000000-0000-0000-0000-000000000000'
+    GroupDescriptor = 'vssgp.00000000-0000-0000-0000-000000000001'
 }
-@('00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000002') | New-AdoGroup @params
+@(
+    '00000000-0000-0000-0000-000000000001',
+    '00000000-0000-0000-0000-000000000002'
+) | New-AdoGroupAsMember @params
 ```
 
 Adds multiple AAD Groups as members demonstrating pipeline input.
@@ -73,6 +76,7 @@ Adds multiple AAD Groups as members demonstrating pipeline input.
 
 Optional.
 The collection URI of the Azure DevOps collection/organization, e.g., <https://vssps.dev.azure.com/myorganization>.
+Defaults to the value of $env:DefaultAdoCollectionUri with the scheme replaced to use vssps subdomain.
 
 ```yaml
 Type: System.String
@@ -95,6 +99,7 @@ HelpMessage: ''
 
 Mandatory.
 A comma separated list of descriptors referencing groups you want the graph group to join.
+This is the descriptor of the target Azure DevOps group that will receive the new member.
 
 ```yaml
 Type: System.String
@@ -114,17 +119,19 @@ AcceptedValues: []
 HelpMessage: ''
 ```
 
-### -GroupId
+### -OriginId
 
 Mandatory.
-The OriginId of the entra group to add as a member.
+The OriginId of the Entra (Azure AD) group to add as a member.
+This is the unique identifier of the AAD group in the backing directory.
 
 ```yaml
-Type: System.String[]
+Type: System.String
 DefaultValue: ''
 SupportsWildcards: false
 Aliases:
-- OriginId
+- Id
+- GroupId
 ParameterSets:
 - Name: (All)
   Position: Named
@@ -142,6 +149,7 @@ HelpMessage: ''
 Optional.
 The API version to use for the request.
 Default is '7.2-preview.1'.
+The -preview flag must be supplied in the api-version for this request to work.
 
 ```yaml
 Type: System.String
@@ -158,8 +166,9 @@ ParameterSets:
   ValueFromRemainingArguments: false
 DontShow: false
 AcceptedValues:
+- 7.1-preview.1
 - 7.2-preview.1
-HelpMessage: ''
+HelpMessage: The -preview flag must be supplied in the api-version for this request to work.
 ```
 
 ### CommonParameters
@@ -171,16 +180,25 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
-- N/A
+- System.String - Accepts OriginId via pipeline
 
 ## OUTPUTS
 
 ### PSCustomObject
 
-An object representing the added group.
+Returns a group object representing the newly added member with the following properties:
+- displayName: The display name of the group
+- originId: The origin ID of the group
+- principalName: The principal name of the group
+- origin: The origin of the group (e.g., 'aad')
+- subjectKind: The subject kind (typically 'group')
+- descriptor: The descriptor of the newly added group member
+- collectionUri: The collection URI used for the operation
 
 ## NOTES
 
+- This cmdlet has a high confirm impact and will prompt for confirmation by default
+- Handles errors gracefully with specific warnings for common issues (missing originId, invalid descriptor)
 - Requires an active Azure account login. Use `Connect-AzAccount` to authenticate:
 
   ```powershell

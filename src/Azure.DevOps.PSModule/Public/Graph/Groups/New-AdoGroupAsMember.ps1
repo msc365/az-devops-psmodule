@@ -1,4 +1,4 @@
-﻿function New-AdoGroup {
+﻿function New-AdoGroupAsMember {
     <#
     .SYNOPSIS
         Adds an AAD Group as member of a group.
@@ -12,11 +12,12 @@
     .PARAMETER GroupDescriptor
         Mandatory. A comma separated list of descriptors referencing groups you want the graph group to join.
 
-    .PARAMETER GroupId
+    .PARAMETER OriginId
         Mandatory. The OriginId of the entra group to add as a member.
 
     .PARAMETER Version
         Optional. The API version to use for the request. Default is '7.2-preview.1'.
+        The -preview flag must be supplied in the api-version for this request to work.
 
     .LINK
         https://learn.microsoft.com/en-us/rest/api/azure/devops/graph/groups/create
@@ -24,19 +25,22 @@
     .EXAMPLE
         $params = @{
             CollectionUri   = 'https://vssps.dev.azure.com/my-org'
-            GroupDescriptor = 'vssgp.00000000-0000-0000-0000-000000000000'
-            GroupId         = '00000000-0000-0000-0000-000000000000'
+            GroupDescriptor = 'vssgp.00000000-0000-0000-0000-000000000001'
+            OriginId        = '00000000-0000-0000-0000-000000000001'
         }
-        New-AdoGroup @params
+        New-AdoGroupAsMember @params
 
         Adds an AAD Group as member of a group.
 
     .EXAMPLE
         $params = @{
             CollectionUri   = 'https://vssps.dev.azure.com/my-org'
-            GroupDescriptor = 'vssgp.00000000-0000-0000-0000-000000000000'
+            GroupDescriptor = 'vssgp.00000000-0000-0000-0000-000000000001'
         }
-        @('00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000002') | New-AdoGroup @params
+        @(
+            '00000000-0000-0000-0000-000000000001',
+            '00000000-0000-0000-0000-000000000002'
+        ) | New-AdoGroupAsMember @params
 
         Adds multiple AAD Groups as members demonstrating pipeline input.
     #>
@@ -51,12 +55,12 @@
         [string]$GroupDescriptor,
 
         [Parameter(Mandatory, ValueFromPipelineByPropertyName, ValueFromPipeline)]
-        [Alias('OriginId')]
-        [string[]]$GroupId,
+        [Alias('Id', 'GroupId')]
+        [string]$OriginId,
 
-        [Parameter()]
+        [Parameter(HelpMessage = 'The -preview flag must be supplied in the api-version for this request to work.')]
         [Alias('ApiVersion')]
-        [ValidateSet('7.2-preview.1')]
+        [ValidateSet('7.1-preview.1', '7.2-preview.1')]
         [string]$Version = '7.2-preview.1'
     )
 
@@ -74,7 +78,6 @@
 
     process {
         try {
-
             $params = @{
                 Uri             = "$CollectionUri/_apis/graph/groups"
                 Version         = $Version
@@ -82,41 +85,40 @@
                 Method          = 'POST'
             }
 
-            foreach ($id in $GroupId) {
-
-                $body = [PSCustomObject]@{
-                    originId = $id
-                }
-
-                if ($PSCmdlet.ShouldProcess($CollectionUri, "Add group with OriginId: $id to descriptor: $GroupDescriptor")) {
-                    try {
-                        $result = $body | Invoke-AdoRestMethod @params
-
-                        [PSCustomObject]@{
-                            displayName   = $result.displayName
-                            originId      = $result.originId
-                            principalName = $result.principalName
-                            origin        = $result.origin
-                            subjectKind   = $result.subjectKind
-                            descriptor    = $result.descriptor
-                            collectionUri = $CollectionUri
-                        }
-
-                    } catch {
-                        if ($_ -match 'already exists') {
-                            Write-Warning "Group with OriginId $id already exists in descriptor $GroupDescriptor"
-                        } else {
-                            throw $_
-                        }
-                    }
-                } else {
-                    $params += @{
-                        Body = $body
-                    }
-                    Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
-                }
+            $body = [PSCustomObject]@{
+                originId = $OriginId
             }
 
+            if ($PSCmdlet.ShouldProcess($CollectionUri, "Add group with OriginId: $OriginId to descriptor: $GroupDescriptor")) {
+                try {
+                    $result = $body | Invoke-AdoRestMethod @params
+
+                    [PSCustomObject]@{
+                        displayName   = $result.displayName
+                        originId      = $result.originId
+                        principalName = $result.principalName
+                        origin        = $result.origin
+                        subjectKind   = $result.subjectKind
+                        descriptor    = $result.descriptor
+                        collectionUri = $CollectionUri
+                    }
+
+                } catch {
+                    if ($_.ErrorDetails.Message -match 'VS860016') {
+                        Write-Warning "Could not find originId '$OriginId' in the backing domain, skipping."
+                    } elseif ($_.ErrorDetails.Message -match 'TF50258' -or
+                        $_.ErrorDetails.Message -match 'FindGroupSidDoesNotExist') {
+                        Write-Warning "There is no group with the security identifier (SID) '$GroupDescriptor', skipping."
+                    } else {
+                        throw $_
+                    }
+                }
+            } else {
+                $params += @{
+                    Body = $body
+                }
+                Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
+            }
         } catch {
             throw $_
         }
