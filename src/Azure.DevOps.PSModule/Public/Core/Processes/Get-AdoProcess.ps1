@@ -14,7 +14,7 @@
         Optional. The name of the process to retrieve. If not provided, retrieves all processes.
 
     .PARAMETER Version
-        Optional. The API version to use for the request. Default is '7.2-preview.1'.
+        Optional. The API version to use for the request. Default is '7.1'.
 
     .LINK
         https://learn.microsoft.com/en-us/rest/api/azure/devops/core/processes/list
@@ -52,12 +52,12 @@
         [Parameter(ValueFromPipelineByPropertyName, ValueFromPipeline)]
         [Alias('Process', 'ProcessName')]
         [ValidateSet('Agile', 'Scrum', 'CMMI', 'Basic')]
-        [string[]]$Name,
+        [string]$Name,
 
         [Parameter()]
         [Alias('ApiVersion')]
         [ValidateSet('7.1', '7.2-preview.1')]
-        [string]$Version = '7.2-preview.1'
+        [string]$Version = '7.1'
     )
 
     begin {
@@ -73,45 +73,38 @@
 
     process {
         try {
-
-            foreach ($n_ in $Name) {
-
-                $params = @{
-                    Uri     = "$CollectionUri/_apis/process/processes"
-                    Version = $Version
-                    Method  = 'GET'
-                }
-
-                if ($PSCmdlet.ShouldProcess($CollectionUri, $n_ ? "Get Process: $n_" : 'Get Processes')) {
-
-                    $results = Invoke-AdoRestMethod @params
-                    $processes = $results.value
-
-                    if ($n_) {
-                        $processes = $processes | Where-Object { $_.name -eq $n_ }
-                    }
-
-                    foreach ($p_ in $processes) {
-                        [PSCustomObject]@{
-                            id            = $p_.id
-                            name          = $p_.name
-                            description   = $p_.description
-                            url           = $p_.url
-                            type          = $p_.type
-                            isDefault     = $p_.isDefault
-                            collectionUri = $CollectionUri
-                        }
-                    }
-
-                } else {
-                    Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
-                }
+            $params = @{
+                Uri     = "$CollectionUri/_apis/process/processes"
+                Version = $Version
+                Method  = 'GET'
             }
 
+            if ($PSCmdlet.ShouldProcess($CollectionUri, $Name ? "Get Process: $Name" : 'Get Processes')) {
+
+                $results = Invoke-AdoRestMethod @params
+                $processes = $results.value
+
+                if ($Name) {
+                    $processes = $processes | Where-Object { $_.name -eq $Name }
+                }
+
+                foreach ($p_ in $processes) {
+                    [PSCustomObject]@{
+                        id            = $p_.id
+                        name          = $p_.name
+                        description   = $p_.description
+                        url           = $p_.url
+                        type          = $p_.type
+                        isDefault     = $p_.isDefault
+                        collectionUri = $CollectionUri
+                    }
+                }
+            } else {
+                Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
+            }
         } catch {
             throw $_
         }
-
     }
 
     end {

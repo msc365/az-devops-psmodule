@@ -4,7 +4,7 @@ external help file: Azure.DevOps.PSModule-Help.xml
 HelpUri: https://learn.microsoft.com/en-us/rest/api/azure/devops/core/processes
 Locale: en-NL
 Module Name: Azure.DevOps.PSModule
-ms.date: 11/01/2025
+ms.date: 01/02/2026
 PlatyPS schema version: 2024-05-01
 title: Get-AdoProcess
 -->
@@ -16,14 +16,14 @@ title: Get-AdoProcess
 
 ## SYNOPSIS
 
-Get the process details.
+Retrieves Azure DevOps process details.
 
 ## SYNTAX
 
 ### __AllParameterSets
 
 ```text
-Get-AdoProcess [[-Process] <string>] [[-ApiVersion] <string>] [<CommonParameters>]
+Get-AdoProcess [[-CollectionUri] <string>] [[-Name] <string>] [[-Version] <string>] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -33,7 +33,7 @@ This cmdlet has the following aliases,
 
 ## DESCRIPTION
 
-This function retrieves the process details for an Azure DevOps process through REST API.
+This cmdlet retrieves details of one or more Azure DevOps processes within a specified organization. You can retrieve all processes or a specific process by name. Processes define the work item types, workflow, and fields available in Azure DevOps projects.
 
 ## EXAMPLES
 
@@ -42,66 +42,108 @@ This function retrieves the process details for an Azure DevOps process through 
 #### PowerShell
 
 ```powershell
-Get-AdoProcess
+$params = @{
+    CollectionUri = 'https://dev.azure.com/my-org'
+}
+Get-AdoProcess @params
 ```
 
-Gets all available processes.
+Retrieves all available processes from the specified organization.
 
 ### EXAMPLE 2
 
 #### PowerShell
 
 ```powershell
-Get-AdoProcess -Process 'Agile'
+Get-AdoProcess -Name 'Agile'
 ```
 
-Gets the details of the 'Agile' process.
+Retrieves the Agile process details using the default collection URI from environment variable.
+
+### EXAMPLE 3
+
+#### PowerShell
+
+```powershell
+@('Agile', 'Scrum') | Get-AdoProcess -CollectionUri 'https://dev.azure.com/my-org'
+```
+
+Retrieves multiple processes by name demonstrating pipeline input.
 
 ## PARAMETERS
 
-### -ApiVersion
+### -CollectionUri
 
-Optional.
-The API version to use.
+The collection URI of the Azure DevOps collection/organization.
+Defaults to the value of $env:DefaultAdoCollectionUri if not provided.
 
 ```yaml
 Type: System.String
-DefaultValue: 7.1
+DefaultValue: $env:DefaultAdoCollectionUri
 SupportsWildcards: false
-Aliases:
-- Api
+Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 1
+  Position: Named
   IsRequired: false
   ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
+  ValueFromPipelineByPropertyName: true
   ValueFromRemainingArguments: false
 DontShow: false
 AcceptedValues: []
 HelpMessage: ''
 ```
 
-### -Process
+### -Name
 
-Optional.
-The name of the process.
-Default is $null.
+The name of the process to retrieve. If not provided, retrieves all processes.
+Valid values are predefined Azure DevOps process templates.
 
 ```yaml
 Type: System.String
 DefaultValue: ''
 SupportsWildcards: false
-Aliases: []
+Aliases:
+- Process
+- ProcessName
 ParameterSets:
 - Name: (All)
-  Position: 0
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: true
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues:
+- Agile
+- Scrum
+- CMMI
+- Basic
+HelpMessage: ''
+```
+
+### -Version
+
+The API version to use for the request.
+Defaults to '7.1'.
+
+```yaml
+Type: System.String
+DefaultValue: 7.1
+SupportsWildcards: false
+Aliases:
+- ApiVersion
+ParameterSets:
+- Name: (All)
+  Position: Named
   IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
   ValueFromRemainingArguments: false
 DontShow: false
-AcceptedValues: []
+AcceptedValues:
+- 7.1
+- 7.2-preview.1
 HelpMessage: ''
 ```
 
@@ -114,17 +156,31 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
-- N/A
+- System.String
 
 ## OUTPUTS
 
-### System.Object
+### PSCustomObject
 
-The process details object.
+Returns one or more process objects with the following properties:
+- id: The unique identifier of the process
+- name: The name of the process (Agile, Scrum, CMMI, or Basic)
+- description: A description of the process
+- url: The REST API URL for the process
+- type: The type of the process
+- isDefault: Boolean indicating if this is the default process
+- collectionUri: The collection URI the process belongs to
 
 ## NOTES
 
-- Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
+- Requires an active Azure account login. Use `Connect-AzAccount` to authenticate:
+
+  ```powershell
+  Connect-AzAccount -Tenant '<tenant-id>' -Subscription '<subscription-id>'
+  ```
+
+- The CollectionUri parameter can be set as an environment variable ($env:DefaultAdoCollectionUri) to avoid specifying it in each call.
+- Supports ShouldProcess for -WhatIf and -Confirm functionality.
 
 ## RELATED LINKS
 
