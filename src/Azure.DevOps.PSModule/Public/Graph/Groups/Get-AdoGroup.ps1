@@ -19,11 +19,12 @@
         Optional. An opaque data blob that allows the next page of data to resume immediately after where the previous page ended.
         The only reliable way to know if there is more data left is the presence of a continuation token.
 
-    .PARAMETER DisplayName
-        Optional. A comma separated list of group display names to filter the retrieved results.
+    .PARAMETER Name
+        Optional. A group's display name to filter the retrieved results.
 
     .PARAMETER Version
-        The API version to use.
+        The API version to use. Default is '7.2-preview.1'.
+        The -preview flag must be supplied in the api-version for this request to work.
 
     .OUTPUTS
         PSCustomObject
@@ -38,7 +39,7 @@
         Retrieves all groups in the Azure DevOps organization.
 
     .EXAMPLE
-        $project = Get-AdoProject -Name 'my-project'
+        $project = Get-AdoProject -Name 'my-project-1'
         $projectDescriptor = (Get-AdoDescriptor -StorageKey $project.Id)
 
         $params = @{
@@ -52,51 +53,66 @@
 
     .EXAMPLE
         $params = @{
-            CollectionUri = 'https://dev.azure.com/my-org'
-            ScopeDescriptor = $projectDescriptor
             SubjectTypes    = 'vssgp'
+            ScopeDescriptor = $prjDscr
+            Name            = @(
+                'Project Administrators',
+                'Contributors'
+            )
         }
-        @(
-            'Project Administrators',
-            'Release Administrators'
-        ) | Get-AdoGroup @params
+        Get-AdoGroup @params
 
-        Retrieves the 'Project Administrators' and 'Release Administrators' groups of type 'vssgp', demonstrating pipeline input.
+        Retrieves the 'Project Administrators' and 'Contributors' groups in the specified scope with subject types 'vssgp'.
+
+    .EXAMPLE
+        @(
+            'vssgp.00000000-0000-0000-0000-000000000000',
+            'vssgp.00000000-0000-0000-0000-000000000001',
+            'vssgp.00000000-0000-0000-0000-000000000002'
+        ) | Get-AdoGroup
+
+        Retrieves the groups with the specified descriptors.
 
     .NOTES
         Retrieves groups in an Azure DevOps organization.
     #>
-    [CmdletBinding(SupportsShouldProcess)]
+    [CmdletBinding(SupportsShouldProcess, DefaultParameterSetName = 'ListGroups')]
     [OutputType([PSCustomObject])]
     param (
         [Parameter(ValueFromPipelineByPropertyName)]
         [string]$CollectionUri = ($env:DefaultAdoCollectionUri -replace 'https://', 'https://vssps.'),
 
-        [Parameter(ValueFromPipelineByPropertyName)]
+        [Parameter(ValueFromPipelineByPropertyName, ParameterSetName = 'ListGroups')]
         [string]$ScopeDescriptor,
 
-        [Parameter(ValueFromPipelineByPropertyName)]
+        [Parameter(ValueFromPipelineByPropertyName, ParameterSetName = 'ListGroups')]
         [ValidateSet('vssgp', 'aadgp')]
-        [string[]]$SubjectTypes = ('vssgp', 'aadgp'),
+        [string[]]$SubjectTypes = @('vssgp', 'aadgp'),
 
-        [Parameter()]
+        [Parameter(ParameterSetName = 'ListGroups')]
         [string]$ContinuationToken,
 
-        [Parameter(ValueFromPipelineByPropertyName, ValueFromPipeline)]
-        [string[]]$DisplayName,
+        [Parameter(ValueFromPipelineByPropertyName, ParameterSetName = 'ListGroups')]
+        [Alias('DisplayName', 'GroupName')]
+        [string[]]$Name,
 
-        [Parameter()]
+        [Parameter(ValueFromPipelineByPropertyName, ValueFromPipeline, ParameterSetName = 'ByDescriptor')]
+        [string]$GroupDescriptor,
+
+        [Parameter(HelpMessage = 'The -preview flag must be supplied in the api-version for this request to work.')]
         [Alias('ApiVersion')]
-        [ValidateSet('7.2-preview.1')]
+        [ValidateSet('7.1-preview.1', '7.2-preview.1')]
         [string]$Version = '7.2-preview.1'
     )
 
     begin {
         Write-Verbose ("Command: $($MyInvocation.MyCommand.Name)")
         Write-Debug ("CollectionUri: $CollectionUri")
-        Write-Debug ("DisplayName: $($DisplayName -join ',')")
         Write-Debug ("ScopeDescriptor: $ScopeDescriptor")
         Write-Debug ("SubjectTypes: $($SubjectTypes -join ',')")
+        Write-Debug ("ContinuationToken: $ContinuationToken")
+        Write-Debug ("Name: $($Name -join ',')")
+        Write-Debug ("GroupDescriptor: $GroupDescriptor")
         Write-Debug ("Version: $Version")
 
         Confirm-Default -Defaults ([ordered]@{
@@ -108,60 +124,71 @@
         try {
             $queryParameters = [System.Collections.Generic.List[string]]::new()
 
-            if ($ScopeDescriptor) {
-                $queryParameters.Add("scopeDescriptor=$($ScopeDescriptor)")
-            }
+            if ($GroupDescriptor) {
+                $uri = "$CollectionUri/_apis/graph/groups/$GroupDescriptor"
+            } else {
+                $uri = "$CollectionUri/_apis/graph/groups"
 
-            if ($SubjectTypes) {
-                $queryParameters.Add("subjectTypes=$([string]::Join(',', $SubjectTypes))")
-            }
+                if ($ScopeDescriptor) {
+                    $queryParameters.Add("scopeDescriptor=$($ScopeDescriptor)")
+                }
 
-            if ($ContinuationToken) {
-                $queryParameters.Add("continuationToken=$ContinuationToken")
-            }
+                if ($SubjectTypes) {
+                    $queryParameters.Add("subjectTypes=$([string]::Join(',', $SubjectTypes))")
+                }
 
-            if ($queryParameters.Count -gt 0) {
-                $queryParameters = $queryParameters -join '&'
+                if ($ContinuationToken) {
+                    $queryParameters.Add("continuationToken=$ContinuationToken")
+                }
             }
 
             $params = @{
-                Uri             = "$CollectionUri/_apis/graph/groups"
+                Uri             = $uri
                 Version         = $Version
-                QueryParameters = $queryParameters
+                QueryParameters = if ($queryParameters.Count -gt 0) { $queryParameters -join '&' } else { $null }
                 Method          = 'GET'
             }
 
-            if ($PSCmdlet.ShouldProcess($CollectionUri, 'Get Groups')) {
+            if ($PSCmdlet.ShouldProcess($CollectionUri, $GroupDescriptor ? "Get Group for $GroupDescriptor" : 'Get Groups')) {
+                try {
+                    $results = Invoke-AdoRestMethod @params
+                    $groups = if ($GroupDescriptor) { @($results) } else { $results.value }
 
-                $result = Invoke-AdoRestMethod @params
-                $groups = $result.value
+                    if ($Name) {
+                        $groups = foreach ($n_ in $Name) {
+                            $groups | Where-Object { -not $n_ -or $_.displayName -like $n_ }
+                        }
+                    }
 
-                if ($DisplayName) {
-                    $groups = foreach ($n_ in $DisplayName) {
-                        $groups | Where-Object { $_.displayName -eq $n_ }
+                    foreach ($g_ in $groups) {
+                        $obj = [ordered]@{
+                            displayName   = $g_.displayName
+                            originId      = $g_.originId
+                            principalName = $g_.principalName
+                            origin        = $g_.origin
+                            subjectKind   = $g_.subjectKind
+                            description   = $g_.description
+                            mailAddress   = $g_.mailAddress
+                            descriptor    = $g_.descriptor
+                            collectionUri = $CollectionUri
+                        }
+                        if ($result.continuationToken) {
+                            $obj['continuationToken'] = $result.continuationToken
+                        }
+                        [PSCustomObject]$obj
                     }
-                }
-
-                foreach ($g_ in $groups) {
-                    $obj = [ordered]@{
-                        displayName   = $g_.displayName
-                        originId      = $g_.originId
-                        principalName = $g_.principalName
-                        origin        = $g_.origin
-                        subjectKind   = $g_.subjectKind
-                        description   = $g_.description
-                        mailAddress   = $g_.mailAddress
-                        descriptor    = $g_.descriptor
-                        collectionUri = $CollectionUri
+                } catch {
+                    if ($_.ErrorDetails.Message -match 'InvalidSubjectTypeException') {
+                        Write-Warning "Subject with scope descriptor $ScopeDescriptor does not exist, skipping."
+                    } elseif ($_.ErrorDetails.Message -match 'GraphSubjectNotFoundException') {
+                        Write-Warning "Subject with group descriptor $GroupDescriptor does not exist, skipping."
+                    } else {
+                        throw $_
                     }
-                    if ($result.continuationToken) {
-                        $obj['continuationToken'] = $result.continuationToken
-                    }
-                    [PSCustomObject]$obj
                 }
             } else {
-                if ($DisplayName) {
-                    $params.DisplayName = ($DisplayName -join ',')
+                if ($Name) {
+                    $params.Name = $Name
                 }
                 Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
             }

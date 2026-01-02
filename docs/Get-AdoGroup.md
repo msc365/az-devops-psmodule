@@ -4,11 +4,12 @@ external help file: Azure.DevOps.PSModule-Help.xml
 HelpUri: https://learn.microsoft.com/en-us/rest/api/azure/devops/graph/groups/list
 Locale: en-NL
 Module Name: Azure.DevOps.PSModule
-ms.date: 11/01/2025
+ms.date: 01/02/2026
 PlatyPS schema version: 2024-05-01
 title: Get-AdoGroup
 -->
 
+<!-- markdownlint-disable MD024 -->
 <!-- cSpell: ignore dontshow -->
 
 # Get-AdoGroup
@@ -23,8 +24,8 @@ Get a single or multiple groups in an Azure DevOps organization.
 
 ```text
 Get-AdoGroup [[-CollectionUri] <string>] [[-ScopeDescriptor] <string>] [[-SubjectTypes] <string[]>]
- [[-ContinuationToken] <string>] [[-DisplayName] <string[]>] [[-Version] <string>]
- [<CommonParameters>]
+ [[-ContinuationToken] <string>] [[-Name] <string[]>] [[-GroupDescriptor] <string>] [[-Version] <string>]
+ [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -72,17 +73,31 @@ Retrieves all groups in the specified project with subject types 'vssgp'.
 
 ```powershell
 $params = @{
-    CollectionUri = 'https://dev.azure.com/my-org'
-    ScopeDescriptor = $projectDescriptor
     SubjectTypes    = 'vssgp'
+    ScopeDescriptor = $prjDscr
+    Name            = @(
+        'Project Administrators',
+        'Contributors'
+    )
 }
-@(
-    'Project Administrators',
-    'Release Administrators'
-) | Get-AdoGroup @params
+Get-AdoGroup @params
 ```
 
-Retrieves the 'Project Administrators' and 'Release Administrators' groups of type 'vssgp', demonstrating pipeline input.
+Retrieves the 'Project Administrators' and 'Contributors' groups in the specified scope with subject types 'vssgp'.
+
+### EXAMPLE 4
+
+#### PowerShell
+
+```powershell
+@(
+    'vssgp.00000000-0000-0000-0000-000000000000',
+    'vssgp.00000000-0000-0000-0000-000000000001',
+    'vssgp.00000000-0000-0000-0000-000000000002'
+) | Get-AdoGroup
+```
+
+Retrieves the groups with the specified descriptors.
 
 ## PARAMETERS
 
@@ -166,7 +181,7 @@ DefaultValue: ''
 SupportsWildcards: false
 Aliases: []
 ParameterSets:
-- Name: (All)
+- Name: ListGroups
   Position: Named
   IsRequired: false
   ValueFromPipeline: false
@@ -177,18 +192,44 @@ AcceptedValues: []
 HelpMessage: ''
 ```
 
-### -DisplayName
+### -Name
 
 Optional.
-A comma separated list of group display names to filter the retrieved results.
+A group's display name to filter the retrieved results.
+Supports wildcards for pattern matching.
 
 ```yaml
 Type: System.String[]
 DefaultValue: ''
 SupportsWildcards: false
+Aliases:
+- DisplayName
+- GroupName
+ParameterSets:
+- Name: ListGroups
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -GroupDescriptor
+
+Optional.
+The descriptor of a specific group to retrieve.
+When provided, retrieves a single group by its descriptor.
+
+```yaml
+Type: System.String
+DefaultValue: ''
+SupportsWildcards: false
 Aliases: []
 ParameterSets:
-- Name: (All)
+- Name: ByDescriptor
   Position: Named
   IsRequired: false
   ValueFromPipeline: true
@@ -204,6 +245,7 @@ HelpMessage: ''
 Optional.
 The API version to use for the request.
 Default is '7.2-preview.1'.
+The -preview flag must be supplied in the api-version for this request to work.
 
 ```yaml
 Type: System.String
@@ -220,8 +262,9 @@ ParameterSets:
   ValueFromRemainingArguments: false
 DontShow: false
 AcceptedValues:
+- 7.1-preview.1
 - 7.2-preview.1
-HelpMessage: ''
+HelpMessage: The -preview flag must be supplied in the api-version for this request to work.
 ```
 
 ### CommonParameters
@@ -237,12 +280,23 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### System.Object
+### PSCustomObject
 
-An object representing the groups in the specified scope.
+Returns one or more group objects with the following properties:
+- displayName: The display name of the group
+- originId: The origin ID of the group
+- principalName: The principal name of the group
+- origin: The origin of the group (e.g., 'aad', 'vsts')
+- subjectKind: The subject kind (e.g., 'group')
+- description: The description of the group
+- mailAddress: The mail address of the group
+- descriptor: The descriptor of the group
+- collectionUri: The collection URI used for the query
+- continuationToken: (Optional) Token for retrieving the next page of results
 
 ## NOTES
 
+- Retrieves groups in an Azure DevOps organization
 - Requires an active Azure account login. Use `Connect-AzAccount` to authenticate:
 
   ```powershell
