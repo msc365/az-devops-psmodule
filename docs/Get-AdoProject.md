@@ -4,7 +4,7 @@ external help file: Azure.DevOps.PSModule-Help.xml
 HelpUri: https://learn.microsoft.com/en-us/rest/api/azure/devops/core/projects/get?view=azure-devops
 Locale: en-NL
 Module Name: Azure.DevOps.PSModule
-ms.date: 11/01/2025
+ms.date: 01/02/2026
 PlatyPS schema version: 2024-05-01
 title: Get-AdoProject
 -->
@@ -280,13 +280,12 @@ HelpMessage: ''
 
 ### -Version
 
-Optional.
 The API version to use for the request.
-Default is '7.2-preview.1'.
+Default is '7.1'.
 
 ```yaml
 Type: System.String
-DefaultValue: 7.2-preview.1
+DefaultValue: 7.1
 SupportsWildcards: false
 Aliases:
 - ApiVersion
@@ -299,7 +298,8 @@ ParameterSets:
   ValueFromRemainingArguments: false
 DontShow: false
 AcceptedValues:
-- 7.2-preview.1
+- 7.1
+- 7.2-preview.4
 HelpMessage: ''
 ```
 
@@ -316,7 +316,18 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### System.Object
+### PSCustomObject
+
+Returns one or more project objects with the following properties:
+- id: The unique identifier of the project
+- name: The name of the project
+- description: The description of the project
+- visibility: The visibility of the project (public or private)
+- state: The state of the project (wellFormed, createPending, deleted, etc.)
+- defaultTeam: Information about the default team for the project
+- capabilities: Project capabilities if IncludeCapabilities is specified (source control type, process template, etc.)
+- collectionUri: The collection URI the project belongs to
+- continuationToken: Token for retrieving next page of results (only present when listing projects with pagination)
 
 ## NOTES
 

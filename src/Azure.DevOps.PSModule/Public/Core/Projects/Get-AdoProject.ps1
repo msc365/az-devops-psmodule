@@ -33,7 +33,7 @@
         Optional. A filter for the project state. Possible values are 'deleting', 'new', 'wellFormed', 'createPending', 'all', 'unchanged', 'deleted'.
 
     .PARAMETER Version
-        Optional. The API version to use for the request. Default is '7.2-preview.1'.
+        Optional. The API version to use for the request. Default is '7.1'.
 
     .LINK
         https://learn.microsoft.com/en-us/rest/api/azure/devops/core/projects/get
@@ -59,11 +59,19 @@
         $params = @{
             CollectionUri = 'https://dev.azure.com/my-org'
         }
-        @('my-project-1', 'my-project-2') | Get-AdoProject @params -Verbose
+        $project.id | Get-AdoProject @params -Verbose
 
-        Retrieves multiple projects by name demonstrating pipeline input.
+        Retrieves project by id demonstrating pipeline input.
+
+    .EXAMPLE
+        Get-AdoProject | Where-Object {
+            'my-project-1' -in $_.name -or
+            'my-project-2' -in $_.name
+        }
+
+        Retrieves multiple projects by their names using filtering.
     #>
-    [CmdletBinding(DefaultParameterSetName = 'ListProjects', SupportsShouldProcess)]
+    [CmdletBinding(DefaultParameterSetName = 'ListProjects', SupportsShouldProcess, ConfirmImpact = 'None')]
     param (
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
@@ -71,7 +79,7 @@
 
         [Parameter(ValueFromPipelineByPropertyName, ValueFromPipeline, ParameterSetName = 'ByNameOrId')]
         [Alias('Id', 'ProjectId', 'ProjectName')]
-        [string[]]$Name,
+        [string]$Name,
 
         [Parameter(ValueFromPipelineByPropertyName, ParameterSetName = 'ByNameOrId')]
         [switch]$IncludeCapabilities,
@@ -94,8 +102,8 @@
 
         [Parameter()]
         [Alias('ApiVersion')]
-        [ValidateSet('7.2-preview.1')]
-        [string]$Version = '7.2-preview.1'
+        [ValidateSet('7.1', '7.2-preview.4')]
+        [string]$Version = '7.1'
     )
 
     begin {
@@ -111,73 +119,78 @@
 
     process {
         try {
+            $queryParameters = [System.Collections.Generic.List[string]]::new()
 
-            foreach ($n_ in $Name) {
-                $queryParameters = [System.Collections.Generic.List[string]]::new()
+            if ($Name) {
+                $uri = "$CollectionUri/_apis/projects/$Name"
 
-                if ($n_) {
-                    $uri = "$CollectionUri/_apis/projects/$n_"
-
-                    # Build query parameters
-                    if ($IncludeCapabilities) {
-                        $queryParameters.Add('includeCapabilities=true')
-                    }
-                    if ($IncludeHistory) {
-                        $queryParameters.Add('includeHistory=true')
-                    }
-                } else {
-                    $uri = "$CollectionUri/_apis/projects"
-
-                    # Build query parameters
-                    if ($Skip) {
-                        $queryParameters.Add("`$skip=$Skip")
-                    }
-                    if ($Top) {
-                        $queryParameters.Add("`$top=$Top")
-                    }
-                    if ($ContinuationToken) {
-                        $queryParameters.Add("continuationToken=$ContinuationToken")
-                    }
-                    if ($StateFilter) {
-                        $queryParameters.Add("stateFilter=$StateFilter")
-                    }
+                # Build query parameters
+                if ($IncludeCapabilities) {
+                    $queryParameters.Add('includeCapabilities=true')
                 }
-
-                $params = @{
-                    Uri             = $uri
-                    Version         = $Version
-                    QueryParameters = if ($queryParameters.Count -gt 0) { $queryParameters -join '&' } else { $null }
-                    Method          = 'GET'
+                if ($IncludeHistory) {
+                    $queryParameters.Add('includeHistory=true')
                 }
+            } else {
+                $uri = "$CollectionUri/_apis/projects"
 
-                if ($PSCmdlet.ShouldProcess($CollectionUri, $n_ ? "Get Project: $n_" : 'Get Projects')) {
-
-                    $results = Invoke-AdoRestMethod @params
-                    $projects = if ($n_) { @($results) } else { $results.value }
-
-                    foreach ($p_ in $projects) {
-                        [PSCustomObject]@{
-                            id                = $p_.id
-                            name              = $p_.name
-                            description       = $p_.description
-                            visibility        = $p_.visibility
-                            state             = $p_.state
-                            defaultTeam       = $p_.DefaultTeam
-                            capabilities      = if ($p_.capabilities) { $p_.capabilities } else { $null }
-                            collectionUri     = $CollectionUri
-                            continuationToken = if ($results.continuationToken) { $results.continuationToken } else { $null }
-                        }
-                    }
-
-                } else {
-                    Write-Verbose "Calling Invoke-AdoRestMethod with $($params| ConvertTo-Json -Depth 10)"
+                # Build query parameters
+                if ($Skip) {
+                    $queryParameters.Add("`$skip=$Skip")
+                }
+                if ($Top) {
+                    $queryParameters.Add("`$top=$Top")
+                }
+                if ($ContinuationToken) {
+                    $queryParameters.Add("continuationToken=$ContinuationToken")
+                }
+                if ($StateFilter) {
+                    $queryParameters.Add("stateFilter=$StateFilter")
                 }
             }
 
+            $params = @{
+                Uri             = $uri
+                Version         = $Version
+                QueryParameters = if ($queryParameters.Count -gt 0) { $queryParameters -join '&' } else { $null }
+                Method          = 'GET'
+            }
+
+            if ($PSCmdlet.ShouldProcess($CollectionUri, $Name ? "Get Project: $Name" : 'Get Projects')) {
+                try {
+                    $results = Invoke-AdoRestMethod @params
+                    $projects = if ($Name) { @($results) } else { $results.value }
+
+                    foreach ($p_ in $projects) {
+                        $outputObj = [ordered]@{
+                            id            = $p_.id
+                            name          = $p_.name
+                            description   = $p_.description
+                            visibility    = $p_.visibility
+                            state         = $p_.state
+                            defaultTeam   = $p_.DefaultTeam
+                            capabilities  = if ($p_.capabilities) { $p_.capabilities } else { $null }
+                            collectionUri = $CollectionUri
+                        }
+                        if ($results.continuationToken) {
+                            $outputObj.continuationToken = $results.continuationToken
+                        }
+                        # Output the project object
+                        [PSCustomObject]$outputObj
+                    }
+                } catch {
+                    if ($_.ErrorDetails.Message -match 'ProjectDoesNotExistWithNameException') {
+                        Write-Warning "Project with ID $Name does not exist, skipping."
+                    } else {
+                        throw $_
+                    }
+                }
+            } else {
+                Write-Verbose "Calling Invoke-AdoRestMethod with $($params| ConvertTo-Json -Depth 10)"
+            }
         } catch {
             throw $_
         }
-
     }
 
     end {
