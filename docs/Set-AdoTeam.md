@@ -4,26 +4,27 @@ external help file: Azure.DevOps.PSModule-Help.xml
 HelpUri: https://learn.microsoft.com/en-us/rest/api/azure/devops/core/teams/update
 Locale: en-NL
 Module Name: Azure.DevOps.PSModule
-ms.date: 11/01/2025
+ms.date: 01/02/2026
 PlatyPS schema version: 2024-05-01
 title: Set-AdoTeam
 -->
 
+<!-- markdownlint-disable MD024 -->
 <!-- cSpell: ignore dontshow -->
 
 # Set-AdoTeam
 
 ## SYNOPSIS
 
-Update a team in an Azure DevOps project.
+Updates an existing Azure DevOps team.
 
 ## SYNTAX
 
 ### __AllParameterSets
 
 ```text
-Set-AdoTeam [-ProjectId] <string> [-TeamId] <string> [-Name] <string> [[-Description] <string>]
- [[-ApiVersion] <string>] [<CommonParameters>]
+Set-AdoTeam [[-CollectionUri] <string>] [[-ProjectName] <string>] [-Id] <string>
+ [[-Name] <string>] [[-Description] <string>] [[-Version] <string>] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -33,7 +34,7 @@ This cmdlet has the following aliases,
 
 ## DESCRIPTION
 
-This function updates a team in an Azure DevOps project through REST API.
+This cmdlet updates an existing Azure DevOps team within a specified project. You can update the team name and/or description. Only properties that are explicitly provided will be updated.
 
 ## EXAMPLES
 
@@ -42,52 +43,94 @@ This function updates a team in an Azure DevOps project through REST API.
 #### PowerShell
 
 ```powershell
-Set-AdoTeam -ProjectId 'my-project' -TeamId '00000000-0000-0000-0000-000000000000' -Name 'my-team'
+$params = @{
+    CollectionUri = 'https://dev.azure.com/my-org'
+    ProjectName   = 'my-project'
+    Id            = 'my-team'
+    Name          = 'my-team-updated'
+}
+Set-AdoTeam @params -Verbose
 ```
 
-Update the team with the specified TeamId in the given project to have the name 'my-team'.
+Updates the name of the specified team.
+
+### EXAMPLE 2
+
+#### PowerShell
+
+```powershell
+[PSCustomObject]@{
+    Id          = 'my-team'
+    Name        = 'my-team-updated'
+    Description = 'Updated description'
+} | Set-AdoTeam -ProjectName 'my-project'
+```
+
+Updates the team using pipeline input.
 
 ## PARAMETERS
 
-### -ApiVersion
+### -CollectionUri
 
-Optional.
-The API version to use.
+The collection URI of the Azure DevOps collection/organization.
+Defaults to the value of $env:DefaultAdoCollectionUri if not provided.
 
 ```yaml
 Type: System.String
-DefaultValue: 7.1
+DefaultValue: $env:DefaultAdoCollectionUri
 SupportsWildcards: false
-Aliases:
-- Api
+Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 4
+  Position: Named
   IsRequired: false
   ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
+  ValueFromPipelineByPropertyName: true
   ValueFromRemainingArguments: false
 DontShow: false
 AcceptedValues: []
 HelpMessage: ''
 ```
 
-### -Description
+### -ProjectName
 
-Optional.
-The description of the team.
+The ID or name of the project.
+Defaults to the value of $env:DefaultAdoProject if not provided.
+
+```yaml
+Type: System.String
+DefaultValue: $env:DefaultAdoProject
+SupportsWildcards: false
+Aliases:
+- ProjectId
+ParameterSets:
+- Name: (All)
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -Id
+
+The ID or name of the team to update.
 
 ```yaml
 Type: System.String
 DefaultValue: ''
 SupportsWildcards: false
-Aliases: []
+Aliases:
+- TeamId
 ParameterSets:
 - Name: (All)
-  Position: 3
-  IsRequired: false
-  ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
+  Position: Named
+  IsRequired: true
+  ValueFromPipeline: true
+  ValueFromPipelineByPropertyName: true
   ValueFromRemainingArguments: false
 DontShow: false
 AcceptedValues: []
@@ -96,30 +139,29 @@ HelpMessage: ''
 
 ### -Name
 
-Mandatory.
-The name of the team.
+The new name for the team.
 
 ```yaml
 Type: System.String
 DefaultValue: ''
 SupportsWildcards: false
-Aliases: []
+Aliases:
+- TeamName
 ParameterSets:
 - Name: (All)
-  Position: 2
-  IsRequired: true
+  Position: Named
+  IsRequired: false
   ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
+  ValueFromPipelineByPropertyName: true
   ValueFromRemainingArguments: false
 DontShow: false
 AcceptedValues: []
 HelpMessage: ''
 ```
 
-### -ProjectId
+### -Description
 
-Mandatory.
-The unique identifier or name of the project.
+The new description for the team.
 
 ```yaml
 Type: System.String
@@ -128,35 +170,38 @@ SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 0
-  IsRequired: true
+  Position: Named
+  IsRequired: false
   ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
+  ValueFromPipelineByPropertyName: true
   ValueFromRemainingArguments: false
 DontShow: false
 AcceptedValues: []
 HelpMessage: ''
 ```
 
-### -TeamId
+### -Version
 
-Mandatory.
-The unique identifier of the team.
+The API version to use for the request.
+Default is '7.1'.
 
 ```yaml
 Type: System.String
-DefaultValue: ''
+DefaultValue: 7.1
 SupportsWildcards: false
-Aliases: []
+Aliases:
+- ApiVersion
 ParameterSets:
 - Name: (All)
-  Position: 1
-  IsRequired: true
+  Position: Named
+  IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
   ValueFromRemainingArguments: false
 DontShow: false
-AcceptedValues: []
+AcceptedValues:
+- 7.1
+- 7.2-preview.3
 HelpMessage: ''
 ```
 
@@ -169,17 +214,28 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
-- N/A
+- System.String
+- PSCustomObject
 
 ## OUTPUTS
 
-### System.Object
+### PSCustomObject
 
-The updated team object.
+Returns the updated team object with the following properties:
+- id: The unique identifier of the team
+- name: The updated name of the team
+- description: The updated description of the team
+- url: The REST API URL for the team
+- identityUrl: The identity URL for the team
+- projectId: The unique identifier of the project the team belongs to
+- projectName: The name of the project the team belongs to
+- collectionUri: The collection URI the team belongs to
 
 ## NOTES
 
-- Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
+- Only properties that are explicitly provided will be updated
+- The Id parameter accepts either a team ID or team name
+- Requires ShouldProcess confirmation due to ConfirmImpact = 'High'
 
 ## RELATED LINKS
 

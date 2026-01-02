@@ -10,7 +10,7 @@
         Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/myorganization.
 
     .PARAMETER ProjectName
-        Mandatory. The ID or name of the project.
+        Optional. The ID or name of the project. If not specified, the default project is used.
 
     .PARAMETER Id
         Mandatory. The ID or name of the team to update.
@@ -22,7 +22,7 @@
         Optional. The new description of the team.
 
     .PARAMETER Version
-        Optional. The API version to use for the request. Default is '7.2-preview.3'.
+        Optional. The API version to use for the request. Default is '7.1'.
 
     .LINK
         https://learn.microsoft.com/en-us/rest/api/azure/devops/core/teams/update
@@ -57,15 +57,16 @@
         [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
         [string]$CollectionUri = $env:DefaultAdoCollectionUri,
 
-        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [Parameter(ValueFromPipelineByPropertyName)]
         [Alias('ProjectId')]
-        [string]$ProjectName,
+        [string]$ProjectName = $env:DefaultAdoProject,
 
         [Parameter(Mandatory, ValueFromPipelineByPropertyName, ValueFromPipeline)]
-        [Alias('Team', 'TeamId', 'TeamName')]
-        [string[]]$Id,
+        [Alias('TeamId')]
+        [string]$Id,
 
         [Parameter(ValueFromPipelineByPropertyName)]
+        [Alias('TeamName')]
         [string]$Name,
 
         [Parameter(ValueFromPipelineByPropertyName)]
@@ -74,7 +75,7 @@
         [Parameter()]
         [Alias('ApiVersion')]
         [ValidateSet('7.1', '7.2-preview.3')]
-        [string]$Version = '7.2-preview.3'
+        [string]$Version = '7.1'
     )
 
     begin {
@@ -88,31 +89,29 @@
 
         Confirm-Default -Defaults ([ordered]@{
                 'CollectionUri' = $CollectionUri
+                'ProjectName'   = $ProjectName
             })
     }
 
     process {
         try {
+            $params = @{
+                Uri     = "$CollectionUri/_apis/projects/$ProjectName/teams/$Id"
+                Version = $Version
+                Method  = 'PATCH'
+            }
 
-            foreach ($t_ in $Id) {
+            $body = [PSCustomObject]@{}
 
-                $params = @{
-                    Uri     = "$CollectionUri/_apis/projects/$ProjectName/teams/$t_"
-                    Version = $Version
-                    Method  = 'PATCH'
-                }
+            if ($PSBoundParameters.ContainsKey('Name')) {
+                $body | Add-Member -NotePropertyName 'name' -NotePropertyValue $Name
+            }
+            if ($PSBoundParameters.ContainsKey('Description')) {
+                $body | Add-Member -NotePropertyName 'description' -NotePropertyValue $Description
+            }
 
-                $body = [PSCustomObject]@{}
-
-                if ($PSBoundParameters.ContainsKey('Name')) {
-                    $body | Add-Member -NotePropertyName 'name' -NotePropertyValue $Name
-                }
-                if ($PSBoundParameters.ContainsKey('Description')) {
-                    $body | Add-Member -NotePropertyName 'description' -NotePropertyValue $Description
-                }
-
-                if ($PSCmdlet.ShouldProcess($CollectionUri, "Update Team: $t_ in Project: $ProjectName")) {
-
+            if ($PSCmdlet.ShouldProcess($CollectionUri, "Update Team: $Id in Project: $ProjectName")) {
+                try {
                     $results = $body | Invoke-AdoRestMethod @params
 
                     [PSCustomObject]@{
@@ -125,16 +124,19 @@
                         projectName   = $results.projectName
                         collectionUri = $CollectionUri
                     }
-
-                } else {
-                    Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
+                } catch {
+                    if ($_.ErrorDetails.Message -match 'TeamNotFoundException') {
+                        Write-Warning "Team with ID $Id does not exist, skipping."
+                    } else {
+                        throw $_
+                    }
                 }
+            } else {
+                Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
             }
-
         } catch {
             throw $_
         }
-
     }
 
     end {
