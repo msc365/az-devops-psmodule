@@ -10,13 +10,13 @@
         Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/myorganization.
 
     .PARAMETER ProjectName
-        Mandatory. The ID or name of the project.
+        Optional. The ID or name of the project. If not specified, the default project is used.
 
-    .PARAMETER Id
+    .PARAMETER Name
         Mandatory. The ID or name of the team to remove.
 
     .PARAMETER Version
-        Optional. The API version to use for the request. Default is '7.2-preview.3'.
+        Optional. The API version to use for the request. Default is '7.1'.
 
     .LINK
         https://learn.microsoft.com/en-us/rest/api/azure/devops/core/teams/delete
@@ -45,18 +45,18 @@
         [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
         [string]$CollectionUri = $env:DefaultAdoCollectionUri,
 
-        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [Parameter(ValueFromPipelineByPropertyName)]
         [Alias('ProjectId')]
-        [string]$ProjectName,
+        [string]$ProjectName = $env:DefaultAdoProject,
 
         [Parameter(Mandatory, ValueFromPipelineByPropertyName, ValueFromPipeline)]
-        [Alias('Team', 'TeamId', 'TeamName')]
-        [string[]]$Id,
+        [Alias('TeamName', 'Id', 'TeamId')]
+        [string]$Name,
 
         [Parameter()]
         [Alias('ApiVersion')]
-        [ValidateSet('5.1', '7.1-preview.4', '7.2-preview.3')]
-        [string]$Version = '7.2-preview.3'
+        [ValidateSet('7.1', '7.2-preview.3')]
+        [string]$Version = '7.1'
     )
 
     begin {
@@ -68,42 +68,35 @@
 
         Confirm-Default -Defaults ([ordered]@{
                 'CollectionUri' = $CollectionUri
+                'ProjectName'   = $ProjectName
             })
     }
 
     process {
         try {
-
-            foreach ($t_ in $Id) {
-
-                $params = @{
-                    Uri     = "$CollectionUri/_apis/projects/$ProjectName/teams/$t_"
-                    Version = $Version
-                    Method  = 'DELETE'
-                }
-
-                if ($PSCmdlet.ShouldProcess($CollectionUri, "Delete Team: $t_ from Project: $ProjectName")) {
-
-                    try {
-                        Invoke-AdoRestMethod @params | Out-Null
-
-                    } catch {
-                        if ($_ -match 'does not exist') {
-                            Write-Warning "Team with ID $t_ does not exist in project $ProjectName, skipping deletion."
-                        } else {
-                            throw $_
-                        }
-                    }
-
-                } else {
-                    Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
-                }
+            $params = @{
+                Uri     = "$CollectionUri/_apis/projects/$ProjectName/teams/$Name"
+                Version = $Version
+                Method  = 'DELETE'
             }
 
+            if ($PSCmdlet.ShouldProcess($CollectionUri, "Delete Team: $Name from Project: $ProjectName")) {
+                try {
+                    Invoke-AdoRestMethod @params | Out-Null
+                } catch {
+                    if ($_.ErrorDetails.Message -match 'TeamNotFoundException') {
+                        Write-Warning "Team with Name $Name does not exist, skipping deletion."
+                    } else {
+                        throw $_
+                    }
+                }
+
+            } else {
+                Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
+            }
         } catch {
             throw $_
         }
-
     }
 
     end {

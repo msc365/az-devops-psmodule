@@ -1,29 +1,30 @@
 <!--
 document type: cmdlet
 external help file: Azure.DevOps.PSModule-Help.xml
-HelpUri: https://learn.microsoft.com/en-us/rest/api/azure/devops/core/teams/get
+HelpUri: https://learn.microsoft.com/en-us/rest/api/azure/devops/core/teams/delete
 Locale: en-NL
 Module Name: Azure.DevOps.PSModule
-ms.date: 11/01/2025
+ms.date: 01/02/2026
 PlatyPS schema version: 2024-05-01
 title: Remove-AdoTeam
 -->
 
+<!-- markdownlint-disable MD024 -->
 <!-- cSpell: ignore dontshow -->
 
 # Remove-AdoTeam
 
 ## SYNOPSIS
 
-Remove a team from an Azure DevOps project.
+Removes a team from an Azure DevOps project.
 
 ## SYNTAX
 
 ### __AllParameterSets
 
 ```text
-Remove-AdoTeam [-ProjectId] <string> [-TeamId] <string> [[-ApiVersion] <string>]
- [<CommonParameters>]
+Remove-AdoTeam [[-CollectionUri] <string>] [[-ProjectName] <string>] [-Name] <string>
+ [[-Version] <string>] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -33,7 +34,7 @@ This cmdlet has the following aliases,
 
 ## DESCRIPTION
 
-This function removes a team from an Azure DevOps project through REST API.
+This cmdlet removes a team from an Azure DevOps project. This action permanently deletes the team.
 
 ## EXAMPLES
 
@@ -42,77 +43,118 @@ This function removes a team from an Azure DevOps project through REST API.
 #### PowerShell
 
 ```powershell
-Remove-AdoTeam -ProjectId 'my-project' -TeamId '00000000-0000-0000-0000-000000000000'
+$params = @{
+    CollectionUri = 'https://dev.azure.com/my-org'
+    ProjectName   = 'my-project'
+}
+Remove-AdoTeam @params -Name 'my-team'
 ```
 
-Removes the specified team from the specified project.
+Removes the specified team from the project.
+
+### EXAMPLE 2
+
+#### PowerShell
+
+```powershell
+@('team-1', 'team-2') | Remove-AdoTeam -ProjectName 'my-project'
+```
+
+Removes multiple teams demonstrating pipeline input.
 
 ## PARAMETERS
 
-### -ApiVersion
+### -CollectionUri
 
-Optional.
-The API version to use.
+The collection URI of the Azure DevOps collection/organization.
+Defaults to the value of $env:DefaultAdoCollectionUri if not provided.
+
+```yaml
+Type: System.String
+DefaultValue: $env:DefaultAdoCollectionUri
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: (All)
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -ProjectName
+
+The ID or name of the project.
+Defaults to the value of $env:DefaultAdoProject if not provided.
+
+```yaml
+Type: System.String
+DefaultValue: $env:DefaultAdoProject
+SupportsWildcards: false
+Aliases:
+- ProjectId
+ParameterSets:
+- Name: (All)
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -Name
+
+The ID or name of the team to remove.
+
+```yaml
+Type: System.String
+DefaultValue: ''
+SupportsWildcards: false
+Aliases:
+- TeamName
+- Id
+- TeamId
+ParameterSets:
+- Name: (All)
+  Position: Named
+  IsRequired: true
+  ValueFromPipeline: true
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -Version
+
+The API version to use for the request.
+Default is '7.1'.
 
 ```yaml
 Type: System.String
 DefaultValue: 7.1
 SupportsWildcards: false
 Aliases:
-- api
+- ApiVersion
 ParameterSets:
 - Name: (All)
-  Position: 2
+  Position: Named
   IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
   ValueFromRemainingArguments: false
 DontShow: false
-AcceptedValues: []
-HelpMessage: ''
-```
-
-### -ProjectId
-
-Mandatory.
-The ID or name of the project.
-
-```yaml
-Type: System.String
-DefaultValue: ''
-SupportsWildcards: false
-Aliases: []
-ParameterSets:
-- Name: (All)
-  Position: 0
-  IsRequired: true
-  ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
-  ValueFromRemainingArguments: false
-DontShow: false
-AcceptedValues: []
-HelpMessage: ''
-```
-
-### -TeamId
-
-Mandatory.
-The ID or name of the team.
-
-```yaml
-Type: System.String
-DefaultValue: ''
-SupportsWildcards: false
-Aliases: []
-ParameterSets:
-- Name: (All)
-  Position: 1
-  IsRequired: true
-  ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
-  ValueFromRemainingArguments: false
-DontShow: false
-AcceptedValues: []
+AcceptedValues:
+- 7.1
+- 7.2-preview.3
 HelpMessage: ''
 ```
 
@@ -125,17 +167,18 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
-- N/A
+- System.String
 
 ## OUTPUTS
 
-### System.Boolean
-
-Boolean indicating success.
+- None. This cmdlet does not generate output.
 
 ## NOTES
 
-- Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
+- This cmdlet permanently removes the team from Azure DevOps
+- The Name parameter accepts either a team ID or team name
+- Requires ShouldProcess confirmation due to ConfirmImpact = 'High'
+- Use -Confirm:$false to skip confirmation prompts
 
 ## RELATED LINKS
 
