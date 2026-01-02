@@ -4,9 +4,12 @@
         Create a new repository in an Azure DevOps project.
 
     .DESCRIPTION
-        This function creates a new repository in an Azure DevOps project through REST API.
+        This cmdlet creates a new repository in an Azure DevOps project through REST API.
 
-    .PARAMETER ProjectId
+    .PARAMETER CollectionUri
+        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/myorganization.
+
+    .PARAMETER ProjectName
         Mandatory. The ID or name of the project.
 
     .PARAMETER Name
@@ -15,88 +18,137 @@
     .PARAMETER SourceRef
         Optional. Specify the source refs to use while creating a fork repo.
 
-    .PARAMETER ApiVersion
-        Optional. The API version to use.
+    .PARAMETER Version
+        Optional. The API version to use for the request. Default is '7.1'.
 
     .LINK
-        https://learn.microsoft.com/en-us/rest/api/azure/devops/git/repositories/create?view=azure-devops
+        https://learn.microsoft.com/en-us/rest/api/azure/devops/git/repositories/create
 
     .EXAMPLE
-        New-AdoRepository -ProjectId $project.id -Name 'my-other-001'
+        $params = @{
+            CollectionUri = 'https://dev.azure.com/my-org'
+            ProjectName   = 'my-project'
+            Name          = 'my-repository-1'
+        }
+        New-AdoRepository @params
 
-        Creates a new repository named 'my-other-001' in the specified project.
+        Creates a new repository named 'my-repository-1' in the specified project.
     #>
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess)]
     [OutputType([pscustomobject])]
     param (
-        [Parameter(Mandatory)]
-        [string]$ProjectId,
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
+        [string]$CollectionUri = $env:DefaultAdoCollectionUri,
 
-        [Parameter(Mandatory)]
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [Alias('ProjectId')]
+        [string]$ProjectName = $env:DefaultAdoProject,
+
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName, ValueFromPipeline)]
+        [Alias('RepositoryName')]
         [string]$Name,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter(ValueFromPipelineByPropertyName)]
         [string]$SourceRef,
 
-        [Parameter(Mandatory = $false)]
-        [Alias('Api')]
+        [Parameter()]
+        [Alias('ApiVersion')]
         [ValidateSet('7.1', '7.2-preview.2')]
-        [string]$ApiVersion = '7.1'
+        [string]$Version = '7.1'
     )
 
     begin {
-        Write-Debug ('Command      : {0}' -f $MyInvocation.MyCommand.Name)
-        Write-Debug ('  ProjectId  : {0}' -f $ProjectId)
-        Write-Debug ('  Name       : {0}' -f $Name)
-        Write-Debug ('  SourceRef  : {0}' -f $SourceRef)
-        Write-Debug ('  ApiVersion : {0}' -f $ApiVersion)
+        Write-Verbose ("Command: $($MyInvocation.MyCommand.Name)")
+        Write-Debug ("CollectionUri: $CollectionUri")
+        Write-Debug ("ProjectName: $ProjectName")
+        Write-Debug ("Name: $Name")
+        Write-Debug ("SourceRef: $SourceRef")
+        Write-Debug ("Version: $Version")
+
+        Confirm-Default -Defaults ([ordered]@{
+                'CollectionUri' = $CollectionUri
+                'ProjectName'   = $ProjectName
+            })
     }
 
     process {
         try {
-            $ErrorActionPreference = 'Stop'
-
-            if (-not $global:AzDevOpsIsConnected) {
-                throw 'Not connected to Azure DevOps. Please connect using Connect-AdoOrganization.'
-            }
-
+            # Get id when name was provided, id is required for body
             try {
-                [System.Guid]::Parse($ProjectId) | Out-Null
+                [System.Guid]::Parse($ProjectName) | Out-Null
+                $projectId = $ProjectName
             } catch {
-                $ProjectId = (Get-AdoProject -ProjectName $ProjectId).id
+                $projectId = (Get-AdoProject -CollectionUri $CollectionUri -Name $ProjectName).id
+                if (-not $projectId) { continue }
             }
 
-            $uriFormat = '{0}/{1}/_apis/git/repositories?sourceRef={2}&api-version={3}'
-            $azDevOpsUri = ($uriFormat -f [uri]::new($global:AzDevOpsOrganization), $ProjectId, $SourceRef, $ApiVersion)
+            $queryParameters = [System.Collections.Generic.List[string]]::new()
 
-            $body = @{
+            if ($SourceRef) {
+                $queryParameters.Add("sourceRef=$SourceRef")
+            }
+
+            $uri = "$CollectionUri/$ProjectName/_apis/git/repositories"
+
+            $body = [PSCustomObject]@{
                 name    = $Name
                 project = @{
-                    id = $ProjectId
+                    id = $projectId
                 }
             }
 
             $params = @{
-                Method      = 'POST'
-                Uri         = $azDevOpsUri
-                ContentType = 'application/json'
-                Headers     = @{
-                    'Accept'        = 'application/json'
-                    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
-                }
-                Body        = ($body | ConvertTo-Json -Depth 3 -Compress)
+                Uri             = $uri
+                Version         = $Version
+                QueryParameters = if ($queryParameters.Count -gt 0) { $queryParameters -join '&' } else { $null }
+                Method          = 'POST'
             }
 
-            $response = Invoke-RestMethod @params -Verbose:$VerbosePreference
+            if ($PSCmdlet.ShouldProcess($CollectionUri, "Create Repository '$($Name)' in project '$($ProjectName)'")) {
+                try {
+                    $results = $body | Invoke-AdoRestMethod @params
 
-            return $response
+                    [PSCustomObject]@{
+                        id            = $results.id
+                        name          = $results.name
+                        project       = $results.project
+                        defaultBranch = $results.defaultBranch
+                        url           = $results.url
+                        remoteUrl     = $results.remoteUrl
+                        projectName   = $ProjectName
+                        collectionUri = $CollectionUri
+                    }
 
+                } catch {
+                    if ($_.ErrorDetails.Message -match 'RepositoryAlreadyExists') {
+                        Write-Warning "Repository $Name already exists, trying to get it"
+
+                        $results = Get-AdoRepository -CollectionUri $CollectionUri -ProjectName $ProjectName -Name $Name
+
+                        [PSCustomObject]@{
+                            id            = $results.id
+                            name          = $results.name
+                            project       = $results.project
+                            defaultBranch = $results.defaultBranch
+                            url           = $results.url
+                            remoteUrl     = $results.remoteUrl
+                            projectName   = $ProjectName
+                            collectionUri = $CollectionUri
+                        }
+                    } else {
+                        throw $_
+                    }
+                }
+            } else {
+                Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
+            }
         } catch {
             throw $_
         }
     }
 
     end {
-        Write-Debug ('Exit : {0}' -f $MyInvocation.MyCommand.Name)
+        Write-Verbose ("Exit: $($MyInvocation.MyCommand.Name)")
     }
 }

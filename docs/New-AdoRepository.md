@@ -1,14 +1,15 @@
 <!--
 document type: cmdlet
 external help file: Azure.DevOps.PSModule-Help.xml
-HelpUri: https://learn.microsoft.com/en-us/rest/api/azure/devops/git/repositories/create?view=azure-devops
+HelpUri: https://learn.microsoft.com/en-us/rest/api/azure/devops/git/repositories/create
 Locale: en-NL
 Module Name: Azure.DevOps.PSModule
-ms.date: 11/01/2025
+ms.date: 01/02/2026
 PlatyPS schema version: 2024-05-01
 title: New-AdoRepository
 -->
 
+<!-- markdownlint-disable MD024 -->
 <!-- cSpell: ignore dontshow -->
 
 # New-AdoRepository
@@ -22,8 +23,7 @@ Create a new repository in an Azure DevOps project.
 ### __AllParameterSets
 
 ```text
-New-AdoRepository [-ProjectId] <string> [-Name] <string> [[-SourceRef] <string>]
- [[-ApiVersion] <string>] [<CommonParameters>]
+New-AdoRepository [[-CollectionUri] <string>] [[-ProjectName] <string>] [-Name] <string> [[-SourceRef] <string>] [[-Version] <string>] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -33,7 +33,7 @@ This cmdlet has the following aliases,
 
 ## DESCRIPTION
 
-This function creates a new repository in an Azure DevOps project through REST API.
+This cmdlet creates a new repository in an Azure DevOps project through REST API.
 
 ## EXAMPLES
 
@@ -42,30 +42,67 @@ This function creates a new repository in an Azure DevOps project through REST A
 #### PowerShell
 
 ```powershell
-New-AdoRepository -ProjectId $project.id -Name 'my-other-001'
+$params = @{
+    CollectionUri = 'https://dev.azure.com/my-org'
+    ProjectName   = 'my-project'
+    Name          = 'my-repository-1'
+}
+New-AdoRepository @params
 ```
 
-Creates a new repository named 'my-other-001' in the specified project.
+Creates a new repository named 'my-repository-1' in the specified project.
+
+### EXAMPLE 2
+
+#### PowerShell
+
+```powershell
+New-AdoRepository -Name 'my-repository-1'
+```
+
+Creates a new repository using the default collection URI and project name from environment variables.
 
 ## PARAMETERS
 
-### -ApiVersion
+### -CollectionUri
 
-Optional.
-The API version to use.
+Optional. The collection URI of the Azure DevOps collection/organization, e.g., <https://dev.azure.com/myorganization>.
+Defaults to the value of $env:DefaultAdoCollectionUri.
 
 ```yaml
 Type: System.String
-DefaultValue: 7.1
+DefaultValue: $env:DefaultAdoCollectionUri
 SupportsWildcards: false
-Aliases:
-- Api
+Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 3
+  Position: Named
   IsRequired: false
   ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -ProjectName
+
+Optional. The ID or name of the project.
+Defaults to the value of $env:DefaultAdoProject.
+
+```yaml
+Type: System.String
+DefaultValue: $env:DefaultAdoProject
+SupportsWildcards: false
+Aliases:
+- ProjectId
+ParameterSets:
+- Name: (All)
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
   ValueFromRemainingArguments: false
 DontShow: false
 AcceptedValues: []
@@ -74,42 +111,20 @@ HelpMessage: ''
 
 ### -Name
 
-Mandatory.
-The name of the repository.
+Mandatory. The name of the repository.
 
 ```yaml
 Type: System.String
 DefaultValue: ''
 SupportsWildcards: false
-Aliases: []
+Aliases:
+- RepositoryName
 ParameterSets:
 - Name: (All)
-  Position: 1
+  Position: Named
   IsRequired: true
-  ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
-  ValueFromRemainingArguments: false
-DontShow: false
-AcceptedValues: []
-HelpMessage: ''
-```
-
-### -ProjectId
-
-Mandatory.
-The ID or name of the project.
-
-```yaml
-Type: System.String
-DefaultValue: ''
-SupportsWildcards: false
-Aliases: []
-ParameterSets:
-- Name: (All)
-  Position: 0
-  IsRequired: true
-  ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
+  ValueFromPipeline: true
+  ValueFromPipelineByPropertyName: true
   ValueFromRemainingArguments: false
 DontShow: false
 AcceptedValues: []
@@ -118,8 +133,7 @@ HelpMessage: ''
 
 ### -SourceRef
 
-Optional.
-Specify the source refs to use while creating a fork repo.
+Optional. Specify the source refs to use while creating a fork repo.
 
 ```yaml
 Type: System.String
@@ -128,13 +142,37 @@ SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 2
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -Version
+
+Optional. The API version to use for the request. Default is '7.1'.
+
+```yaml
+Type: System.String
+DefaultValue: '7.1'
+SupportsWildcards: false
+Aliases:
+- ApiVersion
+ParameterSets:
+- Name: (All)
+  Position: Named
   IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
   ValueFromRemainingArguments: false
 DontShow: false
-AcceptedValues: []
+AcceptedValues:
+- '7.1'
+- '7.2-preview.2'
 HelpMessage: ''
 ```
 
@@ -151,12 +189,23 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### System.Management.Automation.PSObject
+### PSCustomObject
+
+Returns a custom object with the following properties:
+- id: The unique identifier of the repository
+- name: The name of the repository
+- project: The project object containing repository details
+- defaultBranch: The default branch of the repository
+- url: The URL of the repository
+- remoteUrl: The remote URL for cloning the repository
+- projectName: The name of the project containing the repository
+- collectionUri: The collection URI of the Azure DevOps organization
 
 ## NOTES
 
 - Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
+- If a repository with the specified name already exists, the cmdlet retrieves and returns the existing repository.
 
 ## RELATED LINKS
 
-- <https://learn.microsoft.com/en-us/rest/api/azure/devops/git/repositories/create?view=azure-devops>
+- <https://learn.microsoft.com/en-us/rest/api/azure/devops/git/repositories/create>
