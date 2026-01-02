@@ -4,7 +4,7 @@ external help file: Azure.DevOps.PSModule-Help.xml
 HelpUri: https://learn.microsoft.com/en-us/rest/api/azure/devops/feature-management/featurestatesquery
 Locale: en-NL
 Module Name: Azure.DevOps.PSModule
-ms.date: 12/31/2025
+ms.date: 01/02/2026
 PlatyPS schema version: 2024-05-01
 title: Set-AdoFeatureState
 -->
@@ -209,7 +209,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 Returns a custom object with the following properties:
 - featureId: The unique identifier for the feature
-- state: The numeric state value (disabled=0, enabled=1)
+- state: The state as text ('enabled' or 'disabled')
 - feature: The feature name that was updated
 - projectName: The name of the project
 - projectId: The ID of the project

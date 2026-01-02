@@ -37,16 +37,16 @@
     .EXAMPLE
         $params = @{
             CollectionUri = 'https://dev.azure.com/my-org'
-            ProjectName   = 'my-project-002'
-            Feature       = 'Boards'
-            FeatureState  = 'Disabled'
+            ProjectName   = 'my-project-1'
+            Feature       = 'boards'
+            FeatureState  = 'disabled'
         }
         Set-AdoFeatureState @params
 
-        Sets the feature state for Boards to Disabled for the specified project.
+        Sets the feature state for Boards to disabled for the specified project.
 
     .EXAMPLE
-        Set-AdoFeatureState -ProjectName 'my-project-002' -Feature 'Repos' -FeatureState 'Enabled'
+        Set-AdoFeatureState -ProjectName 'my-project-1' -Feature 'repos' -FeatureState 'enabled'
 
         Enables the Repos feature for the specified project using the default collection URI.
     #>
@@ -97,6 +97,7 @@
                 $projectId = $ProjectName
             } catch {
                 $projectId = (Get-AdoProject -CollectionUri $CollectionUri -Name $ProjectName).id
+                if (-not $projectId) { return }
             }
 
             # Get the feature ID
@@ -142,7 +143,6 @@
             } else {
                 Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
             }
-
         } catch {
             throw $_
         }
