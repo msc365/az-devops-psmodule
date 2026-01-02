@@ -4,11 +4,12 @@ external help file: Azure.DevOps.PSModule-Help.xml
 HelpUri: https://learn.microsoft.com/en-us/rest/api/azure/devops/core/projects/delete
 Locale: en-NL
 Module Name: Azure.DevOps.PSModule
-ms.date: 11/01/2025
+ms.date: 01/02/2026
 PlatyPS schema version: 2024-05-01
 title: Remove-AdoProject
 -->
 
+<!-- markdownlint-disable MD024 -->
 <!-- cSpell: ignore dontshow -->
 
 # Remove-AdoProject
@@ -29,8 +30,7 @@ Remove-AdoProject [[-CollectionUri] <string>] [-Id] <string[]> [[-Version] <stri
 ## ALIASES
 
 This cmdlet has the following aliases,
-- ProjectId
-- ProjectName
+- N/A
 
 ## DESCRIPTION
 
@@ -115,13 +115,12 @@ HelpMessage: ''
 
 ### -Version
 
-Optional.
 The API version to use for the request.
-Default is '7.2-preview.1'.
+Default is '7.1'.
 
 ```yaml
 Type: System.String
-DefaultValue: 7.2-preview.1
+DefaultValue: 7.1
 SupportsWildcards: false
 Aliases:
 - ApiVersion
@@ -134,7 +133,8 @@ ParameterSets:
   ValueFromRemainingArguments: false
 DontShow: false
 AcceptedValues:
-- 7.2-preview.1
+- 7.1
+- 7.2-preview.4
 HelpMessage: ''
 ```
 
@@ -147,13 +147,19 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
-- N/A
+- System.String
 
 ## OUTPUTS
 
-- N/A
+- None. This cmdlet does not generate output.
 
 ## NOTES
+
+- This cmdlet permanently removes the project from Azure DevOps
+- The cmdlet accepts either a project ID (GUID) or project name for the Id parameter
+- The cmdlet automatically polls for deletion completion before returning
+- Requires ShouldProcess confirmation due to ConfirmImpact = 'High'
+- Use -Confirm:$false to skip confirmation prompts
 
 - Requires an active Azure account login. Use `Connect-AzAccount` to authenticate:
 

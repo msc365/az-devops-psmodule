@@ -13,7 +13,7 @@
         Mandatory. The ID or name of the project to remove.
 
     .PARAMETER Version
-        Optional. The API version to use for the request. Default is '7.2-preview.1'.
+        Optional. The API version to use for the request. Default is '7.1'.
 
     .LINK
         https://learn.microsoft.com/en-us/rest/api/azure/devops/core/projects/delete
@@ -42,13 +42,13 @@
         [string]$CollectionUri = $env:DefaultAdoCollectionUri,
 
         [Parameter(Mandatory, ValueFromPipelineByPropertyName, ValueFromPipeline)]
-        [Alias('ProjectId', 'ProjectName')]
+        [Alias('ProjectId')]
         [string[]]$Id,
 
         [Parameter()]
         [Alias('ApiVersion')]
-        [ValidateSet('7.2-preview.1')]
-        [string]$Version = '7.2-preview.1'
+        [ValidateSet('7.1', '7.2-preview.4')]
+        [string]$Version = '7.1'
     )
 
     begin {
@@ -64,11 +64,18 @@
 
     process {
         try {
-
             foreach ($id_ in $Id) {
+                # Get id when name was provided, id is required for deletion
+                try {
+                    [System.Guid]::Parse($id_) | Out-Null
+                    $projectId = $id_
+                } catch {
+                    $projectId = (Get-AdoProject -CollectionUri $CollectionUri -Name $id_).id
+                    if (-not $projectId) { continue }
+                }
 
                 $params = @{
-                    Uri     = "$CollectionUri/_apis/projects/$id_"
+                    Uri     = "$CollectionUri/_apis/projects/$projectId"
                     Version = $Version
                     Method  = 'DELETE'
                 }
@@ -98,8 +105,8 @@
                         }
 
                     } catch {
-                        if ($_ -match 'does not exist') {
-                            Write-Warning "Project with ID $id_ does not exist, skipping deletion."
+                        if ($_.ErrorDetails.Message -match 'ProjectDoesNotExistWithNameException') {
+                            Write-Warning "Project with ID $id_ does not exist, skipping."
                         } else {
                             throw $_
                         }
@@ -108,7 +115,6 @@
                     Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
                 }
             }
-
         } catch {
             throw $_
         }
