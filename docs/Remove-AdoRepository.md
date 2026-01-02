@@ -1,14 +1,15 @@
 <!--
 document type: cmdlet
 external help file: Azure.DevOps.PSModule-Help.xml
-HelpUri: https://learn.microsoft.com/en-us/rest/api/azure/devops/git/repositories/delete?view=azure-devops
+HelpUri: https://learn.microsoft.com/en-us/rest/api/azure/devops/git/repositories/delete
 Locale: en-NL
 Module Name: Azure.DevOps.PSModule
-ms.date: 11/01/2025
+ms.date: 01/02/2026
 PlatyPS schema version: 2024-05-01
 title: Remove-AdoRepository
 -->
 
+<!-- markdownlint-disable MD024 -->
 <!-- cSpell: ignore dontshow -->
 
 # Remove-AdoRepository
@@ -22,8 +23,7 @@ Remove a repository from an Azure DevOps project.
 ### __AllParameterSets
 
 ```text
-Remove-AdoRepository [-ProjectId] <string> [-RepositoryId] <string> [[-ApiVersion] <string>]
- [<CommonParameters>]
+Remove-AdoRepository [[-CollectionUri] <string>] [[-ProjectName] <string>] [-Name] <string> [[-Version] <string>] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -33,7 +33,7 @@ This cmdlet has the following aliases,
 
 ## DESCRIPTION
 
-This function removes a repository from an Azure DevOps project through REST API.
+This cmdlet removes a repository from an Azure DevOps project through REST API.
 
 ## EXAMPLES
 
@@ -42,74 +42,117 @@ This function removes a repository from an Azure DevOps project through REST API
 #### PowerShell
 
 ```powershell
-Remove-AdoRepository -ProjectName 'my-project' -RepositoryId $repo.id
+$params = @{
+    CollectionUri = 'https://dev.azure.com/my-org'
+    ProjectName   = 'my-project'
+    Name          = 'my-repository-1'
+}
+Remove-AdoRepository @params
 ```
 
-Removes the specified team from the specified project.
+Removes the specified repository from the project.
+
+### EXAMPLE 2
+
+#### PowerShell
+
+```powershell
+Remove-AdoRepository -Name $repo.id
+```
+
+Removes a repository using its ID and the default collection URI and project name from environment variables.
 
 ## PARAMETERS
 
-### -ApiVersion
+### -CollectionUri
 
-Optional.
-The API version to use.
+Optional. The collection URI of the Azure DevOps collection/organization, e.g., <https://dev.azure.com/myorganization>.
+Defaults to the value of $env:DefaultAdoCollectionUri.
 
 ```yaml
 Type: System.String
-DefaultValue: 7.1
+DefaultValue: $env:DefaultAdoCollectionUri
 SupportsWildcards: false
-Aliases:
-- Api
+Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 2
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -ProjectName
+
+Optional. The ID or name of the project.
+Defaults to the value of $env:DefaultAdoProject.
+
+```yaml
+Type: System.String
+DefaultValue: $env:DefaultAdoProject
+SupportsWildcards: false
+Aliases:
+- ProjectId
+ParameterSets:
+- Name: (All)
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -Name
+
+Mandatory. The repository ID or name to remove.
+
+```yaml
+Type: System.String
+DefaultValue: ''
+SupportsWildcards: false
+Aliases:
+- Id
+- RepositoryId
+ParameterSets:
+- Name: (All)
+  Position: Named
+  IsRequired: true
+  ValueFromPipeline: true
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -Version
+
+Optional. The API version to use for the request. Default is '7.1'.
+
+```yaml
+Type: System.String
+DefaultValue: '7.1'
+SupportsWildcards: false
+Aliases:
+- ApiVersion
+ParameterSets:
+- Name: (All)
+  Position: Named
   IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
   ValueFromRemainingArguments: false
 DontShow: false
-AcceptedValues: []
-HelpMessage: ''
-```
-
-### -ProjectId
-
-Mandatory.
-The ID or name of the project.
-
-```yaml
-Type: System.String
-DefaultValue: ''
-SupportsWildcards: false
-Aliases: []
-ParameterSets:
-- Name: (All)
-  Position: 0
-  IsRequired: true
-  ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
-  ValueFromRemainingArguments: false
-DontShow: false
-AcceptedValues: []
-HelpMessage: ''
-```
-
-### -RepositoryId
-
-```yaml
-Type: System.String
-DefaultValue: ''
-SupportsWildcards: false
-Aliases: []
-ParameterSets:
-- Name: (All)
-  Position: 1
-  IsRequired: true
-  ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
-  ValueFromRemainingArguments: false
-DontShow: false
-AcceptedValues: []
+AcceptedValues:
+- '7.1'
+- '7.2-preview.2'
 HelpMessage: ''
 ```
 
@@ -126,13 +169,15 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### System.Boolean
+### None
 
-Boolean indicating success.
+This cmdlet does not produce output. It removes the specified repository.
 
 ## NOTES
 
 - Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
+- If a repository is not found, a warning is displayed and the cmdlet continues processing.
+- The cmdlet accepts either repository ID (GUID) or repository name.
 
 ## RELATED LINKS
 

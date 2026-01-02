@@ -4,79 +4,104 @@
         Remove a repository from an Azure DevOps project.
 
     .DESCRIPTION
-        This function removes a repository from an Azure DevOps project through REST API.
+        This cmdlet removes a repository from an Azure DevOps project through REST API.
 
-    .PARAMETER ProjectId
+    .PARAMETER CollectionUri
+        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/myorganization.
+
+    .PARAMETER ProjectName
         Mandatory. The ID or name of the project.
 
-    .PARAMETER RepoId
-        Mandatory. The repository ID or name.
+    .PARAMETER Name
+        Mandatory. The repository ID or name to remove.
 
-    .PARAMETER ApiVersion
-        Optional. The API version to use.
-
-    .OUTPUTS
-        System.Boolean
-
-        Boolean indicating success.
+    .PARAMETER Version
+        Optional. The API version to use for the request. Default is '7.1'.
 
     .LINK
-        https://learn.microsoft.com/en-us/rest/api/azure/devops/git/repositories/delete?view=azure-devops
+        https://learn.microsoft.com/en-us/rest/api/azure/devops/git/repositories/delete
 
     .EXAMPLE
-        Remove-AdoRepository -ProjectName 'my-project' -RepositoryId $repo.id
+        $params = @{
+            CollectionUri = 'https://dev.azure.com/my-org'
+            ProjectName   = 'my-project'
+            Id            = 'my-repository-1'
+        }
+        Remove-AdoRepository @params
+
+        Removes the specified repository from the project.
     #>
-    [CmdletBinding()]
-    [OutputType([boolean])]
+    [CmdletBinding(SupportsShouldProcess)]
     param (
-        [Parameter(Mandatory)]
-        [string]$ProjectId,
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
+        [string]$CollectionUri = $env:DefaultAdoCollectionUri,
 
-        [Parameter(Mandatory)]
-        [string]$RepositoryId,
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [Alias('ProjectId')]
+        [string]$ProjectName = $env:DefaultAdoProject,
 
-        [Parameter(Mandatory = $false)]
-        [Alias('Api')]
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName, ValueFromPipeline)]
+        [Alias('Id', 'RepositoryId')]
+        [string]$Name,
+
+        [Parameter()]
+        [Alias('ApiVersion')]
         [ValidateSet('7.1', '7.2-preview.2')]
-        [string]$ApiVersion = '7.1'
+        [string]$Version = '7.1'
     )
 
     begin {
-        Write-Debug ('Command      : {0}' -f $MyInvocation.MyCommand.Name)
-        Write-Debug ('  ProjectId  : {0}' -f $ProjectId)
-        Write-Debug ('  RepoId     : {0}' -f $RepositoryId)
-        Write-Debug ('  ApiVersion : {0}' -f $ApiVersion)
+        Write-Verbose ("Command: $($MyInvocation.MyCommand.Name)")
+        Write-Debug ("CollectionUri: $CollectionUri")
+        Write-Debug ("ProjectName: $ProjectName")
+        Write-Debug ("Id: $($Id -join ',')")
+        Write-Debug ("Version: $Version")
+
+        Confirm-Default -Defaults ([ordered]@{
+                'CollectionUri' = $CollectionUri
+                'ProjectName'   = $ProjectName
+            })
     }
 
     process {
         try {
-            $ErrorActionPreference = 'Stop'
-
-            if (-not $global:AzDevOpsIsConnected) {
-                throw 'Not connected to Azure DevOps. Please connect using Connect-AdoOrganization.'
+            # Get repo ID if name was provided, id is required for deletion
+            try {
+                [System.Guid]::Parse($Name) | Out-Null
+                $repoId = $Name
+            } catch {
+                $repoId = (Get-AdoRepository -CollectionUri $CollectionUri -ProjectName $ProjectName -Name $Name).id
+                if (-not $repoId) { continue }
             }
 
-            $uriFormat = '{0}/{1}/_apis/git/repositories/{2}?api-version={3}'
-            $azDevOpsUri = ($uriFormat -f [uri]::EscapeDataString($Organization), [uri]::EscapeDataString($ProjectId), $RepositoryId, $ApiVersion)
+            $uri = "$CollectionUri/$ProjectName/_apis/git/repositories/$repoId"
 
             $params = @{
+                Uri     = $uri
+                Version = $Version
                 Method  = 'DELETE'
-                Uri     = $azDevOpsUri
-                Headers = @{
-                    'Accept'        = 'application/json'
-                    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
-                }
             }
 
-            Invoke-RestMethod @params -Verbose:$VerbosePreference | Out-Null
-            return $true
-
+            if ($PSCmdlet.ShouldProcess($CollectionUri, "Remove Repository '$($Name)' from project '$($ProjectName)'")) {
+                try {
+                    Invoke-AdoRestMethod @params | Out-Null
+                } catch {
+                    if ($_.ErrorDetails.Message -match 'RepositoryNotFound') {
+                        Write-Warning "Repository with ID $Name does not exist in project $ProjectName, skipping."
+                    } else {
+                        throw $_
+                    }
+                }
+            } else {
+                Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
+            }
         } catch {
             throw $_
         }
     }
 
     end {
-        Write-Debug ('Exit : {0}' -f $MyInvocation.MyCommand.Name)
+        Write-Verbose ("Exit: $($MyInvocation.MyCommand.Name)")
     }
 }
