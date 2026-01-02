@@ -27,14 +27,14 @@
     .EXAMPLE
         $params = @{
             CollectionUri = 'https://dev.azure.com/my-org'
-            ProjectName   = 'my-project-002'
+            ProjectName   = 'my-project-1'
         }
         Get-AdoFeatureState @params
 
         Retrieves the feature states for the specified project.
 
     .EXAMPLE
-        Get-AdoFeatureState -ProjectName 'my-project-002'
+        Get-AdoFeatureState -ProjectName 'my-project-1'
 
         Retrieves the feature states using the default collection URI from environment variable.
     #>
@@ -69,12 +69,13 @@
 
     process {
         try {
-            # Get project ID if name was provided
+            # Get project ID if name was provided, id is required for the API call
             try {
                 [System.Guid]::Parse($ProjectName) | Out-Null
                 $projectId = $ProjectName
             } catch {
                 $projectId = (Get-AdoProject -CollectionUri $CollectionUri -Name $ProjectName).id
+                if (-not $projectId) { return }
             }
 
             $uri = "$CollectionUri/_apis/FeatureManagement/FeatureStatesQuery/host/project/$projectId"
@@ -104,8 +105,8 @@
                 $results = Invoke-AdoRestMethod @params
 
                 # Process and enhance each feature state result
-                $results.featureStates | ForEach-Object {
-                    $featureName = switch ($_.featureId) {
+                foreach ($fs_ in $results.featureStates) {
+                    $featureName = switch ($fs_.featureId) {
                         'ms.vss-work.agile' { 'Boards' }
                         'ms.vss-code.version-control' { 'Repos' }
                         'ms.vss-build.pipelines' { 'Pipelines' }
@@ -116,8 +117,8 @@
 
                     [PSCustomObject]@{
                         feature       = $featureName
-                        featureId     = $_.featureId
-                        state         = ($_.state -eq 1 ? 'enabled' : 'disabled')
+                        featureId     = $fs_.featureId
+                        state         = ($fs_.state -eq 1 ? 'enabled' : 'disabled')
                         projectName   = $ProjectName
                         projectId     = $projectId
                         collectionUri = $CollectionUri
@@ -126,7 +127,6 @@
             } else {
                 Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
             }
-
         } catch {
             throw $_
         }
