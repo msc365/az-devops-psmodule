@@ -20,6 +20,7 @@
 
     .PARAMETER Version
         Optional. The API version to use for the request. Default is '7.2-preview.1'.
+        The -preview flag must be supplied in the api-version for such requests.
 
     .LINK
         https://learn.microsoft.com/en-us/rest/api/azure/devops/approvalsandchecks/check-configurations/add
@@ -28,8 +29,7 @@
         $approverId = 0000000-0000-0000-0000-000000000000
         $environmentId = 1
 
-        $definitionRefId = '26014962-64a0-49f4-885b-4b874119a5cc' # Approval
-        $definitionRefId = '0f52a19b-c67e-468f-b8eb-0ae83b532c99' # Pre-check approval
+        $definitionRefId = (Resolve-AdoCheckConfigDefinitionRef -Name approval).id
 
         $configJson = @{
             settings = @{
@@ -77,11 +77,11 @@
         [string]$ProjectName = $env:DefaultAdoProject,
 
         [Parameter(Mandatory)]
-        [PSCustomObject[]]$Configuration,
+        [PSCustomObject]$Configuration,
 
-        [Parameter()]
+        [Parameter(HelpMessage = 'The -preview flag must be supplied in the api-version for such requests.')]
         [Alias('ApiVersion')]
-        [ValidateSet('7.2-preview.1')]
+        [ValidateSet('7.1', '7.2-preview.1')]
         [string]$Version = '7.2-preview.1'
     )
 
@@ -99,6 +99,13 @@
 
     process {
         try {
+            $definitionId = $Configuration.settings.definitionRef.id
+
+            try {
+                [System.Guid]::Parse($definitionId) | Out-Null
+            } catch {
+                throw "Invalid GUID format in Configuration.Settings.DefinitionRef.Id: $($definitionId)"
+            }
 
             $params = @{
                 Uri     = "$CollectionUri/$ProjectName/_apis/pipelines/checks/configurations"
@@ -106,11 +113,39 @@
                 Method  = 'POST'
             }
 
-            foreach ($c_ in $Configuration) {
+            if ($PSCmdlet.ShouldProcess($ProjectName, "Create Configuration on: $($Configuration.resource.type) with ID $($Configuration.resource.id)")) {
+                try {
+                    $results = $Configuration | Invoke-AdoRestMethod @params
 
-                if ($PSCmdlet.ShouldProcess($ProjectName, "Create Configuration on: $($c_.resource.type)")) {
-                    try {
-                        $results = $c_ | Invoke-AdoRestMethod @params
+                    $obj = [ordered]@{
+                        id = $results.id
+                    }
+                    if ($results.settings) {
+                        $obj['settings'] = $results.settings
+                    }
+                    $obj['timeout'] = $results.timeout
+                    $obj['type'] = $results.type
+                    $obj['resource'] = $results.resource
+                    $obj['createdBy'] = $results.createdBy.id
+                    $obj['createdOn'] = $results.createdOn
+                    $obj['project'] = $ProjectName
+                    $obj['collectionUri'] = $CollectionUri
+                    [PSCustomObject]$obj
+
+                } catch {
+                    if ($_.ErrorDetails.Message -match 'already exists') {
+                        Write-Warning "$($Configuration.type.name) already exists for $($Configuration.resource.type) with ID $($Configuration.resource.id), trying to get it"
+
+                        $params.Method = 'GET'
+                        $params.QueryParameters = @(
+                            "resourceType=$($Configuration.resource.type)",
+                            "resourceId=$($Configuration.resource.id)",
+                            "`$expand=settings"
+                        ) -join '&'
+
+                        $results = (Invoke-AdoRestMethod @params).value | Where-Object {
+                            $_.settings.definitionRef.id -eq $Configuration.settings.definitionRef.id
+                        }
 
                         $obj = [ordered]@{
                             id = $results.id
@@ -127,48 +162,16 @@
                         $obj['collectionUri'] = $CollectionUri
                         [PSCustomObject]$obj
 
-                    } catch {
-                        if ($_ -match 'already exists') {
-                            Write-Warning "$($c_.type.name) already exists for $($c_.resource.type) with ID $($c_.resource.id), trying to get it"
-
-                            $params.Method = 'GET'
-                            $params.QueryParameters = "resourceType=$($c_.resource.type)&resourceId=$($c_.resource.id)&`$expand=settings"
-
-                            $results = (Invoke-AdoRestMethod @params).value | Where-Object {
-                                $_.settings.definitionRef.id -eq $c_.settings.definitionRef.id
-                            }
-
-                            foreach ($r_ in $results) {
-                                $obj = [ordered]@{
-                                    id = $r_.id
-                                }
-                                if ($r_.settings) {
-                                    $obj['settings'] = $r_.settings
-                                }
-                                $obj['timeout'] = $r_.timeout
-                                $obj['type'] = $r_.type
-                                $obj['resource'] = $r_.resource
-                                $obj['createdBy'] = $r_.createdBy.id
-                                $obj['createdOn'] = $r_.createdOn
-                                $obj['project'] = $ProjectName
-                                $obj['collectionUri'] = $CollectionUri
-                                [PSCustomObject]$obj
-
-                            }
-                        } else {
-                            throw $_
-                        }
+                    } else {
+                        throw $_
                     }
-
-
-                } else {
-                    $params += @{
-                        Body = $body
-                    }
-                    Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
                 }
+            } else {
+                $params += @{
+                    Body = $body
+                }
+                Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
             }
-
         } catch {
             throw $_
         }
