@@ -210,9 +210,10 @@ Describe 'Resolve-AdoCheckConfigDefinitionRef' {
             $command = Get-Command Resolve-AdoCheckConfigDefinitionRef
 
             # Act & Assert
-            $command.ParameterSets.Count | Should -Be 2
+            $command.ParameterSets.Count | Should -Be 3
             $command.ParameterSets.Name | Should -Contain 'ById'
             $command.ParameterSets.Name | Should -Contain 'ByName'
+            $command.ParameterSets.Name | Should -Contain 'ListAll'
         }
 
         It 'Should have Id parameter only in ById parameter set' {
@@ -239,6 +240,20 @@ Describe 'Resolve-AdoCheckConfigDefinitionRef' {
             # Assert
             $parameterSets | Should -Contain 'ByName'
             $parameterSets | Should -Not -Contain 'ById'
+        }
+
+        It 'Should have ListAll as a mandatory parameter in ListAll parameter set' {
+            # Arrange
+            $command = Get-Command Resolve-AdoCheckConfigDefinitionRef
+
+            # Act
+            $listAllParam = $command.Parameters['ListAll']
+            $mandatoryAttr = $listAllParam.Attributes | Where-Object {
+                $_ -is [Parameter] -and $_.Mandatory -and $_.ParameterSetName -eq 'ListAll'
+            }
+
+            # Assert
+            $mandatoryAttr | Should -Not -BeNullOrEmpty
         }
     }
 
@@ -341,6 +356,56 @@ Describe 'Resolve-AdoCheckConfigDefinitionRef' {
                 $result.id | Should -Not -BeNullOrEmpty
                 $result.displayName | Should -Not -BeNullOrEmpty
             }
+        }
+    }
+
+    Context 'ListAll functionality' {
+        It 'Should return all definition references when using ListAll' {
+            # Arrange & Act
+            $results = Resolve-AdoCheckConfigDefinitionRef -ListAll
+
+            # Assert
+            $results | Should -Not -BeNullOrEmpty
+            $results.Count | Should -Be 5
+        }
+
+        It 'Should return unique definitions sorted by name' {
+            # Arrange & Act
+            $results = Resolve-AdoCheckConfigDefinitionRef -ListAll
+
+            # Assert
+            $results[0].name | Should -Be 'approval'
+            $results[1].name | Should -Be 'branchControl'
+            $results[2].name | Should -Be 'businessHours'
+            $results[3].name | Should -Be 'postCheckApproval'
+            $results[4].name | Should -Be 'preCheckApproval'
+        }
+
+        It 'Should return objects with all expected properties' {
+            # Arrange & Act
+            $results = Resolve-AdoCheckConfigDefinitionRef -ListAll
+
+            # Assert
+            foreach ($result in $results) {
+                $result.PSObject.Properties.Name | Should -Contain 'name'
+                $result.PSObject.Properties.Name | Should -Contain 'id'
+                $result.PSObject.Properties.Name | Should -Contain 'displayName'
+                $result.name | Should -Not -BeNullOrEmpty
+                $result.id | Should -Not -BeNullOrEmpty
+                $result.displayName | Should -Not -BeNullOrEmpty
+            }
+        }
+
+        It 'Should return same definitions as individually resolved' {
+            # Arrange & Act
+            $allResults = Resolve-AdoCheckConfigDefinitionRef -ListAll
+            $approvalIndividual = Resolve-AdoCheckConfigDefinitionRef -Name 'approval'
+            $approvalFromList = $allResults | Where-Object { $_.name -eq 'approval' }
+
+            # Assert
+            $approvalFromList.name | Should -Be $approvalIndividual.name
+            $approvalFromList.id | Should -Be $approvalIndividual.id
+            $approvalFromList.displayName | Should -Be $approvalIndividual.displayName
         }
     }
 }

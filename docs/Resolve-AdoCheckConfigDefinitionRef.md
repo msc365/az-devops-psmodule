@@ -32,6 +32,12 @@ Resolve-AdoCheckConfigDefinitionRef -Id <string> [<CommonParameters>]
 Resolve-AdoCheckConfigDefinitionRef -Name <string> [<CommonParameters>]
 ```
 
+### ListAll
+
+```text
+Resolve-AdoCheckConfigDefinitionRef -ListAll [<CommonParameters>]
+```
+
 ## ALIASES
 
 This cmdlet has the following aliases,
@@ -64,6 +70,16 @@ Resolve-AdoCheckConfigDefinitionRef -Id '26014962-64a0-49f4-885b-4b874119a5cc'
 Resolves the definition reference for the check with the specified ID, returning the approval check definition.
 
 ### EXAMPLE 3
+
+#### PowerShell
+
+```powershell
+Resolve-AdoCheckConfigDefinitionRef -ListAll
+```
+
+Returns all available check definition references sorted by name.
+
+### EXAMPLE 4
 
 #### PowerShell
 
@@ -126,6 +142,29 @@ AcceptedValues:
 - branchControl
 - businessHours
 HelpMessage: ''
+```
+
+### -ListAll
+
+Returns all available check definition references sorted by name.
+
+```yaml
+Type: System.Management.Automation.SwitchParameter
+DefaultValue: False
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: ListAll
+  Position: Named
+  IsRequired: true
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: false
+  ValueFromRemainingArguments: false
+Doname: The camelCase name of the check definition (e.g., 'approval', 'branchControl')
+- displayName: The display name of the check definition (e.g., 'Approval', 'Branch control')
+- id: The unique identifier GUID of the check definition
+
+When using -ListAll, returns an array of all definition reference objects sorted by name.
 ```
 
 ### CommonParameters
