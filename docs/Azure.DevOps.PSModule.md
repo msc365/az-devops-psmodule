@@ -56,6 +56,9 @@ A PowerShell module that wraps the Azure DevOps REST API into clean, task-orient
 | [Get-AdoTeamIterationList](Get-AdoTeamIterationList.md) | Get the list of team iterations for a given project or team in Azure DevOps. |
 | [Get-AdoTeamList](Get-AdoTeamList.md) | Get all teams for a given Azure DevOps project. |
 | [Get-AdoTeamSettings](Get-AdoTeamSettings.md) | Gets the settings for a team in an Azure DevOps project. |
+| [New-AdoCheckApproval](New-AdoCheckApproval.md) | Create a new approval check for a specific resource. |
+| [New-AdoCheckBranchControl](New-AdoCheckBranchControl.md) | Create a new branch control check for a specific resource. |
+| [New-AdoCheckBusinessHours](New-AdoCheckBusinessHours.md) | Create a new business hours check for a specific resource. |
 | [New-AdoCheckConfiguration](New-AdoCheckConfiguration.md) | Create a new check configuration for pipeline resources in Azure DevOps. |
 | [New-AdoClassificationNode](New-AdoClassificationNode.md) | Creates a new classification node for a project in Azure DevOps. |
 | [New-AdoEnvironment](New-AdoEnvironment.md) | Create a new Azure DevOps Pipeline Environment. |
