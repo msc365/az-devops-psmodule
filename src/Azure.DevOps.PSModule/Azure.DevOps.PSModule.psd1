@@ -107,6 +107,7 @@
         'Get-AdoTeamSettings'
         'New-AdoCheckApproval'
         'New-AdoCheckBranchControl'
+        'New-AdoCheckBusinessHours'
         'New-AdoCheckConfiguration'
         'New-AdoClassificationNode'
         'New-AdoEnvironment'
