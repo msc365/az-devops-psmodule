@@ -59,6 +59,7 @@
 
     [CmdletBinding(DefaultParameterSetName = 'ByName')]
     [OutputType([PSCustomObject])]
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', 'ListAll', Justification = 'Parameter is used via $PSCmdlet.ParameterSetName')]
     param (
         [Parameter(Mandatory, ParameterSetName = 'ById')]
         [ValidateSet(
