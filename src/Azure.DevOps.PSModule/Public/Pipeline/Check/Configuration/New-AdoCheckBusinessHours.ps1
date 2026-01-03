@@ -20,7 +20,7 @@
         Mandatory. The type of resource to which the check will be applied. Valid values are 'endpoint', 'environment', 'variablegroup', 'repository'.
 
     .PARAMETER ResourceName
-        Mandatory. An array of resource names to which the check will be applied.
+        Mandatory. The name of the resource to which the check will be applied.
 
     .PARAMETER BusinessDays
         Optional. An array of business days. Valid values are 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'.
@@ -43,6 +43,7 @@
 
     .PARAMETER Version
         Optional. The API version to use for the request. Default is '7.2-preview.1'.
+        The -preview flag must be supplied in the api-version for such requests.
 
     .LINK
         https://learn.microsoft.com/en-us/rest/api/azure/devops/approvalsandchecks/check-configurations/add
@@ -50,7 +51,7 @@
     .EXAMPLE
         $params = @{
             CollectionUri = 'https://dev.azure.com/my-org'
-            ProjectName   = 'my-project'
+            ProjectName   = 'my-project-1'
             DisplayName   = 'Business Hours'
             ResourceType  = 'environment'
             ResourceName  = 'my-environment-tst'
@@ -83,7 +84,7 @@
         [string]$ResourceType,
 
         [Parameter(Mandatory, ValueFromPipelineByPropertyName, ValueFromPipeline)]
-        [string[]]$ResourceName,
+        [string]$ResourceName,
 
         [Parameter()]
         [ValidateSet('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday')]
@@ -245,9 +246,9 @@
         [Parameter()]
         [int]$Timeout = 1440, # 1 day
 
-        [Parameter()]
+        [Parameter(HelpMessage = 'The -preview flag must be supplied in the api-version for such requests.')]
         [Alias('ApiVersion')]
-        [ValidateSet('7.2-preview.1')]
+        [ValidateSet('7.1-preview.1', '7.2-preview.1')]
         [string]$Version = '7.2-preview.1'
     )
 
@@ -279,113 +280,112 @@
                 Method  = 'POST'
             }
 
-            foreach ($n_ in $ResourceName) {
-                # Get resource ID
-                switch ($ResourceType) {
-                    'environment' {
-                        $typeParams = @{
-                            CollectionUri = $CollectionUri
-                            ProjectName   = $ProjectName
-                            Name          = $n_
-                        }
-                        $resourceId = (Get-AdoEnvironment @typeParams).Id
+            # Get resource ID
+            switch ($ResourceType) {
+                'environment' {
+                    $typeParams = @{
+                        CollectionUri = $CollectionUri
+                        ProjectName   = $ProjectName
+                        Name          = $ResourceName
                     }
-                    default {
-                        throw "ResourceType '$ResourceType' is not supported yet."
-                    }
+                    $resourceId = (Get-AdoEnvironment @typeParams).Id
                 }
-
-                # Create configuration JSON
-                $body = @{
-                    type     = @{
-                        name = 'Task Check'
-                        id   = 'fe1de3ee-a436-41b4-bb20-f6eb4cb879a7'
-                    }
-                    settings = @{
-                        displayName   = $DisplayName
-                        definitionRef = @{
-                            id      = '445fde2f-6c39-441c-807f-8a59ff2e075f'
-                            name    = 'evaluateBusinessHours'
-                            version = '0.0.1'
-                        }
-                        inputs        = @{
-                            businessDays = $BusinessDays -join ','
-                            timeZone     = $TimeZone
-                            startTime    = $StartTime
-                            endTime      = $EndTime
-                        }
-                        retryInterval = 5
-                    }
-                    timeout  = $Timeout
-                    resource = @{
-                        type = $ResourceType
-                        id   = $resourceId
-                    }
-                }
-
-                if ($PSCmdlet.ShouldProcess($ProjectName, "Create $($DisplayName) for: $n_")) {
-                    try {
-                        # Check if configuration already exists
-                        $exists = [PSCustomObject]@{
-                            ResourceType = $ResourceType
-                            ResourceName = $n_
-                            Expands      = 'settings'
-                        } | Get-AdoCheckConfiguration
-
-                        $exists = $exists | Where-Object {
-                            $_.settings.inputs.businessDays -eq ($BusinessDays -join ',') -and
-                            $_.settings.inputs.timeZone -eq $TimeZone -and
-                            $_.settings.inputs.startTime -eq $StartTime -and
-                            $_.settings.inputs.endTime -eq $EndTime
-                        }
-
-                        if (-not $exists) {
-                            $results = $body | Invoke-AdoRestMethod @params
-                            $obj = [ordered]@{
-                                id = $results.id
-                            }
-                            if ($results.settings) {
-                                $obj['settings'] = $results.settings
-                            }
-                            $obj['timeout'] = $results.timeout
-                            $obj['type'] = $results.type
-                            $obj['resource'] = $results.resource
-                            $obj['createdBy'] = $results.createdBy.id
-                            $obj['createdOn'] = $results.createdOn
-                            $obj['project'] = $ProjectName
-                            $obj['collectionUri'] = $CollectionUri
-                            [PSCustomObject]$obj
-
-                        } else {
-                            Write-Warning "$($exists.type.name) '$($exists.settings.displayName)' already exists for $ResourceType with ID $resourceId, returning existing one."
-
-                            $obj = [ordered]@{
-                                id = $exists.id
-                            }
-                            if ($exists.settings) {
-                                $obj['settings'] = $exists.settings
-                            }
-                            $obj['timeout'] = $exists.timeout
-                            $obj['type'] = $exists.type
-                            $obj['resource'] = $exists.resource
-                            $obj['createdBy'] = $exists.createdBy.id
-                            $obj['createdOn'] = $exists.createdOn
-                            $obj['project'] = $ProjectName
-                            $obj['collectionUri'] = $CollectionUri
-                            [PSCustomObject]$obj
-                        }
-                    } catch {
-                        throw $_
-                    }
-
-                } else {
-                    $params += @{
-                        Body = $body
-                    }
-                    Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
+                default {
+                    throw "ResourceType '$ResourceType' is not supported yet."
                 }
             }
 
+            # Create configuration JSON
+            $body = @{
+                type     = @{
+                    name = 'Task Check'
+                    id   = 'fe1de3ee-a436-41b4-bb20-f6eb4cb879a7'
+                }
+                settings = @{
+                    displayName   = $DisplayName
+                    definitionRef = @{
+                        id      = '445fde2f-6c39-441c-807f-8a59ff2e075f'
+                        name    = 'evaluateBusinessHours'
+                        version = '0.0.1'
+                    }
+                    inputs        = @{
+                        businessDays = $BusinessDays -join ','
+                        timeZone     = $TimeZone
+                        startTime    = $StartTime
+                        endTime      = $EndTime
+                    }
+                    retryInterval = 5
+                }
+                timeout  = $Timeout
+                resource = @{
+                    type = $ResourceType
+                    id   = $resourceId
+                }
+            }
+
+            if ($PSCmdlet.ShouldProcess($ProjectName, "Create $($DisplayName) for: $ResourceName")) {
+                try {
+                    # Check if configuration already exists with the same inputs
+                    $exists = [PSCustomObject]@{
+                        ResourceType = $ResourceType
+                        ResourceName = $ResourceName
+                        Expands      = 'settings'
+                    } | Get-AdoCheckConfiguration
+
+                    $exists = $exists | Where-Object {
+                        $_.settings.definitionRef.id -eq '445fde2f-6c39-441c-807f-8a59ff2e075f' -and
+                        $_.settings.inputs.businessDays -eq ($BusinessDays -join ',') -and
+                        $_.settings.inputs.timeZone -eq $TimeZone -and
+                        $_.settings.inputs.startTime -eq $StartTime -and
+                        $_.settings.inputs.endTime -eq $EndTime
+                    }
+
+                    if (-not $exists) {
+                        $results = $body | Invoke-AdoRestMethod @params
+
+                        $obj = [ordered]@{
+                            id = $results.id
+                        }
+                        if ($results.settings) {
+                            $obj['settings'] = $results.settings
+                        }
+                        $obj['timeout'] = $results.timeout
+                        $obj['type'] = $results.type
+                        $obj['resource'] = $results.resource
+                        $obj['createdBy'] = $results.createdBy.id
+                        $obj['createdOn'] = $results.createdOn
+                        $obj['project'] = $ProjectName
+                        $obj['collectionUri'] = $CollectionUri
+                        [PSCustomObject]$obj
+
+                    } else {
+                        Write-Warning "$DisplayName already exists for $ResourceType with $ResourceName, returning existing one"
+
+                        $obj = [ordered]@{
+                            id = $exists.id
+                        }
+                        if ($exists.settings) {
+                            $obj['settings'] = $exists.settings
+                        }
+                        $obj['timeout'] = $exists.timeout
+                        $obj['type'] = $exists.type
+                        $obj['resource'] = $exists.resource
+                        $obj['createdBy'] = $exists.createdBy.id
+                        $obj['createdOn'] = $exists.createdOn
+                        $obj['project'] = $ProjectName
+                        $obj['collectionUri'] = $CollectionUri
+                        [PSCustomObject]$obj
+                    }
+                } catch {
+                    throw $_
+                }
+
+            } else {
+                $params += @{
+                    Body = $body
+                }
+                Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
+            }
         } catch {
             throw $_
         }
