@@ -1,4 +1,8 @@
-﻿BeforeAll {
+﻿[Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+    'PSUseDeclaredVarsMoreThanAssignments', '', Scope = 'Function', Target = '*', Justification = 'Variables are used in nested It blocks')]
+param()
+
+BeforeAll {
     # Import the module for testing
     $moduleName = 'Azure.DevOps.PSModule'
     $modulePath = Join-Path -Path (Get-Item $PSScriptRoot).Parent.Parent.Parent.Parent.FullName -ChildPath $moduleName
@@ -169,7 +173,7 @@ Describe 'New-AdoCheckConfiguration' {
     Context 'When check configuration already exists' {
         BeforeAll {
             Mock Invoke-AdoRestMethod -ModuleName $moduleName -MockWith {
-                param($Method, $Uri)
+                param($Method)
                 if ($Method -eq 'POST') {
                     $errorMessage = @{
                         message = 'Check configuration already exists'

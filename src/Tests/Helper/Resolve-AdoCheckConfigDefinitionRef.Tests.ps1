@@ -1,4 +1,8 @@
-﻿BeforeAll {
+﻿[Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+    'PSUseDeclaredVarsMoreThanAssignments', '', Scope = 'Function', Target = '*', Justification = 'Variables are used in nested It blocks')]
+param()
+
+BeforeAll {
     # Module import logic
     $moduleName = 'Azure.DevOps.PSModule'
     # For tests in src/Tests/<Category>/ use Parent.Parent

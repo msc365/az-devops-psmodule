@@ -1,4 +1,8 @@
-﻿BeforeAll {
+﻿[Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+    'PSUseDeclaredVarsMoreThanAssignments', '', Scope = 'Function', Target = '*', Justification = 'Variables are used in nested It blocks')]
+param()
+
+BeforeAll {
     # Module import logic
     $moduleName = 'Azure.DevOps.PSModule'
     $modulePath = Join-Path -Path (Get-Item $PSScriptRoot).Parent.Parent.Parent.FullName -ChildPath $moduleName
