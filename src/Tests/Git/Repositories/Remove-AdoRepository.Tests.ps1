@@ -95,13 +95,13 @@ Describe 'Remove-AdoRepository' {
             Mock Invoke-AdoRestMethod -ModuleName $moduleName -MockWith {
                 $errorMessage = @{
                     message = "VS404: The repository with name or identifier '$repoName' does not exist or you do not have permission to access it."
-                    typeKey = 'RepositoryNotFoundException'
+                    typeKey = 'NotFoundException'
                 } | ConvertTo-Json
                 $errorDetails = [System.Management.Automation.ErrorDetails]::new($errorMessage)
                 $exception = [System.Exception]::new('Repository not found')
                 $errorRecord = [System.Management.Automation.ErrorRecord]::new(
                     $exception,
-                    'RepositoryNotFound',
+                    'NotFoundException',
                     [System.Management.Automation.ErrorCategory]::ObjectNotFound,
                     $null
                 )
@@ -334,7 +334,7 @@ Describe 'Remove-AdoRepository' {
             { $repoNames | Remove-AdoRepository -CollectionUri $collectionUri -ProjectName $projectName -ErrorAction SilentlyContinue -Confirm:$false } | Should -Not -Throw
         }
 
-        It 'Should warn when RepositoryNotFound error occurs' {
+        It 'Should warn when NotFoundException error occurs' {
             # Arrange
             $collectionUri = 'https://dev.azure.com/testorg'
             $projectName = 'testproject'
@@ -343,13 +343,13 @@ Describe 'Remove-AdoRepository' {
             Mock Invoke-AdoRestMethod -ModuleName $moduleName -MockWith {
                 $errorMessage = @{
                     message = "Repository $repoName not found"
-                    typeKey = 'RepositoryNotFoundException'
+                    typeKey = 'NotFoundException'
                 } | ConvertTo-Json
                 $errorDetails = [System.Management.Automation.ErrorDetails]::new($errorMessage)
                 $exception = [System.Exception]::new('Repository not found')
                 $errorRecord = [System.Management.Automation.ErrorRecord]::new(
                     $exception,
-                    'RepositoryNotFound',
+                    'NotFoundException',
                     [System.Management.Automation.ErrorCategory]::ObjectNotFound,
                     $null
                 )

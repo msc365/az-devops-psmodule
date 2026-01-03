@@ -275,7 +275,7 @@ Describe 'Get-AdoDescriptor' {
             Mock Confirm-Default -ModuleName $moduleName -MockWith { }
         }
 
-        It 'Should handle SubjectDescriptorNotFound error gracefully' {
+        It 'Should handle NotFoundException error gracefully' {
             # Arrange
             $collectionUri = 'https://vssps.dev.azure.com/testorg'
             $storageKey = 'non-existent-key'
@@ -284,13 +284,13 @@ Describe 'Get-AdoDescriptor' {
             Mock Invoke-AdoRestMethod -ModuleName $moduleName -MockWith {
                 $errorMessage = @{
                     message = 'Subject descriptor not found'
-                    typeKey = 'SubjectDescriptorNotFound'
+                    typeKey = 'NotFoundException'
                 } | ConvertTo-Json
                 $errorDetails = [System.Management.Automation.ErrorDetails]::new($errorMessage)
                 $exception = [System.Exception]::new('Descriptor not found')
                 $errorRecord = [System.Management.Automation.ErrorRecord]::new(
                     $exception,
-                    'DescriptorNotFound',
+                    'NotFoundException',
                     [System.Management.Automation.ErrorCategory]::ObjectNotFound,
                     $null
                 )

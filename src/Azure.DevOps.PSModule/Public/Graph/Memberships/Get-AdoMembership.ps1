@@ -16,7 +16,7 @@
         Mandatory. A descriptor to the container in the relationship.
 
     .PARAMETER Version
-        Optional. The API version to use for the request. Default is '7.2-preview.1'.
+        Optional. The API version to use for the request. Default is '7.1'.
 
     .LINK
         https://learn.microsoft.com/en-us/rest/api/azure/devops/graph/memberships/get
@@ -54,8 +54,8 @@
 
         [Parameter()]
         [Alias('ApiVersion')]
-        [ValidateSet('7.2-preview.1')]
-        [string]$Version = '7.2-preview.1'
+        [ValidateSet('7.1', '7.2-preview.1')]
+        [string]$Version = '7.1'
     )
 
     begin {
@@ -72,28 +72,24 @@
 
     process {
         try {
+            $params = @{
+                Uri     = "$CollectionUri/_apis/graph/memberships/$SubjectDescriptor/$ContainerDescriptor"
+                Version = $Version
+                Method  = 'GET'
+            }
 
-            foreach ($subject in $SubjectDescriptor) {
+            if ($PSCmdlet.ShouldProcess($CollectionUri, "Get Membership for subject: $SubjectDescriptor in container: $ContainerDescriptor")) {
 
-                $params = @{
-                    Uri     = "$CollectionUri/_apis/graph/memberships/$subject/$ContainerDescriptor"
-                    Version = $Version
-                    Method  = 'GET'
+                $result = Invoke-AdoRestMethod @params
+
+                [PSCustomObject]@{
+                    memberDescriptor    = $result.memberDescriptor
+                    containerDescriptor = $result.containerDescriptor
+                    collectionUri       = $CollectionUri
                 }
 
-                if ($PSCmdlet.ShouldProcess($CollectionUri, "Get Membership for subject: $subject in container: $ContainerDescriptor")) {
-
-                    $result = Invoke-AdoRestMethod @params
-
-                    [PSCustomObject]@{
-                        memberDescriptor    = $result.memberDescriptor
-                        containerDescriptor = $result.containerDescriptor
-                        collectionUri       = $CollectionUri
-                    }
-
-                } else {
-                    Write-Verbose "Calling Invoke-AdoRestMethod with $($params| ConvertTo-Json -Depth 10)"
-                }
+            } else {
+                Write-Verbose "Calling Invoke-AdoRestMethod with $($params| ConvertTo-Json -Depth 10)"
             }
 
         } catch {

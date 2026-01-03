@@ -83,7 +83,7 @@
                         }
                     }
                 } catch {
-                    if ($_.ErrorDetails.Message -match 'SubjectDescriptorNotFound') {
+                    if ($_.ErrorDetails.Message -match 'NotFoundException') {
                         Write-Warning "StorageKey with ID $StorageKey does not exist in $CollectionUri, skipping."
                     } else {
                         throw $_

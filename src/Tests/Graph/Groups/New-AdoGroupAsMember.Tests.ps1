@@ -24,7 +24,7 @@
             return @{
                 displayName   = 'New AAD Group'
                 originId      = $Body.originId
-                principalName = "[TestOrg]\New AAD Group"
+                principalName = '[TestOrg]\New AAD Group'
                 origin        = 'aad'
                 subjectKind   = 'group'
                 descriptor    = "aadgp.$($Body.originId)"
@@ -53,7 +53,7 @@ Describe 'New-AdoGroupAsMember' {
 
             # Verify Invoke-AdoRestMethod was called correctly
             Should -Invoke Invoke-AdoRestMethod -ModuleName $moduleName -Exactly 1 -ParameterFilter {
-                $Uri -like "*/_apis/graph/groups" -and
+                $Uri -like '*/_apis/graph/groups' -and
                 $Method -eq 'POST' -and
                 $Version -eq '7.2-preview.1' -and
                 $QueryParameters -eq "groupDescriptors=$groupDescriptor"
@@ -146,13 +146,13 @@ Describe 'New-AdoGroupAsMember' {
             Mock Invoke-AdoRestMethod -ModuleName $moduleName -MockWith {
                 $errorMessage = @{
                     message = "VS860016: Could not find originId '$originId' in the backing domain"
-                    typeKey = 'OriginIdNotFoundException'
+                    typeKey = 'NotFoundException'
                 } | ConvertTo-Json
                 $errorDetails = [System.Management.Automation.ErrorDetails]::new($errorMessage)
                 $exception = [System.Exception]::new('Origin ID not found')
                 $errorRecord = [System.Management.Automation.ErrorRecord]::new(
                     $exception,
-                    'OriginIdNotFound',
+                    'NotFoundException',
                     [System.Management.Automation.ErrorCategory]::ObjectNotFound,
                     $null
                 )
@@ -182,7 +182,7 @@ Describe 'New-AdoGroupAsMember' {
                 $exception = [System.Exception]::new('Group descriptor not found')
                 $errorRecord = [System.Management.Automation.ErrorRecord]::new(
                     $exception,
-                    'GroupDescriptorNotFound',
+                    'NotFoundException',
                     [System.Management.Automation.ErrorCategory]::ObjectNotFound,
                     $null
                 )
@@ -212,7 +212,7 @@ Describe 'New-AdoGroupAsMember' {
                 $exception = [System.Exception]::new('Group SID not found')
                 $errorRecord = [System.Management.Automation.ErrorRecord]::new(
                     $exception,
-                    'GroupSidNotFound',
+                    'NotFoundException',
                     [System.Management.Automation.ErrorCategory]::ObjectNotFound,
                     $null
                 )
@@ -454,13 +454,13 @@ Describe 'New-AdoGroupAsMember' {
                 } else {
                     $errorMessage = @{
                         message = "VS860016: Could not find originId '$invalidOriginId' in the backing domain"
-                        typeKey = 'OriginIdNotFoundException'
+                        typeKey = 'NotFoundException'
                     } | ConvertTo-Json
                     $errorDetails = [System.Management.Automation.ErrorDetails]::new($errorMessage)
                     $exception = [System.Exception]::new('Origin ID not found')
                     $errorRecord = [System.Management.Automation.ErrorRecord]::new(
                         $exception,
-                        'OriginIdNotFound',
+                        'NotFoundException',
                         [System.Management.Automation.ErrorCategory]::ObjectNotFound,
                         $null
                     )

@@ -152,13 +152,13 @@ Describe 'Remove-AdoTeam' {
             Mock Invoke-AdoRestMethod -ModuleName $moduleName -MockWith {
                 $errorMessage = @{
                     message = 'VS403729: The team does not exist.'
-                    typeKey = 'TeamNotFoundException'
+                    typeKey = 'NotFoundException'
                 } | ConvertTo-Json
                 $errorDetails = [System.Management.Automation.ErrorDetails]::new($errorMessage)
                 $exception = [System.Exception]::new('Team not found')
                 $errorRecord = [System.Management.Automation.ErrorRecord]::new(
                     $exception,
-                    'TeamNotFound',
+                    'NotFoundException',
                     [System.Management.Automation.ErrorCategory]::ObjectNotFound,
                     $null
                 )
@@ -176,7 +176,7 @@ Describe 'Remove-AdoTeam' {
             $warnings[0] | Should -Match 'does not exist'
         }
 
-        It 'Should not throw on TeamNotFoundException' {
+        It 'Should not throw on NotFoundException' {
             # Act & Assert
             { Remove-AdoTeam -CollectionUri $collectionUri -ProjectName $projectName -Name 'non-existent-team' -WarningAction SilentlyContinue -Confirm:$false } | Should -Not -Throw
         }

@@ -125,7 +125,7 @@
                         collectionUri = $CollectionUri
                     }
                 } catch {
-                    if ($_.ErrorDetails.Message -match 'TeamNotFoundException') {
+                    if ($_.ErrorDetails.Message -match 'NotFoundException') {
                         Write-Warning "Team with ID $Id does not exist, skipping."
                     } else {
                         throw $_

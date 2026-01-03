@@ -303,13 +303,13 @@ Describe 'Get-AdoRepository' {
             Mock Invoke-AdoRestMethod -ModuleName $moduleName -MockWith {
                 $errorMessage = @{
                     message = "VS404: The repository with name or identifier '$repoName' does not exist or you do not have permission to access it."
-                    typeKey = 'RepositoryNotFoundException'
+                    typeKey = 'NotFoundException'
                 } | ConvertTo-Json
                 $errorDetails = [System.Management.Automation.ErrorDetails]::new($errorMessage)
                 $exception = [System.Exception]::new('Repository not found')
                 $errorRecord = [System.Management.Automation.ErrorRecord]::new(
                     $exception,
-                    'RepositoryNotFound',
+                    'NotFoundException',
                     [System.Management.Automation.ErrorCategory]::ObjectNotFound,
                     $null
                 )

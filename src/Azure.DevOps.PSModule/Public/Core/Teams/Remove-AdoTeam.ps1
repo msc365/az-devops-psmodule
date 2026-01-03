@@ -84,7 +84,7 @@
                 try {
                     Invoke-AdoRestMethod @params | Out-Null
                 } catch {
-                    if ($_.ErrorDetails.Message -match 'TeamNotFoundException') {
+                    if ($_.ErrorDetails.Message -match 'NotFoundException') {
                         Write-Warning "Team with Name $Name does not exist, skipping deletion."
                     } else {
                         throw $_

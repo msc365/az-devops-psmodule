@@ -174,7 +174,7 @@ Describe 'Get-AdoGroup' {
                 $exception = [System.Exception]::new('Group not found')
                 $errorRecord = [System.Management.Automation.ErrorRecord]::new(
                     $exception,
-                    'GroupNotFound',
+                    'NotFoundException',
                     [System.Management.Automation.ErrorCategory]::ObjectNotFound,
                     $null
                 )

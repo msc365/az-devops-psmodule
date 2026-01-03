@@ -248,7 +248,7 @@ Describe 'New-AdoTeam' {
                 $exception = [System.Exception]::new('Project not found')
                 $errorRecord = [System.Management.Automation.ErrorRecord]::new(
                     $exception,
-                    'ProjectNotFound',
+                    'NotFoundException',
                     [System.Management.Automation.ErrorCategory]::ObjectNotFound,
                     $null
                 )

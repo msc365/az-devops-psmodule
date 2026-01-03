@@ -87,7 +87,7 @@
                 try {
                     Invoke-AdoRestMethod @params | Out-Null
                 } catch {
-                    if ($_.ErrorDetails.Message -match 'RepositoryNotFound') {
+                    if ($_.ErrorDetails.Message -match 'NotFoundException') {
                         Write-Warning "Repository with ID $Name does not exist in project $ProjectName, skipping."
                     } else {
                         throw $_
