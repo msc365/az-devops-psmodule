@@ -5,7 +5,7 @@ param()
 BeforeAll {
     # Import the module for testing
     $moduleName = 'Azure.DevOps.PSModule'
-    $modulePath = Join-Path -Path (Get-Item $PSScriptRoot).Parent.FullName -ChildPath $moduleName
+    $modulePath = Join-Path -Path (Get-Item $PSScriptRoot).Parent.Parent.FullName -ChildPath $moduleName
 
     # Remove module if already loaded
     if (Get-Module -Name $moduleName -ErrorAction SilentlyContinue) {
