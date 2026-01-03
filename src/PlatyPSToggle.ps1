@@ -46,6 +46,7 @@
     displays better on GitHub.
 #>
 
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingWriteHost', '', Justification = 'Write-Host is used for internal user feedback in this script.')]
 [CmdletBinding()]
 param (
     [Parameter()]
