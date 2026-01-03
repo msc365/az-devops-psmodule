@@ -4,7 +4,7 @@ external help file: Azure.DevOps.PSModule-Help.xml
 HelpUri: https://learn.microsoft.com/en-us/rest/api/azure/devops/approvalsandchecks/check-configurations/list
 Locale: en-NL
 Module Name: Azure.DevOps.PSModule
-ms.date: 12/31/2025
+ms.date: 01/03/2026
 PlatyPS schema version: 2024-05-01
 title: Get-AdoCheckConfiguration
 -->
@@ -20,18 +20,25 @@ Get a list of check configurations for a specific resource.
 
 ## SYNTAX
 
-### __AllParameterSets
+### ConfigurationList
 
 ```text
 Get-AdoCheckConfiguration [[-CollectionUri] <string>] [[-ProjectName] <string>]
- [-ResourceType] <string> [-ResourceName] <string[]> [[-Expands] <string>] [[-Version] <string>]
- [<CommonParameters>]
+ [-ResourceType] <string> [-ResourceName] <string> [[-DefinitionType] <string[]>]
+ [[-Expands] <string>] [[-Version] <string>] [<CommonParameters>]
+```
+
+### ConfigurationById
+
+```text
+Get-AdoCheckConfiguration [[-CollectionUri] <string>] [[-ProjectName] <string>]
+ [-Id] <int32> [[-Expands] <string>] [[-Version] <string>] [<CommonParameters>]
 ```
 
 ## ALIASES
 
 This cmdlet has the following aliases,
-- ProjectId (for ProjectName)
+- N/A
 
 ## DESCRIPTION
 
@@ -51,7 +58,7 @@ $params = @{
     ResourceType  = 'environment'
     ResourceName  = 'my-environment-tst'
 }
-Get-AdoCheckConfiguration @params
+Get-AdoCheckConfiguration @params -Verbose
 ```
 
 Retrieves check configurations for the specified environment within the project using provided parameters.
@@ -70,10 +77,56 @@ $params = @{
 @(
     'my-environment-tst',
     'my-environment-dev'
-) | Get-AdoCheckConfiguration @params
+) | Get-AdoCheckConfiguration @params -Verbose
 ```
 
 Retrieves check configurations for the specified environments within the project using provided parameters, demonstrating pipeline input.
+
+### EXAMPLE 3
+
+#### PowerShell
+
+```powershell
+Get-AdoCheckConfiguration -Id 1 -Expands 'settings' -Verbose
+```
+
+Retrieves the check configuration with ID 1, including its settings.
+
+### EXAMPLE 4
+
+#### PowerShell
+
+```powershell
+$params = @{
+    CollectionUri  = 'https://dev.azure.com/my-org'
+    ProjectName    = 'my-project'
+    ResourceType   = 'environment'
+    ResourceName   = 'my-environment-tst'
+    DefinitionType = 'approval'
+    Expands        = 'settings'
+}
+Get-AdoCheckConfiguration @params -Verbose
+```
+
+Retrieves check configurations for the specified environment filtered by the 'approval' definition type.
+
+### EXAMPLE 5
+
+#### PowerShell
+
+```powershell
+$params = @{
+    CollectionUri  = 'https://dev.azure.com/my-org'
+    ProjectName    = 'my-project'
+    ResourceType   = 'environment'
+    ResourceName   = 'my-environment-tst'
+    DefinitionType = 'approval', 'preCheckApproval'
+    Expands        = 'settings'
+}
+Get-AdoCheckConfiguration @params -Verbose
+```
+
+Retrieves check configurations for the specified environment filtered by multiple definition types.
 
 ## PARAMETERS
 
@@ -125,7 +178,7 @@ HelpMessage: ''
 ### -ResourceType
 
 Mandatory.
-The type of the resource to filter the results. E.g., 'environment'.
+The type of the resource to filter the results.
 
 ```yaml
 Type: System.String
@@ -133,7 +186,7 @@ DefaultValue: ''
 SupportsWildcards: false
 Aliases: []
 ParameterSets:
-- Name: (All)
+- Name: ConfigurationList
   Position: Named
   IsRequired: true
   ValueFromPipeline: false
@@ -154,15 +207,64 @@ Mandatory.
 The name of the resource to filter the results.
 
 ```yaml
+Type: System.String
+DefaultValue: ''
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: ConfigurationList
+  Position: Named
+  IsRequired: true
+  ValueFromPipeline: true
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -DefinitionType
+
+Optional.
+The type(s) of check definitions to filter the results.
+
+```yaml
 Type: System.String[]
 DefaultValue: ''
 SupportsWildcards: false
 Aliases: []
 ParameterSets:
-- Name: (All)
+- Name: ConfigurationList
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues:
+- approval
+- preCheckApproval
+- postCheckApproval
+- branchControl
+- businessHours
+HelpMessage: ''
+```
+
+### -Id
+
+Mandatory.
+The ID of the check configuration to retrieve.
+
+```yaml
+Type: System.Int32
+DefaultValue: ''
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: ConfigurationById
   Position: Named
   IsRequired: true
-  ValueFromPipeline: true
+  ValueFromPipeline: false
   ValueFromPipelineByPropertyName: true
   ValueFromRemainingArguments: false
 DontShow: false
@@ -202,6 +304,7 @@ HelpMessage: ''
 Optional.
 The API version to use for the request.
 Default is '7.2-preview.1'.
+The -preview flag must be supplied in the api-version for such requests.
 
 ```yaml
 Type: System.String
@@ -218,8 +321,9 @@ ParameterSets:
   ValueFromRemainingArguments: false
 DontShow: false
 AcceptedValues:
+- 7.1-preview.1
 - 7.2-preview.1
-HelpMessage: ''
+HelpMessage: The -preview flag must be supplied in the api-version for such requests.
 ```
 
 ### CommonParameters
@@ -237,7 +341,16 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ### PSCustomObject
 
-An object representing the check configuration.
+Returns a collection of check configuration objects, each containing:
+- id: The ID of the check configuration
+- settings: The configuration settings (included when Expands = 'settings')
+- timeout: The timeout value for the check
+- type: The type information for the check
+- resource: The resource information
+- createdBy: The ID of the user who created the configuration
+- createdOn: The date and time when the configuration was created
+- project: The name of the project
+- collectionUri: The collection URI
 
 ## NOTES
 
@@ -249,4 +362,5 @@ An object representing the check configuration.
 
 ## RELATED LINKS
 
+- <https://learn.microsoft.com/en-us/rest/api/azure/devops/approvalsandchecks/check-configurations/get>
 - <https://learn.microsoft.com/en-us/rest/api/azure/devops/approvalsandchecks/check-configurations/list>

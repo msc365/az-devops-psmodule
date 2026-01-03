@@ -19,6 +19,13 @@
     .PARAMETER ResourceName
         Mandatory. The name of the resource to filter the results.
 
+    .PARAMETER DefinitionType
+        Optional. The type(s) of check definitions to filter the results.
+        Valid values are 'approval', 'preCheckApproval', 'postCheckApproval', 'branchControl', and 'businessHours'.
+
+    .PARAMETER Id
+        Mandatory. The ID of the check configuration to retrieve.
+
     .PARAMETER Expands
         Optional. Specifies additional details to include in the response. Default is 'none'.
 
@@ -26,9 +33,11 @@
 
     .PARAMETER Version
         Optional. The API version to use for the request. Default is '7.2-preview.1'.
+        The -preview flag must be supplied in the api-version for such requests.
 
     .LINK
-        https://learn.microsoft.com/en-us/rest/api/azure/devops/approvalsandchecks/check-configurations/list
+        - https://learn.microsoft.com/en-us/rest/api/azure/devops/approvalsandchecks/check-configurations/get
+        - https://learn.microsoft.com/en-us/rest/api/azure/devops/approvalsandchecks/check-configurations/list
 
     .EXAMPLE
         $params = @{
@@ -37,7 +46,7 @@
             ResourceType  = 'environment'
             ResourceName  = 'my-environment-tst'
         }
-        Get-AdoCheckConfiguration @params
+        Get-AdoCheckConfiguration @params -Verbose
 
         Retrieves check configurations for the specified environment within the project using provided parameters.
 
@@ -51,11 +60,42 @@
         @(
             'my-environment-tst',
             'my-environment-dev'
-        ) | Get-AdoCheckConfiguration @params
+        ) | Get-AdoCheckConfiguration @params -Verbose
 
         Retrieves check configurations for the specified environments within the project using provided parameters, demonstrating pipeline input.
+
+    .EXAMPLE
+        Get-AdoCheckConfiguration -Id 1 -Expands 'settings' -Verbose
+
+        Retrieves the check configuration with ID 1, including its settings.
+
+    .EXAMPLE
+        $params = @{
+            CollectionUri  = 'https://dev.azure.com/my-org'
+            ProjectName    = 'my-project'
+            ResourceType   = 'environment'
+            ResourceName   = 'my-environment-tst'
+            DefinitionType = 'approval'
+            Expands        = 'settings'
+        }
+        Get-AdoCheckConfiguration @params -Verbose
+
+        Retrieves check configurations for the specified environment filtered by the 'approval' definition type.
+
+    .EXAMPLE
+        $params = @{
+            CollectionUri  = 'https://dev.azure.com/my-org'
+            ProjectName    = 'my-project'
+            ResourceType   = 'environment'
+            ResourceName   = 'my-environment-tst'
+            DefinitionType = 'approval', 'preCheckApproval'
+            Expands        = 'settings'
+        }
+        Get-AdoCheckConfiguration @params -Verbose
+
+        Retrieves check configurations for the specified environment filtered by multiple definition types.
     #>
-    [CmdletBinding(SupportsShouldProcess)]
+    [CmdletBinding(SupportsShouldProcess, DefaultParameterSetName = 'ConfigurationList')]
     param (
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
@@ -65,20 +105,27 @@
         [Alias('ProjectId')]
         [string]$ProjectName = $env:DefaultAdoProject,
 
-        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName, ParameterSetName = 'ConfigurationList')]
         [ValidateSet('endpoint', 'environment', 'variablegroup', 'repository')]
         [string]$ResourceType,
 
-        [Parameter(Mandatory, ValueFromPipelineByPropertyName, ValueFromPipeline)]
-        [string[]]$ResourceName,
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName, ValueFromPipeline, ParameterSetName = 'ConfigurationList')]
+        [string]$ResourceName,
+
+        [Parameter(ValueFromPipelineByPropertyName, ParameterSetName = 'ConfigurationList')]
+        [ValidateSet('approval', 'preCheckApproval', 'postCheckApproval', 'branchControl', 'businessHours')]
+        [string[]]$DefinitionType,
+
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName, ParameterSetName = 'ConfigurationById')]
+        [int32]$Id,
 
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateSet('none', 'settings')]
         [string]$Expands = 'none',
 
-        [Parameter()]
+        [Parameter(HelpMessage = 'The -preview flag must be supplied in the api-version for such requests.')]
         [Alias('ApiVersion')]
-        [ValidateSet('7.2-preview.1')]
+        [ValidateSet('7.1-preview.1', '7.2-preview.1')]
         [string]$Version = '7.2-preview.1'
     )
 
@@ -99,32 +146,75 @@
 
     process {
         try {
-            foreach ($name in $ResourceName) {
+            $QueryParameters = [System.Collections.Generic.List[string]]::new()
+            $DefinitionRefIds = [System.Collections.Generic.List[string]]::new()
+
+            if ($id) {
+                $uri = "$CollectionUri/$ProjectName/_apis/pipelines/checks/configurations/$id"
+            } else {
+                $resourceId = $null
 
                 switch ($ResourceType) {
                     'environment' {
                         $typeParams = @{
                             CollectionUri = $CollectionUri
                             ProjectName   = $ProjectName
-                            Name          = $name
+                            Name          = $ResourceName
                         }
                         $resourceId = (Get-AdoEnvironment @typeParams).Id
                     }
                     default {
-                        throw "ResourceType '$ResourceType' is not supported yet."
+                        Write-Warning "ResourceType '$ResourceType' is not supported yet."
+                        return
                     }
                 }
 
-                $params = @{
-                    Uri             = "$CollectionUri/$ProjectName/_apis/pipelines/checks/configurations"
-                    Version         = $Version
-                    QueryParameters = "resourceType=$ResourceType&resourceId=$resourceId&`$expand=$Expands"
-                    Method          = 'GET'
+                if (-not $resourceId) {
+                    return
                 }
 
-                if ($PSCmdlet.ShouldProcess($ProjectName, "Get Check Configuration(s) from: $ResourceType/$name")) {
+                $uri = "$CollectionUri/$ProjectName/_apis/pipelines/checks/configurations"
 
-                    $results = (Invoke-AdoRestMethod @params).value
+                # If DefinitionType is provided, resolve it to get the definitionRef
+                if ($DefinitionType) {
+                    foreach ($definitionType_ in $DefinitionType) {
+                        $definitionRef = Resolve-AdoCheckConfigDefinitionRef -Name $definitionType_
+                        $DefinitionRefIds.Add($definitionRef.id)
+                    }
+                    $Expands = 'settings'
+                }
+
+                # Build query parameters
+                if ($ResourceType) {
+                    $QueryParameters.Add("resourceType=$ResourceType")
+                }
+                if ($resourceId) {
+                    $QueryParameters.Add("resourceId=$resourceId")
+                }
+            }
+
+            if ($Expands -ne 'none') {
+                $QueryParameters.Add("`$expand=$Expands")
+            }
+
+            $params = @{
+                Uri             = $uri
+                Version         = $Version
+                QueryParameters = if ($queryParameters.Count -gt 0) { $queryParameters -join '&' } else { $null }
+                Method          = 'GET'
+            }
+
+            if ($PSCmdlet.ShouldProcess($ProjectName, $Id ? "Get check configuration: $Id" : "Get Check Configurations: $ResourceType/$ResourceName")) {
+                try {
+                    $results = (Invoke-AdoRestMethod @params)
+                    if ($Id) { $results = @($results) } else {
+                        if ($DefinitionRefIds.Count -gt 0) {
+                            $results = $results.value |
+                                Where-Object { $DefinitionRefIds -contains $_.settings.definitionRef.id }
+                        } else {
+                            $results = $results.value
+                        }
+                    }
 
                     foreach ($c_ in $results) {
                         $obj = [ordered]@{
@@ -142,12 +232,16 @@
                         $obj['collectionUri'] = $CollectionUri
                         [PSCustomObject]$obj
                     }
-
-                } else {
-                    Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
+                } catch {
+                    if ($_.ErrorDetails.Message -match 'NotFoundException') {
+                        Write-Warning "Check configuration with ID $Id does not exist, skipping."
+                    } else {
+                        throw $_
+                    }
                 }
+            } else {
+                Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
             }
-
         } catch {
             throw $_
         }
