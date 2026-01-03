@@ -92,7 +92,7 @@
 
     process {
         try {
-            # Get id when name was provided, id is required for deletion
+            # Get id when name was provided, id is required for update
             try {
                 [System.Guid]::Parse($Id) | Out-Null
                 $projectId = $Id

@@ -41,7 +41,7 @@
         [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
         [string]$CollectionUri = $env:DefaultAdoCollectionUri,
 
-        [Parameter(ValueFromPipelineByPropertyName, ValueFromPipeline)]
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName, ValueFromPipeline)]
         [Alias('Id', 'ProjectId', 'ProjectName')]
         [string]$Name,
 
@@ -54,7 +54,7 @@
     begin {
         Write-Verbose ("Command: $($MyInvocation.MyCommand.Name)")
         Write-Debug ("CollectionUri: $CollectionUri")
-        Write-Debug ("Id: $Id")
+        Write-Debug ("Name: $Name")
         Write-Debug ("Version: $Version")
 
         Confirm-Default -Defaults ([ordered]@{

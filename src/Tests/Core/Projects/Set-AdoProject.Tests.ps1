@@ -159,7 +159,7 @@ Describe 'Set-AdoProject' {
             $projectIds = @('project-1', 'project-2', 'project-3')
 
             # Act
-            $result = Set-AdoProject -CollectionUri $collectionUri -Id $projectIds -Description 'Batch updated' -Confirm:$false
+            $result = $projectIds | Set-AdoProject -CollectionUri $collectionUri -Description 'Batch updated' -Confirm:$false
 
             # Assert
             $result | Should -Not -BeNullOrEmpty
@@ -578,13 +578,13 @@ Describe 'Set-AdoProject' {
             $validateSet.ValidValues.Count | Should -Be 2
         }
 
-        It 'Should accept string array for Id parameter' {
+        It 'Should accept string for Id parameter' {
             # Arrange
             $command = Get-Command Set-AdoProject
             $idParam = $command.Parameters['Id']
 
             # Assert
-            $idParam.ParameterType.Name | Should -Be 'String[]'
+            $idParam.ParameterType.Name | Should -Be 'String'
         }
 
         It 'Should have <Parameter> as an optional parameter' -ForEach @(
@@ -602,6 +602,12 @@ Describe 'Set-AdoProject' {
     }
 
     Context 'Error handling' {
+        BeforeAll {
+            Mock Confirm-CollectionUri -ModuleName $moduleName -MockWith { $true }
+            Mock Confirm-Default -ModuleName $moduleName -MockWith { }
+            Mock Start-Sleep -ModuleName $moduleName -MockWith { }
+        }
+
         It 'Should throw when operation fails' {
             # Arrange
             $collectionUri = 'https://dev.azure.com/testorg'
@@ -637,7 +643,7 @@ Describe 'Set-AdoProject' {
                 $exception = [System.Net.WebException]::new('Project does not exist')
                 $errorRecord = [System.Management.Automation.ErrorRecord]::new(
                     $exception,
-                    'ProjectNotFound',
+                    'NotFoundException',
                     [System.Management.Automation.ErrorCategory]::ObjectNotFound,
                     'non-existent-project'
                 )
@@ -662,7 +668,7 @@ Describe 'Set-AdoProject' {
                     $exception = [System.Net.WebException]::new('Project does not exist')
                     $errorRecord = [System.Management.Automation.ErrorRecord]::new(
                         $exception,
-                        'ProjectNotFound',
+                        'NotFoundException',
                         [System.Management.Automation.ErrorCategory]::ObjectNotFound,
                         'non-existent-project'
                     )
@@ -677,8 +683,21 @@ Describe 'Set-AdoProject' {
                 }
             }
 
+            Mock Get-AdoProject -ModuleName $moduleName -MockWith {
+                param($CollectionUri, $Id)
+                return @{
+                    id            = $Id
+                    name          = 'updated'
+                    description   = 'Test description'
+                    visibility    = 'Private'
+                    state         = 'wellFormed'
+                    defaultTeam   = @{ id = 'team-id'; name = 'Team' }
+                    collectionUri = $CollectionUri
+                }
+            }
+
             # Act
-            $result = Set-AdoProject -CollectionUri $collectionUri -Id $projectIds -Name 'updated' -Confirm:$false -WarningAction SilentlyContinue
+            $result = $projectIds | Set-AdoProject -CollectionUri $collectionUri -Name 'updated' -Confirm:$false -WarningAction SilentlyContinue
 
             # Assert - Should return 2 projects (non-existent one skipped)
             $result | Should -Not -BeNullOrEmpty
@@ -757,7 +776,7 @@ Describe 'Set-AdoProject' {
             $projectIds = @('project-1', 'project-2')
 
             # Act
-            $result = Set-AdoProject -CollectionUri $collectionUri -Id $projectIds -Name 'updated' -Confirm:$false
+            $result = $projectIds | Set-AdoProject -CollectionUri $collectionUri -Name 'updated' -Confirm:$false
 
             # Assert
             $result | Should -BeOfType [PSCustomObject]
