@@ -59,7 +59,7 @@ A PowerShell module that wraps the Azure DevOps REST API into clean, task-orient
 | [New-AdoCheckConfiguration](New-AdoCheckConfiguration.md) | Create a new check configuration for pipeline resources in Azure DevOps. |
 | [New-AdoClassificationNode](New-AdoClassificationNode.md) | Creates a new classification node for a project in Azure DevOps. |
 | [New-AdoEnvironment](New-AdoEnvironment.md) | Create a new Azure DevOps Pipeline Environment. |
-| [New-AdoGroup](New-AdoGroup.md) | Create a new group in Azure DevOps. |
+| [New-AdoGroupAsMember](New-AdoGroupAsMember.md) | Adds an AAD Group as member of a group. |
 | [New-AdoPolicyConfiguration](New-AdoPolicyConfiguration.md) | Create a new policy configuration for an Azure DevOps project. |
 | [New-AdoProject](New-AdoProject.md) | Create a new project in an Azure DevOps organization. |
 | [New-AdoRepository](New-AdoRepository.md) | Create a new repository in an Azure DevOps project. |
@@ -73,6 +73,7 @@ A PowerShell module that wraps the Azure DevOps REST API into clean, task-orient
 | [Remove-AdoRepository](Remove-AdoRepository.md) | Remove a repository from an Azure DevOps project. |
 | [Remove-AdoServiceEndpoint](Remove-AdoServiceEndpoint.md) | Remove a service endpoint from an Azure DevOps project. |
 | [Remove-AdoTeam](Remove-AdoTeam.md) | Remove a team from an Azure DevOps project. |
+| [Resolve-AdoCheckConfigDefinitionRef](Resolve-AdoCheckConfigDefinitionRef.md) | Resolve a check definition reference by its name or ID. |
 | [Set-AdoClassificationNode](Set-AdoClassificationNode.md) | Updates a classification node for a project in Azure DevOps. |
 | [Set-AdoDefault](Set-AdoDefault.md) | Set default Azure DevOps environment variables. |
 | [Set-AdoEnvironment](Set-AdoEnvironment.md) | Update an Azure DevOps Pipeline Environment by its ID. |

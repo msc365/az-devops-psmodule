@@ -124,7 +124,7 @@
         'Remove-AdoRepository'
         'Remove-AdoServiceEndpoint'
         'Remove-AdoTeam'
-        'Resolve-AdoCheckConfigurationDefRef'
+        'Resolve-AdoCheckConfigDefinitionRef'
         'Set-AdoClassificationNode'
         'Set-AdoDefault'
         'Set-AdoEnvironment'
