@@ -20,10 +20,10 @@
         Mandatory. The type of resource to which the check will be applied. Valid values are 'endpoint', 'environment', 'variablegroup', 'repository'.
 
     .PARAMETER ResourceName
-        Mandatory. An array of resource names to which the check will be applied.
+        Mandatory. The name of the resource to which the check will be applied.
 
-    .PARAMETER ApprovalType
-        Optional. The type of approval check to create. Valid values are 'approval' and 'precheck'. Default is 'approval'.
+    .PARAMETER DefinitionType
+        Optional. The type of approval check to create. Valid values are 'approval', 'preCheckApproval', and 'postCheckApproval'. Default is 'approval'.
 
     .PARAMETER Instructions
         Optional. Instructions for the approvers.
@@ -33,6 +33,7 @@
 
     .PARAMETER Version
         Optional. The API version to use for the request. Default is '7.2-preview.1'.
+        The -preview flag must be supplied in the api-version for such requests.
 
     .LINK
         https://learn.microsoft.com/en-us/rest/api/azure/devops/approvalsandchecks/check-configurations/add
@@ -46,7 +47,7 @@
             Approvers     = $approvers
             ResourceType  = 'environment'
             ResourceName  = 'my-environment-tst'
-            ApprovalType  = 'approval'
+            DefinitionType  = 'approval'
             Instructions  = 'Approval required before deploying to environment'
             Timeout       = 1440
         }
@@ -72,11 +73,11 @@
         [string]$ResourceType,
 
         [Parameter(Mandatory, ValueFromPipelineByPropertyName, ValueFromPipeline)]
-        [string[]]$ResourceName,
+        [string]$ResourceName,
 
         [Parameter(ValueFromPipelineByPropertyName)]
-        [ValidateSet('precheck', 'approval', 'postcheck')]
-        [string]$ApprovalType = 'approval',
+        [ValidateSet('approval', 'preCheckApproval', 'postCheckApproval')]
+        [string]$DefinitionType = 'approval',
 
         [Parameter(ValueFromPipelineByPropertyName)]
         [string]$Instructions,
@@ -84,9 +85,9 @@
         [Parameter(ValueFromPipelineByPropertyName)]
         [int32]$Timeout = 1440,
 
-        [Parameter()]
+        [Parameter(HelpMessage = 'The -preview flag must be supplied in the api-version for such requests.')]
         [Alias('ApiVersion')]
-        [ValidateSet('7.2-preview.1')]
+        [ValidateSet('7.1-preview.1', '7.2-preview.1')]
         [string]$Version = '7.2-preview.1'
     )
 
@@ -97,7 +98,7 @@
         Write-Debug ("Approvers: $Approvers")
         Write-Debug ("ResourceType: $ResourceType")
         Write-Debug ("ResourceName: $ResourceName")
-        Write-Debug ("ApprovalType: $ApprovalType")
+        Write-Debug ("DefinitionType: $DefinitionType")
         Write-Debug ("Instructions: $Instructions")
         Write-Debug ("Timeout: $Timeout")
         Write-Debug ("ApiVersion: $Version")
@@ -116,70 +117,80 @@
                 Method  = 'POST'
             }
 
-            foreach ($name in $ResourceName) {
-                # Determine definitionRef based on ApprovalType
-                switch ($ApprovalType) {
-                    'approval' {
-                        $definitionRef = @{
-                            name = 'Approval'
-                            id   = '26014962-64a0-49f4-885b-4b874119a5cc'
-                        }
+            # Determine definitionRef based on DefinitionType
+            $definitionRef = Resolve-AdoCheckConfigDefinitionRef -Name $DefinitionType
+
+            # Get resource ID
+            switch ($ResourceType) {
+                'environment' {
+                    $typeParams = @{
+                        CollectionUri = $CollectionUri
+                        ProjectName   = $ProjectName
+                        Name          = $ResourceName
                     }
-                    'precheck' {
-                        $definitionRef = @{
-                            name = 'Pre-check approval'
-                            id   = '0f52a19b-c67e-468f-b8eb-0ae83b532c99'
-                        }
-                    }
-                    'postcheck' {
-                        $definitionRef = @{
-                            name = 'Post-check approval'
-                            id   = '06441319-13fb-4756-b198-c2da116894a4'
-                        }
+                    $resourceId = (Get-AdoEnvironment @typeParams).Id
+                }
+                default {
+                    throw "ResourceType '$ResourceType' is not supported yet."
+                }
+            }
+
+            # Create configuration JSON
+            $body = @{
+                settings = @{
+                    approvers            = $Approvers
+                    executionOrder       = 'anyOrder'
+                    minRequiredApprovers = 0
+                    instructions         = $Instructions
+                    blockedApprovers     = @()
+                    definitionRef        = @{
+                        id = $definitionRef.id
                     }
                 }
-
-                # Get resource ID
-                switch ($ResourceType) {
-                    'environment' {
-                        $typeParams = @{
-                            CollectionUri = $CollectionUri
-                            ProjectName   = $ProjectName
-                            Name          = $name
-                        }
-                        $resourceId = (Get-AdoEnvironment @typeParams).Id
-                    }
-                    default {
-                        throw "ResourceType '$ResourceType' is not supported yet."
-                    }
+                timeout  = $Timeout
+                type     = @{
+                    name = 'Approval'
+                    id   = '8c6f20a7-a545-4486-9777-f762fafe0d4d'
                 }
-
-                # Create configuration JSON
-                $body = @{
-                    settings = @{
-                        approvers            = $Approvers
-                        executionOrder       = 'anyOrder'
-                        minRequiredApprovers = 0
-                        instructions         = $Instructions
-                        blockedApprovers     = @()
-                        definitionRef        = @{
-                            id = $definitionRef.id
-                        }
-                    }
-                    timeout  = $Timeout
-                    type     = @{
-                        name = 'Approval'
-                        id   = '8c6f20a7-a545-4486-9777-f762fafe0d4d'
-                    }
-                    resource = @{
-                        type = $ResourceType
-                        id   = $resourceId
-                    }
+                resource = @{
+                    type = $ResourceType
+                    id   = $resourceId
                 }
+            }
 
-                if ($PSCmdlet.ShouldProcess($ProjectName, "Create $($definitionRef.name) for: $name")) {
-                    try {
-                        $results = $body | Invoke-AdoRestMethod @params
+            if ($PSCmdlet.ShouldProcess($ProjectName, "Create $($definitionRef.name) for: $ResourceName")) {
+                try {
+                    $results = $body | Invoke-AdoRestMethod @params
+
+                    $obj = [ordered]@{
+                        id = $results.id
+                    }
+                    if ($results.settings) {
+                        $obj['settings'] = $results.settings
+                    }
+                    $obj['timeout'] = $results.timeout
+                    $obj['type'] = $results.type
+                    $obj['resource'] = $results.resource
+                    $obj['createdBy'] = $results.createdBy.id
+                    $obj['createdOn'] = $results.createdOn
+                    $obj['project'] = $ProjectName
+                    $obj['collectionUri'] = $CollectionUri
+                    [PSCustomObject]$obj
+
+                } catch {
+                    if ($_.ErrorDetails.Message -match 'already exists') {
+                        Write-Warning "$($definitionRef.name) already exists for $ResourceType with $ResourceName, trying to get it"
+
+                        $params.Method = 'GET'
+                        $params.QueryParameters = @(
+                            "resourceType=$($ResourceType)",
+                            "resourceId=$($resourceId)",
+                            "`$expand=settings"
+                        ) -join '&'
+
+                        $results = (Invoke-AdoRestMethod @params).value | Where-Object {
+                            $_.settings.definitionRef.id -eq $definitionRef.id
+                        }
 
                         $obj = [ordered]@{
                             id = $results.id
@@ -196,45 +207,16 @@
                         $obj['collectionUri'] = $CollectionUri
                         [PSCustomObject]$obj
 
-                    } catch {
-                        if ($_ -match 'already exists') {
-                            Write-Warning "$($definitionRef.name) already exists for $ResourceType with ID $resourceId, trying to get it"
-
-                            $params.Method = 'GET'
-                            $params.QueryParameters = "resourceType=$ResourceType&resourceId=$resourceId&`$expand=settings"
-
-                            $results = (Invoke-AdoRestMethod @params).value | Where-Object {
-                                $_.settings.definitionRef.id -eq $definitionRef.id
-                            }
-
-                            $obj = [ordered]@{
-                                id = $results.id
-                            }
-                            if ($results.settings) {
-                                $obj['settings'] = $results.settings
-                            }
-                            $obj['timeout'] = $results.timeout
-                            $obj['type'] = $results.type
-                            $obj['resource'] = $results.resource
-                            $obj['createdBy'] = $results.createdBy.id
-                            $obj['createdOn'] = $results.createdOn
-                            $obj['project'] = $ProjectName
-                            $obj['collectionUri'] = $CollectionUri
-                            [PSCustomObject]$obj
-
-                        } else {
-                            throw $_
-                        }
+                    } else {
+                        throw $_
                     }
-
-                } else {
-                    $params += @{
-                        Body = $body
-                    }
-                    Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
                 }
+            } else {
+                $params += @{
+                    Body = $body
+                }
+                Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
             }
-
         } catch {
             throw $_
         }
