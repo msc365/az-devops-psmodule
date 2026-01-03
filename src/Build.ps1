@@ -19,9 +19,17 @@
 
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
     'PSAvoidUsingWriteHost', '', Justification = 'Write-Host is allowed to display tests status messages') ]
-param()
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+    'PSReviewUnusedParameter', 'Output', Justification = 'Output parameter is used in Properties block via $script:Output') ]
+param(
+    [Parameter()]
+    [ValidateSet('Detailed', 'Diagnostic', 'Minimal', 'None', 'Normal')]
+    [string]$Output = 'Normal'
+)
 
 Properties {
+    # The output verbosity level for Pester tests.
+    $script:Output = $Output
     # The name of the module being built.
     # $script:moduleName = 'Azure.DevOps.PSModule'
 
@@ -132,7 +140,7 @@ Task default -Depends Build
 
 Task Publish -Depends Test, PrePublish, PublishToGallery, PostPublish
 
-Task Test -Depends Build {
+Task Test -Depends Build -RequiredVariables Output {
 
     if ((Get-Module -Name PSScriptAnalyzer) -eq $null) {
         Import-Module -Name PSScriptAnalyzer -ErrorAction Stop
@@ -161,7 +169,7 @@ Task Test -Depends Build {
     Import-Module Pester -PassThru | Out-Null
 
     $testPaths = (Get-ChildItem -Path $script:sourcePath -Recurse -Filter '*.Tests.ps1').FullName
-    Invoke-Pester -Path $testPaths -Output Detailed
+    Invoke-Pester -Path $testPaths -Output $script:Output
 }
 
 Task Build -Depends Clean, Init -RequiredVariables sourcePath, releasePath, moduleName, buildVersion {
