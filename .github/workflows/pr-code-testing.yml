@@ -25,13 +25,14 @@ jobs:
       - name: Verify required modules
         shell: pwsh
         run: |
+          Write-Host "Installing required module dependencies..."
+          Install-Module -Name Az.Accounts -Force -SkipPublisherCheck -Scope CurrentUser
+          Write-Host "Az.Accounts installed successfully"
+
           Write-Host "PowerShell Modules Available:"
           Get-Module -Name Pester -ListAvailable | Select-Object Name, Version
           Get-Module -Name PSScriptAnalyzer -ListAvailable | Select-Object Name, Version
-
-          Write-Host "`nInstalling required module dependencies..."
-          Install-Module -Name Az.Accounts -Force -SkipPublisherCheck -Scope CurrentUser
-          Write-Host "Az.Accounts installed successfully"
+          Get-Module -Name Az.Accounts -ListAvailable | Select-Object Name, Version
 
       - name: Run PSScriptAnalyzer
         shell: pwsh
