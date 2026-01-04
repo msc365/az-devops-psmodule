@@ -64,6 +64,12 @@ jobs:
         shell: pwsh
         run: |
           Write-Host "Running Pester Tests..." -ForegroundColor Cyan
+
+          # Add the module to PSModulePath so tests can import it
+          $modulePath = Join-Path $env:GITHUB_WORKSPACE "src"
+          $env:PSModulePath = "$modulePath$([System.IO.Path]::PathSeparator)$env:PSModulePath"
+          Write-Host "Module path added to PSModulePath: $modulePath"
+
           $testsPath = Join-Path $env:GITHUB_WORKSPACE "src\Tests"
 
           $config = New-PesterConfiguration
