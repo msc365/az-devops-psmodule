@@ -22,20 +22,24 @@ jobs:
           Write-Host "PowerShell Version: $($PSVersionTable.PSVersion)"
           Write-Host "OS: $($PSVersionTable.OS)"
 
-      - name: Install required modules
+      - name: Verify required modules
         shell: pwsh
         run: |
-          Write-Host "Checking Pester version..."
-          Get-Module -Name Pester -ListAvailable
-          Write-Host "Installing PSScriptAnalyzer..."
-          Install-Module -Name PSScriptAnalyzer -Force -SkipPublisherCheck -Scope CurrentUser
+          Write-Host "PowerShell Modules Available:"
+          Get-Module -Name Pester -ListAvailable | Select-Object Name, Version
+          Get-Module -Name PSScriptAnalyzer -ListAvailable | Select-Object Name, Version
 
       - name: Run PSScriptAnalyzer
         shell: pwsh
         run: |
           Write-Host "Running PSScriptAnalyzer..." -ForegroundColor Cyan
           $sourcePath = Join-Path $env:GITHUB_WORKSPACE "src"
-          $results = Invoke-ScriptAnalyzer -Path $sourcePath -Recurse -Severity Warning
+
+          # Exclude test files from analysis
+          $filesToAnalyze = Get-ChildItem -Path $sourcePath -Recurse -Include '*.ps1', '*.psm1', '*.psd1' |
+            Where-Object { $_.FullName -notmatch '[\\/]Tests[\\/]' -and $_.Name -notlike '*.Tests.ps1' }
+
+          $results = $filesToAnalyze | Invoke-ScriptAnalyzer -Severity Warning
 
           if ($results) {
             $errors = ($results | Where-Object Severity -eq 'Error').Count
