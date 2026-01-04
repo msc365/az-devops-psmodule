@@ -97,7 +97,7 @@
         {
             "label": "Test",
             "type": "shell",
-            "command": "Invoke-PSake src/Build.ps1 -taskList Test",
+            "command": "Invoke-PSake src/Build.ps1 -taskList Test -parameters @{Output='${input:pesterOutput}'}",
             "group": {
                 "kind": "test",
                 "isDefault": true
@@ -117,6 +117,20 @@
             "problemMatcher": [
                 "$pester"
             ]
+        }
+    ],
+    "inputs": [
+        {
+            "id": "pesterOutput",
+            "type": "pickString",
+            "description": "Pester output level",
+            "options": [
+                "Detailed",
+                "Normal",
+                "Minimal",
+                "None"
+            ],
+            "default": "Normal"
         }
     ]
 }
