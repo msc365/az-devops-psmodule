@@ -8,7 +8,7 @@
         When an environment with the specified name already exists, it will be returned instead of creating a new one.
 
     .PARAMETER CollectionUri
-        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/myorganization.
+        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/my-org.
 
     .PARAMETER ProjectName
         Optional. The name or id of the project.
@@ -21,6 +21,7 @@
 
     .PARAMETER Version
         Optional. The API version to use for the request. Default is '7.2-preview.1'.
+        The -preview flag must be supplied in the api-version for such requests.
 
     .LINK
         https://learn.microsoft.com/en-us/rest/api/azure/devops/environments/environments/add
@@ -28,7 +29,7 @@
     .EXAMPLE
         $params = @{
             CollectionUri = 'https://dev.azure.com/my-org'
-            ProjectName   = 'my-project'
+            ProjectName   = 'my-project-1'
             Name          = 'my-environment-tst'
             Description   = 'Test environment description'
         }
@@ -40,11 +41,11 @@
     .EXAMPLE
         $params = @{
             CollectionUri = 'https://dev.azure.com/my-org'
-            ProjectName   = 'my-project'
+            ProjectName   = 'my-project-1'
         }
         @(
-            'my-environment-tst',
             'my-environment-dev',
+            'my-environment-tst',
             'my-environment-prd'
         ) | New-AdoEnvironment @params -Verbose
 
@@ -61,12 +62,12 @@
         [string]$ProjectName = $env:DefaultAdoProject,
 
         [Parameter(ValueFromPipelineByPropertyName, ValueFromPipeline)]
-        [string[]]$Name,
+        [string]$Name,
 
         [Parameter()]
         [string]$Description,
 
-        [Parameter()]
+        [Parameter(HelpMessage = 'The -preview flag must be supplied in the api-version for such requests.')]
         [Alias('ApiVersion')]
         [ValidateSet('7.2-preview.1')]
         [string]$Version = '7.2-preview.1'
@@ -76,7 +77,8 @@
         Write-Verbose ("Command: $($MyInvocation.MyCommand.Name)")
         Write-Debug ("CollectionUri: $CollectionUri")
         Write-Debug ("ProjectName: $ProjectName")
-        Write-Debug ("EnvironmentName: $Name")
+        Write-Debug ("Name: $Name")
+        Write-Debug ("Description: $Description")
         Write-Debug ("Version: $Version")
 
         Confirm-Default -Defaults ([ordered]@{
@@ -87,23 +89,38 @@
 
     process {
         try {
-
             $params = @{
                 Uri     = "$CollectionUri/$ProjectName/_apis/pipelines/environments"
                 Version = $Version
                 Method  = 'POST'
             }
 
-            foreach ($n_ in $Name) {
+            $body = [PSCustomObject]@{
+                name        = $Name
+                description = $Description
+            }
 
-                $body = [PSCustomObject]@{
-                    name        = $n_
-                    description = $Description
-                }
+            if ($PSCmdlet.ShouldProcess($ProjectName, "Create environment: $Name")) {
+                try {
+                    $results = $body | Invoke-AdoRestMethod @params
 
-                if ($PSCmdlet.ShouldProcess($ProjectName, "Create environment: $n_")) {
-                    try {
-                        $results = $body | Invoke-AdoRestMethod @params
+                    [PSCustomObject]@{
+                        id            = $results.id
+                        name          = $results.name
+                        createdBy     = $results.createdBy.id
+                        createdOn     = $results.createdOn
+                        projectName   = $ProjectName
+                        collectionUri = $CollectionUri
+                    }
+
+                } catch {
+                    if ($_.ErrorDetails.Message -match 'EnvironmentExistsException') {
+                        Write-Warning "Environment $Name already exists, trying to get it"
+
+                        $params.Method = 'GET'
+                        $params.QueryParameters = "name=$Name"
+
+                        $results = (Invoke-AdoRestMethod @params).value
 
                         [PSCustomObject]@{
                             id            = $results.id
@@ -113,34 +130,15 @@
                             projectName   = $ProjectName
                             collectionUri = $CollectionUri
                         }
-
-                    } catch {
-                        if ($_ -match 'already exists') {
-                            Write-Warning "Environment $n_ already exists, trying to get it"
-
-                            $params.Method = 'GET'
-                            $params.QueryParameters = "name=$n_"
-
-                            $results = (Invoke-AdoRestMethod @params).value
-
-                            [PSCustomObject]@{
-                                id            = $results.id
-                                name          = $results.name
-                                createdBy     = $results.createdBy.id
-                                createdOn     = $results.createdOn
-                                projectName   = $ProjectName
-                                collectionUri = $CollectionUri
-                            }
-                        } else {
-                            throw $_
-                        }
+                    } else {
+                        throw $_
                     }
-                } else {
-                    $params += @{
-                        Body = $body
-                    }
-                    Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
                 }
+            } else {
+                $params += @{
+                    Body = $body
+                }
+                Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
             }
         } catch {
             throw $_

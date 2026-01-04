@@ -4,7 +4,7 @@ external help file: Azure.DevOps.PSModule-Help.xml
 HelpUri: 
 Locale: en-NL
 Module Name: Azure.DevOps.PSModule
-ms.date: 12/05/2025
+ms.date: 01/04/2026
 PlatyPS schema version: 2024-05-01
 title: New-AdoEnvironment
 -->
@@ -46,7 +46,7 @@ When an environment with the specified name already exists, it will be returned 
 ```powershell
 $params = @{
     CollectionUri = 'https://dev.azure.com/my-org'
-    ProjectName   = 'my-project'
+    ProjectName   = 'my-project-1'
     Name          = 'my-environment-tst'
     Description   = 'Test environment description'
 }
@@ -63,7 +63,7 @@ Creates a new environment in the specified project using the provided parameters
 ```powershell
 $params = @{
     CollectionUri = 'https://dev.azure.com/my-org'
-    ProjectName   = 'my-project'
+    ProjectName   = 'my-project-1'
 }
 @(
     'my-environment-tst',
@@ -79,7 +79,7 @@ Creates multiple new environments in the specified project demonstrating pipelin
 ### -CollectionUri
 
 Optional.
-The collection URI of the Azure DevOps collection/organization, e.g., <https://dev.azure.com/myorganization>.
+The collection URI of the Azure DevOps collection/organization, e.g., <https://dev.azure.com/my-org>.
 
 ```yaml
 Type: System.String
@@ -124,10 +124,10 @@ HelpMessage: ''
 ### -Name
 
 Optional.
-The name of the environment to filter the results.
+The name of the environment to create.
 
 ```yaml
-Type: System.String[]
+Type: System.String
 DefaultValue: ''
 SupportsWildcards: false
 Aliases: []
@@ -203,7 +203,15 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### System.Object
+### PSCustomObject
+
+Returns a newly created environment object with the following properties:
+- id: The unique identifier of the environment
+- name: The name of the environment
+- createdBy: ID of the user who created the environment
+- createdOn: Date and time when the environment was created
+- projectName: The project name
+- collectionUri: The collection URI
 
 ## NOTES
 
