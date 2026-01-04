@@ -26,9 +26,9 @@ BeforeAll {
         if ($Method -eq 'POST') {
             # Return successful group creation response
             return @{
-                displayName   = 'New AAD Group'
+                displayName   = 'New Entra ID Group'
                 originId      = $Body.originId
-                principalName = '[TestOrg]\New AAD Group'
+                principalName = '[TestOrg]\New Entra ID Group'
                 origin        = 'aad'
                 subjectKind   = 'group'
                 descriptor    = "aadgp.$($Body.originId)"
@@ -39,8 +39,8 @@ BeforeAll {
 
 Describe 'Add-AdoGroupMember' {
 
-    Context 'When adding a new AAD group as member' {
-        It 'Should add AAD group with required parameters' {
+    Context 'When adding a new Entra ID group as member' {
+        It 'Should add Entra ID group with required parameters' {
             # Arrange
             $collectionUri = 'https://dev.azure.com/testorg'
             $groupDescriptor = 'vssgp.00000000-0000-0000-0000-000000000001'
@@ -407,7 +407,7 @@ Describe 'Add-AdoGroupMember' {
     }
 
     Context 'Integration scenarios' {
-        It 'Should add multiple AAD groups to the same parent group' {
+        It 'Should add multiple Entra ID groups to the same parent group' {
             # Arrange
             $collectionUri = 'https://dev.azure.com/testorg'
             $groupDescriptor = 'vssgp.00000000-0000-0000-0000-000000000001'
@@ -448,9 +448,9 @@ Describe 'Add-AdoGroupMember' {
                 $script:callCount++
                 if ($script:callCount -eq 1) {
                     return @{
-                        displayName   = 'Valid Group'
+                        displayName   = 'Valid Entra ID Group'
                         originId      = $validOriginId
-                        principalName = '[TestOrg]\Valid Group'
+                        principalName = '[TestOrg]\Valid Entra ID Group'
                         origin        = 'aad'
                         subjectKind   = 'group'
                         descriptor    = "aadgp.$validOriginId"

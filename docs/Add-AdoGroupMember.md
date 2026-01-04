@@ -4,7 +4,7 @@ external help file: Azure.DevOps.PSModule-Help.xml
 HelpUri: https://learn.microsoft.com/en-us/rest/api/azure/devops/graph/groups/create
 Locale: en-NL
 Module Name: Azure.DevOps.PSModule
-ms.date: 01/02/2026
+ms.date: 01/04/2026
 PlatyPS schema version: 2024-05-01
 title: Add-AdoGroupMember
 -->
@@ -16,15 +16,14 @@ title: Add-AdoGroupMember
 
 ## SYNOPSIS
 
-Adds an AAD Group as member of a group.
+Adds an Entra ID group as member of a group.
 
 ## SYNTAX
 
 ### __AllParameterSets
 
 ```text
-Add-AdoGroupMember [[-CollectionUri] <string>] -GroupDescriptor <string> -OriginId <string>
- [[-Version] <string>] [-WhatIf] [-Confirm] [<CommonParameters>]
+Add-AdoGroupMember [[-CollectionUri] <string>] [-GroupDescriptor] <string> [-OriginId] <string> [[-Version] <string>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -34,7 +33,7 @@ This cmdlet has the following aliases,
 
 ## DESCRIPTION
 
-This cmdlet adds an AAD Group as member of a group in Azure DevOps. It creates a new group membership by linking an Azure Active Directory (AAD) group to an existing Azure DevOps group using the origin ID and group descriptor.
+This cmdlet adds an Entra ID group as member of a group in Azure DevOps. It uses the Azure DevOps Graph API to create the membership relationship by specifying the group descriptor of the parent group and the Origin ID of the Entra ID group to be added as a member.
 
 ## EXAMPLES
 
@@ -51,7 +50,7 @@ $params = @{
 Add-AdoGroupMember @params
 ```
 
-Adds an AAD Group as member of a group.
+Adds an Entra ID group as member of a group using the specified collection URI, group descriptor, and origin ID.
 
 ### EXAMPLE 2
 
@@ -68,21 +67,21 @@ $params = @{
 ) | Add-AdoGroupMember @params
 ```
 
-Adds multiple AAD Groups as members demonstrating pipeline input.
+Adds multiple Entra ID groups as members demonstrating pipeline input. The Origin IDs are piped to the cmdlet.
 
 ## PARAMETERS
 
 ### -CollectionUri
 
-Optional.
-The collection URI of the Azure DevOps collection/organization, e.g., <https://vssps.dev.azure.com/my-org>.
-Defaults to the value of $env:DefaultAdoCollectionUri with the scheme replaced to use vssps subdomain.
+The collection URI of the Azure DevOps collection/organization.
+The URI should be in the format: <https://vssps.dev.azure.com/my-org>.
+If not provided, the default collection URI from the environment variable `$env:DefaultAdoCollectionUri` is used (with https:// replaced by <https://vssps>.).
 
 ```yaml
 Type: System.String
 DefaultValue: ($env:DefaultAdoCollectionUri -replace 'https://', 'https://vssps.')
 SupportsWildcards: false
-Aliases: []
+Aliases:
 ParameterSets:
 - Name: (All)
   Position: Named
@@ -91,19 +90,18 @@ ParameterSets:
   ValueFromPipelineByPropertyName: true
   ValueFromRemainingArguments: false
 DontShow: false
-AcceptedValues: []
+AcceptedValues:
 HelpMessage: ''
 ```
 
 ### -GroupDescriptor
 
-Mandatory.
-A comma separated list of descriptors referencing groups you want the graph group to join.
-This is the descriptor of the target Azure DevOps group that will receive the new member.
+The descriptor of the group to which the member will be added.
+This is the unique identifier for the Azure DevOps group that will contain the new member.
 
 ```yaml
 Type: System.String
-DefaultValue: ''
+DefaultValue: 
 SupportsWildcards: false
 Aliases:
 - Descriptor
@@ -115,19 +113,18 @@ ParameterSets:
   ValueFromPipelineByPropertyName: true
   ValueFromRemainingArguments: false
 DontShow: false
-AcceptedValues: []
+AcceptedValues:
 HelpMessage: ''
 ```
 
 ### -OriginId
 
-Mandatory.
-The OriginId of the Entra (Azure AD) group to add as a member.
-This is the unique identifier of the AAD group in the backing directory.
+The Origin ID of the Entra ID group to add as a member.
+This is the unique identifier from Entra ID (formerly Azure Active Directory) that identifies the group to be added.
 
 ```yaml
 Type: System.String
-DefaultValue: ''
+DefaultValue: 
 SupportsWildcards: false
 Aliases:
 - Id
@@ -140,15 +137,13 @@ ParameterSets:
   ValueFromPipelineByPropertyName: true
   ValueFromRemainingArguments: false
 DontShow: false
-AcceptedValues: []
+AcceptedValues:
 HelpMessage: ''
 ```
 
 ### -Version
 
-Optional.
 The API version to use for the request.
-Default is '7.2-preview.1'.
 The -preview flag must be supplied in the api-version for this request to work.
 
 ```yaml
@@ -180,20 +175,20 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
-- System.String - Accepts OriginId via pipeline
+- System.String - The Origin ID can be piped to this cmdlet
 
 ## OUTPUTS
 
 ### PSCustomObject
 
-Returns a group object representing the newly added member with the following properties:
-- displayName: The display name of the group
-- originId: The origin ID of the group
+Returns a custom object with the following properties:
+- displayName: The display name of the group that was added
+- originId: The Origin ID of the Entra ID group
 - principalName: The principal name of the group
-- origin: The origin of the group (e.g., 'aad')
-- subjectKind: The subject kind (typically 'group')
-- descriptor: The descriptor of the newly added group member
-- collectionUri: The collection URI used for the operation
+- origin: The origin source of the group
+- subjectKind: The kind of subject (e.g., group)
+- descriptor: The descriptor of the group that was created/added
+- collectionUri: The collection URI where the operation was performed
 
 ## NOTES
 
