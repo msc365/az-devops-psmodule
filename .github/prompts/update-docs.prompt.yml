@@ -50,6 +50,15 @@ instructions: |
   - [Alias1]
   - [Alias2]
 
+  **Note:** If the cmdlet has no function-level aliases, use:
+  ```markdown
+  ## ALIASES
+
+  This cmdlet has the following aliases,
+  - N/A
+  ```
+  Parameter aliases (like `ProjectId` for `ProjectName`) should be documented in the parameter's YAML section under `Aliases:`, not in this section.
+
   ## DESCRIPTION
 
   [Detailed description of what the cmdlet does, 2-3 sentences]
@@ -107,6 +116,9 @@ instructions: |
   HelpMessage: ''
   ```
 
+  **IMPORTANT:** Do NOT create separate parameter sections for -WhatIf and -Confirm.
+  These are included in the CommonParameters section below.
+
   ### CommonParameters
 
   This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable,
@@ -136,10 +148,18 @@ instructions: |
     Connect-AzAccount -Tenant '<tenant-id>' -Subscription '<subscription-id>'
     ```
 
+  **NOTE:**
+  Connection to Azure DevOps using `Connect-AdoOrganization` is deprecated for new functions that use the `Set-AdoDefault` function
+  and automatically authenticate indirectly through the `Invoke-AdoRestMethod` which calls `New-AdoAuthHeader`. This explanation is for
+  prompt guidance only and should NOT be included in documentation files.
+
   ## RELATED LINKS
 
   - <[Microsoft Learn URL]>
   ```
+
+  **IMPORTANT:** The RELATED LINKS section should ONLY contain external documentation URLs (e.g., Microsoft Learn API references).
+  Do NOT include markdown links to other cmdlets in the module (e.g., [Get-AdoCmdlet](Get-AdoCmdlet.md)).
 
   ## 3. Key Standards
 
@@ -177,10 +197,41 @@ instructions: |
   After creating/updating cmdlet docs, ensure the cmdlet is listed in:
   - docs/Azure.DevOps.PSModule.md
 
-  Add entry in alphabetical order:
+  The main module documentation uses a single consolidated table with category headers.
+  All cmdlets are organized under category sections within one unified table.
+
+  ### Table Structure:
+  - Single table with two columns: Command | Description
+  - Category headers are bold rows with empty description: `| **Category Name** | |`
+  - Cmdlets are indented using: `| &nbsp; • &nbsp; [Cmdlet-Name](Cmdlet-Name.md) | Brief description |`
+  - Categories are listed in alphabetical order
+  - Cmdlets within each category are in alphabetical order
+
+  ### Categories (in alphabetical order):
+  - **Approvals And Checks** - Check configurations for pipeline resources
+  - **Connection and Authentication** - Connection, context, and access token management
+  - **Default Context** - Default environment variable management
+  - **Environments** - Environment management for pipelines
+  - **Features** - Feature state management
+  - **Groups and Security** - Group, membership, and descriptor management
+  - **Policies** - Policy configuration and type management
+  - **Projects and Process** - Project and process management
+  - **Repositories** - Repository management
+  - **Service Endpoints** - Service endpoint management
+  - **Teams** - Team management including settings, iterations, and field values
+  - **Work Item Tracking** - Classification node management
+
+  ### Example Entry:
   ```markdown
-  | [Cmdlet-Name](Cmdlet-Name.md) | Brief description |
+  | **Connection and Authentication** | |
+  | &nbsp; • &nbsp; [Connect-AdoOrganization](Connect-AdoOrganization.md) | Connect to an Azure DevOps organization. |
+  | &nbsp; • &nbsp; [Get-AdoContext](Get-AdoContext.md) | Get the current Azure DevOps connection context. |
   ```
+
+  When adding a new cmdlet:
+  1. Locate the appropriate category header row in the table
+  2. Find the correct alphabetical position within that category
+  3. Insert the new row with proper indentation: `| &nbsp; • &nbsp; [Cmdlet-Name](Cmdlet-Name.md) | Brief description |`
 
   ## 5. Validation Checklist
   - [ ] All parameters match .ps1 function signature
