@@ -111,7 +111,7 @@
         'New-AdoCheckConfiguration'
         'New-AdoClassificationNode'
         'New-AdoEnvironment'
-        'New-AdoGroupAsMember'
+        'Add-AdoGroupMember'
         'New-AdoPolicyConfiguration'
         'New-AdoProject'
         'New-AdoRepository'

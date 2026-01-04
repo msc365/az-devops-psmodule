@@ -1,4 +1,4 @@
-﻿function New-AdoGroupAsMember {
+﻿function Add-AdoGroupMember {
     <#
     .SYNOPSIS
         Adds an AAD Group as member of a group.
@@ -28,7 +28,7 @@
             GroupDescriptor = 'vssgp.00000000-0000-0000-0000-000000000001'
             OriginId        = '00000000-0000-0000-0000-000000000001'
         }
-        New-AdoGroupAsMember @params
+        Add-AdoGroupMember @params
 
         Adds an AAD Group as member of a group.
 
@@ -40,7 +40,7 @@
         @(
             '00000000-0000-0000-0000-000000000001',
             '00000000-0000-0000-0000-000000000002'
-        ) | New-AdoGroupAsMember @params
+        ) | Add-AdoGroupMember @params
 
         Adds multiple AAD Groups as members demonstrating pipeline input.
     #>

@@ -37,7 +37,7 @@ BeforeAll {
     }
 }
 
-Describe 'New-AdoGroupAsMember' {
+Describe 'Add-AdoGroupMember' {
 
     Context 'When adding a new AAD group as member' {
         It 'Should add AAD group with required parameters' {
@@ -47,7 +47,7 @@ Describe 'New-AdoGroupAsMember' {
             $originId = '11111111-1111-1111-1111-111111111111'
 
             # Act
-            $result = New-AdoGroupAsMember -CollectionUri $collectionUri -GroupDescriptor $groupDescriptor -OriginId $originId -Confirm:$false
+            $result = Add-AdoGroupMember -CollectionUri $collectionUri -GroupDescriptor $groupDescriptor -OriginId $originId -Confirm:$false
 
             # Assert
             $result | Should -Not -BeNullOrEmpty
@@ -71,7 +71,7 @@ Describe 'New-AdoGroupAsMember' {
             $originId = '11111111-1111-1111-1111-111111111111'
 
             # Act
-            $result = New-AdoGroupAsMember -GroupDescriptor $groupDescriptor -OriginId $originId -Confirm:$false
+            $result = Add-AdoGroupMember -GroupDescriptor $groupDescriptor -OriginId $originId -Confirm:$false
 
             # Assert
             $result | Should -Not -BeNullOrEmpty
@@ -90,7 +90,7 @@ Describe 'New-AdoGroupAsMember' {
             $originId = '22222222-2222-2222-2222-222222222222'
 
             # Act
-            $result = New-AdoGroupAsMember -CollectionUri $collectionUri -GroupDescriptor $groupDescriptor -OriginId $originId -Confirm:$false
+            $result = Add-AdoGroupMember -CollectionUri $collectionUri -GroupDescriptor $groupDescriptor -OriginId $originId -Confirm:$false
 
             # Assert
             Should -Invoke Invoke-AdoRestMethod -ModuleName $moduleName -Exactly 1 -ParameterFilter {
@@ -110,7 +110,7 @@ Describe 'New-AdoGroupAsMember' {
             )
 
             # Act
-            $result = $originIds | New-AdoGroupAsMember -CollectionUri $collectionUri -GroupDescriptor $groupDescriptor -Confirm:$false
+            $result = $originIds | Add-AdoGroupMember -CollectionUri $collectionUri -GroupDescriptor $groupDescriptor -Confirm:$false
 
             # Assert
             $result | Should -Not -BeNullOrEmpty
@@ -132,7 +132,7 @@ Describe 'New-AdoGroupAsMember' {
             )
 
             # Act
-            $result = $inputObjects | New-AdoGroupAsMember -CollectionUri $collectionUri -GroupDescriptor $groupDescriptor -Confirm:$false
+            $result = $inputObjects | Add-AdoGroupMember -CollectionUri $collectionUri -GroupDescriptor $groupDescriptor -Confirm:$false
 
             # Assert
             $result | Should -Not -BeNullOrEmpty
@@ -165,7 +165,7 @@ Describe 'New-AdoGroupAsMember' {
             }
 
             # Act & Assert - Should not throw, should write warning instead
-            { New-AdoGroupAsMember -CollectionUri $collectionUri -GroupDescriptor $groupDescriptor -OriginId $originId -WarningAction SilentlyContinue -Confirm:$false } | Should -Not -Throw
+            { Add-AdoGroupMember -CollectionUri $collectionUri -GroupDescriptor $groupDescriptor -OriginId $originId -WarningAction SilentlyContinue -Confirm:$false } | Should -Not -Throw
 
             # Verify warning was written
             Should -Invoke Invoke-AdoRestMethod -ModuleName $moduleName -Exactly 1
@@ -195,7 +195,7 @@ Describe 'New-AdoGroupAsMember' {
             }
 
             # Act & Assert - Should not throw, should write warning instead
-            { New-AdoGroupAsMember -CollectionUri $collectionUri -GroupDescriptor $groupDescriptor -OriginId $originId -WarningAction SilentlyContinue -Confirm:$false } | Should -Not -Throw
+            { Add-AdoGroupMember -CollectionUri $collectionUri -GroupDescriptor $groupDescriptor -OriginId $originId -WarningAction SilentlyContinue -Confirm:$false } | Should -Not -Throw
 
             # Verify warning was written
             Should -Invoke Invoke-AdoRestMethod -ModuleName $moduleName -Exactly 1
@@ -225,7 +225,7 @@ Describe 'New-AdoGroupAsMember' {
             }
 
             # Act & Assert - Should not throw, should write warning instead
-            { New-AdoGroupAsMember -CollectionUri $collectionUri -GroupDescriptor $groupDescriptor -OriginId $originId -WarningAction SilentlyContinue -Confirm:$false } | Should -Not -Throw
+            { Add-AdoGroupMember -CollectionUri $collectionUri -GroupDescriptor $groupDescriptor -OriginId $originId -WarningAction SilentlyContinue -Confirm:$false } | Should -Not -Throw
 
             # Verify warning was written
             Should -Invoke Invoke-AdoRestMethod -ModuleName $moduleName -Exactly 1
@@ -255,14 +255,14 @@ Describe 'New-AdoGroupAsMember' {
             }
 
             # Act & Assert - Should throw
-            { New-AdoGroupAsMember -CollectionUri $collectionUri -GroupDescriptor $groupDescriptor -OriginId $originId -Confirm:$false } | Should -Throw
+            { Add-AdoGroupMember -CollectionUri $collectionUri -GroupDescriptor $groupDescriptor -OriginId $originId -Confirm:$false } | Should -Throw
         }
     }
 
     Context 'Parameter validation' {
         It 'Should have GroupDescriptor as a mandatory parameter' {
             # Arrange
-            $command = Get-Command New-AdoGroupAsMember
+            $command = Get-Command Add-AdoGroupMember
 
             # Act
             $groupDescriptorParam = $command.Parameters['GroupDescriptor']
@@ -273,7 +273,7 @@ Describe 'New-AdoGroupAsMember' {
 
         It 'Should have OriginId as a mandatory parameter' {
             # Arrange
-            $command = Get-Command New-AdoGroupAsMember
+            $command = Get-Command Add-AdoGroupMember
 
             # Act
             $originIdParam = $command.Parameters['OriginId']
@@ -284,7 +284,7 @@ Describe 'New-AdoGroupAsMember' {
 
         It 'Should have GroupDescriptor parameter with Descriptor alias' {
             # Arrange
-            $command = Get-Command New-AdoGroupAsMember
+            $command = Get-Command Add-AdoGroupMember
 
             # Act
             $groupDescriptorParam = $command.Parameters['GroupDescriptor']
@@ -297,7 +297,7 @@ Describe 'New-AdoGroupAsMember' {
 
         It 'Should have OriginId parameter with Id and GroupId aliases' {
             # Arrange
-            $command = Get-Command New-AdoGroupAsMember
+            $command = Get-Command Add-AdoGroupMember
 
             # Act
             $originIdParam = $command.Parameters['OriginId']
@@ -311,7 +311,7 @@ Describe 'New-AdoGroupAsMember' {
 
         It 'Should have Version parameter with ValidateSet attribute' {
             # Arrange
-            $command = Get-Command New-AdoGroupAsMember
+            $command = Get-Command Add-AdoGroupMember
 
             # Act
             $versionParam = $command.Parameters['Version']
@@ -325,7 +325,7 @@ Describe 'New-AdoGroupAsMember' {
 
         It 'Should support ShouldProcess with ConfirmImpact High' {
             # Arrange
-            $command = Get-Command New-AdoGroupAsMember
+            $command = Get-Command Add-AdoGroupMember
 
             # Act
             $cmdletBinding = $command.ScriptBlock.Attributes | Where-Object { $_ -is [System.Management.Automation.CmdletBindingAttribute] }
@@ -344,7 +344,7 @@ Describe 'New-AdoGroupAsMember' {
             $originId = '11111111-1111-1111-1111-111111111111'
 
             # Act
-            $result = New-AdoGroupAsMember -CollectionUri $collectionUri -GroupDescriptor $groupDescriptor -OriginId $originId -Version '7.1-preview.1' -Confirm:$false
+            $result = Add-AdoGroupMember -CollectionUri $collectionUri -GroupDescriptor $groupDescriptor -OriginId $originId -Version '7.1-preview.1' -Confirm:$false
 
             # Assert
             Should -Invoke Invoke-AdoRestMethod -ModuleName $moduleName -Exactly 1 -ParameterFilter {
@@ -359,7 +359,7 @@ Describe 'New-AdoGroupAsMember' {
             $originId = '11111111-1111-1111-1111-111111111111'
 
             # Act
-            $result = New-AdoGroupAsMember -CollectionUri $collectionUri -GroupDescriptor $groupDescriptor -OriginId $originId -Confirm:$false
+            $result = Add-AdoGroupMember -CollectionUri $collectionUri -GroupDescriptor $groupDescriptor -OriginId $originId -Confirm:$false
 
             # Assert
             Should -Invoke Invoke-AdoRestMethod -ModuleName $moduleName -Exactly 1 -ParameterFilter {
@@ -376,7 +376,7 @@ Describe 'New-AdoGroupAsMember' {
             $originId = '11111111-1111-1111-1111-111111111111'
 
             # Act
-            $result = New-AdoGroupAsMember -CollectionUri $collectionUri -GroupDescriptor $groupDescriptor -OriginId $originId -Confirm:$false
+            $result = Add-AdoGroupMember -CollectionUri $collectionUri -GroupDescriptor $groupDescriptor -OriginId $originId -Confirm:$false
 
             # Assert
             $result | Should -Not -BeNullOrEmpty
@@ -399,7 +399,7 @@ Describe 'New-AdoGroupAsMember' {
             $originId = '11111111-1111-1111-1111-111111111111'
 
             # Act
-            New-AdoGroupAsMember -CollectionUri $collectionUri -GroupDescriptor $groupDescriptor -OriginId $originId -WhatIf
+            Add-AdoGroupMember -CollectionUri $collectionUri -GroupDescriptor $groupDescriptor -OriginId $originId -WhatIf
 
             # Assert - WhatIf should prevent the API call
             Should -Invoke Invoke-AdoRestMethod -ModuleName $moduleName -Exactly 0
@@ -419,7 +419,7 @@ Describe 'New-AdoGroupAsMember' {
 
             # Act
             $results = foreach ($originId in $originIds) {
-                New-AdoGroupAsMember -CollectionUri $collectionUri -GroupDescriptor $groupDescriptor -OriginId $originId -Confirm:$false
+                Add-AdoGroupMember -CollectionUri $collectionUri -GroupDescriptor $groupDescriptor -OriginId $originId -Confirm:$false
             }
 
             # Assert
@@ -474,8 +474,8 @@ Describe 'New-AdoGroupAsMember' {
             }
 
             # Act
-            $result1 = New-AdoGroupAsMember -CollectionUri $collectionUri -GroupDescriptor $groupDescriptor -OriginId $validOriginId -Confirm:$false
-            $result2 = New-AdoGroupAsMember -CollectionUri $collectionUri -GroupDescriptor $groupDescriptor -OriginId $invalidOriginId -WarningAction SilentlyContinue -Confirm:$false
+            $result1 = Add-AdoGroupMember -CollectionUri $collectionUri -GroupDescriptor $groupDescriptor -OriginId $validOriginId -Confirm:$false
+            $result2 = Add-AdoGroupMember -CollectionUri $collectionUri -GroupDescriptor $groupDescriptor -OriginId $invalidOriginId -WarningAction SilentlyContinue -Confirm:$false
 
             # Assert
             $result1 | Should -Not -BeNullOrEmpty

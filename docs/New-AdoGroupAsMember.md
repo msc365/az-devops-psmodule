@@ -6,13 +6,13 @@ Locale: en-NL
 Module Name: Azure.DevOps.PSModule
 ms.date: 01/02/2026
 PlatyPS schema version: 2024-05-01
-title: New-AdoGroupAsMember
+title: Add-AdoGroupMember
 -->
 
 <!-- markdownlint-disable MD024 -->
 <!-- cSpell: ignore dontshow -->
 
-# New-AdoGroupAsMember
+# Add-AdoGroupMember
 
 ## SYNOPSIS
 
@@ -23,7 +23,7 @@ Adds an AAD Group as member of a group.
 ### __AllParameterSets
 
 ```text
-New-AdoGroupAsMember [[-CollectionUri] <string>] -GroupDescriptor <string> -OriginId <string>
+Add-AdoGroupMember [[-CollectionUri] <string>] -GroupDescriptor <string> -OriginId <string>
  [[-Version] <string>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
@@ -48,7 +48,7 @@ $params = @{
     GroupDescriptor = 'vssgp.00000000-0000-0000-0000-000000000001'
     OriginId        = '00000000-0000-0000-0000-000000000001'
 }
-New-AdoGroupAsMember @params
+Add-AdoGroupMember @params
 ```
 
 Adds an AAD Group as member of a group.
@@ -65,7 +65,7 @@ $params = @{
 @(
     '00000000-0000-0000-0000-000000000001',
     '00000000-0000-0000-0000-000000000002'
-) | New-AdoGroupAsMember @params
+) | Add-AdoGroupMember @params
 ```
 
 Adds multiple AAD Groups as members demonstrating pipeline input.
