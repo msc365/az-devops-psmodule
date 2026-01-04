@@ -48,12 +48,74 @@ rules:
     - title: Use Efficient Code Structure
       pattern: |
           Follow Get-AdoProject pattern for efficiency:
-          - Single foreach ($n_ in $Name) loop handles both scenarios
-          - When $Name is null, loop runs once for list all
+          - Use a robust foreach pattern:
+              $namesToProcess = if ($Name) { $Name } else { @($null) }
+              foreach ($n_ in $namesToProcess) { ... }
+          - This ensures the loop runs once for 'list all' when $Name is not provided, and once per name when $Name is specified.
           - Build URI conditionally inside loop
           - Use List[string] for query parameters
           - Use ternary operators in ShouldProcess
           - Normalize results: $items = if ($n_) { @($results) } else { $results.value }
+
+    - title: Proper Body Handling for POST/PUT/PATCH
+      pattern: |
+          For cmdlets that send data (New/Set):
+          - Create body as [PSCustomObject] (not hashtable)
+          - Use hashtables for nested objects (Azure API accepts both)
+          - Do NOT add Body to $params hashtable
+          - Pipe body to Invoke-AdoRestMethod using pipeline input
+          - Let Invoke-AdoRestMethod handle JSON serialization
+          - Example: $results = $body | Invoke-AdoRestMethod @params
+
+    - title: Error Handling Pattern
+      pattern: |
+          Use proper error handling with ErrorDetails.Message matching:
+          - Wrap REST API calls in try/catch blocks
+          - Inner try/catch for specific error scenarios (404, already exists, etc.)
+          - Check $_.ErrorDetails.Message -match 'ExceptionTypeName' for specific errors
+          - Use Write-Warning for expected/graceful errors (not found, already exists)
+          - Re-throw unexpected errors with throw $_
+          - Outer try/catch for general error handling
+
+          Common pattern (most functions):
+          process {
+              try {
+                  if ($PSCmdlet.ShouldProcess(...)) {
+                      try {
+                          $results = Invoke-AdoRestMethod @params
+                          # Process results
+                      } catch {
+                          if ($_.ErrorDetails.Message -match 'NotFoundException') {
+                              Write-Warning "[Type] with ID $Name does not exist, skipping."
+                          } else {
+                              throw $_
+                          }
+                      }
+                  }
+              } catch {
+                  throw $_
+              }
+          }
+
+          Note: Projects use specific exceptions (ProjectDoesNotExistWithNameException, ProjectAlreadyExistsException)
+          New cmdlets may use specific exceptions (TeamAlreadyExistsException, ProjectAlreadyExistsException)
+
+    - title: Name-to-ID Resolution Pattern
+      pattern: |
+          For Set/Remove cmdlets that accept name or ID:
+          - Try to parse input as GUID first
+          - If parsing fails, treat as name and call Get cmdlet to resolve
+          - Use continue keyword if resolution fails (for array processing)
+          - Only proceed with resolved ID
+
+          Example:
+          try {
+              [System.Guid]::Parse($Id) | Out-Null
+              $projectId = $Id
+          } catch {
+              $projectId = (Get-AdoProject -CollectionUri $CollectionUri -Name $Id).id
+              if (-not $projectId) { continue }
+          }
 
 template: |
     function Get-Ado[Type] {
@@ -66,7 +128,7 @@ template: |
             You can retrieve all [type]s, or specific [type]s by name or ID.
 
         .PARAMETER CollectionUri
-            Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/myorganization.
+            Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/my-org.
 
         .PARAMETER ProjectName
             Mandatory. The ID or name of the project.
@@ -89,7 +151,7 @@ template: |
         .EXAMPLE
             $params = @{
                 CollectionUri = 'https://dev.azure.com/my-org'
-                ProjectName   = 'my-project'
+                ProjectName   = 'my-project-1'
             }
             Get-Ado[Type] @params
 
@@ -98,7 +160,7 @@ template: |
         .EXAMPLE
             $params = @{
                 CollectionUri = 'https://dev.azure.com/my-org'
-                ProjectName   = 'my-project'
+                ProjectName   = 'my-project-1'
             }
             Get-Ado[Type] @params -Name 'my-[type]'
 
@@ -190,8 +252,8 @@ template: |
                             }
 
                         } catch {
-                            if ($_ -match 'does not exist') {
-                                Write-Warning "[Type] with ID $n_ does not exist in project $ProjectName, skipping."
+                            if ($_.ErrorDetails.Message -match 'NotFoundException') {
+                                Write-Warning "[Type] with ID $Name does not exist in project $ProjectName, skipping."
                             } else {
                                 throw $_
                             }
@@ -264,31 +326,220 @@ examples:
               }
 
               process {
-                  foreach ($n_ in $Name) {
-                      if ($n_) {
-                          $uri = "$CollectionUri/_apis/projects/$ProjectName/teams/$n_"
-                      } else {
-                          $uri = "$CollectionUri/_apis/projects/$ProjectName/teams"
-                      }
+                  try {
+                      foreach ($n_ in $Name) {
+                          if ($n_) {
+                              $uri = "$CollectionUri/_apis/projects/$ProjectName/teams/$n_"
+                          } else {
+                              $uri = "$CollectionUri/_apis/projects/$ProjectName/teams"
+                          }
 
-                      $params = @{
-                          Uri     = $uri
-                          Version = '7.2-preview.3'
-                          Method  = 'GET'
-                      }
+                          $params = @{
+                              Uri     = $uri
+                              Version = '7.2-preview.3'
+                              Method  = 'GET'
+                          }
 
-                      if ($PSCmdlet.ShouldProcess($CollectionUri, $n_ ? "Get Team '$($n_)' in project '$($ProjectName)'" : "Get Teams for project '$($ProjectName)'")) {
-                          $results = Invoke-AdoRestMethod @params
-                          $teams = if ($n_) { @($results) } else { $results.value }
+                          if ($PSCmdlet.ShouldProcess($CollectionUri, $n_ ? "Get Team '$($n_)' in project '$($ProjectName)'" : "Get Teams for project '$($ProjectName)'")) {
+                              try {
+                                  $results = Invoke-AdoRestMethod @params
+                                  $teams = if ($n_) { @($results) } else { $results.value }
 
-                          foreach ($t_ in $teams) {
-                              [PSCustomObject]@{
-                                  id            = $t_.id
-                                  name          = $t_.name
-                                  collectionUri = $CollectionUri
+                                  foreach ($t_ in $teams) {
+                                      [PSCustomObject]@{
+                                          id            = $t_.id
+                                          name          = $t_.name
+                                          collectionUri = $CollectionUri
+                                      }
+                                  }
+                              } catch {
+                                  if ($_.ErrorDetails.Message -match 'NotFoundException') {
+                                      Write-Warning "Team with ID $n_ does not exist, skipping."
+                                  } else {
+                                      throw $_
+                                  }
                               }
                           }
                       }
+                  } catch {
+                      throw $_
+                  }
+              }
+          }
+
+    - description: Modernize New cmdlet with error handling
+      before: |
+          function New-AdoProject {
+              param (
+                  [Parameter(Mandatory)]
+                  [string]$Name
+              )
+
+              $uri = "$global:AzDevOpsOrganization/_apis/projects"
+              $body = @{ name = $Name } | ConvertTo-Json
+              Invoke-RestMethod -Uri $uri -Method Post -Body $body -Headers @{ Authorization = $AzDevOpsAuth }
+          }
+
+      after: |
+          function New-AdoProject {
+              [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
+              param (
+                  [Parameter(ValueFromPipelineByPropertyName)]
+                  [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
+                  [string]$CollectionUri = $env:DefaultAdoCollectionUri,
+
+                  [Parameter(Mandatory, ValueFromPipelineByPropertyName, ValueFromPipeline)]
+                  [string[]]$Name,
+
+                  [Parameter(ValueFromPipelineByPropertyName)]
+                  [string]$Description
+              )
+
+              begin {
+                  Confirm-Default -Defaults ([ordered]@{
+                      'CollectionUri' = $CollectionUri
+                  })
+              }
+
+              process {
+                  try {
+                      $params = @{
+                          Uri     = "$CollectionUri/_apis/projects"
+                          Version = '7.1'
+                          Method  = 'POST'
+                      }
+
+                      foreach ($name_ in $Name) {
+                          $body = [PSCustomObject]@{
+                              name        = $name_
+                              description = $Description
+                          }
+
+                          if ($PSCmdlet.ShouldProcess($CollectionUri, "Create project: $name_")) {
+                              try {
+                                  $results = $body | Invoke-AdoRestMethod @params
+
+                                  # Get the created project details
+                                  $results = Get-AdoProject -CollectionUri $CollectionUri -Name $name_
+
+                                  [PSCustomObject]@{
+                                      id            = $results.id
+                                      name          = $results.name
+                                      description   = $results.description
+                                      collectionUri = $CollectionUri
+                                  }
+                              } catch {
+                                  if ($_.ErrorDetails.Message -match 'ProjectAlreadyExistsException') {
+                                      Write-Warning "Project $name_ already exists, trying to get it"
+                                      $results = Get-AdoProject -CollectionUri $CollectionUri -Name $name_
+                                      [PSCustomObject]@{
+                                          id            = $results.id
+                                          name          = $results.name
+                                          description   = $results.description
+                                          collectionUri = $CollectionUri
+                                      }
+                                  } else {
+                                      throw $_
+                                  }
+                              }
+                          }
+                      }
+                  } catch {
+                      throw $_
+                  }
+              }
+          }
+
+    - description: Modernize Set cmdlet with name-to-ID resolution
+      before: |
+          function Set-AdoProject {
+              param (
+                  [Parameter(Mandatory)]
+                  [string]$ProjectId,
+
+                  [Parameter()]
+                  [string]$Name
+              )
+
+              $uri = "$global:AzDevOpsOrganization/_apis/projects/$ProjectId"
+              $body = @{ name = $Name } | ConvertTo-Json
+              Invoke-RestMethod -Uri $uri -Method Patch -Body $body -Headers @{ Authorization = $AzDevOpsAuth }
+          }
+
+      after: |
+          function Set-AdoProject {
+              [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
+              param (
+                  [Parameter(ValueFromPipelineByPropertyName)]
+                  [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
+                  [string]$CollectionUri = $env:DefaultAdoCollectionUri,
+
+                  [Parameter(Mandatory, ValueFromPipelineByPropertyName, ValueFromPipeline)]
+                  [Alias('ProjectId')]
+                  [string]$Id,
+
+                  [Parameter(ValueFromPipelineByPropertyName)]
+                  [Alias('ProjectName')]
+                  [string]$Name,
+
+                  [Parameter(ValueFromPipelineByPropertyName)]
+                  [string]$Description
+              )
+
+              begin {
+                  Confirm-Default -Defaults ([ordered]@{
+                      'CollectionUri' = $CollectionUri
+                  })
+              }
+
+              process {
+                  try {
+                      # Get id when name was provided, id is required for update
+                      try {
+                          [System.Guid]::Parse($Id) | Out-Null
+                          $projectId = $Id
+                      } catch {
+                          $projectId = (Get-AdoProject -CollectionUri $CollectionUri -Name $Id).id
+                          if (-not $projectId) { continue }
+                      }
+
+                      $params = @{
+                          Uri     = "$CollectionUri/_apis/projects/$projectId"
+                          Version = '7.1'
+                          Method  = 'PATCH'
+                      }
+
+                      $body = [PSCustomObject]@{}
+                      if ($PSBoundParameters.ContainsKey('Name')) {
+                          $body | Add-Member -NotePropertyName 'name' -NotePropertyValue $Name
+                      }
+                      if ($PSBoundParameters.ContainsKey('Description')) {
+                          $body | Add-Member -NotePropertyName 'description' -NotePropertyValue $Description
+                      }
+
+                      if ($PSCmdlet.ShouldProcess($CollectionUri, "Update project: $Id")) {
+                          try {
+                              $results = $body | Invoke-AdoRestMethod @params
+
+                              # Get the updated project details
+                              $results = Get-AdoProject -CollectionUri $CollectionUri -Id $projectId
+
+                              [PSCustomObject]@{
+                                  id            = $results.id
+                                  name          = $results.name
+                                  description   = $results.description
+                                  collectionUri = $CollectionUri
+                              }
+                          } catch {
+                              if ($_.ErrorDetails.Message -match 'ProjectDoesNotExistWithNameException') {
+                                  Write-Warning "Project with ID $Id does not exist, skipping."
+                              } else {
+                                  throw $_
+                              }
+                          }
+                      }
+                  } catch {
+                      throw $_
                   }
               }
           }
@@ -312,10 +563,14 @@ checklist:
     - Add pipeline support attributes
     - Add parameter set names for Get cmdlets
     - Use single foreach loop pattern
-    - Add proper error handling with try/catch
+    - Add proper error handling with try/catch and ErrorDetails.Message matching
+    - Use Write-Warning for expected errors (not found, already exists)
+    - Re-throw unexpected errors with throw $_
     - Add Write-Verbose and Write-Debug statements
     - Add backward compatibility aliases
     - Include collectionUri in output objects
+    - For POST/PUT/PATCH: Use [PSCustomObject] for body, pipe to Invoke-AdoRestMethod (not in $params)
+    - For Set/Remove: Add name-to-ID resolution with GUID parsing
     - Update help documentation
     - Update examples to use new pattern
 
@@ -327,3 +582,9 @@ notes:
     - Set cmdlets use -Id for target identification, -Name for new name value
     - Remove cmdlets use -Id for target identification
     - New cmdlets use -Name for the new item name
+    - Error handling checks $_.ErrorDetails.Message -match 'ExceptionTypeName' for specific Azure DevOps exceptions
+    - Most functions use generic 'NotFoundException' for not found errors
+    - Project functions use specific exceptions: ProjectDoesNotExistWithNameException, ProjectAlreadyExistsException
+    - New cmdlets may use specific [Type]AlreadyExistsException (e.g., TeamAlreadyExistsException)
+    - Name-to-ID resolution uses [System.Guid]::Parse() to differentiate between GUID and name inputs
+    - Use 'continue' keyword in catch blocks when processing arrays to skip failed items and continue with next
