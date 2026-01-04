@@ -11,6 +11,9 @@
 
 This repository provides a PowerShell module that wraps the Azure DevOps REST API into clean, task-oriented cmdlets. It simplifies automation and scripting across your DevOps workflows, making it easier to manage pipelines, repositories, builds, releases, and work items directly from PowerShell.
 
+> [!NOTE]
+> We are currently working on major changes to elevate this project with better PowerShell best practices, comprehensive unit tests, and improved documentation. The first result was the **v0.2.0-alpha1** release last week, followed by the current **v0.2.0-alpha2** release. An upcoming **v0.2.0-alpha3** release will test all available functions to ensure they conform to the new patterns and improvements. See the [releases page](https://github.com/msc365/az-devops-psmodule/releases) for the latest detailed information. Your feedback during this alpha phase is highly appreciated!
+
 <!-- > [!WARNING]
 > This module provides experimental features, allowing you to test and provide feedback on new functionalities before they become stable. These features are not finalized and may undergo breaking changes, so they are not recommended for production use. -->
 
@@ -23,12 +26,12 @@ This repository provides a PowerShell module that wraps the Azure DevOps REST AP
 <!-- omit from toc -->
 ## Use Cases
 
-> [!TIP]
-> See the [msc365/az-devops-governance](https://github.com/msc365/az-devops-governance) repository for sample scripts that demonstrate a complete Azure governance model. These examples showcase how to implement end-to-end governance from CI/CD pipelines to Azure Resource Manager deployments, aligning with best practices for enterprise-grade cloud architecture.
-
 - Automate DevOps workflows and resource deployments
 - Accelerate onboarding and standardization for cloud teams
 - Implement end-to-end governance from CI/CD pipelines to Azure Resource Manager
+
+> [!TIP]
+> See the [msc365/az-devops-governance](https://github.com/msc365/az-devops-governance) repository for sample scripts that demonstrate a complete Azure governance model. These examples showcase how to implement end-to-end governance from CI/CD pipelines to Azure Resource Manager deployments, aligning with best practices for enterprise-grade cloud architecture.
 
 <!-- omit from toc -->
 ## Table of Contents
@@ -103,7 +106,7 @@ This connects to an Azure DevOps organization using a personal access token (PAT
 #### PowerShell
 
 ```powershell
-Get-AdoProject -ProjectId 'my-project'
+Get-AdoProject -ProjectId 'my-project-1'
 ```
 
 This gets the project as a `<System.Object>` with all available details.
