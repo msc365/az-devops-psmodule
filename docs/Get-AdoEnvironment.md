@@ -4,7 +4,7 @@ external help file: Azure.DevOps.PSModule-Help.xml
 HelpUri: 
 Locale: en-NL
 Module Name: Azure.DevOps.PSModule
-ms.date: 12/05/2025
+ms.date: 01/04/2026
 PlatyPS schema version: 2024-05-01
 title: Get-AdoEnvironment 
 -->
@@ -20,17 +20,24 @@ Get a list of Azure DevOps Pipeline Environments within a specified project.
 
 ## SYNTAX
 
-### __AllParameterSets
+### ListEnvironments (Default)
 
 ```text
-Get-AdoEnvironment [[-CollectionUri] <string>] [[-ProjectName] <string>] [[-Name] <string[]>]
- [[-Top] <int>] [[-Version] <string>] [<CommonParameters>]
+Get-AdoEnvironment [[-CollectionUri] <string>] [[-ProjectName] <string>] [[-Name] <string>]
+ [[-ContinuationToken] <string>] [[-Top] <int32>] [[-Version] <string>] [<CommonParameters>]
+```
+
+### ByEnvironmentId
+
+```text
+Get-AdoEnvironment [[-CollectionUri] <string>] [[-ProjectName] <string>] [-Id] <int32>
+ [[-Expands] <string>] [[-Version] <string>] [<CommonParameters>]
 ```
 
 ## ALIASES
 
 This cmdlet has the following aliases,
-- ProjectId (for ProjectName)
+- N/A
 
 ## DESCRIPTION
 
@@ -45,7 +52,7 @@ This cmdlet retrieves a list of Azure DevOps Pipeline Environments for a given p
 ```powershell
 $params = @{
     CollectionUri = 'https://dev.azure.com/my-org'
-    ProjectName   = 'my-project'
+    ProjectName   = 'my-project-1'
 }
 
 Get-AdoEnvironment @params -Top 2
@@ -63,7 +70,7 @@ Retrieves environments from the specified project with various filtering and pag
 ```powershell
 $params = @{
     CollectionUri = 'https://dev.azure.com/my-org'
-    ProjectName   = 'my-project'
+    ProjectName   = 'my-project-1'
 }
 @(
     'my-environment-tst',
@@ -78,7 +85,7 @@ Retrieves the specified environments from the project, demonstrating pipeline in
 ### -CollectionUri
 
 Optional.
-The collection URI of the Azure DevOps collection/organization, e.g., <https://dev.azure.com/myorganization>.
+The collection URI of the Azure DevOps collection/organization, e.g., <https://dev.azure.com/my-org>.
 
 ```yaml
 Type: System.String
@@ -124,18 +131,41 @@ HelpMessage: ''
 
 Optional.
 The name of the environment to filter the results.
+Supports wildcard patterns.
 
 ```yaml
-Type: System.String[]
+Type: System.String
+DefaultValue: ''
+SupportsWildcards: true
+Aliases: []
+ParameterSets:
+- Name: ListEnvironments
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -ContinuationToken
+
+Optional.
+A continuation token from a previous request to get the next set of results.
+
+```yaml
+Type: System.String
 DefaultValue: ''
 SupportsWildcards: false
 Aliases: []
 ParameterSets:
-- Name: (All)
+- Name: ListEnvironments
   Position: Named
   IsRequired: false
-  ValueFromPipeline: true
-  ValueFromPipelineByPropertyName: true
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: false
   ValueFromRemainingArguments: false
 DontShow: false
 AcceptedValues: []
@@ -146,15 +176,14 @@ HelpMessage: ''
 
 Optional.
 The maximum number of environments to return.
-Default is 20.
 
 ```yaml
 Type: System.Int32
-DefaultValue: 20
+DefaultValue: ''
 SupportsWildcards: false
 Aliases: []
 ParameterSets:
-- Name: (All)
+- Name: ListEnvironments
   Position: Named
   IsRequired: false
   ValueFromPipeline: false
@@ -162,6 +191,54 @@ ParameterSets:
   ValueFromRemainingArguments: false
 DontShow: false
 AcceptedValues: []
+HelpMessage: ''
+```
+
+### -Id
+
+Optional.
+The ID of a specific environment to retrieve.
+
+```yaml
+Type: System.Int32
+DefaultValue: 0
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: ByEnvironmentId
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: true
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -Expands
+
+Optional.
+Include additional details in the returned objects.
+Valid values are 'none' and 'resourceReferences'.
+Default is 'none'.
+
+```yaml
+Type: System.String
+DefaultValue: none
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: ByEnvironmentId
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues:
+- none
+- resourceReferences
 HelpMessage: ''
 ```
 
@@ -198,11 +275,24 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 [about_CommonParameters](https://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS
+
 - N/A
 
 ## OUTPUTS
 
-### System.Object
+### PSCustomObject
+
+Returns environment objects with the following properties:
+- id: The unique identifier of the environment
+- name: The name of the environment
+- createdBy: ID of the user who created the environment
+- createdOn: Date and time when the environment was created
+- lastModifiedBy: ID of the user who last modified the environment
+- lastModifiedOn: Date and time when the environment was last modified
+- projectName: The project name
+- collectionUri: The collection URI
+- resources: (Only when Expands is 'resourceReferences') Array of resource references
+- continuationToken: (When applicable) Token for pagination
 
 ## NOTES
 

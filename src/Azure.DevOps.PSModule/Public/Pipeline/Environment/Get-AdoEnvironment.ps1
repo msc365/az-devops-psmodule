@@ -7,7 +7,7 @@
         This cmdlet retrieves a list of Azure DevOps Pipeline Environments for a given project, with optional filtering by environment name and pagination support.
 
     .PARAMETER CollectionUri
-        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/myorganization.
+        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/my-org.
 
     .PARAMETER ProjectName
         Optional. The name or id of the project.
@@ -16,18 +16,26 @@
         Optional. The name of the environment to filter the results.
 
     .PARAMETER Top
-        Optional. The maximum number of environments to return. Default is 20.
+        Optional. The maximum number of environments to return.
+
+    .PARAMETER Id
+        Optional. The ID of a specific environment to retrieve.
+
+    .PARAMETER Expands
+        Optional. Include additional details in the returned objects. Valid values are 'none' and 'resourceReferences'. Default is 'none'.
 
     .PARAMETER Version
         Optional. The API version to use for the request. Default is '7.2-preview.1'.
+        The -preview flag must be supplied in the api-version for such requests.
 
     .LINK
-        https://learn.microsoft.com/en-us/rest/api/azure/devops/environments/environments/list
+        - https://learn.microsoft.com/en-us/rest/api/azure/devops/environments/environments/get
+        - https://learn.microsoft.com/en-us/rest/api/azure/devops/environments/environments/list
 
     .EXAMPLE
         $params = @{
             CollectionUri = 'https://dev.azure.com/my-org'
-            ProjectName   = 'my-project'
+            ProjectName   = 'my-project-1'
         }
 
         Get-AdoEnvironment @params -Top 2
@@ -40,7 +48,7 @@
     .EXAMPLE
         $params = @{
             CollectionUri = 'https://dev.azure.com/my-org'
-            ProjectName   = 'my-project'
+            ProjectName   = 'my-project-1'
         }
         @(
             'my-environment-tst',
@@ -49,7 +57,7 @@
 
         Retrieves the specified environments from the project, demonstrating pipeline input.
     #>
-    [CmdletBinding(SupportsShouldProcess)]
+    [CmdletBinding(SupportsShouldProcess, DefaultParameterSetName = 'ListEnvironments')]
     param (
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
@@ -59,13 +67,23 @@
         [Alias('ProjectId')]
         [string]$ProjectName = $env:DefaultAdoProject,
 
-        [Parameter(ValueFromPipelineByPropertyName, ValueFromPipeline)]
-        [string[]]$Name,
+        [Parameter(ValueFromPipelineByPropertyName, ParameterSetName = 'ListEnvironments')]
+        [string]$Name,
 
-        [Parameter()]
-        [int]$Top = 20,
+        [Parameter(ParameterSetName = 'ListEnvironments')]
+        [string]$ContinuationToken,
 
-        [Parameter()]
+        [Parameter(ParameterSetName = 'ListEnvironments')]
+        [int32]$Top,
+
+        [Parameter(ValueFromPipelineByPropertyName, ValueFromPipeline, ParameterSetName = 'ByEnvironmentId')]
+        [int32]$Id,
+
+        [Parameter(ValueFromPipelineByPropertyName, ParameterSetName = 'ByEnvironmentId')]
+        [ValidateSet('none', 'resourceReferences')]
+        [string]$Expands = 'none',
+
+        [Parameter(HelpMessage = 'The -preview flag must be supplied in the api-version for such requests.')]
         [Alias('ApiVersion')]
         [ValidateSet('7.2-preview.1')]
         [string]$Version = '7.2-preview.1'
@@ -87,35 +105,71 @@
 
     process {
         try {
+            $QueryParameters = [system.Collections.Generic.List[string]]::new()
+
+            if ($Id) {
+                $uri = "$CollectionUri/$ProjectName/_apis/pipelines/environments/$Id"
+
+                if ($Expands) {
+                    $QueryParameters.Add("expands=$Expands")
+                }
+            } else {
+                $uri = "$CollectionUri/$ProjectName/_apis/pipelines/environments"
+
+                # Build query parameters
+                if ($Name) {
+                    $QueryParameters.Add("name=$Name")
+                }
+                if ($ContinuationToken) {
+                    $QueryParameters.Add("continuationToken=$ContinuationToken")
+                }
+                if ($Top) {
+                    $QueryParameters.Add("`$top=$Top")
+                }
+            }
 
             $params = @{
-                Uri             = "$CollectionUri/$ProjectName/_apis/pipelines/environments"
+                Uri             = $uri
                 Version         = $Version
-                QueryParameters = "name=$($Name)&`$top=$Top"
+                QueryParameters = if ($queryParameters.Count -gt 0) { $queryParameters -join '&' } else { $null }
                 Method          = 'GET'
             }
 
             if ($PSCmdlet.ShouldProcess($CollectionUri, "Get Environment(s) from: $ProjectName")) {
+                try {
+                    $results = (Invoke-AdoRestMethod @params)
+                    $environments = if ($Id) { @($results) } else { $results.value }
 
-                $results = (Invoke-AdoRestMethod @params).value
-
-                foreach ($e_ in $results) {
-                    [PSCustomObject]@{
-                        id             = $e_.id
-                        name           = $e_.name
-                        createdBy      = $e_.createdBy.id
-                        createdOn      = $e_.createdOn
-                        lastModifiedBy = $e_.lastModifiedBy.id
-                        lastModifiedOn = $e_.lastModifiedOn
-                        projectName    = $ProjectName
-                        collectionUri  = $CollectionUri
+                    foreach ($e_ in $environments) {
+                        $obj = [ordered]@{
+                            id   = $e_.id
+                            name = $e_.name
+                        }
+                        if ($Expands -eq 'resourceReferences') {
+                            $obj['resources'] = $e_.resources
+                        }
+                        $obj['createdBy'] = $e_.createdBy.id
+                        $obj['createdOn'] = $e_.createdOn
+                        $obj['lastModifiedBy'] = $e_.lastModifiedBy.id
+                        $obj['lastModifiedOn'] = $e_.lastModifiedOn
+                        $obj['projectName'] = $ProjectName
+                        $obj['collectionUri'] = $CollectionUri
+                        if ($e_.continuationToken) {
+                            $obj['continuationToken'] = $e_.continuationToken
+                        }
+                        # Output the environment object
+                        [PSCustomObject]$obj
+                    }
+                } catch {
+                    if ($_.ErrorDetails.Message -match 'EnvironmentNotFoundException') {
+                        Write-Warning "Environment with ID $Id does not exist, skipping."
+                    } else {
+                        throw $_
                     }
                 }
-
             } else {
                 Write-Verbose "Calling Invoke-AdoRestMethod with $($params| ConvertTo-Json -Depth 10)"
             }
-
         } catch {
             throw $_
         }
