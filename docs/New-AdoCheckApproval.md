@@ -50,6 +50,26 @@ Approval checks ensure that deployments or other operations require approval fro
 
 ```powershell
 $approvers = @(
+    @{ id = '00000000-0000-0000-0000-000000000001' }
+)
+$params = @{
+    CollectionUri = 'https://dev.azure.com/my-org'
+    ProjectName   = 'my-project-1'
+    Approvers     = $approvers
+    ResourceType  = 'environment'
+    ResourceName  = 'my-environment-tst'
+}
+New-AdoCheckApproval @params -Verbose
+```
+
+Creates a new approval check configuration for the specified environment with default parameters.
+
+### EXAMPLE 2
+
+#### PowerShell
+
+```powershell
+$approvers = @(
     @{ id = '00000000-0000-0000-0000-000000000001' },
     @{ id = '00000000-0000-0000-0000-000000000002' }
 )
@@ -72,7 +92,7 @@ New-AdoCheckApproval @params -Verbose
 
 Creates a new approval check configuration for the specified environment with the provided parameters.
 
-### EXAMPLE 2
+### EXAMPLE 3
 
 #### PowerShell
 
@@ -87,7 +107,7 @@ $approvers = @(
 
 Creates approval checks for multiple environments using pipeline input.
 
-### EXAMPLE 3
+### EXAMPLE 4
 
 #### PowerShell
 

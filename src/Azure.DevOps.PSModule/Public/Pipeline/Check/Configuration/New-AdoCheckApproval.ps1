@@ -51,6 +51,21 @@
 
     .EXAMPLE
         $approvers = @(
+            @{ id = '00000000-0000-0000-0000-000000000001' }
+        )
+        $params = @{
+            CollectionUri = 'https://dev.azure.com/my-org'
+            ProjectName   = 'my-project-1'
+            Approvers     = $approvers
+            ResourceType  = 'environment'
+            ResourceName  = 'my-environment-tst'
+        }
+        New-AdoCheckApproval @params -Verbose
+
+        Creates a new approval check configuration for the specified environment with default parameters.
+
+    .EXAMPLE
+        $approvers = @(
             @{ id = '00000000-0000-0000-0000-000000000001' },
             @{ id = '00000000-0000-0000-0000-000000000002' }
         )
