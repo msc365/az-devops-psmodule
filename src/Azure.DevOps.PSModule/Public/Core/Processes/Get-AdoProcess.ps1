@@ -8,7 +8,7 @@
         You can retrieve all processes or a specific process by name.
 
     .PARAMETER CollectionUri
-        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/myorganization.
+        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/my-org.
 
     .PARAMETER Name
         Optional. The name of the process to retrieve. If not provided, retrieves all processes.

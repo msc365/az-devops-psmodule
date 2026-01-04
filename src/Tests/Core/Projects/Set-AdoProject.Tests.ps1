@@ -76,7 +76,7 @@ Describe 'Set-AdoProject' {
         ) {
             # Arrange
             $collectionUri = 'https://dev.azure.com/testorg'
-            $projectId = 'my-project'
+            $projectId = 'my-project-1'
 
             # Act
             $params = @{
@@ -106,7 +106,7 @@ Describe 'Set-AdoProject' {
         It 'Should update multiple properties together' {
             # Arrange
             $collectionUri = 'https://dev.azure.com/testorg'
-            $projectId = 'my-project'
+            $projectId = 'my-project-1'
 
             # Act
             $result = Set-AdoProject -CollectionUri $collectionUri -Id $projectId -Name 'renamed' -Description 'New desc' -Visibility 'Public' -Confirm:$false
@@ -238,7 +238,7 @@ Describe 'Set-AdoProject' {
             $collectionUri = 'https://dev.azure.com/testorg'
 
             # Act
-            $result = Set-AdoProject -CollectionUri $collectionUri -Id 'my-project' -Name 'updated-project' -Confirm:$false
+            $result = Set-AdoProject -CollectionUri $collectionUri -Id 'my-project-1' -Name 'updated-project' -Confirm:$false
 
             # Assert
             $result | Should -Not -BeNullOrEmpty
@@ -436,7 +436,7 @@ Describe 'Set-AdoProject' {
         It 'Should use environment variable when CollectionUri is not provided' {
             # Arrange
             $env:DefaultAdoCollectionUri = 'https://dev.azure.com/envorg'
-            $projectId = 'my-project'
+            $projectId = 'my-project-1'
 
             # Act
             $result = Set-AdoProject -Id $projectId -Name 'updated-project' -Confirm:$false
@@ -496,7 +496,7 @@ Describe 'Set-AdoProject' {
             $collectionUri = 'https://dev.azure.com/testorg'
 
             # Act
-            $result = Set-AdoProject -CollectionUri $collectionUri -Id 'my-project' -Name 'updated' -Version $Version -Confirm:$false
+            $result = Set-AdoProject -CollectionUri $collectionUri -Id 'my-project-1' -Name 'updated' -Version $Version -Confirm:$false
 
             # Assert
             Should -Invoke Invoke-AdoRestMethod -ModuleName $moduleName -Exactly 1 -ParameterFilter {
@@ -541,7 +541,7 @@ Describe 'Set-AdoProject' {
 
             Mock Get-AdoProject -ModuleName $moduleName -MockWith {
                 return @{
-                    id            = 'my-project'
+                    id            = 'my-project-1'
                     name          = 'updated-my-project'
                     description   = 'Updated'
                     visibility    = 'Private'
@@ -554,7 +554,7 @@ Describe 'Set-AdoProject' {
             # Arrange
             $collectionUri = 'https://dev.azure.com/testorg'
             $projectInput = [PSCustomObject]@{
-                Id        = 'my-project'
+                Id        = 'my-project-1'
                 $Property = $Value
             }
 
@@ -625,7 +625,7 @@ Describe 'Set-AdoProject' {
 
             Mock Get-AdoProject -ModuleName $moduleName -MockWith {
                 return @{
-                    id            = 'my-project'
+                    id            = 'my-project-1'
                     name          = 'updated'
                     description   = 'Test'
                     visibility    = 'Private'
@@ -636,7 +636,7 @@ Describe 'Set-AdoProject' {
             }
 
             # Act & Assert
-            { Set-AdoProject -CollectionUri $collectionUri -Id 'my-project' -Name 'updated' -Confirm:$false } | Should -Throw 'Project update failed.'
+            { Set-AdoProject -CollectionUri $collectionUri -Id 'my-project-1' -Name 'updated' -Confirm:$false } | Should -Throw 'Project update failed.'
         }
 
         It 'Should handle project not found error' {
@@ -717,7 +717,7 @@ Describe 'Set-AdoProject' {
             }
 
             # Act & Assert
-            { Set-AdoProject -CollectionUri $collectionUri -Id 'my-project' -Name 'updated' -Confirm:$false } | Should -Throw
+            { Set-AdoProject -CollectionUri $collectionUri -Id 'my-project-1' -Name 'updated' -Confirm:$false } | Should -Throw
         }
     }
 
@@ -758,7 +758,7 @@ Describe 'Set-AdoProject' {
         It 'Should return PSCustomObject with expected properties' {
             # Arrange
             $collectionUri = 'https://dev.azure.com/testorg'
-            $projectId = 'my-project'
+            $projectId = 'my-project-1'
 
             # Act
             $result = Set-AdoProject -CollectionUri $collectionUri -Id $projectId -Name 'updated' -Confirm:$false
@@ -814,7 +814,7 @@ Describe 'Set-AdoProject' {
 
             Mock Get-AdoProject -ModuleName $moduleName -MockWith {
                 return @{
-                    id            = 'my-project'
+                    id            = 'my-project-1'
                     name          = 'updated-my-project'
                     description   = 'Updated'
                     visibility    = 'Private'
@@ -830,7 +830,7 @@ Describe 'Set-AdoProject' {
             $collectionUri = 'https://dev.azure.com/testorg'
 
             # Act
-            Set-AdoProject -CollectionUri $collectionUri -Id 'my-project' -Name 'updated' -WhatIf
+            Set-AdoProject -CollectionUri $collectionUri -Id 'my-project-1' -Name 'updated' -WhatIf
 
             # Assert - Should not actually call the API
             Should -Invoke Invoke-AdoRestMethod -ModuleName $moduleName -Exactly 0 -ParameterFilter {
@@ -843,7 +843,7 @@ Describe 'Set-AdoProject' {
             $collectionUri = 'https://dev.azure.com/testorg'
 
             # Act
-            $result = Set-AdoProject -CollectionUri $collectionUri -Id 'my-project' -Name 'updated' -Confirm:$false
+            $result = Set-AdoProject -CollectionUri $collectionUri -Id 'my-project-1' -Name 'updated' -Confirm:$false
 
             # Assert
             $result | Should -Not -BeNullOrEmpty

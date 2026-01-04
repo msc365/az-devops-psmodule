@@ -42,7 +42,7 @@ This cmdlet retrieves a specific team iteration by its ID for a specified projec
 #### PowerShell
 
 ```powershell
-Get-AdoTeamIteration -ProjectId -ProjectId 'my-project' -TeamId 'my-team' -IterationId $iterationId
+Get-AdoTeamIteration -ProjectId -ProjectId 'my-project-1' -TeamId 'my-team' -IterationId $iterationId
 ```
 
 Retrieves the specified iteration for the given team in the specified project.

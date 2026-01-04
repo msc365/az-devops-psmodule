@@ -42,7 +42,7 @@ This function retrieves policy types for an Azure DevOps project through REST AP
 #### PowerShell
 
 ```powershell
-Get-AdoPolicyType -ProjectId 'my-project' -PolicyType '00000000-0000-0000-0000-000000000000'
+Get-AdoPolicyType -ProjectId 'my-project-1' -PolicyType '00000000-0000-0000-0000-000000000000'
 ```
 
 ## PARAMETERS

@@ -8,7 +8,7 @@
         You can retrieve all repositories, or specific repositories by name or ID.
 
     .PARAMETER CollectionUri
-        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/myorganization.
+        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/my-org.
 
     .PARAMETER ProjectName
         Mandatory. The ID or name of the project.
@@ -31,7 +31,7 @@
     .EXAMPLE
         $params = @{
             CollectionUri = 'https://dev.azure.com/my-org'
-            ProjectName   = 'my-project'
+            ProjectName   = 'my-project-1'
         }
         Get-AdoRepository @params
 
@@ -40,7 +40,7 @@
     .EXAMPLE
         $params = @{
             CollectionUri = 'https://dev.azure.com/my-org'
-            ProjectName   = 'my-project'
+            ProjectName   = 'my-project-1'
         }
         Get-AdoRepository @params -Name 'my-repository-1'
 

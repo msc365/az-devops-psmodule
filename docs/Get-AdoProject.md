@@ -69,7 +69,7 @@ Retrieves the first 5 projects from the specified organization.
 $params = @{
     CollectionUri = 'https://dev.azure.com/my-org'
 }
-Get-AdoProject @params -Name 'my-project'
+Get-AdoProject @params -Name 'my-project-1'
 ```
 
 Retrieves the specified project by name.
@@ -92,7 +92,7 @@ Retrieves multiple projects by name demonstrating pipeline input.
 ### -CollectionUri
 
 Optional.
-The collection URI of the Azure DevOps collection/organization, e.g., <https://dev.azure.com/myorganization>.
+The collection URI of the Azure DevOps collection/organization, e.g., <https://dev.azure.com/my-org>.
 
 ```yaml
 Type: System.String

@@ -24,14 +24,14 @@
         https://learn.microsoft.com/en-us/rest/api/azure/devops/serviceendpoint/endpoints/get-service-endpoints-by-names
 
     .EXAMPLE
-        $endpoint = Get-AdoServiceEndpoint -ProjectId 'my-project' -EndpointNames 'id-my-adortagent'
+        $endpoint = Get-AdoServiceEndpoint -ProjectId 'my-project-1' -EndpointNames 'id-my-adortagent'
 
-        Retrieves the service endpoint with the name 'id-my-adortagent' in the project 'my-project'.
+        Retrieves the service endpoint with the name 'id-my-adortagent' in the project 'my-project-1'.
 
     .EXAMPLE
-        $endpoints = Get-AdoServiceEndpoint -ProjectId 'my-project' -EndpointNames 'id-my-adortagent', 'id-my-other-endpoint'
+        $endpoints = Get-AdoServiceEndpoint -ProjectId 'my-project-1' -EndpointNames 'id-my-adortagent', 'id-my-other-endpoint'
 
-        Retrieves the service endpoints with the names 'id-my-adortagent' and 'id-my-other-endpoint' in the project 'my-project'.
+        Retrieves the service endpoints with the names 'id-my-adortagent' and 'id-my-other-endpoint' in the project 'my-project-1'.
     #>
     [CmdletBinding()]
     [OutputType([object[]])]

@@ -67,10 +67,10 @@ $config = @{
     }
   }
 
-Set-AdoPolicyConfiguration -ProjectName 'my-project' -ConfigurationId 24 -Configuration $config
+Set-AdoPolicyConfiguration -ProjectName 'my-project-1' -ConfigurationId 24 -Configuration $config
 ```
 
-Sets the policy configuration with ID 24 in the 'my-project' project using the specified configuration.
+Sets the policy configuration with ID 24 in the 'my-project-1' project using the specified configuration.
 
 ## PARAMETERS
 

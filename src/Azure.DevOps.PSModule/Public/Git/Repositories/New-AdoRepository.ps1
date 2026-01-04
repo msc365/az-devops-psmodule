@@ -7,7 +7,7 @@
         This cmdlet creates a new repository in an Azure DevOps project through REST API.
 
     .PARAMETER CollectionUri
-        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/myorganization.
+        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/my-org.
 
     .PARAMETER ProjectName
         Mandatory. The ID or name of the project.
@@ -27,7 +27,7 @@
     .EXAMPLE
         $params = @{
             CollectionUri = 'https://dev.azure.com/my-org'
-            ProjectName   = 'my-project'
+            ProjectName   = 'my-project-1'
             Name          = 'my-repository-1'
         }
         New-AdoRepository @params

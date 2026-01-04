@@ -50,7 +50,7 @@ This cmdlet retrieves details of one or more Azure DevOps repositories within a 
 ```powershell
 $params = @{
     CollectionUri = 'https://dev.azure.com/my-org'
-    ProjectName   = 'my-project'
+    ProjectName   = 'my-project-1'
 }
 Get-AdoRepository @params
 ```
@@ -64,7 +64,7 @@ Retrieves all repositories from the specified project.
 ```powershell
 $params = @{
     CollectionUri = 'https://dev.azure.com/my-org'
-    ProjectName   = 'my-project'
+    ProjectName   = 'my-project-1'
     Name          = 'my-repository-1'
 }
 Get-AdoRepository @params
@@ -86,7 +86,7 @@ Retrieves a specific repository using the default collection URI and project nam
 
 ### -CollectionUri
 
-Optional. The collection URI of the Azure DevOps collection/organization, e.g., <https://dev.azure.com/myorganization>.
+Optional. The collection URI of the Azure DevOps collection/organization, e.g., <https://dev.azure.com/my-org>.
 Defaults to the value of $env:DefaultAdoCollectionUri.
 
 ```yaml

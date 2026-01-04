@@ -60,7 +60,7 @@ $params = @{
   backlogIteration = '00000000-0000-0000-0000-000000000000'
   }
 
-  Set-AdoTeamSettings -ProjectId 'my-project' -TeamId 'my-other-team' -TeamSettings $params
+  Set-AdoTeamSettings -ProjectId 'my-project-1' -TeamId 'my-other-team' -TeamSettings $params
 ```
 
 Updates the settings for the team "my-other-team" in the project "my-project" with the specified parameters.

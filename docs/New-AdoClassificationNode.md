@@ -43,7 +43,7 @@ This function creates a new classification node under a specified path for a pro
 #### PowerShell
 
 ```powershell
-New-AdoClassificationNode -Name 'NewArea' -ProjectId 'my-project'
+New-AdoClassificationNode -Name 'NewArea' -ProjectId 'my-project-1'
 ```
 
 This example creates a new area node named 'NewArea' at the root level of the specified project.
@@ -53,7 +53,7 @@ This example creates a new area node named 'NewArea' at the root level of the sp
 #### PowerShell
 
 ```powershell
-New-AdoClassificationNode -Name 'SubArea' -Path 'ExistingArea' -ProjectId 'my-project'
+New-AdoClassificationNode -Name 'SubArea' -Path 'ExistingArea' -ProjectId 'my-project-1'
 ```
 
 This example creates a new area node named 'SubArea' under the existing area node 'ExistingArea' in the specified project.

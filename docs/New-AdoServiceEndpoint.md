@@ -69,7 +69,7 @@ $config = [ordered]@{
             name             = 'id-msc-adortagnt-prd'
             projectReference = [ordered]@{
                 id   = '33333333-3333-3333-3333-333333333333'
-                name = 'my-project'
+                name = 'my-project-1'
             }
         }
     )

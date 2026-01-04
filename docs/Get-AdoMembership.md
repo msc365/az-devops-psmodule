@@ -69,7 +69,7 @@ Retrieves the membership relationships for multiple subjects demonstrating pipel
 ### -CollectionUri
 
 Optional.
-The collection URI of the Azure DevOps collection/organization, e.g., <https://vssps.dev.azure.com/myorganization>.
+The collection URI of the Azure DevOps collection/organization, e.g., <https://vssps.dev.azure.com/my-org>.
 
 ```yaml
 Type: System.String

@@ -23,7 +23,7 @@ BeforeAll {
 Describe 'Remove-AdoTeam' {
     BeforeAll {
         $collectionUri = 'https://dev.azure.com/my-org'
-        $projectName = 'my-project'
+        $projectName = 'my-project-1'
         $teamId = '11111111-1111-1111-1111-111111111111'
 
         Mock Confirm-Default -ModuleName $moduleName -MockWith { }

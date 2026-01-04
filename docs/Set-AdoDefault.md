@@ -43,10 +43,10 @@ This function sets the default Azure DevOps environment variables for the curren
 #### PowerShell
 
 ```powershell
-Set-AdoDefault -Organization 'my-org' -Project 'my-project'
+Set-AdoDefault -Organization 'my-org' -Project 'my-project-1'
 ```
 
-Sets the default Azure DevOps organization to 'my-org', CollectionUri to "<https://dev.azure.com/my-org>", and Project to 'my-project'.
+Sets the default Azure DevOps organization to 'my-org', CollectionUri to "<https://dev.azure.com/my-org>", and Project to 'my-project-1'.
 
 ## PARAMETERS
 

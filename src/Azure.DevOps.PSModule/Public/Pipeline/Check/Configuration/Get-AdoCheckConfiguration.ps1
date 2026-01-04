@@ -8,7 +8,7 @@
         You need to provide the resource type and resource ID to filter the results.
 
     .PARAMETER CollectionUri
-        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/myorganization.
+        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/my-org.
 
     .PARAMETER ProjectName
         Optional. The name or id of the project.
@@ -42,7 +42,7 @@
     .EXAMPLE
         $params = @{
             CollectionUri = 'https://dev.azure.com/my-org'
-            ProjectName   = 'my-project'
+            ProjectName   = 'my-project-1'
             ResourceType  = 'environment'
             ResourceName  = 'my-environment-tst'
         }
@@ -53,7 +53,7 @@
     .EXAMPLE
         $params = @{
             CollectionUri = 'https://dev.azure.com/my-org'
-            ProjectName   = 'my-project'
+            ProjectName   = 'my-project-1'
             ResourceType  = 'environment'
             Expands       = 'settings'
         }
@@ -72,7 +72,7 @@
     .EXAMPLE
         $params = @{
             CollectionUri  = 'https://dev.azure.com/my-org'
-            ProjectName    = 'my-project'
+            ProjectName    = 'my-project-1'
             ResourceType   = 'environment'
             ResourceName   = 'my-environment-tst'
             DefinitionType = 'approval'
@@ -85,7 +85,7 @@
     .EXAMPLE
         $params = @{
             CollectionUri  = 'https://dev.azure.com/my-org'
-            ProjectName    = 'my-project'
+            ProjectName    = 'my-project-1'
             ResourceType   = 'environment'
             ResourceName   = 'my-environment-tst'
             DefinitionType = 'approval', 'preCheckApproval'

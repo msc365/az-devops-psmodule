@@ -7,9 +7,9 @@
         This function sets the default Azure DevOps environment variables for the current session.
 
     .EXAMPLE
-        Set-AdoDefault -Organization 'my-org' -Project 'my-project'
+        Set-AdoDefault -Organization 'my-org' -Project 'my-project-1'
 
-        Sets the default Azure DevOps default Organization to 'my-org', CollectionUri to "https://dev.azure.com/my-org" and Project to 'my-project'.
+        Sets the default Azure DevOps default Organization to 'my-org', CollectionUri to "https://dev.azure.com/my-org" and Project to 'my-project-1'.
     #>
     [CmdletBinding(SupportsShouldProcess)]
     param (

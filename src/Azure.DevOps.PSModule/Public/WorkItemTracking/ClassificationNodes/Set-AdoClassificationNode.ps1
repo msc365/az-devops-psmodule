@@ -34,7 +34,7 @@ function Set-AdoClassificationNode {
         - Requires an active connection to Azure DevOps using Connect-AdoOrganization.
 
     .EXAMPLE
-        $updatedAreaNode = Set-AdoClassificationNode -ProjectId 'my-project' -Name 'New Area Name' -Path 'Area/SubArea'
+        $updatedAreaNode = Set-AdoClassificationNode -ProjectId 'my-project-1' -Name 'New Area Name' -Path 'Area/SubArea'
 
         This example updates the name of the specified area node.
     #>

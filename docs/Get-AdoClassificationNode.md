@@ -43,7 +43,7 @@ This function retrieves classification nodes for a specified project in Azure De
 #### PowerShell
 
 ```powershell
-Get-AdoClassificationNode -ProjectId 'my-project'
+Get-AdoClassificationNode -ProjectId 'my-project-1'
 ```
 
 This example retrieves the root classification node for the specified project.
@@ -53,7 +53,7 @@ This example retrieves the root classification node for the specified project.
 #### PowerShell
 
 ```powershell
-Get-AdoClassificationNode -ProjectId 'my-project' -Path 'Area/SubArea' -Depth 2
+Get-AdoClassificationNode -ProjectId 'my-project-1' -Path 'Area/SubArea' -Depth 2
 ```
 
 This example retrieves the classification node at the specified path with a depth of 2.

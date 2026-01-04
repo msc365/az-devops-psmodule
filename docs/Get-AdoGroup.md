@@ -54,7 +54,7 @@ Retrieves all groups in the Azure DevOps organization.
 #### PowerShell
 
 ```powershell
-$project = Get-AdoProject -Name 'my-project'
+$project = Get-AdoProject -Name 'my-project-1'
 $projectDescriptor = (Get-AdoDescriptor -StorageKey $project.Id)
 
 $params = @{
@@ -104,7 +104,7 @@ Retrieves the groups with the specified descriptors.
 ### -CollectionUri
 
 Optional.
-The collection URI of the Azure DevOps collection/organization, e.g., <https://vssps.dev.azure.com/myorganization>.
+The collection URI of the Azure DevOps collection/organization, e.g., <https://vssps.dev.azure.com/my-org>.
 
 ```yaml
 Type: System.String

@@ -45,7 +45,7 @@ This cmdlet deletes a specific check configuration using its unique identifier w
 ```powershell
 $params = @{
     CollectionUri = 'https://dev.azure.com/my-org'
-    ProjectName   = 'my-project'
+    ProjectName   = 'my-project-1'
     Id = 1
 }
 Remove-AdoCheckConfiguration @params -Verbose
@@ -60,7 +60,7 @@ Removes the check configuration with ID 1 from the specified resource using the 
 ```powershell
 $params = @{
     CollectionUri = 'https://dev.azure.com/my-org'
-    ProjectName   = 'my-project'
+    ProjectName   = 'my-project-1'
 }
 @(
     1, 2, 3
@@ -74,7 +74,7 @@ Removes the check configurations with IDs 1, 2, and 3 from the specified resourc
 ### -CollectionUri
 
 Optional.
-The collection URI of the Azure DevOps collection/organization, e.g., <https://dev.azure.com/myorganization>.
+The collection URI of the Azure DevOps collection/organization, e.g., <https://dev.azure.com/my-org>.
 
 ```yaml
 Type: System.String

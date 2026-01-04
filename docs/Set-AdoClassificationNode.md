@@ -42,7 +42,7 @@ This function updates the name of a classification node for a specified project 
 #### PowerShell
 
 ```powershell
-Set-AdoClassificationNode -ProjectId 'my-project' -Name 'New Area Name' -Path 'Area/SubArea'
+Set-AdoClassificationNode -ProjectId 'my-project-1' -Name 'New Area Name' -Path 'Area/SubArea'
 ```
 
 This example updates the name of the specified area node.

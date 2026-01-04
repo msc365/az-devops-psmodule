@@ -7,7 +7,7 @@
         This cmdlet updates an existing Azure DevOps team within a specified project.
 
     .PARAMETER CollectionUri
-        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/myorganization.
+        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/my-org.
 
     .PARAMETER ProjectName
         Optional. The ID or name of the project. If not specified, the default project is used.
@@ -30,7 +30,7 @@
     .EXAMPLE
         $params = @{
             CollectionUri = 'https://dev.azure.com/my-org'
-            ProjectName   = 'my-project'
+            ProjectName   = 'my-project-1'
             Id            = 'my-team'
             Name          = 'my-team-updated'
         }
@@ -41,7 +41,7 @@
     .EXAMPLE
         $params = @{
             CollectionUri = 'https://dev.azure.com/my-org'
-            ProjectName   = 'my-project'
+            ProjectName   = 'my-project-1'
         }
         [PSCustomObject]@{
             Id          = 'my-team'

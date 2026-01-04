@@ -7,7 +7,7 @@
         This cmdlet updates an existing Azure DevOps project within a specified organization.
 
     .PARAMETER CollectionUri
-        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/myorganization.
+        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/my-org.
 
     .PARAMETER Id
         Mandatory. The ID (uuid) of the project to update.

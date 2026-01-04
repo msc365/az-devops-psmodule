@@ -52,7 +52,7 @@ This cmdlet retrieves details of one or more Azure DevOps teams within a given p
 ```powershell
 $params = @{
     CollectionUri = 'https://dev.azure.com/my-org'
-    ProjectName   = 'my-project'
+    ProjectName   = 'my-project-1'
 }
 Get-AdoTeam @params
 ```
@@ -74,7 +74,7 @@ Retrieves the specified team using default CollectionUri and ProjectName from en
 #### PowerShell
 
 ```powershell
-'team-1' | Get-AdoTeam -ProjectName 'my-project'
+'team-1' | Get-AdoTeam -ProjectName 'my-project-1'
 ```
 
 Retrieves a team demonstrating pipeline input.

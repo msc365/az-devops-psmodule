@@ -26,7 +26,7 @@ function Get-AdoTeamIteration {
         https://learn.microsoft.com/en-us/rest/api/azure/devops/work/iterations/get
 
     .EXAMPLE
-        Get-AdoTeamIteration -ProjectId -ProjectId 'my-project' -TeamId 'my-team' -IterationId $iterationId
+        Get-AdoTeamIteration -ProjectId -ProjectId 'my-project-1' -TeamId 'my-team' -IterationId $iterationId
 
         Retrieves the specified iteration for the given team in the specified project.
     #>

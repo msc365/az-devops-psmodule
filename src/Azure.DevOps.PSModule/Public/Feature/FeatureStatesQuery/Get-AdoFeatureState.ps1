@@ -8,7 +8,7 @@
         Returns the states for Boards, Repos, Pipelines, Test Plans, and Artifacts features.
 
     .PARAMETER CollectionUri
-        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/myorganization.
+        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/my-org.
 
     .PARAMETER ProjectName
         Optional. The ID or name of the project. Defaults to the value of $env:DefaultAdoProject.

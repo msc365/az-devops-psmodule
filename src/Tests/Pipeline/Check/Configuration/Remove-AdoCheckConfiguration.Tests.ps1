@@ -23,7 +23,7 @@ BeforeAll {
 Describe 'Remove-AdoCheckConfiguration' {
     BeforeAll {
         $collectionUri = 'https://dev.azure.com/my-org'
-        $projectName = 'my-project'
+        $projectName = 'my-project-1'
         $checkId = 1
 
         Mock Confirm-Default -ModuleName $moduleName -MockWith { }

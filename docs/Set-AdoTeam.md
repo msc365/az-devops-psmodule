@@ -45,7 +45,7 @@ This cmdlet updates an existing Azure DevOps team within a specified project. Yo
 ```powershell
 $params = @{
     CollectionUri = 'https://dev.azure.com/my-org'
-    ProjectName   = 'my-project'
+    ProjectName   = 'my-project-1'
     Id            = 'my-team'
     Name          = 'my-team-updated'
 }
@@ -63,7 +63,7 @@ Updates the name of the specified team.
     Id          = 'my-team'
     Name        = 'my-team-updated'
     Description = 'Updated description'
-} | Set-AdoTeam -ProjectName 'my-project'
+} | Set-AdoTeam -ProjectName 'my-project-1'
 ```
 
 Updates the team using pipeline input.

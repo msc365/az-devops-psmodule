@@ -47,7 +47,7 @@ When a project with the specified name already exists, it will be returned inste
 ```powershell
 $params = @{
     CollectionUri = 'https://dev.azure.com/my-org'
-    Name          = 'my-project'
+    Name          = 'my-project-1'
     Description   = 'My new project'
 }
 New-AdoProject @params -Verbose
@@ -73,7 +73,7 @@ Creates multiple projects demonstrating pipeline input.
 ### -CollectionUri
 
 Optional.
-The collection URI of the Azure DevOps collection/organization, e.g., <https://dev.azure.com/myorganization>.
+The collection URI of the Azure DevOps collection/organization, e.g., <https://dev.azure.com/my-org>.
 
 ```yaml
 Type: System.String

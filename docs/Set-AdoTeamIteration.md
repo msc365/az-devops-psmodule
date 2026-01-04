@@ -42,7 +42,7 @@ This cmdlet sets a specific team iteration by its ID for a specified project or 
 #### PowerShell
 
 ```powershell
-Set-AdoTeamIteration -ProjectId -ProjectId 'my-project' -TeamId 'my-team' -IterationId $iterationId
+Set-AdoTeamIteration -ProjectId -ProjectId 'my-project-1' -TeamId 'my-team' -IterationId $iterationId
 ```
 
 Sets the specified iteration for the given team in the specified project.

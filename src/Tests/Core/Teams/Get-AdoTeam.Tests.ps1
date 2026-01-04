@@ -23,7 +23,7 @@ BeforeAll {
 Describe 'Get-AdoTeam' {
     BeforeAll {
         $collectionUri = 'https://dev.azure.com/my-org'
-        $projectName = 'my-project'
+        $projectName = 'my-project-1'
         $teamName = 'my-team'
         $teamId = '11111111-1111-1111-1111-111111111111'
 
@@ -117,7 +117,7 @@ Describe 'Get-AdoTeam' {
             Mock Invoke-AdoRestMethod -ModuleName $moduleName -MockWith {
                 param($Uri)
                 $script:collectionUri = 'https://dev.azure.com/my-org'
-                $script:projectName = 'my-project'
+                $script:projectName = 'my-project-1'
                 $script:teamName = 'my-team'
                 $script:teamId = '11111111-1111-1111-1111-111111111111'
 
@@ -163,7 +163,7 @@ Describe 'Get-AdoTeam' {
             Mock Invoke-AdoRestMethod -ModuleName $moduleName -MockWith {
                 param($Uri)
                 $script:collectionUri = 'https://dev.azure.com/my-org'
-                $script:projectName = 'my-project'
+                $script:projectName = 'my-project-1'
 
                 if ($Uri -match 'team-1') {
                     return @{

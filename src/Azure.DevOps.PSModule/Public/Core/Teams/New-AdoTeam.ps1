@@ -7,7 +7,7 @@
         This cmdlet creates a new Azure DevOps team within a specified project.
 
     .PARAMETER CollectionUri
-        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/myorganization.
+        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/my-org.
 
     .PARAMETER ProjectName
         Optional. The ID or name of the project. If not specified, the default project is used.
@@ -27,7 +27,7 @@
     .EXAMPLE
         $params = @{
             CollectionUri = 'https://dev.azure.com/my-org'
-            ProjectName   = 'my-project'
+            ProjectName   = 'my-project-1'
             Name          = 'my-team'
         }
         New-AdoTeam @params -Verbose
@@ -37,7 +37,7 @@
     .EXAMPLE
         $params = @{
             CollectionUri = 'https://dev.azure.com/my-org'
-            ProjectName   = 'my-project'
+            ProjectName   = 'my-project-1'
         }
         @('team-1', 'team-2') | New-AdoTeam @params -Verbose
 

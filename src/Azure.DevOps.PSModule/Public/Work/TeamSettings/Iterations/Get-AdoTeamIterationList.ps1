@@ -28,7 +28,7 @@ function Get-AdoTeamIterationList {
         https://learn.microsoft.com/en-us/rest/api/azure/devops/work/iterations/list
 
     .EXAMPLE
-        Get-AdoTeamIterationList -ProjectId 'my-project' -TeamId 'my-team' -TimeFrame 'current'
+        Get-AdoTeamIterationList -ProjectId 'my-project-1' -TeamId 'my-team' -TimeFrame 'current'
 
         Retrieves the current iterations for the specified team in the given project.
     #>

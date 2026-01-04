@@ -26,7 +26,7 @@ function Set-AdoTeamIteration {
         https://learn.microsoft.com/en-us/rest/api/azure/devops/work/iterations/post-team-iteration
 
     .EXAMPLE
-        Set-AdoTeamIteration -ProjectId -ProjectId 'my-project' -TeamId 'my-team' -IterationId $iterationId
+        Set-AdoTeamIteration -ProjectId -ProjectId 'my-project-1' -TeamId 'my-team' -IterationId $iterationId
 
         Sets the specified iteration for the given team in the specified project.
     #>

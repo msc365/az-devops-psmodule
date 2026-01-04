@@ -44,7 +44,7 @@ You can filter the iterations by timeframe (past, current, future).
 #### PowerShell
 
 ```powershell
-Get-AdoTeamIterationList -ProjectId 'my-project' -TeamId 'my-team' -TimeFrame 'current'
+Get-AdoTeamIterationList -ProjectId 'my-project-1' -TeamId 'my-team' -TimeFrame 'current'
 ```
 
 Retrieves the current iterations for the specified team in the given project.

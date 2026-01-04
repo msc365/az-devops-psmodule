@@ -7,7 +7,7 @@
         This cmdlet removes a team from an Azure DevOps project.
 
     .PARAMETER CollectionUri
-        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/myorganization.
+        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/my-org.
 
     .PARAMETER ProjectName
         Optional. The ID or name of the project. If not specified, the default project is used.
@@ -24,7 +24,7 @@
     .EXAMPLE
         $params = @{
             CollectionUri = 'https://dev.azure.com/my-org'
-            ProjectName   = 'my-project'
+            ProjectName   = 'my-project-1'
         }
         Remove-AdoTeam @params -Id 'my-team' -Verbose
 
@@ -33,7 +33,7 @@
     .EXAMPLE
         $params = @{
             CollectionUri = 'https://dev.azure.com/my-org'
-            ProjectName   = 'my-project'
+            ProjectName   = 'my-project-1'
         }
         @('team-1', 'team-2') | Remove-AdoTeam @params -Verbose
 

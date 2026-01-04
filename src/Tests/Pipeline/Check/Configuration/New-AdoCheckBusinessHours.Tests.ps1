@@ -23,7 +23,7 @@ BeforeAll {
 Describe 'New-AdoCheckBusinessHours' {
     BeforeAll {
         $collectionUri = 'https://dev.azure.com/my-org'
-        $projectName = 'my-project'
+        $projectName = 'my-project-1'
         $resourceType = 'environment'
         $resourceName = 'my-environment-tst'
         $resourceId = 123

@@ -80,7 +80,7 @@ $configJson = @{
 
 $params = @{
     CollectionUri = 'https://dev.azure.com/my-org'
-    ProjectName   = 'my-project'
+    ProjectName   = 'my-project-1'
     Configuration = $configJson
 }
 New-AdoCheckConfiguration @params
@@ -93,7 +93,7 @@ Creates a new check configuration in the specified project using the provided co
 ### -CollectionUri
 
 Optional.
-The collection URI of the Azure DevOps collection/organization, e.g., <https://dev.azure.com/myorganization>.
+The collection URI of the Azure DevOps collection/organization, e.g., <https://dev.azure.com/my-org>.
 
 ```yaml
 Type: System.String

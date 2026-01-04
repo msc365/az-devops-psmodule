@@ -7,7 +7,7 @@
         This function retrieves a single or multiple groups in an Azure DevOps organization through REST API.
 
     .PARAMETER CollectionUri
-        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://vssps.dev.azure.com/myorganization.
+        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://vssps.dev.azure.com/my-org.
 
     .PARAMETER ScopeDescriptor
         Optional. Specify a non-default scope (collection, project) to search for groups.

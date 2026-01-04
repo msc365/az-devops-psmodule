@@ -8,7 +8,7 @@
         When a project with the specified name already exists, it will be returned instead of creating a new one.
 
     .PARAMETER CollectionUri
-        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/myorganization.
+        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/my-org.
 
     .PARAMETER Name
         Mandatory. The name of the project to create.
@@ -34,7 +34,7 @@
     .EXAMPLE
         $params = @{
             CollectionUri = 'https://dev.azure.com/my-org'
-            Name          = 'my-project'
+            Name          = 'my-project-1'
             Description   = 'My new project'
         }
         New-AdoProject @params -Verbose

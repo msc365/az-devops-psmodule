@@ -41,7 +41,7 @@ This function retrieves a list of policy configurations for an Azure DevOps proj
 #### PowerShell
 
 ```powershell
-Get-AdoPolicyConfiguration -ProjectId 'my-project'
+Get-AdoPolicyConfiguration -ProjectId 'my-project-1'
 ```
 
 ## PARAMETERS

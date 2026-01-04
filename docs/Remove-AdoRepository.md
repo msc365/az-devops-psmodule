@@ -44,7 +44,7 @@ This cmdlet removes a repository from an Azure DevOps project through REST API.
 ```powershell
 $params = @{
     CollectionUri = 'https://dev.azure.com/my-org'
-    ProjectName   = 'my-project'
+    ProjectName   = 'my-project-1'
     Name          = 'my-repository-1'
 }
 Remove-AdoRepository @params
@@ -66,7 +66,7 @@ Removes a repository using its ID and the default collection URI and project nam
 
 ### -CollectionUri
 
-Optional. The collection URI of the Azure DevOps collection/organization, e.g., <https://dev.azure.com/myorganization>.
+Optional. The collection URI of the Azure DevOps collection/organization, e.g., <https://dev.azure.com/my-org>.
 Defaults to the value of $env:DefaultAdoCollectionUri.
 
 ```yaml

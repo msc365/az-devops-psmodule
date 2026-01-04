@@ -51,7 +51,7 @@ $approvers = @{ id = '00000000-0000-0000-0000-000000000000' }
 
 $params = @{
     CollectionUri  = 'https://dev.azure.com/my-org'
-    ProjectName    = 'my-project'
+    ProjectName    = 'my-project-1'
     Approvers      = $approvers
     ResourceType   = 'environment'
     ResourceName   = 'my-environment-tst'
@@ -86,7 +86,7 @@ Creates approval checks for multiple environments using pipeline input.
 ```powershell
 $params = @{
     CollectionUri  = 'https://dev.azure.com/my-org'
-    ProjectName    = 'my-project'
+    ProjectName    = 'my-project-1'
     Approvers      = @{ id = '00000000-0000-0000-0000-000000000000' }
     ResourceType   = 'environment'
     ResourceName   = 'my-environment-tst'
@@ -102,7 +102,7 @@ Creates a pre-check approval for the specified environment.
 ### -CollectionUri
 
 Optional.
-The collection URI of the Azure DevOps collection/organization, e.g., <https://dev.azure.com/myorganization>.
+The collection URI of the Azure DevOps collection/organization, e.g., <https://dev.azure.com/my-org>.
 
 ```yaml
 Type: System.String

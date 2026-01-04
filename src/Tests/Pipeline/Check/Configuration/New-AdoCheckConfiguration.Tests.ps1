@@ -23,7 +23,7 @@ BeforeAll {
 Describe 'New-AdoCheckConfiguration' {
     BeforeAll {
         $collectionUri = 'https://dev.azure.com/my-org'
-        $projectName = 'my-project'
+        $projectName = 'my-project-1'
         $definitionRefId = '8c6f20a7-a545-4486-9777-f762fafe0d4d'
 
         Mock Confirm-Default -ModuleName $moduleName -MockWith { }

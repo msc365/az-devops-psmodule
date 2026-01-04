@@ -45,7 +45,7 @@ This cmdlet removes a team from an Azure DevOps project. This action permanently
 ```powershell
 $params = @{
     CollectionUri = 'https://dev.azure.com/my-org'
-    ProjectName   = 'my-project'
+    ProjectName   = 'my-project-1'
 }
 Remove-AdoTeam @params -Name 'my-team'
 ```
@@ -57,7 +57,7 @@ Removes the specified team from the project.
 #### PowerShell
 
 ```powershell
-@('team-1', 'team-2') | Remove-AdoTeam -ProjectName 'my-project'
+@('team-1', 'team-2') | Remove-AdoTeam -ProjectName 'my-project-1'
 ```
 
 Removes multiple teams demonstrating pipeline input.

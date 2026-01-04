@@ -75,7 +75,7 @@ Adds multiple AAD Groups as members demonstrating pipeline input.
 ### -CollectionUri
 
 Optional.
-The collection URI of the Azure DevOps collection/organization, e.g., <https://vssps.dev.azure.com/myorganization>.
+The collection URI of the Azure DevOps collection/organization, e.g., <https://vssps.dev.azure.com/my-org>.
 Defaults to the value of $env:DefaultAdoCollectionUri with the scheme replaced to use vssps subdomain.
 
 ```yaml

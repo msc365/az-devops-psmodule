@@ -7,7 +7,7 @@
         This cmdlet retrieves the membership relationship between a specified subject and container in Azure DevOps.
 
     .PARAMETER CollectionUri
-        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://vssps.dev.azure.com/myorganization.
+        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://vssps.dev.azure.com/my-org.
 
     .PARAMETER SubjectDescriptor
         Mandatory. A descriptor to the child subject in the relationship.

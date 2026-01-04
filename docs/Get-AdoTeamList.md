@@ -42,7 +42,7 @@ This function retrieves all teams for a given Azure DevOps project through REST 
 #### PowerShell
 
 ```powershell
-Get-AdoTeamList -ProjectId 'my-project'
+Get-AdoTeamList -ProjectId 'my-project-1'
 ```
 
 ## PARAMETERS

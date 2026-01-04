@@ -8,7 +8,7 @@
         You can retrieve all projects, a specific project by name or id, and control the amount of data returned using pagination parameters.
 
     .PARAMETER CollectionUri
-        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/myorganization.
+        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/my-org.
 
     .PARAMETER Name
         Optional. The name or id of the project to retrieve. If not provided, retrieves all projects.
@@ -51,7 +51,7 @@
         $params = @{
             CollectionUri = 'https://dev.azure.com/my-org'
         }
-        Get-AdoProject @params -Name 'my-project'
+        Get-AdoProject @params -Name 'my-project-1'
 
         Retrieves the specified project by name.
 
@@ -162,7 +162,7 @@
                     $projects = if ($Name) { @($results) } else { $results.value }
 
                     foreach ($p_ in $projects) {
-                        $outputObj = [ordered]@{
+                        $obj = [ordered]@{
                             id            = $p_.id
                             name          = $p_.name
                             description   = $p_.description
@@ -173,10 +173,10 @@
                             collectionUri = $CollectionUri
                         }
                         if ($results.continuationToken) {
-                            $outputObj.continuationToken = $results.continuationToken
+                            $obj.continuationToken = $results.continuationToken
                         }
                         # Output the project object
-                        [PSCustomObject]$outputObj
+                        [PSCustomObject]$obj
                     }
                 } catch {
                     if ($_.ErrorDetails.Message -match 'ProjectDoesNotExistWithNameException') {

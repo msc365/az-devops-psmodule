@@ -23,7 +23,7 @@ BeforeAll {
 Describe 'Set-AdoTeam' {
     BeforeAll {
         $collectionUri = 'https://dev.azure.com/my-org'
-        $projectName = 'my-project'
+        $projectName = 'my-project-1'
         $teamId = '11111111-1111-1111-1111-111111111111'
 
         Mock Confirm-Default -ModuleName $moduleName -MockWith { }
@@ -34,7 +34,7 @@ Describe 'Set-AdoTeam' {
             Mock Invoke-AdoRestMethod -ModuleName $moduleName -MockWith {
                 param($Body)
                 $script:collectionUri = 'https://dev.azure.com/my-org'
-                $script:projectName = 'my-project'
+                $script:projectName = 'my-project-1'
                 $script:teamId = '11111111-1111-1111-1111-111111111111'
 
                 return @{
@@ -100,7 +100,7 @@ Describe 'Set-AdoTeam' {
             Mock Invoke-AdoRestMethod -ModuleName $moduleName -MockWith {
                 param($Uri, $Body)
                 $script:collectionUri = 'https://dev.azure.com/my-org'
-                $script:projectName = 'my-project'
+                $script:projectName = 'my-project-1'
 
                 # Extract team ID from URI
                 $teamIdFromUri = $Uri -replace '.*/teams/([^/]+).*', '$1'
@@ -133,7 +133,7 @@ Describe 'Set-AdoTeam' {
             Mock Invoke-AdoRestMethod -ModuleName $moduleName -MockWith {
                 param($Body, $Uri)
                 $script:collectionUri = 'https://dev.azure.com/my-org'
-                $script:projectName = 'my-project'
+                $script:projectName = 'my-project-1'
                 $teamIdFromUri = $Uri -replace '.*/teams/([^/]+).*', '$1'
 
                 return @{
@@ -287,7 +287,7 @@ Describe 'Set-AdoTeam' {
             Mock Invoke-AdoRestMethod -ModuleName $moduleName -MockWith {
                 param($Body)
                 $script:collectionUri = 'https://dev.azure.com/my-org'
-                $script:projectName = 'my-project'
+                $script:projectName = 'my-project-1'
                 $script:teamId = '11111111-1111-1111-1111-111111111111'
 
                 return @{
@@ -333,7 +333,7 @@ Describe 'Set-AdoTeam' {
             Mock Invoke-AdoRestMethod -ModuleName $moduleName -MockWith {
                 param($Body)
                 $script:collectionUri = 'https://dev.azure.com/my-org'
-                $script:projectName = 'my-project'
+                $script:projectName = 'my-project-1'
                 $script:teamId = '11111111-1111-1111-1111-111111111111'
 
                 return @{

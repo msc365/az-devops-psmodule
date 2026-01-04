@@ -46,7 +46,7 @@ This cmdlet updates an existing Azure DevOps project within a specified organiza
 ```powershell
 $params = @{
     CollectionUri = 'https://dev.azure.com/my-org'
-    Id            = 'my-project'
+    Id            = 'my-project-1'
     Name          = 'my-project-updated'
 }
 Set-AdoProject @params -Verbose
@@ -63,7 +63,7 @@ $params = @{
     CollectionUri = 'https://dev.azure.com/my-org'
 }
 [PSCustomObject]@{
-    Id          = 'my-project'
+    Id          = 'my-project-1'
     Name        = 'my-project-updated'
     Description = 'Updated description'
 } | Set-AdoProject @params -Verbose
@@ -76,7 +76,7 @@ Updates the project using pipeline input.
 ### -CollectionUri
 
 Optional.
-The collection URI of the Azure DevOps collection/organization, e.g., <https://dev.azure.com/myorganization>.
+The collection URI of the Azure DevOps collection/organization, e.g., <https://dev.azure.com/my-org>.
 
 ```yaml
 Type: System.String

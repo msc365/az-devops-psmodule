@@ -45,7 +45,7 @@ This cmdlet removes a project from an Azure DevOps organization.
 ```powershell
 $params = @{
     CollectionUri = 'https://dev.azure.com/my-org'
-    Id            = 'my-project'
+    Id            = 'my-project-1'
 }
 Remove-AdoProject @params -Verbose
 ```
@@ -70,7 +70,7 @@ Removes multiple projects demonstrating pipeline input.
 ### -CollectionUri
 
 Optional.
-The collection URI of the Azure DevOps collection/organization, e.g., <https://dev.azure.com/myorganization>.
+The collection URI of the Azure DevOps collection/organization, e.g., <https://dev.azure.com/my-org>.
 
 ```yaml
 Type: System.String

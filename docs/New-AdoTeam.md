@@ -45,7 +45,7 @@ This cmdlet creates a new Azure DevOps team within a specified project. If a tea
 ```powershell
 $params = @{
     CollectionUri = 'https://dev.azure.com/my-org'
-    ProjectName   = 'my-project'
+    ProjectName   = 'my-project-1'
     Name          = 'my-team'
 }
 New-AdoTeam @params -Verbose
@@ -58,7 +58,7 @@ Creates a new team in the specified project.
 #### PowerShell
 
 ```powershell
-@('team-1', 'team-2') | New-AdoTeam -ProjectName 'my-project' -Description 'Development teams'
+@('team-1', 'team-2') | New-AdoTeam -ProjectName 'my-project-1' -Description 'Development teams'
 ```
 
 Creates multiple teams demonstrating pipeline input.

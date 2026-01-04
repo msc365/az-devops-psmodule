@@ -29,17 +29,17 @@ function Remove-AdoClassificationNode {
         - Requires an active connection to Azure DevOps using Connect-AdoOrganization.
 
     .EXAMPLE
-        Remove-AdoClassificationNode -ProjectId 'my-project' -Path 'Area/SubArea'
+        Remove-AdoClassificationNode -ProjectId 'my-project-1' -Path 'Area/SubArea'
 
         This example removes the area node at the specified path from the specified project.
 
     .EXAMPLE
-        Remove-AdoClassificationNode -ProjectId 'my-project' -Path 'Area'
+        Remove-AdoClassificationNode -ProjectId 'my-project-1' -Path 'Area'
 
         This example removes the area node named 'Area' from the specified project including its 'SubArea' child node.
 
     .EXAMPLE
-        Remove-AdoClassificationNode -ProjectId 'my-project' -Path 'Area/SubArea' -ReclassifyId 658
+        Remove-AdoClassificationNode -ProjectId 'my-project-1' -Path 'Area/SubArea' -ReclassifyId 658
 
         This example removes the area node at the specified path and reassigns (reclassifies) the work items that were associated with that node to another existing node, the node with ID 658.
 

@@ -65,7 +65,7 @@ $config = @{
     }
 } | ConvertTo-Json -Depth 5 -Compress
 
-$policy = New-AdoPolicyConfiguration -ProjectName 'my-project' -Configuration $config
+$policy = New-AdoPolicyConfiguration -ProjectName 'my-project-1' -Configuration $config
 ```
 
 ## PARAMETERS

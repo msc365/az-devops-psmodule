@@ -23,7 +23,7 @@ BeforeAll {
 Describe 'New-AdoTeam' {
     BeforeAll {
         $collectionUri = 'https://dev.azure.com/my-org'
-        $projectName = 'my-project'
+        $projectName = 'my-project-1'
         $teamName = 'new-team'
         $teamId = '11111111-1111-1111-1111-111111111111'
         $description = 'Test team description'
@@ -36,7 +36,7 @@ Describe 'New-AdoTeam' {
             Mock Invoke-AdoRestMethod -ModuleName $moduleName -MockWith {
                 param($Body)
                 $script:collectionUri = 'https://dev.azure.com/my-org'
-                $script:projectName = 'my-project'
+                $script:projectName = 'my-project-1'
 
                 return @{
                     id          = '11111111-1111-1111-1111-111111111111'
@@ -109,7 +109,7 @@ Describe 'New-AdoTeam' {
 
             Mock Get-AdoTeam -ModuleName $moduleName -MockWith {
                 $script:collectionUri = 'https://dev.azure.com/my-org'
-                $script:projectName = 'my-project'
+                $script:projectName = 'my-project-1'
                 $script:teamName = 'new-team'
 
                 return @{
@@ -142,7 +142,7 @@ Describe 'New-AdoTeam' {
             Mock Invoke-AdoRestMethod -ModuleName $moduleName -MockWith {
                 param($Body)
                 $script:collectionUri = 'https://dev.azure.com/my-org'
-                $script:projectName = 'my-project'
+                $script:projectName = 'my-project-1'
 
                 return @{
                     id          = [guid]::NewGuid().ToString()
@@ -270,7 +270,7 @@ Describe 'New-AdoTeam' {
             Mock Invoke-AdoRestMethod -ModuleName $moduleName -MockWith {
                 param($Body)
                 $script:collectionUri = 'https://dev.azure.com/my-org'
-                $script:projectName = 'my-project'
+                $script:projectName = 'my-project-1'
 
                 return @{
                     id          = '11111111-1111-1111-1111-111111111111'
@@ -316,7 +316,7 @@ Describe 'New-AdoTeam' {
             Mock Invoke-AdoRestMethod -ModuleName $moduleName -MockWith {
                 param($Body)
                 $script:collectionUri = 'https://dev.azure.com/my-org'
-                $script:projectName = 'my-project'
+                $script:projectName = 'my-project-1'
 
                 return @{
                     id          = '11111111-1111-1111-1111-111111111111'

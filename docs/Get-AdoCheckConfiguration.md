@@ -54,7 +54,7 @@ You need to provide the resource type and resource ID to filter the results.
 ```powershell
 $params = @{
     CollectionUri = 'https://dev.azure.com/my-org'
-    ProjectName   = 'my-project'
+    ProjectName   = 'my-project-1'
     ResourceType  = 'environment'
     ResourceName  = 'my-environment-tst'
 }
@@ -70,7 +70,7 @@ Retrieves check configurations for the specified environment within the project 
 ```powershell
 $params = @{
     CollectionUri = 'https://dev.azure.com/my-org'
-    ProjectName   = 'my-project'
+    ProjectName   = 'my-project-1'
     ResourceType  = 'environment'
     Expands       = 'settings'
 }
@@ -99,7 +99,7 @@ Retrieves the check configuration with ID 1, including its settings.
 ```powershell
 $params = @{
     CollectionUri  = 'https://dev.azure.com/my-org'
-    ProjectName    = 'my-project'
+    ProjectName    = 'my-project-1'
     ResourceType   = 'environment'
     ResourceName   = 'my-environment-tst'
     DefinitionType = 'approval'
@@ -117,7 +117,7 @@ Retrieves check configurations for the specified environment filtered by the 'ap
 ```powershell
 $params = @{
     CollectionUri  = 'https://dev.azure.com/my-org'
-    ProjectName    = 'my-project'
+    ProjectName    = 'my-project-1'
     ResourceType   = 'environment'
     ResourceName   = 'my-environment-tst'
     DefinitionType = 'approval', 'preCheckApproval'
@@ -133,7 +133,7 @@ Retrieves check configurations for the specified environment filtered by multipl
 ### -CollectionUri
 
 Optional.
-The collection URI of the Azure DevOps collection/organization, e.g., <https://dev.azure.com/myorganization>.
+The collection URI of the Azure DevOps collection/organization, e.g., <https://dev.azure.com/my-org>.
 
 ```yaml
 Type: System.String

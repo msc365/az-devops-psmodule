@@ -7,7 +7,7 @@
         This cmdlet adds an AAD Group as member of a group in Azure DevOps.
 
     .PARAMETER CollectionUri
-        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://vssps.dev.azure.com/myorganization.
+        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://vssps.dev.azure.com/my-org.
 
     .PARAMETER GroupDescriptor
         Mandatory. A comma separated list of descriptors referencing groups you want the graph group to join.

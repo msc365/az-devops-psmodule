@@ -42,7 +42,7 @@ The Get-AdoTeamSettings cmdlet retrieves the settings for a specified team withi
 #### PowerShell
 
 ```powershell
-Get-AdoTeamSettings -ProjectId 'my-project' -TeamId 'my-team'
+Get-AdoTeamSettings -ProjectId 'my-project-1' -TeamId 'my-team'
 ```
 
 Retrieves the settings for the team "my-team" in the project "my-project".
