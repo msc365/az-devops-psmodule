@@ -1,0 +1,103 @@
+name: Code Analysis and Testing
+
+on:
+  pull_request:
+    branches: ['main']
+  push:
+    branches: ['main']
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Run Pester Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup PowerShell
+        shell: pwsh
+        run: |
+          Write-Host "PowerShell Version: $($PSVersionTable.PSVersion)"
+          Write-Host "OS: $($PSVersionTable.OS)"
+
+      - name: Verify required modules
+        shell: pwsh
+        run: |
+          Write-Host "Installing required module dependencies..."
+          Install-Module -Name Az.Accounts -Force -SkipPublisherCheck -Scope CurrentUser
+          Write-Host "Az.Accounts installed successfully"
+
+          Write-Host "PowerShell Modules Available:"
+          Get-Module -Name Pester -ListAvailable | Select-Object Name, Version
+          Get-Module -Name PSScriptAnalyzer -ListAvailable | Select-Object Name, Version
+          Get-Module -Name Az.Accounts -ListAvailable | Select-Object Name, Version
+
+      - name: Run PSScriptAnalyzer
+        shell: pwsh
+        run: |
+          Write-Host "Running PSScriptAnalyzer..." -ForegroundColor Cyan
+          $sourcePath = Join-Path $env:GITHUB_WORKSPACE "src"
+          $settingsPath = Join-Path $env:GITHUB_WORKSPACE "src/PSScriptAnalyzerSettings.psd1"
+
+          # Exclude test files from analysis
+          $filesToAnalyze = Get-ChildItem -Path $sourcePath -Recurse -Include '*.ps1', '*.psm1', '*.psd1' |
+            Where-Object { $_.FullName -notmatch '[\\/]Tests[\\/]' -and $_.Name -notlike '*.Tests.ps1' }
+
+          $results = $filesToAnalyze | Invoke-ScriptAnalyzer -Settings $settingsPath
+
+          if ($results) {
+            $errors = ($results | Where-Object Severity -eq 'Error').Count
+            $warnings = ($results | Where-Object Severity -eq 'Warning').Count
+
+            Write-Host "Analysis Results:" -ForegroundColor Yellow
+            Write-Host "  Total Issues: $($results.Count)"
+            Write-Host "  Errors: $errors"
+            Write-Host "  Warnings: $warnings"
+
+            $results | Format-Table -AutoSize
+
+            if ($errors -gt 0) {
+              Write-Error "PSScriptAnalyzer found $errors error(s). Build failed."
+              exit 1
+            }
+          } else {
+            Write-Host "No issues found!" -ForegroundColor Green
+          }
+
+      - name: Run Pester Tests
+        shell: pwsh
+        run: |
+          Write-Host "Running Pester Tests..." -ForegroundColor Cyan
+
+          # Add the module to PSModulePath so tests can import it
+          $modulePath = Join-Path $env:GITHUB_WORKSPACE "src"
+          $env:PSModulePath = "$modulePath$([System.IO.Path]::PathSeparator)$env:PSModulePath"
+          Write-Host "Module path added to PSModulePath: $modulePath"
+
+          $testsPath = Join-Path $env:GITHUB_WORKSPACE "src\Tests"
+
+          $config = New-PesterConfiguration
+          $config.Run.Path = $testsPath
+          $config.Run.Exit = $true
+          $config.Output.Verbosity = 'Detailed'
+          $config.TestResult.Enabled = $true
+          $config.TestResult.OutputPath = 'testResults.xml'
+          $config.CodeCoverage.Enabled = $false
+
+          $result = Invoke-Pester -Configuration $config
+
+          if ($result.FailedCount -gt 0) {
+            Write-Error "Pester tests failed. Failed: $($result.FailedCount), Passed: $($result.PassedCount)"
+            exit 1
+          }
+
+          Write-Host "All tests passed! Total: $($result.TotalCount), Passed: $($result.PassedCount)" -ForegroundColor Green
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: testResults.xml
