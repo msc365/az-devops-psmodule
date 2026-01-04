@@ -7,7 +7,7 @@
         This cmdlet deletes a specific Azure DevOps Pipeline Environment using its unique identifier within a specified project.
 
     .PARAMETER CollectionUri
-        The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/myorganization.
+        The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/my-org.
 
     .PARAMETER ProjectName
         Optional. The name or id of the project.
@@ -17,11 +17,12 @@
 
     .PARAMETER Version
         Optional. The API version to use for the request. Default is '7.2-preview.1'.
+        The -preview flag must be supplied in the api-version for such requests.
 
     .EXAMPLE
         $params = @{
             CollectionUri = 'https://dev.azure.com/my-org'
-            ProjectName   = 'my-project'
+            ProjectName   = 'my-project-1'
             Id = 1
         }
         Remove-AdoEnvironment @params -Verbose
@@ -30,7 +31,7 @@
     .EXAMPLE
         $params = @{
             CollectionUri = 'https://dev.azure.com/my-org'
-            ProjectName   = 'my-project'
+            ProjectName   = 'my-project-1'
         }
         @(
             1, 2, 3
@@ -49,9 +50,9 @@
         [string]$ProjectName = $env:DefaultAdoProject,
 
         [Parameter(Mandatory, ValueFromPipelineByPropertyName, ValueFromPipeline)]
-        [int32[]]$Id,
+        [int32]$Id,
 
-        [Parameter()]
+        [Parameter(HelpMessage = 'The -preview flag must be supplied in the api-version for such requests.')]
         [Alias('ApiVersion')]
         [ValidateSet('7.2-preview.1')]
         [string]$Version = '7.2-preview.1'
@@ -82,17 +83,15 @@
                 try {
                     Invoke-AdoRestMethod @params | Out-Null
                 } catch {
-                    if ($_ -match 'does not exist in current project') {
+                    if ($_.ErrorDetails.Message -match 'EnvironmentNotFoundException') {
                         Write-Warning "Environment with ID $Id does not exist, skipping deletion."
                     } else {
                         throw $_
                     }
                 }
-
             } else {
                 Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
             }
-
         } catch {
             throw $_
         }

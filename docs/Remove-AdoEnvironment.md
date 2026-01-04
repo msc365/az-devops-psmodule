@@ -4,7 +4,7 @@ external help file: Azure.DevOps.PSModule-Help.xml
 HelpUri: 
 Locale: en-NL
 Module Name: Azure.DevOps.PSModule
-ms.date: 12/05/2025
+ms.date: 01/04/2026
 PlatyPS schema version: 2024-05-01
 title: Remove-AdoEnvironment
 -->
@@ -23,14 +23,14 @@ Remove an Azure DevOps Pipeline Environment by its ID.
 ### __AllParameterSets
 
 ```text
-Remove-AdoEnvironment [[-CollectionUri] <string>] [[-ProjectName] <string>] [-Id] <int32[]>
+Remove-AdoEnvironment [[-CollectionUri] <string>] [[-ProjectName] <string>] [-Id] <int32>
  [[-Version] <string>] [<CommonParameters>]
 ```
 
 ## ALIASES
 
 This cmdlet has the following aliases,
-- ProjectId (for ProjectName)
+- N/A
 
 ## DESCRIPTION
 
@@ -45,7 +45,7 @@ This cmdlet deletes a specific Azure DevOps Pipeline Environment using its uniqu
 ```powershell
 $params = @{
     CollectionUri = 'https://dev.azure.com/my-org'
-    ProjectName   = 'my-project'
+    ProjectName   = 'my-project-1'
     Id = 1
 }
 Remove-AdoEnvironment @params -Verbose
@@ -60,7 +60,7 @@ Removes the environment with ID 1 from the specified project using the provided 
 ```powershell
 $params = @{
     CollectionUri = 'https://dev.azure.com/my-org'
-    ProjectName   = 'my-project'
+    ProjectName   = 'my-project-1'
 }
 @(
     1, 2, 3
@@ -74,7 +74,7 @@ Removes the environments with IDs 1, 2, and 3 from the specified project demonst
 ### -CollectionUri
 
 Optional.
-The collection URI of the Azure DevOps collection/organization, e.g., <https://dev.azure.com/myorganization>.
+The collection URI of the Azure DevOps collection/organization, e.g., <https://dev.azure.com/my-org>.
 
 ```yaml
 Type: System.String
@@ -122,7 +122,7 @@ Mandatory.
 The ID of the environment to remove.
 
 ```yaml
-Type: System.Int32[]
+Type: System.Int32
 DefaultValue: 0
 SupportsWildcards: false
 Aliases: []
