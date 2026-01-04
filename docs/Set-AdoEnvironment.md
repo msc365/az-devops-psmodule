@@ -4,7 +4,7 @@ external help file: Azure.DevOps.PSModule-Help.xml
 HelpUri: 
 Locale: en-NL
 Module Name: Azure.DevOps.PSModule
-ms.date: 12/05/2025
+ms.date: 01/04/2026
 PlatyPS schema version: 2024-05-01
 title: Set-AdoEnvironment
 -->
@@ -16,7 +16,7 @@ title: Set-AdoEnvironment
 
 ## SYNOPSIS
 
-Create a new Azure DevOps Pipeline Environment.
+Update an existing Azure DevOps Pipeline Environment.
 
 ## SYNTAX
 
@@ -30,13 +30,11 @@ Set-AdoEnvironment [[-CollectionUri] <string>] [[-ProjectName] <string>] [-Id] <
 ## ALIASES
 
 This cmdlet has the following aliases,
-- ProjectId (for ProjectName)
-- Id
-- Name
+- N/A
 
 ## DESCRIPTION
 
-This cmdlet creates a new Azure DevOps Pipeline Environment within a specified project.
+This cmdlet updates an existing Azure DevOps Pipeline Environment within a specified project.
 
 ## EXAMPLES
 
@@ -47,7 +45,7 @@ This cmdlet creates a new Azure DevOps Pipeline Environment within a specified p
 ```powershell
 $params = @{
     CollectionUri = 'https://dev.azure.com/my-org'
-    ProjectName   = 'my-project'
+    ProjectName   = 'my-project-1'
     Id            = 1
     Name          = 'my-updated-environment'
     Description   = 'Updated environment description'
@@ -64,7 +62,7 @@ Updates the environment with ID 1 in the specified project using the provided pa
 ```powershell
 $params = @{
     CollectionUri = 'https://dev.azure.com/my-org'
-    ProjectName   = 'my-project'
+    ProjectName   = 'my-project-1'
 }
 
 [PSCustomObject]@{
@@ -81,7 +79,7 @@ Updates the environment with ID 1 in the specified project using the provided pa
 ### -CollectionUri
 
 Optional.
-The collection URI of the Azure DevOps collection/organization, e.g., <https://dev.azure.com/myorganization>.
+The collection URI of the Azure DevOps collection/organization, e.g., <https://dev.azure.com/my-org>.
 
 ```yaml
 Type: System.String
@@ -133,7 +131,7 @@ Type: System.Int32
 DefaultValue: 0
 SupportsWildcards: false
 Aliases:
-- Id
+- EnvironmentId
 ParameterSets:
 - Name: (All)
   Position: Named
@@ -156,7 +154,7 @@ Type: System.String
 DefaultValue: ''
 SupportsWildcards: false
 Aliases:
-- Name
+- EnvironmentName
 ParameterSets:
 - Name: (All)
   Position: Named
@@ -229,7 +227,17 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### System.Object
+### PSCustomObject
+
+Returns an updated environment object with the following properties:
+- id: The unique identifier of the environment
+- name: The updated name of the environment
+- createdBy: ID of the user who created the environment
+- createdOn: Date and time when the environment was created
+- lastModifiedBy: ID of the user who last modified the environment
+- lastModifiedOn: Date and time when the environment was last modified
+- projectName: The project name
+- collectionUri: The collection URI
 
 ## NOTES
 
@@ -238,6 +246,8 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
   ```powershell
   Connect-AzAccount -Tenant '<tenant-id>' -Subscription '<subscription-id>'
   ```
+
+## RELATED LINKS
 
 - <https://learn.microsoft.com/en-us/rest/api/azure/devops/environments/environments/update>
 

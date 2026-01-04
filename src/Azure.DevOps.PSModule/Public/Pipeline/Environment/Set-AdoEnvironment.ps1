@@ -1,13 +1,13 @@
 ﻿function Set-AdoEnvironment {
     <#
     .SYNOPSIS
-        Create a new Azure DevOps Pipeline Environment.
+        Update an existing Azure DevOps Pipeline Environment.
 
     .DESCRIPTION
-        This cmdlet creates a new Azure DevOps Pipeline Environment within a specified project.
+        This cmdlet updates an existing Azure DevOps Pipeline Environment within a specified project.
 
     .PARAMETER CollectionUri
-        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/myorganization.
+        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/my-org.
 
     .PARAMETER ProjectName
         Optional. The name or id of the project.
@@ -15,7 +15,7 @@
     .PARAMETER Id
         Mandatory. The ID of the environment to update.
 
-    .PARAMETER EnvironmentName
+    .PARAMETER Name
         Mandatory. The name of the environment to update.
 
     .PARAMETER Description
@@ -23,6 +23,7 @@
 
     .PARAMETER Version
         Optional. The API version to use for the request. Default is '7.2-preview.1'.
+        The -preview flag must be supplied in the api-version for such requests.
 
     .LINK
         https://learn.microsoft.com/en-us/rest/api/azure/devops/environments/environments/update
@@ -30,10 +31,10 @@
     .EXAMPLE
         $params = @{
             CollectionUri = 'https://dev.azure.com/my-org'
-            ProjectName   = 'my-project'
+            ProjectName   = 'my-project-1'
             Id            = 1
-            Name          = 'my-updated-environment'
-            Description   = 'Updated environment description'
+            Name          = 'my-environment-updated'
+            Description   = 'Environment description updated'
         }
         Set-AdoEnvironment @params -Verbose
 
@@ -42,13 +43,13 @@
     .EXAMPLE
         $params = @{
             CollectionUri = 'https://dev.azure.com/my-org'
-            ProjectName   = 'my-project'
+            ProjectName   = 'my-project-1'
         }
 
         [PSCustomObject]@{
             Id          = 1
-            Name        = 'my-updated-environment'
-            Description = 'Updated environment description'
+            Name        = 'my-environment-updated'
+            Description = 'Environment description updated'
         } | Set-AdoEnvironment @params -Verbose
 
         Updates the environment with ID 1 in the specified project using the provided parameters in a pipeline.
@@ -64,17 +65,17 @@
         [string]$ProjectName = $env:DefaultAdoProject,
 
         [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
-        [Alias('Id')]
+        [Alias('EnvironmentId')]
         [int32]$Id,
 
         [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
-        [Alias('Name')]
+        [Alias('EnvironmentName')]
         [string]$Name,
 
         [Parameter(ValueFromPipelineByPropertyName)]
         [string]$Description,
 
-        [Parameter()]
+        [Parameter(HelpMessage = 'The -preview flag must be supplied in the api-version for such requests.')]
         [Alias('ApiVersion')]
         [ValidateSet('7.2-preview.1')]
         [string]$Version = '7.2-preview.1'
@@ -97,7 +98,6 @@
 
     process {
         try {
-
             $params = @{
                 Uri     = "$CollectionUri/$ProjectName/_apis/pipelines/environments/$Id"
                 Version = $Version
@@ -124,8 +124,8 @@
                         collectionUri  = $CollectionUri
                     }
                 } catch {
-                    if ($_ -match 'does not exist') {
-                        Write-Warning "Environment with ID $id does not exist, skipping update."
+                    if ($_.ErrorDetails.Message -match 'EnvironmentNotFoundException') {
+                        Write-Warning "Environment with ID $Id does not exist, skipping update."
                     } else {
                         throw $_
                     }
@@ -136,7 +136,6 @@
                 }
                 Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
             }
-
         } catch {
             throw $_
         }
