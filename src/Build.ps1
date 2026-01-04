@@ -37,7 +37,7 @@ Properties {
     $script:buildVersion = [System.Version]'0.2.0'
 
     # Pre-release label (e.g. 'alpha1', 'beta1', 'rc1'). Set to $null for stable releases.
-    $script:prerelease = 'alpha2'
+    $script:prerelease = 'alpha3'
 
     # The root path of the repository.
     $script:rootPath = (Get-Item $PSScriptRoot).Parent.FullName
@@ -73,6 +73,9 @@ Properties {
 
     # API Key for PowerShell Gallery
     $script:apiKey = $env:PSGalleryApiKey
+
+    # Skip automatic tags when publishing to the gallery
+    $script:skipAutomaticTags = $true
 }
 
 # // ---------------------------- //
@@ -95,9 +98,10 @@ Task PublishToGallery -RequiredVariables releaseModulePath, repository, apiKey {
     }
 
     $publishParams = @{
-        Path        = $script:releaseModulePath
-        Repository  = $script:repository
-        NuGetApiKey = $script:apiKey
+        Path              = $script:releaseModulePath
+        Repository        = $script:repository
+        NuGetApiKey       = $script:apiKey
+        SkipAutomaticTags = $script:skipAutomaticTags
     }
 
     try {
