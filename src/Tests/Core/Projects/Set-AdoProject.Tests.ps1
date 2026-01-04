@@ -446,7 +446,7 @@ Describe 'Set-AdoProject' {
 
             # Verify correct URI was used
             Should -Invoke Invoke-AdoRestMethod -ModuleName $moduleName -Exactly 1 -ParameterFilter {
-                $Uri -eq 'https://dev.azure.com/envorg/_apis/projects/my-project'
+                $Uri -eq 'https://dev.azure.com/envorg/_apis/projects/my-project-1'
             }
 
             # Cleanup
