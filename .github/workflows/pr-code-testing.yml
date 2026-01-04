@@ -38,12 +38,13 @@ jobs:
         run: |
           Write-Host "Running PSScriptAnalyzer..." -ForegroundColor Cyan
           $sourcePath = Join-Path $env:GITHUB_WORKSPACE "src"
+          $settingsPath = Join-Path $env:GITHUB_WORKSPACE "src/PSScriptAnalyzerSettings.psd1"
 
           # Exclude test files from analysis
           $filesToAnalyze = Get-ChildItem -Path $sourcePath -Recurse -Include '*.ps1', '*.psm1', '*.psd1' |
             Where-Object { $_.FullName -notmatch '[\\/]Tests[\\/]' -and $_.Name -notlike '*.Tests.ps1' }
 
-          $results = $filesToAnalyze | Invoke-ScriptAnalyzer -Severity Warning
+          $results = $filesToAnalyze | Invoke-ScriptAnalyzer -Settings $settingsPath
 
           if ($results) {
             $errors = ($results | Where-Object Severity -eq 'Error').Count
