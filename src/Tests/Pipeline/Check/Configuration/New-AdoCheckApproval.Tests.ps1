@@ -95,6 +95,77 @@ Describe 'New-AdoCheckApproval' {
             }
         }
 
+        It 'Should set minRequiredApprovers to 0 when only one approver' {
+            # Arrange
+            $singleApprover = @(@{ id = '11111111-1111-1111-1111-111111111111' })
+
+            # Act
+            New-AdoCheckApproval -CollectionUri $collectionUri -ProjectName $projectName -Approvers $singleApprover -ResourceType $resourceType -ResourceName $resourceName -MinRequiredApprovers 1 -Confirm:$false
+
+            # Assert
+            Should -Invoke Invoke-AdoRestMethod -ModuleName $moduleName -Exactly 1 -ParameterFilter {
+                $Body.settings.minRequiredApprovers -eq 0
+            }
+        }
+
+        It 'Should set executionOrder to anyOrder when minRequiredApprovers is 0' {
+            # Arrange
+            $multipleApprovers = @(
+                @{ id = '11111111-1111-1111-1111-111111111111' },
+                @{ id = '22222222-2222-2222-2222-222222222222' }
+            )
+
+            # Act
+            New-AdoCheckApproval -CollectionUri $collectionUri -ProjectName $projectName -Approvers $multipleApprovers -ResourceType $resourceType -ResourceName $resourceName -MinRequiredApprovers 0 -ExecutionOrder 'inSequence' -Confirm:$false
+
+            # Assert
+            Should -Invoke Invoke-AdoRestMethod -ModuleName $moduleName -Exactly 1 -ParameterFilter {
+                $Body.settings.executionOrder -eq 'anyOrder'
+            }
+        }
+
+        It 'Should respect MinRequiredApprovers when multiple approvers specified' {
+            # Arrange
+            $multipleApprovers = @(
+                @{ id = '11111111-1111-1111-1111-111111111111' },
+                @{ id = '22222222-2222-2222-2222-222222222222' }
+            )
+
+            # Act
+            New-AdoCheckApproval -CollectionUri $collectionUri -ProjectName $projectName -Approvers $multipleApprovers -ResourceType $resourceType -ResourceName $resourceName -MinRequiredApprovers 1 -Confirm:$false
+
+            # Assert
+            Should -Invoke Invoke-AdoRestMethod -ModuleName $moduleName -Exactly 1 -ParameterFilter {
+                $Body.settings.minRequiredApprovers -eq 1
+            }
+        }
+
+        It 'Should set executionOrder when minRequiredApprovers is greater than 0' {
+            # Arrange
+            $multipleApprovers = @(
+                @{ id = '11111111-1111-1111-1111-111111111111' },
+                @{ id = '22222222-2222-2222-2222-222222222222' }
+            )
+
+            # Act
+            New-AdoCheckApproval -CollectionUri $collectionUri -ProjectName $projectName -Approvers $multipleApprovers -ResourceType $resourceType -ResourceName $resourceName -MinRequiredApprovers 1 -ExecutionOrder 'inSequence' -Confirm:$false
+
+            # Assert
+            Should -Invoke Invoke-AdoRestMethod -ModuleName $moduleName -Exactly 1 -ParameterFilter {
+                $Body.settings.executionOrder -eq 'inSequence'
+            }
+        }
+
+        It 'Should set RequesterCannotBeApprover' {
+            # Act
+            New-AdoCheckApproval -CollectionUri $collectionUri -ProjectName $projectName -Approvers $approvers -ResourceType $resourceType -ResourceName $resourceName -RequesterCannotBeApprover $true -Confirm:$false
+
+            # Assert
+            Should -Invoke Invoke-AdoRestMethod -ModuleName $moduleName -Exactly 1 -ParameterFilter {
+                $Body.settings.requesterCannotBeApprover -eq $true
+            }
+        }
+
         It 'Should create approval check with DefinitionType specified' -ForEach @(
             @{ Type = 'approval'; ExpectedId = '8c6f20a7-a545-4486-9777-f762fafe0d4d' }
             @{ Type = 'preCheckApproval'; ExpectedId = '8c6f20a7-a545-4486-9777-f762fafe0d4d' }
@@ -345,6 +416,29 @@ Describe 'New-AdoCheckApproval' {
             $validateSet.ValidValues | Should -Contain 'approval'
             $validateSet.ValidValues | Should -Contain 'preCheckApproval'
             $validateSet.ValidValues | Should -Contain 'postCheckApproval'
+        }
+
+        It 'Should have MinRequiredApprovers parameter with default value 0' {
+            $command = Get-Command New-AdoCheckApproval
+            $parameter = $command.Parameters['MinRequiredApprovers']
+            $parameter | Should -Not -BeNullOrEmpty
+            $parameter.ParameterType.Name | Should -Be 'Int32'
+        }
+
+        It 'Should have ExecutionOrder parameter with ValidateSet' {
+            $command = Get-Command New-AdoCheckApproval
+            $parameter = $command.Parameters['ExecutionOrder']
+            $parameter | Should -Not -BeNullOrEmpty
+            $validateSet = $parameter.Attributes | Where-Object { $_ -is [System.Management.Automation.ValidateSetAttribute] }
+            $validateSet.ValidValues | Should -Contain 'anyOrder'
+            $validateSet.ValidValues | Should -Contain 'inSequence'
+        }
+
+        It 'Should have RequesterCannotBeApprover parameter' {
+            $command = Get-Command New-AdoCheckApproval
+            $parameter = $command.Parameters['RequesterCannotBeApprover']
+            $parameter | Should -Not -BeNullOrEmpty
+            $parameter.ParameterType.Name | Should -Be 'Boolean'
         }
 
         It 'Should support ShouldProcess' {

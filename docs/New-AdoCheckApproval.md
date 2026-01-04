@@ -24,8 +24,10 @@ Create a new approval check for a specific resource.
 
 ```text
 New-AdoCheckApproval [[-CollectionUri] <string>] [[-ProjectName] <string>]
- [-Approvers] <object[]> [-ResourceType] <string> [-ResourceName] <string>
- [[-DefinitionType] <string>] [[-Instructions] <string>] [[-Timeout] <int32>]
+ [-Approvers] <hashtable[]> [-ResourceType] <string> [-ResourceName] <string>
+ [[-DefinitionType] <string>] [[-Instructions] <string>]
+ [[-MinRequiredApprovers] <int32>] [[-ExecutionOrder] <string>]
+ [[-RequesterCannotBeApprover] <bool>] [[-Timeout] <int32>]
  [[-Version] <string>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
@@ -47,22 +49,28 @@ Approval checks ensure that deployments or other operations require approval fro
 #### PowerShell
 
 ```powershell
-$approvers = @{ id = '00000000-0000-0000-0000-000000000000' }
-
+$approvers = @(
+    @{ id = '00000000-0000-0000-0000-000000000001' },
+    @{ id = '00000000-0000-0000-0000-000000000002' }
+)
 $params = @{
-    CollectionUri  = 'https://dev.azure.com/my-org'
-    ProjectName    = 'my-project-1'
-    Approvers      = $approvers
-    ResourceType   = 'environment'
-    ResourceName   = 'my-environment-tst'
-    DefinitionType = 'approval'
-    Instructions   = 'Approval required before deploying to environment'
-    Timeout        = 1440
+    CollectionUri             = 'https://dev.azure.com/my-org'
+    ProjectName               = 'my-project-1'
+    Approvers                 = $approvers
+    ResourceType              = 'environment'
+    ResourceName              = 'my-environment-tst'
+    DefinitionType            = 'approval'
+    Instructions              = 'Approval required before deploying to environment'
+    MinRequiredApprovers      = 1
+    ExecutionOrder            = 'inSequence'
+    RequesterCannotBeApprover = $true
+    Timeout                   = 1440
 }
-New-AdoCheckApproval @params
+
+New-AdoCheckApproval @params -Verbose
 ```
 
-Creates a new approval check in the specified project using the provided parameters.
+Creates a new approval check configuration for the specified environment with the provided parameters.
 
 ### EXAMPLE 2
 
@@ -151,7 +159,7 @@ An array of approvers in the format @{ id = 'originId' }.
 Each approver must have an 'id' property containing the Azure DevOps identity ID.
 
 ```yaml
-Type: System.Object[]
+Type: System.Collections.Hashtable[]
 DefaultValue: ''
 SupportsWildcards: false
 Aliases: []
@@ -264,6 +272,79 @@ AcceptedValues: []
 HelpMessage: ''
 ```
 
+### -MinRequiredApprovers
+
+Optional.
+The minimum number of required approvers.
+Default is 0 (All).
+Note: When only one approver is specified ($Approvers.Count = 1), this value is automatically set to 0 regardless of the input.
+
+```yaml
+Type: System.Int32
+DefaultValue: 0
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: (All)
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: Set to 0 for All.
+```
+
+### -ExecutionOrder
+
+Optional.
+The execution order of the approvers.
+Default is 'anyOrder'.
+Note: When MinRequiredApprovers is 0, this value is automatically set to 'anyOrder' regardless of the input.
+
+```yaml
+Type: System.String
+DefaultValue: anyOrder
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: (All)
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues:
+- anyOrder
+- inSequence
+HelpMessage: ''
+```
+
+### -RequesterCannotBeApprover
+
+Optional.
+Indicates whether the requester can be an approver.
+Default is $false.
+
+```yaml
+Type: System.Boolean
+DefaultValue: false
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: (All)
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
 ### -Timeout
 
 Optional.
@@ -331,10 +412,17 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 Returns a custom object representing the approval check configuration:
 - id: The unique identifier of the check configuration
-- settings: The approval settings including approvers, instructions, and definition reference
+- settings: The approval settings object containing:
+  - approvers: Array of approver objects with id property
+  - minRequiredApprovers: Minimum number of required approvers (0 = all)
+  - executionOrder: Order in which approvers must approve (anyOrder or inSequence)
+  - requesterCannotBeApprover: Whether the requester can be an approver
+  - instructions: Instructions for the approvers
+  - blockedApprovers: Array of blocked approvers
+  - definitionRef: Reference to the approval definition with id property
 - timeout: The timeout value in minutes
-- type: The type of check (Approval)
-- resource: The resource details (type and id)
+- type: The check type object with name and id properties
+- resource: The resource object with type and id properties
 - createdBy: The ID of the user who created the check
 - createdOn: The timestamp when the check was created
 - project: The project name
@@ -343,7 +431,9 @@ Returns a custom object representing the approval check configuration:
 ## NOTES
 
 - When an approval check with the same configuration already exists, the existing check is returned with a warning
-- Only 'environment' resource type is currently supported
+- Currently supports 'environment' resource type. Other resource types ('endpoint', 'variablegroup', 'repository') will throw an error indicating they are not supported yet
+- MinRequiredApprovers is automatically adjusted: when only one approver is specified, it is set to 0 regardless of input
+- ExecutionOrder is automatically adjusted: when MinRequiredApprovers is 0, ExecutionOrder is set to 'anyOrder' regardless of input
 - Requires an active Azure account login. Use `Connect-AzAccount` to authenticate:
 
   ```powershell

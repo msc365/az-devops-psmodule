@@ -28,6 +28,17 @@
     .PARAMETER Instructions
         Optional. Instructions for the approvers.
 
+    .PARAMETER MinRequiredApprovers
+        Optional. The minimum number of required approvers. Default is 0 (All).
+        Note: When only one approver is specified ($Approvers.Count = 1), this value is automatically set to 0 regardless of the input.
+
+    .PARAMETER ExecutionOrder
+        Optional. The execution order of the approvers. Valid values are 'anyOrder' and 'inSequence'. Default is 'anyOrder'.
+        Note: When MinRequiredApprovers is 0, this value is automatically set to 'anyOrder' regardless of the input.
+
+    .PARAMETER RequesterCannotBeApprover
+        Optional. Indicates whether the requester can be an approver. Default is $false.
+
     .PARAMETER Timeout
         Optional. The timeout in minutes for the approval check. Default is 1440 (1 day).
 
@@ -39,21 +50,27 @@
         https://learn.microsoft.com/en-us/rest/api/azure/devops/approvalsandchecks/check-configurations/add
 
     .EXAMPLE
-        $approvers = @{ id = '0000000-0000-0000-0000-000000000000' }
-
+        $approvers = @(
+            @{ id = '00000000-0000-0000-0000-000000000001' },
+            @{ id = '00000000-0000-0000-0000-000000000002' }
+        )
         $params = @{
-            CollectionUri = 'https://dev.azure.com/my-org'
-            ProjectName   = 'my-project-1'
-            Approvers     = $approvers
-            ResourceType  = 'environment'
-            ResourceName  = 'my-environment-tst'
-            DefinitionType  = 'approval'
-            Instructions  = 'Approval required before deploying to environment'
-            Timeout       = 1440
+            CollectionUri             = 'https://dev.azure.com/my-org'
+            ProjectName               = 'my-project-1'
+            Approvers                 = $approvers
+            ResourceType              = 'environment'
+            ResourceName              = 'my-environment-tst'
+            DefinitionType            = 'approval'
+            Instructions              = 'Approval required before deploying to environment'
+            MinRequiredApprovers      = 1
+            ExecutionOrder            = 'inSequence'
+            RequesterCannotBeApprover = $true
+            Timeout                   = 1440
         }
-        New-AdoCheckApproval @params
 
-        Creates a new approval check in the specified project using the provided parameters.
+        New-AdoCheckApproval @params -Verbose
+
+        Creates a new approval check configuration for the specified environment with the provided parameters.
     #>
     [CmdletBinding(SupportsShouldProcess)]
     param (
@@ -66,7 +83,7 @@
         [string]$ProjectName = $env:DefaultAdoProject,
 
         [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
-        [object[]]$Approvers,
+        [hashtable[]]$Approvers,
 
         [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
         [ValidateSet('endpoint', 'environment', 'variablegroup', 'repository')]
@@ -82,6 +99,16 @@
         [Parameter(ValueFromPipelineByPropertyName)]
         [string]$Instructions,
 
+        [Parameter(ValueFromPipelineByPropertyName, HelpMessage = 'Set to 0 for All.')]
+        [int32]$MinRequiredApprovers = 0,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateSet('anyOrder', 'inSequence')]
+        [string]$ExecutionOrder = 'anyOrder',
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [bool]$RequesterCannotBeApprover = $false,
+
         [Parameter(ValueFromPipelineByPropertyName)]
         [int32]$Timeout = 1440,
 
@@ -95,11 +122,14 @@
         Write-Verbose ("Command: $($MyInvocation.MyCommand.Name)")
         Write-Debug ("CollectionUri: $CollectionUri")
         Write-Debug ("ProjectName: $ProjectName")
-        Write-Debug ("Approvers: $Approvers")
+        Write-Debug ("Approvers: $($Approvers -join ',')")
         Write-Debug ("ResourceType: $ResourceType")
         Write-Debug ("ResourceName: $ResourceName")
         Write-Debug ("DefinitionType: $DefinitionType")
         Write-Debug ("Instructions: $Instructions")
+        Write-Debug ("MinRequiredApprovers: $MinRequiredApprovers")
+        Write-Debug ("ExecutionOrder: $ExecutionOrder")
+        Write-Debug ("RequesterCannotBeApprover: $RequesterCannotBeApprover")
         Write-Debug ("Timeout: $Timeout")
         Write-Debug ("ApiVersion: $Version")
 
@@ -135,15 +165,16 @@
                 }
             }
 
-            # Create configuration JSON
+            # Create configuration body
             $body = @{
                 settings = @{
-                    approvers            = $Approvers
-                    executionOrder       = 'anyOrder'
-                    minRequiredApprovers = 0
-                    instructions         = $Instructions
-                    blockedApprovers     = @()
-                    definitionRef        = @{
+                    approvers                 = $Approvers
+                    minRequiredApprovers      = if ($Approvers.Count -gt 1) { $MinRequiredApprovers } else { 0 }
+                    executionOrder            = if ($MinRequiredApprovers -gt 0) { $ExecutionOrder } else { 'anyOrder' }
+                    requesterCannotBeApprover = $RequesterCannotBeApprover
+                    instructions              = $Instructions
+                    blockedApprovers          = @()
+                    definitionRef             = @{
                         id = $definitionRef.id
                     }
                 }
