@@ -73,12 +73,12 @@ BeforeAll {
                         descriptor    = 'vssgp.00000000-0000-0000-0000-000000000003'
                     },
                     @{
-                        displayName   = 'AAD Group'
-                        originId      = 'aad-origin-id'
-                        principalName = '[TestOrg]\AAD Group'
+                        displayName   = 'Entra ID Group'
+                        originId      = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
+                        principalName = '[TestOrg]\Entra ID Group'
                         origin        = 'aad'
                         subjectKind   = 'group'
-                        description   = 'Azure AD synchronized group'
+                        description   = 'Entra ID synchronized group'
                         mailAddress   = 'aadgroup@example.com'
                         descriptor    = 'aadgp.00000000-0000-0000-0000-000000000004'
                     }

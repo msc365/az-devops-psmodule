@@ -1,19 +1,19 @@
 ﻿function Add-AdoGroupMember {
     <#
     .SYNOPSIS
-        Adds an AAD Group as member of a group.
+        Adds an Entra ID group as member of a group.
 
     .DESCRIPTION
-        This cmdlet adds an AAD Group as member of a group in Azure DevOps.
+        This cmdlet adds an Entra ID group as member of a group in Azure DevOps.
 
     .PARAMETER CollectionUri
         Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://vssps.dev.azure.com/my-org.
 
     .PARAMETER GroupDescriptor
-        Mandatory. A comma separated list of descriptors referencing groups you want the graph group to join.
+        Mandatory. The descriptor of the group to which the member will be added.
 
     .PARAMETER OriginId
-        Mandatory. The OriginId of the entra group to add as a member.
+        Mandatory. The OriginId of the Entra ID group to add as a member.
 
     .PARAMETER Version
         Optional. The API version to use for the request. Default is '7.2-preview.1'.
@@ -30,7 +30,7 @@
         }
         Add-AdoGroupMember @params
 
-        Adds an AAD Group as member of a group.
+        Adds an Entra ID group as member of a group.
 
     .EXAMPLE
         $params = @{
@@ -42,7 +42,7 @@
             '00000000-0000-0000-0000-000000000002'
         ) | Add-AdoGroupMember @params
 
-        Adds multiple AAD Groups as members demonstrating pipeline input.
+        Adds multiple Entra ID groups as members demonstrating pipeline input.
     #>
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
     param (

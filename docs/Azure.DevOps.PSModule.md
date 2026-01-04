@@ -34,7 +34,7 @@ A PowerShell module that wraps the Azure DevOps REST API into clean, task-orient
 | &nbsp; • &nbsp; [Set-AdoFeatureState](Set-AdoFeatureState.md) | Set the feature state for an Azure DevOps project feature. |
 | **Groups and Security** | |
 | &nbsp; • &nbsp; [Get-AdoGroup](Get-AdoGroup.md) | Get a single or multiple groups in an Azure DevOps organization. |
-| &nbsp; • &nbsp; [Add-AdoGroupMember](Add-AdoGroupMember.md) | Adds an AAD Group as member of a group. |
+| &nbsp; • &nbsp; [Add-AdoGroupMember](Add-AdoGroupMember.md) | Adds an Entra ID group as member of a group. |
 | &nbsp; • &nbsp; [Get-AdoMembership](Get-AdoMembership.md) | Get the membership relationship between a subject and a container in Azure DevOps. |
 | &nbsp; • &nbsp; [Get-AdoDescriptor](Get-AdoDescriptor.md) | Resolve a storage key to a descriptor. |
 | **Approvals And Checks** | |
