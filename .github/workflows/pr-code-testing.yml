@@ -29,6 +29,10 @@ jobs:
           Get-Module -Name Pester -ListAvailable | Select-Object Name, Version
           Get-Module -Name PSScriptAnalyzer -ListAvailable | Select-Object Name, Version
 
+          Write-Host "`nInstalling required module dependencies..."
+          Install-Module -Name Az.Accounts -Force -SkipPublisherCheck -Scope CurrentUser
+          Write-Host "Az.Accounts installed successfully"
+
       - name: Run PSScriptAnalyzer
         shell: pwsh
         run: |
