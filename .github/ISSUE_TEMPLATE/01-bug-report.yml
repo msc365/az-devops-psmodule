@@ -3,6 +3,8 @@ name: "Bug report \U0001F41B"
 description: Report errors or unexpected behavior
 title: 'Bug: '
 labels: ['needs triage :wave:', 'bug :beetle:']
+type: 'bug'
+projects: ['Azure.DevOps.PSModule']
 body:
   - type: checkboxes
     attributes:
@@ -14,14 +16,15 @@ body:
   - type: input
     attributes:
       label: PowerShell version
-      description: Please provide the version of the PowerShell you are using if relevant.
+      description: Please provide the version of the PowerShell you are using.
+      placeholder: 5.1, 7.2, etc.
     validations:
-      required: false
+      required: true
   - type: input
     attributes:
       label: Azure.DevOps.PSModule version
       description: Please provide the version of the Azure.DevOps.PSModule you are using.
-      placeholder: 0.2.0, 0.2.0-alpha1, etc.
+      placeholder: 0.2.0-prev1, 0.2.0, etc.
     validations:
       required: true
   - type: input
