@@ -1,13 +1,16 @@
 <!--
 document type: cmdlet
 external help file: Azure.DevOps.PSModule-Help.xml
-HelpUri: https://learn.microsoft.com/en-us/rest/api/azure/devops/policy/configurations/create?view=azure-devops
+HelpUri: https://learn.microsoft.com/en-us/rest/api/azure/devops/policy/configurations/create
 Locale: en-NL
 Module Name: Azure.DevOps.PSModule
-ms.date: 11/01/2025
+ms.date: 01/05/2026
 PlatyPS schema version: 2024-05-01
 title: New-AdoPolicyConfiguration
 -->
+
+<!-- markdownlint-disable MD024 -->
+<!-- cSpell: ignore dontshow -->
 
 # New-AdoPolicyConfiguration
 
@@ -20,8 +23,7 @@ Create a new policy configuration for an Azure DevOps project.
 ### __AllParameterSets
 
 ```text
-New-AdoPolicyConfiguration [-ProjectId] <string> [-Configuration] <string> [[-ApiVersion] <string>]
- [<CommonParameters>]
+New-AdoPolicyConfiguration [[-CollectionUri] <string>] [[-ProjectName] <string>] [-Configuration] <PSCustomObject> [[-Version] <string>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -31,7 +33,7 @@ This cmdlet has the following aliases,
 
 ## DESCRIPTION
 
-This function creates a new policy configuration for an Azure DevOps project through REST API.
+This cmdlet creates a new policy configuration for an Azure DevOps project. The configuration must be provided as a PSCustomObject or hashtable containing all required policy settings.
 
 ## EXAMPLES
 
@@ -40,53 +42,82 @@ This function creates a new policy configuration for an Azure DevOps project thr
 #### PowerShell
 
 ```powershell
-$config = @{
-    "isEnabled": true,
-    "isBlocking": true,
-    "type": @{
-        "id": "fa4e907d-c16b-4a4c-9dfa-4906e5d171dd"
-    },
-    "settings": @{
-        "minimumApproverCount": 1,
-        "creatorVoteCounts": true,
-        "allowDownvotes": false,
-        "resetOnSourcePush": false,
-        "requireVoteOnLastIteration": false,
-        "resetRejectionsOnSourcePush": false,
-        "blockLastPusherVote": false,
-        "requireVoteOnEachIteration": false,
-        "scope": @(
-            {
-                "repositoryId": null,
-                "refName": null,
-                "matchKind": "DefaultBranch"
+$params = @{
+    CollectionUri = 'https://dev.azure.com/my-org'
+    ProjectName   = 'my-project-1'
+}
+
+$config = [PSCustomObject]@{
+    isEnabled = $true
+    isBlocking = $true
+    type = @{
+        id = 'fa4e907d-c16b-4a4c-9dfa-4906e5d171dd'
+    }
+    settings = @{
+        minimumApproverCount = 1
+        creatorVoteCounts = $true
+        allowDownvotes = $false
+        resetOnSourcePush = $false
+        requireVoteOnLastIteration = $false
+        resetRejectionsOnSourcePush = $false
+        blockLastPusherVote = $false
+        requireVoteOnEachIteration = $false
+        scope = @(
+            @{
+                repositoryId = $null
+                refName = $null
+                matchKind = 'DefaultBranch'
             }
         )
     }
-} | ConvertTo-Json -Depth 5 -Compress
+}
 
-$policy = New-AdoPolicyConfiguration -ProjectName 'my-project-1' -Configuration $config
+New-AdoPolicyConfiguration @params -Configuration $config
 ```
+
+Creates a new minimum approver count policy configuration in the specified project.
 
 ## PARAMETERS
 
-### -ApiVersion
+### -CollectionUri
 
-Optional.
-The API version to use.
+The collection URI of the Azure DevOps collection/organization, e.g., <https://dev.azure.com/my-org>.
+Defaults to $env:DefaultAdoCollectionUri.
 
 ```yaml
 Type: System.String
-DefaultValue: 7.1
+DefaultValue: $env:DefaultAdoCollectionUri
 SupportsWildcards: false
-Aliases:
-- api
+Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 2
+  Position: Named
   IsRequired: false
   ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -ProjectName
+
+The ID or name of the project.
+Defaults to $env:DefaultAdoProject.
+
+```yaml
+Type: System.String
+DefaultValue: $env:DefaultAdoProject
+SupportsWildcards: false
+Aliases:
+- ProjectId
+ParameterSets:
+- Name: (All)
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
   ValueFromRemainingArguments: false
 DontShow: false
 AcceptedValues: []
@@ -95,46 +126,46 @@ HelpMessage: ''
 
 ### -Configuration
 
-Mandatory.
-The configuration JSON for the policy.
+The configuration object for the policy as a PSCustomObject. Must include the policy type ID and all required settings.
 
 ```yaml
-Type: System.String
-DefaultValue: ''
+Type: PSCustomObject
+DefaultValue: 
 SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 1
+  Position: Named
   IsRequired: true
   ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
+  ValueFromPipelineByPropertyName: true
   ValueFromRemainingArguments: false
 DontShow: false
 AcceptedValues: []
 HelpMessage: ''
 ```
 
-### -ProjectId
+### -Version
 
-Mandatory.
-The ID or name of the project.
+The API version to use for the request.
 
 ```yaml
 Type: System.String
-DefaultValue: ''
+DefaultValue: 7.1
 SupportsWildcards: false
 Aliases:
-- ProjectName
+- ApiVersion
 ParameterSets:
 - Name: (All)
-  Position: 0
-  IsRequired: true
+  Position: Named
+  IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
   ValueFromRemainingArguments: false
 DontShow: false
-AcceptedValues: []
+AcceptedValues:
+- 7.1
+- 7.2-preview.1
 HelpMessage: ''
 ```
 
@@ -151,14 +182,31 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### System.Object
+### PSCustomObject
 
-The created policy configuration object.
+Returns the created policy configuration object with the following properties:
+- id: The unique identifier of the created policy configuration
+- type: The policy type object containing the type ID
+- revision: The revision number of the configuration
+- isEnabled: Whether the policy is enabled
+- isBlocking: Whether the policy is blocking
+- isDeleted: Whether the policy is deleted
+- settings: The policy-specific settings object
+- createdBy: The user who created the configuration
+- createdDate: The date the configuration was created
+- projectName: The project name where the configuration was created
+- collectionUri: The collection URI of the Azure DevOps organization
 
 ## NOTES
 
-- Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
+- Requires an active Azure account login. Use `Connect-AzAccount` to authenticate:
+
+  ```powershell
+  Connect-AzAccount -Tenant '<tenant-id>' -Subscription '<subscription-id>'
+  ```
+
+- If a policy configuration with the same settings already exists, a warning is displayed and the cmdlet continues execution.
 
 ## RELATED LINKS
 
-- <https://learn.microsoft.com/en-us/rest/api/azure/devops/policy/configurations/create?view=azure-devops>
+- <https://learn.microsoft.com/en-us/rest/api/azure/devops/policy/configurations/create>
