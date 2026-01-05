@@ -7,13 +7,13 @@
 [![GitHub release (latest)](https://img.shields.io/github/v/release/msc365/az-devops-psmodule?include_prereleases&logo=github&color=blue)](https://github.com/msc365/az-devops-psmodule/releases)
 [![PowerShell Gallery Version](https://img.shields.io/powershellgallery/v/Azure.DevOps.PSModule?include_prereleases&color=blue)](https://www.powershellgallery.com/packages/Azure.DevOps.PSModule)
 [![PowerShell Gallery Downloads](https://img.shields.io/powershellgallery/dt/Azure.DevOps.PSModule.svg)](https://www.powershellgallery.com/packages/Azure.DevOps.PSModule)
-[![Code Analysis and Testing](https://github.com/msc365/az-devops-psmodule/actions/workflows/pr-code-testing.yml/badge.svg)](https://github.com/msc365/az-devops-psmodule/actions/workflows/pr-code-testing.yml)
+[![Code Testing](https://github.com/msc365/az-devops-psmodule/actions/workflows/pr-code-testing.yml/badge.svg)](https://github.com/msc365/az-devops-psmodule/actions/workflows/pr-code-testing.yml)
 [![license](https://img.shields.io/badge/License-MIT-purple.svg)](LICENSE)
 
 This repository provides a PowerShell module that wraps the Azure DevOps REST API into clean, task-oriented cmdlets. It simplifies automation and scripting across your DevOps workflows, making it easier to manage pipelines, repositories, builds, releases, and work items directly from PowerShell.
 
 > [!NOTE]
-> We are currently working on major changes to elevate this project with better PowerShell best practices, comprehensive unit tests, and improved documentation. The first result was the **v0.2.0-alpha1** release last week, followed by the current **v0.2.0-alpha2** release. An upcoming **v0.2.0-alpha3** release will test all available functions to ensure they conform to the new patterns and improvements. See the [releases page](https://github.com/msc365/az-devops-psmodule/releases) for the latest detailed information. Your feedback during this alpha phase is highly appreciated!
+> We are currently working on major changes to elevate this project with better PowerShell best practices, comprehensive unit tests, and improved documentation. The first result was the **v0.2.0-alpha1** release last week, followed by the current **v0.2.0-alpha2** release. Upcoming **v0.2.0-alpha** releases will test all available functions to ensure they conform to the new patterns and improvements. See the [releases page](https://github.com/msc365/az-devops-psmodule/releases) for the latest detailed information. Your feedback during this alpha phase is highly appreciated!
 
 <!-- > [!WARNING]
 > This module provides experimental features, allowing you to test and provide feedback on new functionalities before they become stable. These features are not finalized and may undergo breaking changes, so they are not recommended for production use. -->

@@ -1,8 +1,12 @@
-name: Code Analysis and Testing
+name: code-tests
 
 on:
   pull_request:
     branches: ['main']
+    paths:
+      - 'src/**'
+      - '!src/Tests/**'
+
   workflow_dispatch:
 
 jobs:
