@@ -1,13 +1,13 @@
 ---
 name: "Miscellaneous work \U0001F6E0"
-description: 'Create an issue for miscellaneous and improvements tasks'
+description: 'Create a task for miscellaneous work'
 title: '[Miscellaneous] '
-labels: ['miscellaneous :hammer_and_wrench:']
+labels: ['needs triage :wave:', 'miscellaneous :hammer_and_wrench:']
 body:
   - type: markdown
     attributes:
       value: |
-        Thank you for documenting this issue. This template is for miscellaneous refactoring and improvement tasks.
+        Thank you for documenting this issue. This template is for miscellaneous tasks like refactoring and improvements.
   - type: checkboxes
     attributes:
       label: Is there an existing issue for this?
@@ -19,22 +19,22 @@ body:
     attributes:
       label: Azure.DevOps.PSModule version
       description: Please provide the version of the Azure.DevOps.PSModule you are using.
-      placeholder: 0.2.0, 0.2.0-alpha1, etc.
+      placeholder: N/A or 0.2.0, 0.2.0-alpha1, etc.
     validations:
-      required: true
+      required: false
   - type: input
     attributes:
       label: Related function
-      description: Which function is related to your request?
-      placeholder: Set-AdoDefault, New-AdoProject, etc.
+      description: Which function(s) or area is related to your request?
+      placeholder: N/A or New-AdoProject, Multiple functions, Documentation, Test system, etc.
     validations:
-      required: true
+      required: false
   - type: textarea
     id: description
     attributes:
-      label: Improvement description
-      description: Describe the refactoring or improvement that needs to be done
-      placeholder: What should be refactored or improved and why?
+      label: Task description
+      description: Describe the task that needs to be done
+      placeholder: What should be improved, refactored or done and why?
     validations:
       required: true
   - type: textarea
