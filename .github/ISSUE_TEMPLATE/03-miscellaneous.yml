@@ -1,5 +1,5 @@
 ---
-name: 'Miscellaneous work \U0001F6E0'
+name: "Miscellaneous work \U0001F6E0"
 description: 'Create an issue for miscellaneous and improvements tasks'
 title: '[Miscellaneous] '
 labels: ['miscellaneous :hammer_and_wrench:']
