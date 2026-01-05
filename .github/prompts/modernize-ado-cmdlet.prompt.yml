@@ -117,6 +117,34 @@ rules:
               if (-not $projectId) { continue }
           }
 
+    - title: Continuation Token Pattern for Pagination
+      pattern: |
+          For Get (list) cmdlets that support continuation tokens:
+          - Add ContinuationToken parameter to List parameter set
+          - Build output object with ordered hashtable first
+          - Conditionally add continuationToken to output if present
+          - Always add projectName and collectionUri after optional properties
+          - Convert to PSCustomObject at the end
+
+          Example:
+          foreach ($i_ in $items) {
+              $obj = [ordered]@{
+                  id          = $i_.id
+                  name        = $i_.name
+                  description = $i_.description
+                  # ... other required properties
+              }
+              # Conditionally add optional properties
+              if ($i_.continuationToken) {
+                  $obj['continuationToken'] = $i_.continuationToken
+              }
+              # Always add these last
+              $obj['projectName'] = $ProjectName
+              $obj['collectionUri'] = $CollectionUri
+
+              [PSCustomObject]$obj
+          }
+
 template: |
     function Get-Ado[Type] {
         <#
@@ -186,6 +214,9 @@ template: |
             [Parameter(ParameterSetName = 'List[Type]s')]
             [int]$Top = 100,
 
+            [Parameter(ParameterSetName = 'List[Type]s')]
+            [string]$ContinuationToken,
+
             [Parameter()]
             [Alias('ApiVersion')]
             [ValidateSet('[versions]')]
@@ -199,6 +230,7 @@ template: |
             Write-Debug ("Name: $($Name -join ',')")
             Write-Debug ("Skip: $Skip")
             Write-Debug ("Top: $Top")
+            Write-Debug ("ContinuationToken: $ContinuationToken")
             Write-Debug ("Version: $Version")
 
             Confirm-Default -Defaults ([ordered]@{
@@ -225,6 +257,9 @@ template: |
                         if ($Top) {
                             $queryParameters.Add("`$top=$Top")
                         }
+                        if ($ContinuationToken) {
+                            $queryParameters.Add("continuationToken=$ContinuationToken")
+                        }
                     }
 
                     $params = @{
@@ -241,14 +276,22 @@ template: |
                             $items = if ($n_) { @($results) } else { $results.value }
 
                             foreach ($i_ in $items) {
-                                [PSCustomObject]@{
-                                    id            = $i_.id
-                                    name          = $i_.name
-                                    description   = $i_.description
-                                    # Add additional properties
-                                    projectName   = $ProjectName
-                                    collectionUri = $CollectionUri
+                                $obj = [ordered]@{
+                                    id          = $i_.id
+                                    name        = $i_.name
+                                    description = $i_.description
+                                    # Add additional properties as needed
                                 }
+                                # Conditionally add optional properties like continuation tokens
+                                if ($i_.continuationToken) {
+                                    $obj['continuationToken'] = $i_.continuationToken
+                                }
+                                # Always add these last
+                                $obj['projectName'] = $ProjectName
+                                $obj['collectionUri'] = $CollectionUri
+
+                                # Output the object
+                                [PSCustomObject]$obj
                             }
 
                         } catch {
@@ -568,7 +611,9 @@ checklist:
     - Re-throw unexpected errors with throw $_
     - Add Write-Verbose and Write-Debug statements
     - Add backward compatibility aliases
-    - Include collectionUri in output objects
+    - Include collectionUri and projectName in output objects
+    - Build output objects using ordered hashtable, add optional properties conditionally, then convert to PSCustomObject
+    - For list cmdlets: Add ContinuationToken parameter and conditionally include it in output if present
     - For POST/PUT/PATCH: Use [PSCustomObject] for body, pipe to Invoke-AdoRestMethod (not in $params)
     - For Set/Remove: Add name-to-ID resolution with GUID parsing
     - Update help documentation
@@ -588,3 +633,5 @@ notes:
     - New cmdlets may use specific [Type]AlreadyExistsException (e.g., TeamAlreadyExistsException)
     - Name-to-ID resolution uses [System.Guid]::Parse() to differentiate between GUID and name inputs
     - Use 'continue' keyword in catch blocks when processing arrays to skip failed items and continue with next
+    - ContinuationToken should be used for APIs that support cursor-based pagination (not Skip/Top)
+    - Build output objects with ordered hashtable first, conditionally add optional properties, always add projectName and collectionUri last
