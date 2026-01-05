@@ -18,17 +18,17 @@ body:
   - type: input
     attributes:
       label: Azure.DevOps.PSModule version
-      description: Please provide the version of the Azure.DevOps.PSModule you are using.
+      description: If relevant, please provide the version of the Azure.DevOps.PSModule you are using.
       placeholder: 0.2.0, 0.2.0-alpha1, etc.
     validations:
-      required: true
+      required: false
   - type: input
     attributes:
       label: Related function
-      description: Which function is related to your request?
+      description: Which function is related to your question?
       placeholder: Set-AdoDefault, New-AdoProject, etc.
     validations:
-      required: true
+      required: false
   - type: textarea
     id: question
     attributes:

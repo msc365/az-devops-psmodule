@@ -18,27 +18,15 @@ body:
   - type: input
     attributes:
       label: Azure.DevOps.PSModule version
-      description: Please provide the version of the Azure.DevOps.PSModule you are using.
+      description: If relevant, please provide the version of the Azure.DevOps.PSModule you are using.
       placeholder: 0.2.0, 0.2.0-alpha1, etc.
     validations:
-      required: true
+      required: false
   - type: input
     attributes:
       label: Related function
       description: Which function is related to your request?
       placeholder: Set-AdoDefault, New-AdoProject, etc.
-    validations:
-      required: true
-  - type: dropdown
-    attributes:
-      label: Infra as Code type
-      description: Are you using Bicep, Terraform, or PowerShell?
-      multiple: true
-      options:
-        - Bicep
-        - Terraform
-        - PowerShell
-        - Other
     validations:
       required: false
   - type: textarea
@@ -66,4 +54,4 @@ body:
       label: Proposed solution
       description: Describe how this feature could be implemented
     validations:
-      required: true
+      required: false

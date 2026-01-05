@@ -18,17 +18,34 @@ body:
   - type: input
     attributes:
       label: Azure.DevOps.PSModule version
-      description: Please provide the version of the Azure.DevOps.PSModule you are using.
-      placeholder: N/A or 0.2.0, 0.2.0-alpha1, etc.
+      description: If relevant, please provide the version of the Azure.DevOps.PSModule you are using.
+      placeholder: 0.2.0, 0.2.0-alpha1, etc.
     validations:
       required: false
   - type: input
     attributes:
-      label: Related function
+      label: Related area or function
       description: Which function(s) or area is related to your request?
-      placeholder: N/A or New-AdoProject, Multiple functions, Documentation, Test system, etc.
+      placeholder: New-AdoProject, Multiple functions, Documentation, Test system, etc.
     validations:
       required: false
+  - type: dropdown
+    attributes:
+      label: Type of work
+      description: What type of work is this related to?
+      multiple: false
+      options:
+        - Refactoring
+        - Technical debt
+        - Performance
+        - Code quality
+        - Documentation
+        - Build/CI
+        - Deployment/CD
+        - Testing
+        - Other
+    validations:
+      required: true
   - type: textarea
     id: description
     attributes:

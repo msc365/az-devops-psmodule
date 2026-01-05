@@ -31,23 +31,11 @@ body:
       placeholder: Set-AdoDefault, New-AdoProject, etc.
     validations:
       required: true
-  - type: dropdown
-    attributes:
-      label: Infra as Code type
-      description: Are you using Bicep, Terraform, or PowerShell?
-      multiple: true
-      options:
-        - Bicep
-        - Terraform
-        - PowerShell
-        - Other
-    validations:
-      required: false
   - type: textarea
     id: inputs
     attributes:
       label: Input arguments of the related function
-      description: Please provide any relevant input arguments of the MSc365.Idp.Toolbox Module that can reproduce the issue.
+      description: Please provide any relevant input arguments of the Azure.DevOps.PSModule module that can reproduce the issue.
     validations:
       required: false
   - type: textarea
