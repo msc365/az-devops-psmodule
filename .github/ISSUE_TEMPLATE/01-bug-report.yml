@@ -4,7 +4,7 @@ description: Report errors or unexpected behavior
 title: 'Bug: '
 labels: ['needs triage :wave:', 'bug :beetle:']
 type: 'bug'
-projects: ['Azure.DevOps.PSModule']
+projects: ['msc365/3']
 body:
   - type: checkboxes
     attributes:

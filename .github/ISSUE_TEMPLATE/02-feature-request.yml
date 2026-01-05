@@ -4,7 +4,7 @@ description: 'Suggest an idea for this project'
 title: '[Request] '
 labels: ['needs triage :wave:', 'enhancement :sparkles:']
 type: 'feature'
-projects: ['Azure.DevOps.PSModule']
+projects: ['msc365/3']
 body:
   - type: markdown
     attributes:
