@@ -1,4 +1,4 @@
-name: code-tests
+name: Code Analysis and Testing
 
 on:
   pull_request:

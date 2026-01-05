@@ -7,7 +7,8 @@
 [![GitHub release (latest)](https://img.shields.io/github/v/release/msc365/az-devops-psmodule?include_prereleases&logo=github&color=blue)](https://github.com/msc365/az-devops-psmodule/releases)
 [![PowerShell Gallery Version](https://img.shields.io/powershellgallery/v/Azure.DevOps.PSModule?include_prereleases&color=blue)](https://www.powershellgallery.com/packages/Azure.DevOps.PSModule)
 [![PowerShell Gallery Downloads](https://img.shields.io/powershellgallery/dt/Azure.DevOps.PSModule.svg)](https://www.powershellgallery.com/packages/Azure.DevOps.PSModule)
-[![Code Testing](https://github.com/msc365/az-devops-psmodule/actions/workflows/pr-code-testing.yml/badge.svg)](https://github.com/msc365/az-devops-psmodule/actions/workflows/pr-code-testing.yml)
+[![Code Analysis and Testing](https://img.shields.io/github/actions/workflow/status/msc365/az-devops-psmodule/pr-code-testing.yml?branch=main&logo=github&label=code%20tests)](https://github.com/msc365/az-devops-psmodule/actions/workflows/pr-code-testing.yml)
+[![GitHub Issues](https://img.shields.io/github/issues/msc365/az-devops-psmodule?logo=github)](https://github.com/msc365/az-devops-psmodule/issues)
 [![license](https://img.shields.io/badge/License-MIT-purple.svg)](LICENSE)
 
 This repository provides a PowerShell module that wraps the Azure DevOps REST API into clean, task-oriented cmdlets. It simplifies automation and scripting across your DevOps workflows, making it easier to manage pipelines, repositories, builds, releases, and work items directly from PowerShell.
