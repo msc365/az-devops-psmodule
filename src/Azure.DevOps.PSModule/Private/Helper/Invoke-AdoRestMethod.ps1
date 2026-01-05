@@ -37,7 +37,7 @@
         [string]$QueryParameters,
 
         [Parameter(Mandatory)]
-        [ValidateSet('GET', 'POST', 'PATCH', 'DELETE')]
+        [ValidateSet('GET', 'POST', 'PUT', 'PATCH', 'DELETE')]
         [string]$Method,
 
         [Parameter(ValueFromPipeline, ValueFromPipelineByPropertyName)]
@@ -98,7 +98,7 @@
 
     process {
         try {
-            if ($Method -eq 'POST' -or ($Method -eq 'PATCH')) {
+            if ($Method -eq 'POST' -or $Method -eq 'PUT' -or ($Method -eq 'PATCH')) {
                 Write-Verbose "Body: $($Body | ConvertTo-Json -Depth 10)"
                 $params.Body = $Body | ConvertTo-Json -Depth 10
             }
