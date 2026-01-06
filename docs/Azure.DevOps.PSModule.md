@@ -55,8 +55,7 @@ A PowerShell module that wraps the Azure DevOps REST API into clean, task-orient
 | &nbsp; • &nbsp; [Get-AdoPolicyConfigurationList](Get-AdoPolicyConfigurationList.md) | Gets policy configurations for an Azure DevOps project. |
 | &nbsp; • &nbsp; [New-AdoPolicyConfiguration](New-AdoPolicyConfiguration.md) | Create a new policy configuration for an Azure DevOps project. |
 | &nbsp; • &nbsp; [Set-AdoPolicyConfiguration](Set-AdoPolicyConfiguration.md) | Update a policy configuration for an Azure DevOps project. |
-| &nbsp; • &nbsp; [Get-AdoPolicyType](Get-AdoPolicyType.md) | Gets policy types for an Azure DevOps project. |
-| &nbsp; • &nbsp; [Get-AdoPolicyTypeList](Get-AdoPolicyTypeList.md) | Gets a list of policy types for an Azure DevOps project. |
+| &nbsp; • &nbsp; [Get-AdoPolicyType](Get-AdoPolicyType.md) | Retrieves Azure DevOps policy type details. |
 | **Projects and Process** | |
 | &nbsp; • &nbsp; [Get-AdoProject](Get-AdoProject.md) | Get project details with optional list and filter capabilities. |
 | &nbsp; • &nbsp; [New-AdoProject](New-AdoProject.md) | Create a new project in an Azure DevOps organization. |
