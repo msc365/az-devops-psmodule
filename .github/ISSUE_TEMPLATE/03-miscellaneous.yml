@@ -2,9 +2,6 @@
 name: "Miscellaneous work \U0001F6E0"
 description: 'Create a task for miscellaneous work'
 title: '[Miscellaneous] '
-labels: ['needs triage :wave:', 'miscellaneous :hammer_and_wrench:']
-type: 'task'
-projects: ['msc365/3']
 body:
   - type: markdown
     attributes:
