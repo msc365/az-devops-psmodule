@@ -98,7 +98,7 @@
         'Get-AdoProject'
         'Get-AdoProjectList'
         'Get-AdoRepository'
-        'Get-AdoServiceEndpointByName'
+        'Get-AdoServiceEndpoint'
         'Get-AdoTeam'
         'Get-AdoTeamFieldValue'
         'Get-AdoTeamIteration'

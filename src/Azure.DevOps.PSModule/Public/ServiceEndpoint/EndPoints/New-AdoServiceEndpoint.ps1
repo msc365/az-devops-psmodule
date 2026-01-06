@@ -1,118 +1,156 @@
 ﻿function New-AdoServiceEndpoint {
     <#
     .SYNOPSIS
-        Create a new service endpoint in an Azure DevOps project.
+        Creates a new service endpoint in an Azure DevOps project.
 
     .DESCRIPTION
-        This function creates a new service endpoint in an Azure DevOps project through REST API.
+        This cmdlet creates a new service endpoint in an Azure DevOps project. Service endpoints provide connection details
+        for external services like Azure subscriptions, GitHub, Docker registries, etc.
+
+    .PARAMETER CollectionUri
+        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/my-org.
 
     .PARAMETER Configuration
-        Mandatory. The configuration JSON for the service endpoint.
+        Mandatory. The configuration for the service endpoint as a PSCustomObject.
 
-    .PARAMETER ApiVersion
-        Optional. The API version to use.
-
-    .OUTPUTS
-        System.Object
-
-        The created service endpoint object.
+    .PARAMETER Version
+        Optional. The API version to use for the request. Default is '7.1'.
 
     .LINK
-        https://learn.microsoft.com/en-us/rest/api/azure/devops/serviceendpoint/endpoints/create?view=azure-devops
+        https://learn.microsoft.com/en-us/rest/api/azure/devops/serviceendpoint/endpoints/create
 
     .EXAMPLE
-        $config = [ordered]@{
-            data                 = [ordered]@{
+        $config = [PSCustomObject]@{
+            data                 = [PSCustomObject]@{
                 creationMode     = 'Manual'
                 environment      = 'AzureCloud'
                 scopeLevel       = 'Subscription'
                 subscriptionId   = '00000000-0000-0000-0000-000000000000'
-                subscriptionName = 'sub-alz-workload-dev-weu'
-                # scopeLevel          = 'ManagementGroup'
-                # managementGroupId   = '11111111-1111-1111-1111-111111111111'
-                # managementGroupName = 'Tenant Root Group'
+                subscriptionName = 'my-subscription-1'
             }
-            name                             = 'id-msc-adortagnt-prd'
+            name                             = 'my-endpoint-1'
             type                             = 'AzureRM'
             url                              = 'https://management.azure.com/'
-            authorization                    = [ordered]@{
-                parameters = [ordered]@{
-                    serviceprincipalid = '22222222-2222-2222-2222-222222222222'
-                    tenantid           = '11111111-1111-1111-1111-111111111111'
-                    scope              = '/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/rg-my-avengers-weu'
+            authorization                    = [PSCustomObject]@{
+                parameters = [PSCustomObject]@{
+                    serviceprincipalid = '11111111-1111-1111-1111-111111111111'
+                    tenantid           = '22222222-2222-2222-2222-222222222222'
+                    scope              = '/subscriptions/00000000-0000-0000-0000-000000000000'
                 }
                 scheme     = 'WorkloadIdentityFederation'
             }
             isShared                         = $false
-            serviceEndpointProjectReferences = @(
-                [ordered]@{
-                    name             = 'id-msc-adortagnt-prd'
-                    projectReference = [ordered]@{
+            serviceEndpointProjectReferences = [PSCustomObject[]]@(
+                [PSCustomObject]@{
+                    name             = 'my-endpoint-1'
+                    projectReference = [PSCustomObject]@{
                         id   = '33333333-3333-3333-3333-333333333333'
                         name = 'my-project-1'
                     }
                 }
             )
-        } | ConvertTo-Json -Depth 5 -Compress
+        }
 
-        New-AdoServiceEndpoint -Configuration $objConfig
+        New-AdoServiceEndpoint -CollectionUri 'https://dev.azure.com/my-org' -Configuration $config
 
-        This example demonstrates how to create a new Azure Resource Manager service endpoint in an Azure DevOps project using a configuration object.
+        Creates an Azure Resource Manager service endpoint with workload identity federation.
     #>
-    [CmdletBinding()]
-    [OutputType([object])]
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param (
-        [Parameter(Mandatory)]
-        [string]$Configuration,
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
+        [string]$CollectionUri = $env:DefaultAdoCollectionUri,
 
-        [Parameter(Mandatory = $false)]
-        [Alias('Api')]
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [PSCustomObject]$Configuration,
+
+        [Parameter()]
+        [Alias('ApiVersion', 'Api')]
         [ValidateSet('7.1', '7.2-preview.4')]
-        [string]$ApiVersion = '7.1'
+        [string]$Version = '7.1'
     )
 
     begin {
-        Write-Debug ('Command         : {0}' -f $MyInvocation.MyCommand.Name)
-        Write-Debug ('  Configuration : {0}' -f $Configuration)
-        Write-Debug ('  ApiVersion    : {0}' -f $ApiVersion)
+        Write-Verbose ("Command: $($MyInvocation.MyCommand.Name)")
+        Write-Debug ("CollectionUri: $CollectionUri")
+        Write-Debug ("Configuration: $($Configuration | ConvertTo-Json -Depth 10)")
+        Write-Debug ("Version: $Version")
+
+        Confirm-Default -Defaults ([ordered]@{
+                'CollectionUri' = $CollectionUri
+            })
     }
 
     process {
         try {
-            $ErrorActionPreference = 'Stop'
-
-            if (-not $global:AzDevOpsIsConnected) {
-                throw 'Not connected to Azure DevOps. Please connect using Connect-AdoOrganization.'
-            }
-
-            if (-not (Test-Json $Configuration)) {
-                throw 'Invalid JSON for service endpoint configuration object.'
-            }
-
-            $uriFormat = '{0}/_apis/serviceendpoint/endpoints?api-version={1}'
-            $azDevopsUri = ($uriFormat -f [uri]::new($global:AzDevOpsOrganization), $ApiVersion)
+            $endpointName = $Configuration.name
+            $projectName = $Configuration.serviceEndpointProjectReferences[0].projectReference.name
 
             $params = @{
-                Method      = 'POST'
-                Uri         = $azDevopsUri
-                ContentType = 'application/json'
-                Headers     = @{
-                    'Accept'        = 'application/json'
-                    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
-                }
-                Body        = $Configuration
+                Uri     = "$CollectionUri/_apis/serviceendpoint/endpoints"
+                Version = $Version
+                Method  = 'POST'
             }
 
-            $response = Invoke-RestMethod @params -Verbose:$VerbosePreference
+            if ($PSCmdlet.ShouldProcess($CollectionUri, "Create service endpoint: $endpointName")) {
+                try {
+                    $results = $Configuration | Invoke-AdoRestMethod @params
 
-            return $response
+                    [PSCustomObject]@{
+                        id                               = $results.id
+                        name                             = $results.name
+                        type                             = $results.type
+                        description                      = $results.description
+                        authorization                    = $results.authorization
+                        url                              = $results.url
+                        isShared                         = $results.isShared
+                        isReady                          = $results.isReady
+                        owner                            = $results.owner
+                        data                             = $results.data
+                        serviceEndpointProjectReferences = $results.serviceEndpointProjectReferences
+                        projectName                      = $projectName
+                        collectionUri                    = $CollectionUri
+                    }
+                } catch {
+                    if ($_.ErrorDetails.Message -match 'DuplicateServiceConnectionException') {
+                        Write-Warning "Service endpoint '$endpointName' already exists, trying to get it."
 
+                        $params.Method = 'GET'
+                        $params.Uri = "$CollectionUri/$projectName/_apis/serviceendpoint/endpoints"
+                        $params.QueryParameters = "endpointNames=$endpointName"
+
+                        $results = (Invoke-AdoRestMethod @params).value
+
+                        [PSCustomObject]@{
+                            id                               = $results.id
+                            name                             = $results.name
+                            type                             = $results.type
+                            description                      = $results.description
+                            authorization                    = $results.authorization
+                            isShared                         = $results.isShared
+                            url                              = $results.url
+                            isReady                          = $results.isReady
+                            owner                            = $results.owner
+                            data                             = $results.data
+                            serviceEndpointProjectReferences = $results.serviceEndpointProjectReferences
+                            projectName                      = $projectName
+                            collectionUri                    = $CollectionUri
+                        }
+                    } else {
+                        throw $_
+                    }
+                }
+            } else {
+                $params.Body = $Configuration
+                Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
+            }
         } catch {
             throw $_
         }
     }
 
     end {
-        Write-Debug ('Exit : {0}' -f $MyInvocation.MyCommand.Name)
+        Write-Verbose ("Exit: $($MyInvocation.MyCommand.Name)")
     }
 }

@@ -1,85 +1,110 @@
 ﻿function Remove-AdoServiceEndpoint {
     <#
     .SYNOPSIS
-        Remove a service endpoint from an Azure DevOps project.
+        Removes a service endpoint from Azure DevOps projects.
 
     .DESCRIPTION
-        This function removes a service endpoint from an Azure DevOps project through REST API.
+        This cmdlet removes a service endpoint from one or more Azure DevOps projects.
 
-    .PARAMETER EndpointId
-        Mandatory. The unique identifier of the service endpoint.
+    .PARAMETER CollectionUri
+        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/my-org.
+
+    .PARAMETER Id
+        Mandatory. The unique identifier of the service endpoint to remove.
 
     .PARAMETER ProjectIds
-        Mandatory. The project Ids from which endpoint needs to be deleted.
+        Mandatory. The project IDs from which the endpoint needs to be deleted.
 
-    .PARAMETER ApiVersion
-        Optional. The API version to use.
+    .PARAMETER Deep
+        Optional. If specified, delete the service principal name (SPN) created by the endpoint.
 
-    .OUTPUTS
-        System.Boolean
-
-        Boolean indicating success or failure.
+    .PARAMETER Version
+        Optional. The API version to use for the request. Default is '7.1'.
 
     .LINK
-        https://learn.microsoft.com/en-us/rest/api/azure/devops/serviceendpoint/endpoints/delete?view=azure-devops
+        https://learn.microsoft.com/en-us/rest/api/azure/devops/serviceendpoint/endpoints/delete
 
     .EXAMPLE
-        Remove-AdoServiceEndpoint -EndPointId $endpoint.id -ProjectIds $project.id
+        Remove-AdoServiceEndpoint -CollectionUri 'https://dev.azure.com/my-org' -Id $endpoint.id -ProjectId $project.id
 
         Removes the specified service endpoint from the given project.
-    #>
-    [CmdletBinding()]
-    [OutputType([boolean])]
-    param (
-        [Parameter(Mandatory)]
-        [string]$EndpointId,
 
-        [Parameter(Mandatory)]
+    .EXAMPLE
+        $endpoint | Remove-AdoServiceEndpoint -ProjectId '00000000-0000-0000-0000-000000000001'
+
+        Removes a service endpoint by piping the endpoint object.
+    #>
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
+    [OutputType([void])]
+    param (
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
+        [string]$CollectionUri = $env:DefaultAdoCollectionUri,
+
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName, ValueFromPipeline)]
+        [Alias('EndpointId')]
+        [string]$Id,
+
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
         [string[]]$ProjectIds,
 
-        [Parameter(Mandatory = $false)]
-        [Alias('Api')]
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [switch]$Deep,
+
+        [Parameter()]
+        [Alias('ApiVersion', 'Api')]
         [ValidateSet('7.1', '7.2-preview.4')]
-        [string]$ApiVersion = '7.1'
+        [string]$Version = '7.1'
     )
 
     begin {
-        Write-Debug ('Command      : {0}' -f $MyInvocation.MyCommand.Name)
-        Write-Debug ('  EndpointId : {0}' -f $EndpointId)
-        Write-Debug ('  ProjectIds : {0}' -f ($ProjectIds -join ','))
-        Write-Debug ('  ApiVersion : {0}' -f $ApiVersion)
+        Write-Verbose ("Command: $($MyInvocation.MyCommand.Name)")
+        Write-Debug ("CollectionUri: $CollectionUri")
+        Write-Debug ("Id: $Id")
+        Write-Debug ("ProjectIds: $($ProjectIds -join ',')")
+        Write-Debug ("Deep: $($Deep.IsPresent)")
+        Write-Debug ("Version: $Version")
+
+        Confirm-Default -Defaults ([ordered]@{
+                'CollectionUri' = $CollectionUri
+            })
     }
 
     process {
         try {
-            $ErrorActionPreference = 'Stop'
+            $QueryParameters = [System.Collections.Generic.List[string]]::new()
+            $QueryParameters.Add("projectIds=$($ProjectIds -join ',')")
 
-            if (-not $global:AzDevOpsIsConnected) {
-                throw 'Not connected to Azure DevOps. Please connect using Connect-AdoOrganization.'
+            if ($Deep.IsPresent) {
+                $QueryParameters.Add('deep=true')
             }
-
-            $uriFormat = '{0}/_apis/serviceendpoint/endpoints/{1}?projectIds={2}&api-version={3}'
-            $azDevOpsUri = ($uriFormat -f [uri]::new($global:AzDevOpsOrganization), $EndpointId, ($ProjectIds -join ',') , $ApiVersion)
 
             $params = @{
-                Method  = 'DELETE'
-                Uri     = $azDevOpsUri
-                Headers = @{
-                    'Accept'        = 'application/json'
-                    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
-                }
+                Uri             = "$CollectionUri/_apis/serviceendpoint/endpoints/$Id"
+                Version         = $Version
+                QueryParameters = if ($QueryParameters.Count -gt 0) { $QueryParameters -join '&' } else { $null }
+                Method          = 'DELETE'
             }
 
-            Invoke-RestMethod @params -Verbose:$VerbosePreference | Out-Null
-
-            return $true
-
+            if ($PSCmdlet.ShouldProcess($CollectionUri, "Remove service endpoint: $Id from project(s) '$($ProjectIds -join ', ')'" )) {
+                try {
+                    Invoke-AdoRestMethod @params | Out-Null
+                } catch {
+                    if ($_.ErrorDetails.Message -match 'No service connection found') {
+                        Write-Warning "Service endpoint with ID $Id does not exist, skipping."
+                    } else {
+                        throw $_
+                    }
+                }
+            } else {
+                Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
+            }
         } catch {
             throw $_
         }
     }
 
     end {
-        Write-Debug ('Exit : {0}' -f $MyInvocation.MyCommand.Name)
+        Write-Verbose ("Exit: $($MyInvocation.MyCommand.Name)")
     }
 }

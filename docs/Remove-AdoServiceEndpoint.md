@@ -15,15 +15,15 @@ title: Remove-AdoServiceEndpoint
 
 ## SYNOPSIS
 
-Remove a service endpoint from an Azure DevOps project.
+Removes an Azure DevOps service endpoint (service connection) from one or more projects.
 
 ## SYNTAX
 
 ### __AllParameterSets
 
 ```text
-Remove-AdoServiceEndpoint [-EndpointId] <string> [-ProjectIds] <string[]> [[-ApiVersion] <string>]
- [<CommonParameters>]
+Remove-AdoServiceEndpoint [[-CollectionUri] <string>] [-Id] <string> [-ProjectIds] <string[]>
+ [-Deep] [[-Version] <string>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -33,7 +33,7 @@ This cmdlet has the following aliases,
 
 ## DESCRIPTION
 
-This function removes a service endpoint from an Azure DevOps project through REST API.
+This function removes a service endpoint (service connection) from one or more Azure DevOps projects. You can perform a deep deletion to also remove all associated pipeline resources.
 
 ## EXAMPLES
 
@@ -42,27 +42,54 @@ This function removes a service endpoint from an Azure DevOps project through RE
 #### PowerShell
 
 ```powershell
-Remove-AdoServiceEndpoint -EndPointId $endpoint.id -ProjectIds $project.id
+$params = @{
+    CollectionUri = 'https://dev.azure.com/myorg'
+    Id            = '00000000-0000-0000-0000-000000000001'
+    ProjectIds    = 'MyProject'
+}
+Remove-AdoServiceEndpoint @params
 ```
 
-Removes the specified service endpoint from the given project.
+Removes the service endpoint from the specified project.
+
+### EXAMPLE 2
+
+#### PowerShell
+
+```powershell
+$params = @{
+    Id         = '00000000-0000-0000-0000-000000000001'
+    ProjectIds = @('Project1', 'Project2', 'Project3')
+}
+Remove-AdoServiceEndpoint @params
+```
+
+Removes the service endpoint from multiple projects.
+
+### EXAMPLE 3
+
+#### PowerShell
+
+```powershell
+Remove-AdoServiceEndpoint -Id '00000000-0000-0000-0000-000000000001' -ProjectIds 'MyProject' -Deep
+```
+
+Removes the service endpoint and all associated pipeline resources from the project.
 
 ## PARAMETERS
 
-### -ApiVersion
+### -CollectionUri
 
-Optional.
-The API version to use.
+Optional. The URI of the Azure DevOps collection or Azure DevOps Server. If not provided, it uses the default collection URI from $env:DefaultAdoCollectionUri.
 
 ```yaml
 Type: System.String
-DefaultValue: 7.1
+DefaultValue: $env:DefaultAdoCollectionUri
 SupportsWildcards: false
-Aliases:
-- Api
+Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 2
+  Position: 0
   IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
@@ -72,19 +99,19 @@ AcceptedValues: []
 HelpMessage: ''
 ```
 
-### -EndpointId
+### -Id
 
-Mandatory.
-The unique identifier of the service endpoint.
+Mandatory. The ID of the service endpoint to remove.
 
 ```yaml
 Type: System.String
 DefaultValue: ''
 SupportsWildcards: false
-Aliases: []
+Aliases:
+- EndpointId
 ParameterSets:
 - Name: (All)
-  Position: 0
+  Position: 1
   IsRequired: true
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
@@ -96,8 +123,7 @@ HelpMessage: ''
 
 ### -ProjectIds
 
-Mandatory.
-The project Ids from which endpoint needs to be deleted.
+Mandatory. One or more project IDs from which to remove the service endpoint.
 
 ```yaml
 Type: System.String[]
@@ -106,13 +132,59 @@ SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 1
+  Position: 2
   IsRequired: true
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
   ValueFromRemainingArguments: false
 DontShow: false
 AcceptedValues: []
+HelpMessage: ''
+```
+
+### -Deep
+
+Optional. If specified, performs a deep deletion to remove all associated pipeline resources.
+
+```yaml
+Type: System.Management.Automation.SwitchParameter
+DefaultValue: false
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: (All)
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: false
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -Version
+
+Optional. The API version to use. Defaults to '7.1'.
+
+```yaml
+Type: System.String
+DefaultValue: 7.1
+SupportsWildcards: false
+Aliases:
+- ApiVersion
+- Api
+ParameterSets:
+- Name: (All)
+  Position: 3
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: false
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues:
+- 7.1
+- 7.2-preview.4
 HelpMessage: ''
 ```
 
@@ -129,14 +201,22 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### System.Boolean
+### None
 
-Boolean indicating success or failure.
+This cmdlet does not return any output.
 
 ## NOTES
 
-- Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
+- If the service endpoint is not found, a warning is displayed instead of throwing an error.
+- The cmdlet has a high impact confirmation level, so it prompts for confirmation by default unless -Confirm:$false is specified.
+- Multiple projects can be specified to remove the service endpoint from all of them in a single operation.
+- Supports ShouldProcess for WhatIf and Confirm parameters (high impact).
+- Requires an active Azure account login. Use `Connect-AzAccount` to authenticate:
+
+  ```powershell
+  Connect-AzAccount -Tenant '<tenant-id>' -Subscription '<subscription-id>'
+  ```
 
 ## RELATED LINKS
 
-- <https://learn.microsoft.com/en-us/rest/api/azure/devops/serviceendpoint/endpoints/delete?view=azure-devops>
+- <https://learn.microsoft.com/en-us/rest/api/azure/devops/serviceendpoint/endpoints/delete>

@@ -52,7 +52,6 @@ A PowerShell module that wraps the Azure DevOps REST API into clean, task-orient
 | &nbsp; • &nbsp; [Remove-AdoEnvironment](Remove-AdoEnvironment.md) | Remove an Azure DevOps Pipeline Environment by its ID. |
 | **Policies** | |
 | &nbsp; • &nbsp; [Get-AdoPolicyConfiguration](Get-AdoPolicyConfiguration.md) | Gets policy configurations for an Azure DevOps project. |
-| &nbsp; • &nbsp; [Get-AdoPolicyConfigurationList](Get-AdoPolicyConfigurationList.md) | Gets policy configurations for an Azure DevOps project. |
 | &nbsp; • &nbsp; [New-AdoPolicyConfiguration](New-AdoPolicyConfiguration.md) | Create a new policy configuration for an Azure DevOps project. |
 | &nbsp; • &nbsp; [Set-AdoPolicyConfiguration](Set-AdoPolicyConfiguration.md) | Update a policy configuration for an Azure DevOps project. |
 | &nbsp; • &nbsp; [Get-AdoPolicyType](Get-AdoPolicyType.md) | Retrieves Azure DevOps policy type details. |
@@ -67,9 +66,9 @@ A PowerShell module that wraps the Azure DevOps REST API into clean, task-orient
 | &nbsp; • &nbsp; [New-AdoRepository](New-AdoRepository.md) | Create a new repository in an Azure DevOps project. |
 | &nbsp; • &nbsp; [Remove-AdoRepository](Remove-AdoRepository.md) | Remove a repository from an Azure DevOps project. |
 | **Service Endpoints** | |
-| &nbsp; • &nbsp; [Get-AdoServiceEndpointByName](Get-AdoServiceEndpointByName.md) | Get the service endpoint details for an Azure DevOps service endpoint. |
-| &nbsp; • &nbsp; [New-AdoServiceEndpoint](New-AdoServiceEndpoint.md) | Create a new service endpoint in an Azure DevOps project. |
-| &nbsp; • &nbsp; [Remove-AdoServiceEndpoint](Remove-AdoServiceEndpoint.md) | Remove a service endpoint from an Azure DevOps project. |
+| &nbsp; • &nbsp; [Get-AdoServiceEndpoint](Get-AdoServiceEndpoint.md) | Retrieves Azure DevOps service endpoint details by name. |
+| &nbsp; • &nbsp; [New-AdoServiceEndpoint](New-AdoServiceEndpoint.md) | Creates a new service endpoint in an Azure DevOps project. |
+| &nbsp; • &nbsp; [Remove-AdoServiceEndpoint](Remove-AdoServiceEndpoint.md) | Removes a service endpoint from Azure DevOps projects. |
 | **Teams** | |
 | &nbsp; • &nbsp; [Get-AdoTeam](Get-AdoTeam.md) | Get teams or the team details for a given Azure DevOps project. |
 | &nbsp; • &nbsp; [New-AdoTeam](New-AdoTeam.md) | Create a new team in an Azure DevOps project. |
