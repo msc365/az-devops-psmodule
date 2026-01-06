@@ -50,14 +50,35 @@ instructions: |
   - [Alias1]
   - [Alias2]
 
-  **Note:** If the cmdlet has no function-level aliases, use:
+  **CRITICAL:** This section is ONLY for **function-level aliases** defined using `[Alias('AliasName')]` attribute on the function itself.
+
+  **Example of function-level alias in PowerShell:**
+  ```powershell
+  function Get-AdoTeam {
+      [CmdletBinding()]
+      [Alias('Get-Team')]  # <-- This is a function-level alias
+      param(...)
+  ```
+
+  **Most cmdlets do NOT have function-level aliases.** If the function has no `[Alias()]` attribute, use:
   ```markdown
   ## ALIASES
 
   This cmdlet has the following aliases,
   - N/A
   ```
-  Parameter aliases (like `ProjectId` for `ProjectName`) should be documented in the parameter's YAML section under `Aliases:`, not in this section.
+
+  **Parameter aliases** (like `ProjectId` for `ProjectName`, defined as `[Alias('ProjectId')]` on the parameter)
+  must be documented ONLY in the parameter's YAML section under `Aliases:`, NOT in the ALIASES section.
+
+  **Example of parameter alias in PowerShell:**
+  ```powershell
+  param(
+      [Parameter()]
+      [Alias('ProjectId')]  # <-- This is a parameter alias, goes in YAML only
+      [string]$ProjectName
+  )
+  ```
 
   ## DESCRIPTION
 
