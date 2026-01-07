@@ -66,6 +66,7 @@ jobs:
             $results | Format-Table -AutoSize
 
             # Store analysis results for badge generation
+            "ANALYZER_TOTAL=$($filesToAnalyze.Count)" | Out-File -FilePath $env:GITHUB_ENV -Append
             "ANALYZER_ERRORS=$errors" | Out-File -FilePath $env:GITHUB_ENV -Append
             "ANALYZER_WARNINGS=$warnings" | Out-File -FilePath $env:GITHUB_ENV -Append
 
@@ -75,6 +76,7 @@ jobs:
             }
           } else {
             Write-Host "No issues found!" -ForegroundColor Green
+            "ANALYZER_TOTAL=$($filesToAnalyze.Count)" | Out-File -FilePath $env:GITHUB_ENV -Append
             "ANALYZER_ERRORS=0" | Out-File -FilePath $env:GITHUB_ENV -Append
             "ANALYZER_WARNINGS=0" | Out-File -FilePath $env:GITHUB_ENV -Append
           }
@@ -95,7 +97,7 @@ jobs:
           $config.Run.Path = $testsPath
           $config.Run.Exit = $false
           $config.Run.PassThru = $true
-          $config.Output.Verbosity = if ($env:GITHUB_EVENT_NAME -eq 'pull_request') { 'Detailed' } else { 'Normal' }
+          $config.Output.Verbosity = if ($env:GITHUB_EVENT_NAME -eq 'pull_request') { 'Detailed' } else { 'Minimal' }
           $config.TestResult.Enabled = $true
           $config.TestResult.OutputPath = 'testResults.xml'
           $config.CodeCoverage.Enabled = $false
@@ -130,7 +132,7 @@ jobs:
           $testPassed = $env:TEST_PASSED
           $testFailed = $env:TEST_FAILED
           $testColor = if ($testFailed -eq '0') { 'green' } else { 'red' }
-          $testMessage = if ($testFailed -eq '0') { "$testPassed passing" } else { "$testFailed failing" }
+          $testMessage = if ($testFailed -eq '0') { "$testPassed" } else { "$testFailed" }
 
           $testBadge = @{
             schemaVersion = 1
@@ -142,10 +144,11 @@ jobs:
           $testBadge | ConvertTo-Json | Out-File -FilePath 'test-badge.json' -Encoding utf8
 
           # Code analysis badge
+          $total = $env:ANALYZER_TOTAL
           $errors = $env:ANALYZER_ERRORS
           $warnings = $env:ANALYZER_WARNINGS
           $analysisColor = if ($errors -eq '0' -and $warnings -eq '0') { 'green' } elseif ($errors -eq '0') { 'yellow' } else { 'red' }
-          $analysisMessage = if ($errors -eq '0' -and $warnings -eq '0') { 'passing' } else { "$errors errors, $warnings warnings" }
+          $analysisMessage = if ($errors -eq '0' -and $warnings -eq '0') { $total } elseif ($errors -eq '0') { $warnings } else { $errors }
 
           $analysisBadge = @{
             schemaVersion = 1
@@ -166,7 +169,7 @@ jobs:
           gistID: ${{ secrets.GIST_ID }}
           filename: az-devops-psmodule-test-badge.json
           label: pester tests
-          message: ${{ env.TEST_FAILED == '0' && format('{0} | {1} passing', env.TEST_PASSED, env.TEST_TOTAL) || format('{0} | {1} failing', env.TEST_FAILED, env.TEST_TOTAL) }}
+          message: ${{ env.TEST_FAILED == '0' && format('{0}', env.TEST_PASSED) || format('{0}'', env.TEST_FAILED) }}
           color: ${{ env.TEST_FAILED == '0' && 'green' || 'red' }}
 
       - name: Create analysis badge gist
@@ -177,7 +180,7 @@ jobs:
           gistID: ${{ secrets.GIST_ID }}
           filename: az-devops-psmodule-analysis-badge.json
           label: code analysis
-          message: ${{ env.ANALYZER_ERRORS == '0' && env.ANALYZER_WARNINGS == '0' && 'passing' || format('{0} errors, {1} warnings', env.ANALYZER_ERRORS, env.ANALYZER_WARNINGS) }}
+          message: ${{ env.ANALYZER_ERRORS == '0' && env.ANALYZER_WARNINGS == '0' && format('{0}', env.ANALYZER_TOTAL) || env.ANALYZER_ERRORS == '0' && format('{0}',env.ANALYZER_WARNINGS) || format('{0}', env.ANALYZER_ERRORS) }}
           color: ${{ env.ANALYZER_ERRORS == '0' && env.ANALYZER_WARNINGS == '0' && 'green' || env.ANALYZER_ERRORS == '0' && 'yellow' || 'red' }}
 
       - name: Upload test results
