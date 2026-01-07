@@ -96,17 +96,34 @@ jobs:
 
           $result = Invoke-Pester -Configuration $config
 
-          # Store test results for badge generation
-          "TEST_TOTAL=$($result.TotalCount)" | Out-File -FilePath $env:GITHUB_ENV -Append
-          "TEST_PASSED=$($result.PassedCount)" | Out-File -FilePath $env:GITHUB_ENV -Append
-          "TEST_FAILED=$($result.FailedCount)" | Out-File -FilePath $env:GITHUB_ENV -Append
+          # Extract test counts (Pester 5.x uses different property structure)
+          $totalTests = $result.Tests.Count
+          $passedTests = ($result.Tests | Where-Object { $_.Result -eq 'Passed' }).Count
+          $failedTests = ($result.Tests | Where-Object { $_.Result -eq 'Failed' }).Count
 
-          if ($result.FailedCount -gt 0) {
-            Write-Error "Pester tests failed. Failed: $($result.FailedCount), Passed: $($result.PassedCount)"
+          # Debug output
+          Write-Host "Pester Result Object:" -ForegroundColor Magenta
+          Write-Host "  Total Tests: $totalTests" -ForegroundColor Magenta
+          Write-Host "  Passed Tests: $passedTests" -ForegroundColor Magenta
+          Write-Host "  Failed Tests: $failedTests" -ForegroundColor Magenta
+
+          # Store test results for badge generation
+          "TEST_TOTAL=$totalTests" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "TEST_PASSED=$passedTests" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "TEST_FAILED=$failedTests" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+          # Verify what was written
+          Write-Host "Environment variables written:" -ForegroundColor Magenta
+          Write-Host "  TEST_TOTAL=$totalTests" -ForegroundColor Magenta
+          Write-Host "  TEST_PASSED=$passedTests" -ForegroundColor Magenta
+          Write-Host "  TEST_FAILED=$failedTests" -ForegroundColor Magenta
+
+          if ($failedTests -gt 0) {
+            Write-Error "Pester tests failed. Failed: $failedTests, Passed: $passedTests"
             exit 1
           }
 
-          Write-Host "All tests passed! Total: $($result.TotalCount), Passed: $($result.PassedCount)" -ForegroundColor Green
+          Write-Host "All tests passed! Total: $totalTests, Passed: $passedTests" -ForegroundColor Green
 
       - name: Generate badge data
         if: always()
