@@ -10,7 +10,7 @@ Dynamic badges have been configured to display:
 ### 1. Create a GitHub Gist
 1. Go to <https://gist.github.com/>
 2. Create a new **secret** gist with any content (it will be overwritten)
-3. Copy the gist ID from the URL (e.g., `https://gist.github.com/msc365/abc123def456` → ID is `abc123def456`)
+3. Copy the gist ID from the URL (e.g., `https://gist.github.com/MSc365Admin/abc123def456` → ID is `abc123def456`)
 
 ### 2. Create a Personal Access Token (PAT)
 1. Go to GitHub Settings → Developer Settings → Personal Access Tokens → Tokens (classic)
@@ -31,14 +31,14 @@ Replace `GIST_ID` in the README.md badge URLs with your actual gist ID:
 
 **Before:**
 ```markdown
-[![pester-tests](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/msc365/GIST_ID/raw/az-devops-psmodule-test-badge.json)]
-[![code-analysis](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/msc365/GIST_ID/raw/az-devops-psmodule-analysis-badge.json)]
+[![pester-tests](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/MSc365Admin/GIST_ID/raw/az-devops-psmodule-test-badge.json)]
+[![code-analysis](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/MSc365Admin/GIST_ID/raw/az-devops-psmodule-analysis-badge.json)]
 ```
 
 **After (example):**
 ```markdown
-[![pester-tests](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/msc365/abc123def456/raw/az-devops-psmodule-test-badge.json)]
-[![code-analysis](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/msc365/abc123def456/raw/az-devops-psmodule-analysis-badge.json)]
+[![pester-tests](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/MSc365Admin/abc123def456/raw/az-devops-psmodule-test-badge.json)]
+[![code-analysis](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/MSc365Admin/abc123def456/raw/az-devops-psmodule-analysis-badge.json)]
 ```
 
 ## How It Works

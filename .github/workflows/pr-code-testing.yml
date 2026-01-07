@@ -1,7 +1,7 @@
 name: Code Analysis and Testing
 
 on:
-  pull_request:
+  push:
     branches: ['main']
     paths:
       - 'src/**'
@@ -60,12 +60,18 @@ jobs:
 
             $results | Format-Table -AutoSize
 
+            # Store analysis results for badge generation
+            "ANALYZER_ERRORS=$errors" | Out-File -FilePath $env:GITHUB_ENV -Append
+            "ANALYZER_WARNINGS=$warnings" | Out-File -FilePath $env:GITHUB_ENV -Append
+
             if ($errors -gt 0) {
               Write-Error "PSScriptAnalyzer found $errors error(s). Build failed."
               exit 1
             }
           } else {
             Write-Host "No issues found!" -ForegroundColor Green
+            "ANALYZER_ERRORS=0" | Out-File -FilePath $env:GITHUB_ENV -Append
+            "ANALYZER_WARNINGS=0" | Out-File -FilePath $env:GITHUB_ENV -Append
           }
 
       - name: Run Pester Tests
@@ -103,7 +109,7 @@ jobs:
           Write-Host "All tests passed! Total: $($result.TotalCount), Passed: $($result.PassedCount)" -ForegroundColor Green
 
       - name: Generate badge data
-        if: always() && github.ref == 'refs/heads/main'
+        if: always()
         shell: pwsh
         run: |
           Write-Host "Generating badge data..." -ForegroundColor Cyan
@@ -141,7 +147,7 @@ jobs:
           Write-Host "Badge data generated successfully" -ForegroundColor Green
 
       - name: Create badges gist
-        if: always() && github.ref == 'refs/heads/main'
+        if: always()
         uses: schneegans/dynamic-badges-action@v1.7.0
         with:
           auth: ${{ secrets.GIST_TOKEN }}
@@ -152,7 +158,7 @@ jobs:
           color: ${{ env.TEST_FAILED == '0' && 'brightgreen' || 'red' }}
 
       - name: Create analysis badge gist
-        if: always() && github.ref == 'refs/heads/main'
+        if: always()
         uses: schneegans/dynamic-badges-action@v1.7.0
         with:
           auth: ${{ secrets.GIST_TOKEN }}
