@@ -1,7 +1,8 @@
 ---
 name: "Feature request \U0001F680"
 description: 'Suggest an idea for this project'
-title: '[Request] '
+title: '[Request]: '
+labels: ['needs triage :wave:']
 body:
   - type: markdown
     attributes:
@@ -38,10 +39,10 @@ body:
         Define the role of the user who will benefit from the feature.
 
         **I want** [Feature]
-        Describe the feature the user wants to use.
+        Describe the feature you would like to use.
 
         **So that** [Benefit]
-        Explain the benefit that the user will gain from the feature.
+        Explain the benefit that you will gain from the feature.
 
         **Notes**
         Any additional notes or considerations related to the user story.
