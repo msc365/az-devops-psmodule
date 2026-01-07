@@ -169,7 +169,7 @@ jobs:
           gistID: ${{ secrets.GIST_ID }}
           filename: az-devops-psmodule-test-badge.json
           label: pester tests
-          message: ${{ env.TEST_FAILED == '0' && format('{0}', env.TEST_PASSED) || format('{0}'', env.TEST_FAILED) }}
+          message: ${{ env.TEST_FAILED == '0' && format('{0}', env.TEST_PASSED) || format('{0}', env.TEST_FAILED) }}
           color: ${{ env.TEST_FAILED == '0' && 'green' || 'red' }}
 
       - name: Create analysis badge gist
