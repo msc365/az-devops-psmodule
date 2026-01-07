@@ -90,12 +90,77 @@ jobs:
 
           $result = Invoke-Pester -Configuration $config
 
+          # Store test results for badge generation
+          "TEST_TOTAL=$($result.TotalCount)" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "TEST_PASSED=$($result.PassedCount)" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "TEST_FAILED=$($result.FailedCount)" | Out-File -FilePath $env:GITHUB_ENV -Append
+
           if ($result.FailedCount -gt 0) {
             Write-Error "Pester tests failed. Failed: $($result.FailedCount), Passed: $($result.PassedCount)"
             exit 1
           }
 
           Write-Host "All tests passed! Total: $($result.TotalCount), Passed: $($result.PassedCount)" -ForegroundColor Green
+
+      - name: Generate badge data
+        if: always() && github.ref == 'refs/heads/main'
+        shell: pwsh
+        run: |
+          Write-Host "Generating badge data..." -ForegroundColor Cyan
+
+          # Test badge
+          $testTotal = $env:TEST_TOTAL
+          $testPassed = $env:TEST_PASSED
+          $testFailed = $env:TEST_FAILED
+          $testColor = if ($testFailed -eq '0') { 'brightgreen' } else { 'red' }
+
+          $testBadge = @{
+            schemaVersion = 1
+            label = 'tests'
+            message = "$testPassed/$testTotal passing"
+            color = $testColor
+          }
+
+          $testBadge | ConvertTo-Json | Out-File -FilePath 'test-badge.json' -Encoding utf8
+
+          # Code analysis badge
+          $errors = $env:ANALYZER_ERRORS
+          $warnings = $env:ANALYZER_WARNINGS
+          $analysisColor = if ($errors -eq '0' -and $warnings -eq '0') { 'brightgreen' } elseif ($errors -eq '0') { 'yellow' } else { 'red' }
+          $analysisMessage = if ($errors -eq '0' -and $warnings -eq '0') { 'passing' } else { "$errors errors, $warnings warnings" }
+
+          $analysisBadge = @{
+            schemaVersion = 1
+            label = 'code analysis'
+            message = $analysisMessage
+            color = $analysisColor
+          }
+
+          $analysisBadge | ConvertTo-Json | Out-File -FilePath 'analysis-badge.json' -Encoding utf8
+
+          Write-Host "Badge data generated successfully" -ForegroundColor Green
+
+      - name: Create badges gist
+        if: always() && github.ref == 'refs/heads/main'
+        uses: schneegans/dynamic-badges-action@v1.7.0
+        with:
+          auth: ${{ secrets.GIST_TOKEN }}
+          gistID: ${{ secrets.GIST_ID }}
+          filename: az-devops-psmodule-test-badge.json
+          label: tests
+          message: ${{ env.TEST_PASSED }}/${{ env.TEST_TOTAL }} passing
+          color: ${{ env.TEST_FAILED == '0' && 'brightgreen' || 'red' }}
+
+      - name: Create analysis badge gist
+        if: always() && github.ref == 'refs/heads/main'
+        uses: schneegans/dynamic-badges-action@v1.7.0
+        with:
+          auth: ${{ secrets.GIST_TOKEN }}
+          gistID: ${{ secrets.GIST_ID }}
+          filename: az-devops-psmodule-analysis-badge.json
+          label: code analysis
+          message: ${{ env.ANALYZER_ERRORS == '0' && env.ANALYZER_WARNINGS == '0' && 'passing' || format('{0} errors, {1} warnings', env.ANALYZER_ERRORS, env.ANALYZER_WARNINGS) }}
+          color: ${{ env.ANALYZER_ERRORS == '0' && env.ANALYZER_WARNINGS == '0' && 'brightgreen' || env.ANALYZER_ERRORS == '0' && 'yellow' || 'red' }}
 
       - name: Upload test results
         if: always()

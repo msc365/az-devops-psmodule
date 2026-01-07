@@ -4,12 +4,13 @@
 <!-- cSpell: words psake psmodule -->
 <!-- markdownlint-disable no-duplicate-heading -->
 
-[![GitHub release (latest)](https://img.shields.io/github/v/release/msc365/az-devops-psmodule?include_prereleases&logo=github&color=blue)](https://github.com/msc365/az-devops-psmodule/releases)
-[![PowerShell Gallery Version](https://img.shields.io/powershellgallery/v/Azure.DevOps.PSModule?include_prereleases&color=blue)](https://www.powershellgallery.com/packages/Azure.DevOps.PSModule)
-[![PowerShell Gallery Downloads](https://img.shields.io/powershellgallery/dt/Azure.DevOps.PSModule.svg)](https://www.powershellgallery.com/packages/Azure.DevOps.PSModule)
-[![Code Analysis and Testing](https://img.shields.io/github/actions/workflow/status/msc365/az-devops-psmodule/pr-code-testing.yml?branch=main&logo=github&label=code%20tests)](https://github.com/msc365/az-devops-psmodule/actions/workflows/pr-code-testing.yml)
-[![GitHub Issues](https://img.shields.io/github/issues/msc365/az-devops-psmodule?logo=github)](https://github.com/msc365/az-devops-psmodule/issues)
-[![license](https://img.shields.io/badge/License-MIT-purple.svg)](LICENSE)
+[![github-latest](https://img.shields.io/github/v/release/msc365/az-devops-psmodule?include_prereleases&color=blue&logo=github&label=release)](https://github.com/msc365/az-devops-psmodule/releases)
+[![ps-gallery-latest](https://img.shields.io/powershellgallery/v/Azure.DevOps.PSModule?include_prereleases&color=blue&label=ps-gallery)](https://www.powershellgallery.com/packages/Azure.DevOps.PSModule)
+[![ps-gallery-downloads](https://img.shields.io/powershellgallery/dt/Azure.DevOps.PSModule.svg)](https://www.powershellgallery.com/packages/Azure.DevOps.PSModule)
+[![github-issues](https://img.shields.io/github/issues/msc365/az-devops-psmodule?logo=github)](https://github.com/msc365/az-devops-psmodule/issues)
+[![pester-tests](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/msc365/49cbfa1538653138a1f2c4e452d7b4b4/raw/az-devops-psmodule-test-badge.json)](https://github.com/msc365/az-devops-psmodule/actions/workflows/pr-code-testing.yml)
+[![code-analysis](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/msc365/49cbfa1538653138a1f2c4e452d7b4b4/raw/az-devops-psmodule-analysis-badge.json)](https://github.com/msc365/az-devops-psmodule/actions/workflows/pr-code-testing.yml)
+[![github-license](https://img.shields.io/github/license/msc365/az-devops-psmodule?label=licence&color=purple)](LICENSE)
 
 This repository provides a PowerShell module that wraps the Azure DevOps REST API into clean, task-oriented cmdlets. It simplifies automation and scripting across your DevOps workflows, making it easier to manage pipelines, repositories, builds, releases, and work items directly from PowerShell.
 
