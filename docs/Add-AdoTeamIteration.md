@@ -1,35 +1,29 @@
 <!--
 document type: cmdlet
 external help file: Azure.DevOps.PSModule-Help.xml
-HelpUri: https://learn.microsoft.com/en-us/rest/api/azure/devops/work/iterations/get
+HelpUri: https://learn.microsoft.com/en-us/rest/api/azure/devops/work/iterations/post-team-iteration
 Locale: en-NL
 Module Name: Azure.DevOps.PSModule
 ms.date: 01/07/2026
 PlatyPS schema version: 2024-05-01
-title: Get-AdoTeamIteration
+title: Add-AdoTeamIteration
 -->
 
 <!-- markdownlint-disable MD024 -->
 <!-- cSpell: ignore dontshow -->
 
-# Get-AdoTeamIteration
+# Add-AdoTeamIteration
 
 ## SYNOPSIS
 
-Retrieves Azure DevOps team iteration details.
+Adds an iteration to a team in Azure DevOps.
 
 ## SYNTAX
 
-### ListIterations
+### __AllParameterSets
 
 ```text
-Get-AdoTeamIteration [[-CollectionUri] <string>] [[-ProjectName] <string>] [-TeamName] <string> [[-TimeFrame] <string>] [[-Version] <string>] [-WhatIf] [-Confirm] [<CommonParameters>]
-```
-
-### ById
-
-```text
-Get-AdoTeamIteration [[-CollectionUri] <string>] [[-ProjectName] <string>] [-TeamName] <string> [[-Id] <string>] [[-Version] <string>] [-WhatIf] [-Confirm] [<CommonParameters>]
+Add-AdoTeamIteration [[-CollectionUri] <string>] [[-ProjectName] <string>] [-TeamName] <string> [-Id] <string> [[-Version] <string>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -39,7 +33,7 @@ This cmdlet has the following aliases,
 
 ## DESCRIPTION
 
-This cmdlet retrieves details of one or more Azure DevOps team iterations within a specified project and team. You can retrieve all iterations, filter by timeframe, or retrieve specific iterations by ID.
+This cmdlet adds a specific iteration to a team for a specified project in Azure DevOps. The iteration must already exist in the project's classification nodes before it can be added to a team.
 
 ## EXAMPLES
 
@@ -52,11 +46,12 @@ $params = @{
     CollectionUri = 'https://dev.azure.com/my-org'
     ProjectName = 'my-project'
     TeamName = 'my-team'
+    Id = '00000000-0000-0000-0000-000000000000'
 }
-Get-AdoTeamIteration @params
+Add-AdoTeamIteration @params
 ```
 
-Retrieves all iterations for the specified team.
+Adds the specified iteration to the team.
 
 ### EXAMPLE 2
 
@@ -64,31 +59,14 @@ Retrieves all iterations for the specified team.
 
 ```powershell
 $params = @{
-    CollectionUri = 'https://dev.azure.com/my-org'
-    ProjectName = 'my-project'
-    TeamName = 'my-team'
-    TimeFrame = 'current'
-}
-Get-AdoTeamIteration @params
-```
-
-Retrieves current iterations for the specified team.
-
-### EXAMPLE 3
-
-#### PowerShell
-
-```powershell
-$params = @{
-    CollectionUri = 'https://dev.azure.com/my-org'
     ProjectName = 'my-project'
     TeamName = 'my-team'
     Id = '00000000-0000-0000-0000-000000000000'
 }
-Get-AdoTeamIteration @params
+Add-AdoTeamIteration @params
 ```
 
-Retrieves the specified iteration by ID.
+Adds the iteration using the default CollectionUri from the environment variable.
 
 ## PARAMETERS
 
@@ -139,13 +117,14 @@ HelpMessage: ''
 
 ### -TeamName
 
-The ID or name of the team.
+The ID or name of the team to add the iteration to.
 
 ```yaml
 Type: System.String
 DefaultValue: ''
 SupportsWildcards: false
 Aliases:
+- Team
 - TeamId
 ParameterSets:
 - Name: (All)
@@ -161,7 +140,7 @@ HelpMessage: ''
 
 ### -Id
 
-The ID of the iteration(s) to retrieve. If not provided, retrieves all iterations.
+The ID of the iteration to add to the team. The iteration must already exist in the project's classification nodes.
 
 ```yaml
 Type: System.String
@@ -170,40 +149,15 @@ SupportsWildcards: false
 Aliases:
 - IterationId
 ParameterSets:
-- Name: ById
+- Name: (All)
   Position: Named
-  IsRequired: false
-  ValueFromPipeline: false
+  IsRequired: true
+  ValueFromPipeline: true
   ValueFromPipelineByPropertyName: true
   ValueFromRemainingArguments: false
 DontShow: false
 AcceptedValues: []
 HelpMessage: ''
-```
-
-### -TimeFrame
-
-The timeframe to filter iterations. Valid values are 'past', 'current', and 'future'.
-Note: Only 'current' is fully supported by the Azure DevOps API currently.
-
-```yaml
-Type: System.String
-DefaultValue: ''
-SupportsWildcards: false
-Aliases: []
-ParameterSets:
-- Name: ListIterations
-  Position: Named
-  IsRequired: false
-  ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: true
-  ValueFromRemainingArguments: false
-DontShow: false
-AcceptedValues:
-- past
-- current
-- future
-HelpMessage: Only 'current' is supported currently.
 ```
 
 ### -Version
@@ -250,7 +204,7 @@ The cmdlet returns a PSCustomObject with the following properties:
 - id: The unique identifier of the iteration
 - name: The name of the iteration
 - attributes: The iteration attributes including start date, finish date, and time frame
-- team: The id or name of the team
+- team: The id or name of the team the iteration was added to
 - project: The id or name of the project
 - collectionUri: The collection URI
 
@@ -262,12 +216,10 @@ The cmdlet returns a PSCustomObject with the following properties:
   Connect-AzAccount -Tenant '<tenant-id>' -Subscription '<subscription-id>'
   ```
 
-- If a specific iteration ID is not found, a warning will be issued and the cmdlet will continue without error.
-- This cmdlet supports -WhatIf and -Confirm parameters for testing queries before execution.
-- The TimeFrame parameter currently only fully supports 'current' timeframe filtering.
+- The iteration must already exist in the project's classification nodes before it can be added to a team.
+- If the iteration does not exist, a warning will be issued and the cmdlet will continue without error.
+- This cmdlet supports -WhatIf and -Confirm parameters for testing changes before execution.
 
 ## RELATED LINKS
 
-- <https://learn.microsoft.com/en-us/rest/api/azure/devops/work/iterations/get>
-- <https://learn.microsoft.com/en-us/rest/api/azure/devops/work/iterations/list>
-
+- <https://learn.microsoft.com/en-us/rest/api/azure/devops/work/iterations/post-team-iteration>

@@ -2,91 +2,166 @@
 function Get-AdoTeamIteration {
     <#
     .SYNOPSIS
-        Get a specific team iteration for a given project or team in Azure DevOps.
+        Retrieves Azure DevOps team iteration details.
 
     .DESCRIPTION
-        This cmdlet retrieves a specific team iteration by its ID for a specified project or team in Azure DevOps.
+        This cmdlet retrieves details of one or more Azure DevOps team iterations within a specified project and team.
+        You can retrieve all iterations, filter by timeframe, or retrieve specific iterations by ID.
 
-    .PARAMETER ProjectId
-        The ID or name of the Azure DevOps project.
+    .PARAMETER CollectionUri
+        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/my-org.
 
-    .PARAMETER TeamId
-        The ID or name of the Azure DevOps team. If not specified, the default team for the project will be used.
+    .PARAMETER ProjectName
+        Mandatory. The ID or name of the project.
 
-    .PARAMETER IterationId
-        The ID of the iteration to retrieve.
+    .PARAMETER TeamName
+        Mandatory. The ID or name of the team.
 
-    .PARAMETER ApiVersion
-        The API version to use for the request. Default is '7.1'.
+    .PARAMETER Id
+        Optional. The ID of the iteration(s) to retrieve. If not provided, retrieves all iterations.
 
-    .NOTES
-        Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
+    .PARAMETER TimeFrame
+        Optional. The timeframe to filter iterations. Valid values are 'past', 'current', and 'future'.
+
+    .PARAMETER Version
+        Optional. The API version to use for the request. Default is '7.1'.
 
     .LINK
         https://learn.microsoft.com/en-us/rest/api/azure/devops/work/iterations/get
+        https://learn.microsoft.com/en-us/rest/api/azure/devops/work/iterations/list
 
     .EXAMPLE
-        Get-AdoTeamIteration -ProjectId -ProjectId 'my-project-1' -TeamId 'my-team' -IterationId $iterationId
+        $params = @{
+            CollectionUri = 'https://dev.azure.com/my-org'
+            ProjectName = 'my-project'
+            TeamName = 'my-team'
+        }
+        Get-AdoTeamIteration @params
 
-        Retrieves the specified iteration for the given team in the specified project.
+        Retrieves all iterations for the specified team.
+
+    .EXAMPLE
+        $params = @{
+            CollectionUri = 'https://dev.azure.com/my-org'
+            ProjectName = 'my-project'
+            TeamName = 'my-team'
+            TimeFrame = 'current'
+        }
+        Get-AdoTeamIteration @params
+
+        Retrieves current iterations for the specified team.
+
+    .EXAMPLE
+        $params = @{
+            CollectionUri = 'https://dev.azure.com/my-org'
+            ProjectName = 'my-project'
+            TeamName = 'my-team'
+            Id = '00000000-0000-0000-0000-000000000000'
+        }
+        Get-AdoTeamIteration @params
+
+        Retrieves the specified iteration by ID.
     #>
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName = 'ListIterations', SupportsShouldProcess)]
     [OutputType([object])]
     param (
-        [Parameter(Mandatory)]
-        [string]$ProjectId,
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
+        [string]$CollectionUri = $env:DefaultAdoCollectionUri,
 
-        [Parameter(Mandatory = $false)]
-        [string]$TeamId,
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [Alias('ProjectId')]
+        [string]$ProjectName = $env:DefaultAdoProject,
 
-        [Parameter(Mandatory)]
-        [string]$IterationId,
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [Alias('TeamId')]
+        [string]$TeamName,
 
-        [Parameter(Mandatory = $false)]
-        [Alias('api')]
+        [Parameter(ValueFromPipelineByPropertyName, ParameterSetName = 'ById')]
+        [Alias('IterationId')]
+        [string]$Id,
+
+        [Parameter(HelpMessage = "Only 'current' is supported currently.", ValueFromPipelineByPropertyName, ParameterSetName = 'ListIterations')]
+        [ValidateSet('past', 'current', 'future')]
+        [string]$TimeFrame,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [Alias('api', 'ApiVersion')]
         [ValidateSet('7.1', '7.2-preview.1')]
-        [string]$ApiVersion = '7.1'
+        [string]$Version = '7.1'
     )
 
     begin {
-        Write-Debug ('Command       : {0}' -f $MyInvocation.MyCommand.Name)
-        Write-Debug ('  ProjectId   : {0}' -f $ProjectId)
-        Write-Debug ('  TeamId      : {0}' -f $TeamId)
-        Write-Debug ('  IterationId : {0}' -f $IterationId)
-        Write-Debug ('  ApiVersion  : {0}' -f $ApiVersion)
+        Write-Verbose ("Command: $($MyInvocation.MyCommand.Name)")
+        Write-Debug ("CollectionUri: $CollectionUri")
+        Write-Debug ("ProjectName: $ProjectName")
+        Write-Debug ("TeamName: $TeamName")
+        Write-Debug ("Id: $Id")
+        Write-Debug ("TimeFrame: $TimeFrame")
+        Write-Debug ("Version: $Version")
+
+        Confirm-Default -Defaults ([ordered]@{
+                'CollectionUri' = $CollectionUri
+                'ProjectName'   = $ProjectName
+            })
     }
 
     process {
         try {
-            $ErrorActionPreference = 'Stop'
+            $QueryParameters = [System.Collections.Generic.List[string]]::new()
 
-            if (-not $global:AzDevOpsIsConnected) {
-                throw 'Not connected to Azure DevOps. Please connect using Connect-AdoOrganization.'
-            }
+            if ($Id) {
+                # Get specific iteration by ID
+                $uri = "$CollectionUri/$ProjectName/$TeamName/_apis/work/teamsettings/iterations/$Id"
+            } else {
+                # List all iterations
+                $uri = "$CollectionUri/$ProjectName/$TeamName/_apis/work/teamsettings/iterations"
 
-            $uriFormat = '{0}/{1}/{2}/_apis/work/teamsettings/iterations/{3}?api-version={4}'
-            $azDevOpsUri = ($uriFormat -f [uri]::new($global:AzDevOpsOrganization), [uri]::EscapeUriString($ProjectId),
-                [uri]::EscapeUriString($TeamId), [uri]::EscapeUriString($IterationId), $ApiVersion)
-
-            $params = @{
-                Method  = 'GET'
-                Uri     = $azDevOpsUri
-                Headers = @{
-                    'Accept'        = 'application/json'
-                    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
+                # Build query parameters
+                if ($TimeFrame) {
+                    $QueryParameters.Add("`$timeframe=$TimeFrame")
                 }
             }
 
-            $response = Invoke-RestMethod @params -Verbose:$VerbosePreference
+            $params = @{
+                Uri             = $uri
+                Version         = $Version
+                QueryParameters = if ($QueryParameters.Count -gt 0) { $QueryParameters -join '&' } else { $null }
+                Method          = 'GET'
+            }
 
-            return $response
+            if ($PSCmdlet.ShouldProcess($ProjectName, $Id ? "Get Iteration: $Id for: $TeamName" : "Get iterations for: $TeamName")) {
+                try {
+                    $results = Invoke-AdoRestMethod @params
+                    $items = if ($Id) { @($results) } else { $results.value }
 
+                    # Build output objects
+                    foreach ($i_ in $items) {
+                        [PSCustomObject]@{
+                            id            = $i_.id
+                            name          = $i_.name
+                            attributes    = $i_.attributes
+                            team          = $TeamName    # TeamName or TeamId
+                            project       = $ProjectName # ProjectName or ProjectId
+                            collectionUri = $CollectionUri
+                        }
+                    }
+                } catch {
+                    if ($_.ErrorDetails.Message -match 'NotFoundException') {
+                        Write-Warning "Iteration with ID $Id does not exist, skipping."
+                    } else {
+                        throw $_
+                    }
+                }
+            } else {
+                Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 5)"
+            }
         } catch {
             throw $_
         }
     }
 
     end {
-        Write-Debug ('{0} exited' -f $MyInvocation.MyCommand)
+        Write-Verbose ("Exit: $($MyInvocation.MyCommand.Name)")
     }
 }

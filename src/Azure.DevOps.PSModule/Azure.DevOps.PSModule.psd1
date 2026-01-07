@@ -134,7 +134,7 @@
         'Set-AdoProject'
         'Set-AdoTeam'
         'Set-AdoTeamFieldValue'
-        'Set-AdoTeamIteration'
+        'Add-AdoTeamIteration'
         'Set-AdoTeamSettings'
     )
 

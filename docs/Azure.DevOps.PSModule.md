@@ -76,9 +76,8 @@ A PowerShell module that wraps the Azure DevOps REST API into clean, task-orient
 | &nbsp; • &nbsp; [Remove-AdoTeam](Remove-AdoTeam.md) | Remove a team from an Azure DevOps project. |
 | &nbsp; • &nbsp; [Get-AdoTeamSettings](Get-AdoTeamSettings.md) | Retrieves the settings for a team in an Azure DevOps project. |
 | &nbsp; • &nbsp; [Set-AdoTeamSettings](Set-AdoTeamSettings.md) | Updates the settings for a team in Azure DevOps. |
-| &nbsp; • &nbsp; [Get-AdoTeamIteration](Get-AdoTeamIteration.md) | Get a specific team iteration for a given project or team in Azure DevOps. |
-| &nbsp; • &nbsp; [Get-AdoTeamIterationList](Get-AdoTeamIterationList.md) | Get the list of team iterations for a given project or team in Azure DevOps. |
-| &nbsp; • &nbsp; [Set-AdoTeamIteration](Set-AdoTeamItteration.md) | Set a specific team iteration for a given project or team in Azure DevOps. |
+| &nbsp; • &nbsp; [Add-AdoTeamIteration](Add-AdoTeamIteration.md) | Adds an iteration to a team in Azure DevOps. |
+| &nbsp; • &nbsp; [Get-AdoTeamIteration](Get-AdoTeamIteration.md) | Retrieves Azure DevOps team iteration details. |
 | &nbsp; • &nbsp; [Get-AdoTeamFieldValue](Get-AdoTeamFieldValue.md) | Gets the team field value settings for a team in an Azure DevOps project. |
 | &nbsp; • &nbsp; [Set-AdoTeamFieldValue](Set-AdoTeamFieldValue.md) | Sets the team field value settings for a team in an Azure DevOps project. |
 | **Work Item Tracking** | |
