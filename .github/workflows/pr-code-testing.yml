@@ -148,7 +148,7 @@ jobs:
           $errors = $env:ANALYZER_ERRORS
           $warnings = $env:ANALYZER_WARNINGS
           $analysisColor = if ($errors -eq '0' -and $warnings -eq '0') { 'green' } elseif ($errors -eq '0') { 'yellow' } else { 'red' }
-          $analysisMessage = if ($errors -eq '0' -and $warnings -eq '0') { $total } elseif ($errors -eq '0') { $warnings } else { $errors }
+          $analysisMessage = if ($errors -eq '0' -and $warnings -eq '0') { "$($total)" } elseif ($errors -eq '0') { "$($warnings)" } else { "$($errors)" }
 
           $analysisBadge = @{
             schemaVersion = 1
@@ -180,7 +180,7 @@ jobs:
           gistID: ${{ secrets.GIST_ID }}
           filename: az-devops-psmodule-analysis-badge.json
           label: code analysis
-          message: ${{ env.ANALYZER_ERRORS == '0' && env.ANALYZER_WARNINGS == '0' && format('{0}', env.ANALYZER_TOTAL) || env.ANALYZER_ERRORS == '0' && format('{0}',env.ANALYZER_WARNINGS) || format('{0}', env.ANALYZER_ERRORS) }}
+          message: ${{ env.ANALYZER_ERRORS == '0' && env.ANALYZER_WARNINGS == '0' && format('{0}', env.ANALYZER_TOTAL) || env.ANALYZER_ERRORS == '0' && format('{0}', env.ANALYZER_WARNINGS) || format('{0}', env.ANALYZER_ERRORS) }}
           color: ${{ env.ANALYZER_ERRORS == '0' && env.ANALYZER_WARNINGS == '0' && 'green' || env.ANALYZER_ERRORS == '0' && 'yellow' || 'red' }}
 
       - name: Upload test results
