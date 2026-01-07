@@ -3,9 +3,7 @@ name: Code Analysis and Testing
 on:
   push:
     branches: ['main']
-    paths:
-      - 'src/**'
-      - '!src/Tests/**'
+
   pull_request:
     branches: ['main']
     paths:
