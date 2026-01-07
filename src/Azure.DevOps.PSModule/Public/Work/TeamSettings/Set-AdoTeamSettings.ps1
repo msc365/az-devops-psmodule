@@ -2,112 +2,207 @@
 function Set-AdoTeamSettings {
     <#
     .SYNOPSIS
-        Update the settings for a team in Azure DevOps.
+        Updates the settings for a team in Azure DevOps.
 
     .DESCRIPTION
-        Update the settings for a team in Azure DevOps by sending a PATCH request to the Azure DevOps REST API.
+        This cmdlet updates the settings for a team in Azure DevOps by sending a PATCH request to the Azure DevOps REST API.
+        You can update working days, bugs behavior, backlog iteration, and backlog visibilities.
 
-    .PARAMETER ProjectId
-        The ID or name of the project containing the team.
+    .PARAMETER CollectionUri
+        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/my-org.
 
-    .PARAMETER TeamId
-        The ID or name of the team to update.
+    .PARAMETER ProjectName
+        Optional. The ID or name of the project. If not specified, the default project is used.
 
-    .PARAMETER TeamSettings
-        A string representing the team settings to be updated in JSON format.
+    .PARAMETER Name
+        Mandatory. The ID or name of the team to update settings for.
 
-    .PARAMETER ApiVersion
-        The API version to use for the request. Default is '7.1'.
+    .PARAMETER BacklogIteration
+        Optional. The id (uuid) of the iteration to use as the backlog iteration.
+
+    .PARAMETER BacklogVisibilities
+        Optional. Object of backlog level visibilities (e.g., @{'Microsoft.EpicCategory' = $true}).
+
+    .PARAMETER BugsBehavior
+        Optional. How bugs should behave. Valid values: 'off', 'asRequirements', 'asTasks'.
+
+    .PARAMETER DefaultIteration
+        Optional. The default iteration id (uuid) for the team. Cannot be used together with DefaultIterationMacro.
+
+    .PARAMETER DefaultIterationMacro
+        Optional. Default iteration macro (e.g., '@currentIteration'). Used to set the default iteration dynamically. Cannot be used together with DefaultIteration.
+
+    .PARAMETER WorkingDays
+        Optional. Array of working days for the team (e.g., 'monday', 'tuesday', 'wednesday').
+
+    .PARAMETER Version
+        Optional. The API version to use for the request. Default is '7.1'.
 
     .LINK
         https://learn.microsoft.com/en-us/rest/api/azure/devops/work/teamsettings/update
 
-        .EXAMPLE
+    .EXAMPLE
         $params = @{
-            bugsBehavior          = 'asRequirements'
-            backlogVisibilities   = @{
+            CollectionUri = 'https://dev.azure.com/my-org'
+            ProjectName   = 'my-project-1'
+            Name          = 'my-team-1'
+            BugsBehavior  = 'asRequirements'
+            WorkingDays   = @('monday', 'tuesday', 'wednesday', 'thursday', 'friday')
+        }
+        Set-AdoTeamSettings @params
+
+        Updates the team settings to treat bugs as requirements and set working days.
+
+    .EXAMPLE
+        $params = @{
+            CollectionUri        = 'https://dev.azure.com/my-org'
+            ProjectName          = 'my-project-1'
+            Name                 = 'my-team-1'
+            BacklogVisibilities  = @{
                 'Microsoft.EpicCategory'        = $false
                 'Microsoft.FeatureCategory'     = $true
                 'Microsoft.RequirementCategory' = $true
             }
-            defaultIterationMacro = '@currentIteration'
-            workingDays           = @(
-                'monday'
-                'tuesday'
-                'wednesday'
-                'thursday'
-                'friday'
-            )
-        } | ConvertTo-Json -Depth 5 -Compress
+        }
+        Set-AdoTeamSettings @params
 
-        Set-AdoTeamSettings -ProjectId 'my-project-1' -TeamId 'my-other-team' -TeamSettings $params
+        Updates the backlog visibilities for the team.
 
-        Updates the settings for the team "my-other-team" in the project "my-project" with the specified parameters.
+    .EXAMPLE
+        $params = @{
+            CollectionUri = 'https://dev.azure.com/my-org'
+            ProjectName   = 'my-project-1'
+            BugsBehavior = 'asRequirements'
+            WorkingDays  = @('monday', 'tuesday', 'wednesday')
+        }
+        @(
+            'my-team-1',
+            'my-team-2'
+        ) | Set-AdoTeamSettings @params
 
-        The backlogIteration is set to the root iteration, bugs are treated as requirements, and working days are set to Monday through Friday.
+        Updates multiple teams to treat bugs as requirements and set working days using pipeline input.
     #>
-    [CmdletBinding()]
-    [OutputType([object])]
+    [CmdletBinding(SupportsShouldProcess, DefaultParameterSetName = 'DefaultIterationMacro', ConfirmImpact = 'High')]
+    [OutputType([PSCustomObject])]
     param (
-        [Parameter(Mandatory)]
-        [string]$ProjectId,
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
+        [string]$CollectionUri = $env:DefaultAdoCollectionUri,
 
-        [Parameter(Mandatory)]
-        [string]$TeamId,
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [Alias('ProjectId')]
+        [string]$ProjectName = $env:DefaultAdoProject,
 
-        [Parameter(Mandatory)]
-        [string]$TeamSettings,
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName, ValueFromPipeline)]
+        [Alias('Team', 'TeamId', 'TeamName')]
+        [string]$Name,
 
-        [Parameter(Mandatory = $false)]
-        [Alias('api')]
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [string]$BacklogIteration,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [object]$BacklogVisibilities,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateSet('off', 'asRequirements', 'asTasks')]
+        [string]$BugsBehavior,
+
+        [Parameter(ValueFromPipelineByPropertyName, ParameterSetName = 'DefaultIteration')]
+        [string]$DefaultIteration,
+
+        [Parameter(ValueFromPipelineByPropertyName, ParameterSetName = 'DefaultIterationMacro')]
+        [string]$DefaultIterationMacro,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateSet('sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday')]
+        [string[]]$WorkingDays,
+
+        [Parameter()]
+        [Alias('ApiVersion')]
         [ValidateSet('7.1', '7.2-preview.1')]
-        [string]$ApiVersion = '7.1'
+        [string]$Version = '7.1'
     )
 
     begin {
-        Write-Debug ('Command        : {0}' -f $MyInvocation.MyCommand.Name)
-        Write-Debug ('  ProjectId    : {0}' -f $ProjectId)
-        Write-Debug ('  TeamId       : {0}' -f $TeamId)
-        Write-Debug ('  ApiVersion   : {0}' -f $ApiVersion)
+        Write-Verbose ("Command: $($MyInvocation.MyCommand.Name)")
+        Write-Debug ("CollectionUri: $CollectionUri")
+        Write-Debug ("ProjectName: $ProjectName")
+        Write-Debug ("Name: $Name")
+        Write-Debug ("WorkingDays: $($WorkingDays -join ',')")
+        Write-Debug ("BugsBehavior: $BugsBehavior")
+        Write-Debug ("BacklogIterationId: $BacklogIteration")
+        Write-Debug ("DefaultIterationMacro: $DefaultIterationMacro")
+        Write-Debug ("Version: $Version")
+
+        Confirm-Default -Defaults ([ordered]@{
+                'CollectionUri' = $CollectionUri
+                'ProjectName'   = $ProjectName
+            })
     }
 
     process {
         try {
-            $ErrorActionPreference = 'Stop'
-
-            if (-not $global:AzDevOpsIsConnected) {
-                throw 'Not connected to Azure DevOps. Please connect using Connect-AdoOrganization.'
-            }
-
-            if (-not (Test-Json $TeamSettings)) {
-                throw 'Invalid JSON for team settings string.'
-            }
-
-            $uriFormat = '{0}/{1}/{2}/_apis/work/teamsettings?api-version={3}'
-            $azDevOpsUri = ($uriFormat -f [uri]::new($global:AzDevOpsOrganization), [uri]::EscapeUriString($ProjectId),
-                [uri]::EscapeUriString($TeamId), $ApiVersion)
-
             $params = @{
-                Method      = 'PATCH'
-                Uri         = $azDevOpsUri
-                ContentType = 'application/json'
-                Headers     = @{
-                    'Accept'        = 'application/json'
-                    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
-                }
-                Body        = $TeamSettings
+                Uri     = "$CollectionUri/$ProjectName/$Name/_apis/work/teamsettings"
+                Version = $Version
+                Method  = 'PATCH'
             }
 
-            $response = Invoke-RestMethod @params -Verbose:$VerbosePreference
+            $body = [PSCustomObject]@{}
 
-            return $response
+            if ($PSBoundParameters.ContainsKey('BacklogIteration')) {
+                $body | Add-Member -NotePropertyName 'backlogIteration' -NotePropertyValue @{ id = $BacklogIteration }
+            }
+            if ($PSBoundParameters.ContainsKey('BacklogVisibilities')) {
+                $body | Add-Member -NotePropertyName 'backlogVisibilities' -NotePropertyValue $BacklogVisibilities
+            }
+            if ($PSBoundParameters.ContainsKey('BugsBehavior')) {
+                $body | Add-Member -NotePropertyName 'bugsBehavior' -NotePropertyValue $BugsBehavior
+            }
+            if ($PSBoundParameters.ContainsKey('DefaultIteration')) {
+                $body | Add-Member -NotePropertyName 'defaultIteration' -NotePropertyValue $DefaultIteration
+            }
+            if ($PSBoundParameters.ContainsKey('DefaultIterationMacro')) {
+                $body | Add-Member -NotePropertyName 'defaultIterationMacro' -NotePropertyValue $DefaultIterationMacro
+            }
+            if ($PSBoundParameters.ContainsKey('WorkingDays')) {
+                $body | Add-Member -NotePropertyName 'workingDays' -NotePropertyValue $WorkingDays
+            }
 
+            if ($PSCmdlet.ShouldProcess($ProjectName, "Update Team Settings for: $Name")) {
+                try {
+                    $results = $body | Invoke-AdoRestMethod @params
+
+                    [PSCustomObject]@{
+                        backlogIteration      = $results.backlogIteration
+                        backlogVisibilities   = $results.backlogVisibilities
+                        bugsBehavior          = $results.bugsBehavior
+                        defaultIteration      = $results.defaultIteration
+                        defaultIterationMacro = $results.defaultIterationMacro
+                        workingDays           = $results.workingDays
+                        url                   = $results.url
+                        projectName           = $ProjectName
+                        collectionUri         = $CollectionUri
+                    }
+                } catch {
+                    if ($_.ErrorDetails.Message -match 'NotFoundException') {
+                        Write-Warning "Team $Name does not exist in project $ProjectName, skipping."
+                    } else {
+                        throw $_
+                    }
+                }
+            } else {
+                $params += @{
+                    Body = $body
+                }
+                Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 5)"
+            }
         } catch {
             throw $_
         }
     }
 
     end {
-        Write-Debug ('{0} exited' -f $MyInvocation.MyCommand)
+        Write-Verbose ("Exit: $($MyInvocation.MyCommand.Name)")
     }
 }

@@ -1,29 +1,39 @@
 <!--
 document type: cmdlet
 external help file: Azure.DevOps.PSModule-Help.xml
-HelpUri: 
+HelpUri: https://learn.microsoft.com/en-us/rest/api/azure/devops/work/teamsettings/update
 Locale: en-NL
 Module Name: Azure.DevOps.PSModule
-ms.date: 11/24/2025
+ms.date: 01/07/2026
 PlatyPS schema version: 2024-05-01
 title: Set-AdoTeamSettings
 -->
 
+<!-- markdownlint-disable MD024 -->
 <!-- cSpell: ignore dontshow -->
 
 # Set-AdoTeamSettings
 
 ## SYNOPSIS
 
-Update the settings for a team in Azure DevOps.
+Updates the settings for a team in Azure DevOps.
 
 ## SYNTAX
 
-### __AllParameterSets
+### DefaultIterationMacro
 
 ```text
-Set-AdoTeamSettings [-ProjectId] <string> [-TeamId] <string> [-TeamSettings] <Object>
- [[-ApiVersion] <string>] [<CommonParameters>]
+Set-AdoTeamSettings [[-CollectionUri] <string>] [[-ProjectName] <string>] [-Name] <string>
+ [[-BacklogIteration] <string>] [[-BacklogVisibilities] <object>] [[-BugsBehavior] <string>]
+ [[-DefaultIterationMacro] <string>] [[-WorkingDays] <string[]>] [[-Version] <string>] [<CommonParameters>]
+```
+
+### DefaultIteration
+
+```text
+Set-AdoTeamSettings [[-CollectionUri] <string>] [[-ProjectName] <string>] [-Name] <string>
+ [[-BacklogIteration] <string>] [[-BacklogVisibilities] <object>] [[-BugsBehavior] <string>]
+ [[-DefaultIteration] <string>] [[-WorkingDays] <string[]>] [[-Version] <string>] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -33,91 +43,162 @@ This cmdlet has the following aliases,
 
 ## DESCRIPTION
 
-Update the settings for a team in Azure DevOps by sending a PATCH request to the Azure DevOps REST API.
+This cmdlet updates the settings for a team in Azure DevOps by sending a PATCH request to the Azure DevOps REST API.
+You can update working days, bugs behavior, backlog iteration, and backlog visibilities.
 
 ## EXAMPLES
 
-### Example 1
+### EXAMPLE 1
 
 #### PowerShell
 
 ```powershell
 $params = @{
-  bugsBehavior = 'asRequirements'
-  backlogVisibilities = @{
-    'Microsoft.EpicCategory' = $false
-    'Microsoft.FeatureCategory' = $true
-    'Microsoft.RequirementCategory' = $true
-  }
-  defaultIterationMacro = '@currentIteration'
-  workingDays = @(
-    'monday'
-    'tuesday'
-    'wednesday'
-    'thursday'
-    'friday'
-  )
-  backlogIteration = '00000000-0000-0000-0000-000000000000'
-  }
-
-  Set-AdoTeamSettings -ProjectId 'my-project-1' -TeamId 'my-other-team' -TeamSettings $params
+    CollectionUri = 'https://dev.azure.com/my-org'
+    ProjectName   = 'my-project-1'
+    Name          = 'my-team-1'
+    BugsBehavior  = 'asRequirements'
+    WorkingDays   = @('monday', 'tuesday', 'wednesday', 'thursday', 'friday')
+}
+Set-AdoTeamSettings @params
 ```
 
-Updates the settings for the team "my-other-team" in the project "my-project" with the specified parameters.
+Updates the team settings to treat bugs as requirements and set working days.
 
-The backlogIteration is set to the root iteration, bugs are treated as requirements, and working days are set to Monday through Friday.
+### EXAMPLE 2
+
+#### PowerShell
+
+```powershell
+$params = @{
+    CollectionUri        = 'https://dev.azure.com/my-org'
+    ProjectName          = 'my-project-1'
+    Name                 = 'my-team-1'
+    BacklogVisibilities  = @{
+        'Microsoft.EpicCategory'        = $false
+        'Microsoft.FeatureCategory'     = $true
+        'Microsoft.RequirementCategory' = $true
+    }
+}
+Set-AdoTeamSettings @params
+```
+
+Updates the backlog visibilities for the team.
+
+### EXAMPLE 3
+
+#### PowerShell
+
+```powershell
+$params = @{
+    CollectionUri = 'https://dev.azure.com/my-org'
+    ProjectName   = 'my-project-1'
+    BugsBehavior  = 'asRequirements'
+    WorkingDays   = @('monday', 'tuesday', 'wednesday')
+}
+@(
+    'my-team-1',
+    'my-team-2'
+) | Set-AdoTeamSettings @params
+```
+
+Updates multiple teams to treat bugs as requirements and set working days using pipeline input.
 
 ## PARAMETERS
 
-### -ApiVersion
+### -CollectionUri
 
 Optional.
-The API version to use.
+The collection URI of the Azure DevOps collection/organization, e.g., <https://dev.azure.com/my-org>.
 
 ```yaml
 Type: System.String
-DefaultValue: 7.1
+DefaultValue: $env:DefaultAdoCollectionUri
 SupportsWildcards: false
-Aliases:
-- api
+Aliases: []
 ParameterSets:
-- Name: (All)
-  Position: 2
+- Name: DefaultIterationMacro
+  Position: Named
   IsRequired: false
   ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+- Name: DefaultIteration
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
   ValueFromRemainingArguments: false
 DontShow: false
 AcceptedValues: []
 HelpMessage: ''
 ```
 
-### -ProjectId
+### -ProjectName
 
-Mandatory.
+Optional.
 The ID or name of the project.
+If not specified, the default project is used.
 
 ```yaml
 Type: System.String
-DefaultValue: ''
+DefaultValue: $env:DefaultAdoProject
 SupportsWildcards: false
-Aliases: []
+Aliases:
+- ProjectId
 ParameterSets:
-- Name: (All)
-  Position: 0
-  IsRequired: true
+- Name: DefaultIterationMacro
+  Position: Named
+  IsRequired: false
   ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+- Name: DefaultIteration
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
   ValueFromRemainingArguments: false
 DontShow: false
 AcceptedValues: []
 HelpMessage: ''
 ```
 
-### -TeamId
+### -Name
 
 Mandatory.
-The ID or name of the team.
+The ID or name of the team to update settings for.
+
+```yaml
+Type: System.String
+DefaultValue: ''
+SupportsWildcards: false
+Aliases:
+- Team
+- TeamId
+- TeamName
+ParameterSets:
+- Name: DefaultIterationMacro
+  Position: Named
+  IsRequired: true
+  ValueFromPipeline: true
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+- Name: DefaultIteration
+  Position: Named
+  IsRequired: true
+  ValueFromPipeline: true
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -BacklogIteration
+
+Optional.
+The id (uuid) of the iteration to use as the backlog iteration.
 
 ```yaml
 Type: System.String
@@ -125,20 +206,27 @@ DefaultValue: ''
 SupportsWildcards: false
 Aliases: []
 ParameterSets:
-- Name: (All)
-  Position: 1
-  IsRequired: true
+- Name: DefaultIterationMacro
+  Position: Named
+  IsRequired: false
   ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+- Name: DefaultIteration
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
   ValueFromRemainingArguments: false
 DontShow: false
 AcceptedValues: []
 HelpMessage: ''
 ```
 
-### -TeamSettings
+### -BacklogVisibilities
 
-An object representing the team settings to be updated.
+Optional.
+Object with backlog level visibilities (e.g., @{'Microsoft.EpicCategory' = $true}).
 
 ```yaml
 Type: System.Object
@@ -146,14 +234,166 @@ DefaultValue: ''
 SupportsWildcards: false
 Aliases: []
 ParameterSets:
-- Name: (All)
-  Position: 2
-  IsRequired: true
+- Name: DefaultIterationMacro
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+- Name: DefaultIteration
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -BugsBehavior
+
+Optional.
+How bugs should behave.
+Valid values: 'off', 'asRequirements', 'asTasks'.
+
+```yaml
+Type: System.String
+DefaultValue: ''
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: DefaultIterationMacro
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+- Name: DefaultIteration
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues:
+- off
+- asRequirements
+- asTasks
+HelpMessage: ''
+```
+
+### -DefaultIteration
+
+Optional.
+The default iteration id (uuid) for the team.
+Cannot be used together with DefaultIterationMacro.
+
+```yaml
+Type: System.String
+DefaultValue: ''
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: DefaultIteration
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -DefaultIterationMacro
+
+Optional.
+Default iteration macro (e.g., '@currentIteration').
+Used to set the default iteration dynamically.
+Cannot be used together with DefaultIteration.
+
+```yaml
+Type: System.String
+DefaultValue: ''
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: DefaultIterationMacro
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -WorkingDays
+
+Optional.
+Array of working days for the team (e.g., 'monday', 'tuesday', 'wednesday').
+
+```yaml
+Type: System.String[]
+DefaultValue: ''
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: DefaultIterationMacro
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+- Name: DefaultIteration
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues:
+- sunday
+- monday
+- tuesday
+- wednesday
+- thursday
+- friday
+- saturday
+HelpMessage: ''
+```
+
+### -Version
+
+Optional.
+The API version to use for the request.
+Default is '7.1'.
+
+```yaml
+Type: System.String
+DefaultValue: 7.1
+SupportsWildcards: false
+Aliases:
+- ApiVersion
+ParameterSets:
+- Name: DefaultIterationMacro
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: false
+  ValueFromRemainingArguments: false
+- Name: DefaultIteration
+  Position: Named
+  IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
   ValueFromRemainingArguments: false
 DontShow: false
-AcceptedValues: []
+AcceptedValues:
+- 7.1
+- 7.2-preview.1
 HelpMessage: ''
 ```
 
@@ -170,13 +410,26 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### System.Object
+### PSCustomObject
 
-The team details object.
+Returns a team settings object containing:
+- backlogIteration: The backlog iteration configuration
+- backlogVisibilities: Hashtable of backlog level visibilities (Epic, Feature, Requirement categories)
+- bugsBehavior: How bugs are treated ('off', 'asRequirements', or 'asTasks')
+- defaultIteration: The default iteration configuration
+- defaultIterationMacro: Default iteration macro (e.g., '@currentIteration')
+- workingDays: Array of working days for the team
+- url: API URL for the team settings
+- projectName: The name of the project
+- collectionUri: The collection URI
 
 ## NOTES
 
-- Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
+- Requires an active Azure account login. Use `Connect-AzAccount` to authenticate:
+
+  ```powershell
+  Connect-AzAccount -Tenant '<tenant-id>' -Subscription '<subscription-id>'
+  ```
 
 ## RELATED LINKS
 

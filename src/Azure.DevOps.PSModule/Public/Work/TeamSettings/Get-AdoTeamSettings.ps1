@@ -2,81 +2,118 @@
 function Get-AdoTeamSettings {
     <#
     .SYNOPSIS
-        Gets the settings for a team in an Azure DevOps project.
+        Retrieves the settings for a team in an Azure DevOps project.
 
     .DESCRIPTION
-        The Get-AdoTeamSettings cmdlet retrieves the settings for a specified team within an Azure DevOps project.
+        This cmdlet retrieves the settings for a specified team within an Azure DevOps project,
+        including working days, backlog iteration, bugs behavior, and backlog visibilities.
 
-    .PARAMETER ProjectId
-        The ID or name of the Azure DevOps project.
+    .PARAMETER CollectionUri
+        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/my-org.
 
-    .PARAMETER TeamId
-        The ID or name of the team within the specified project.
+    .PARAMETER ProjectName
+        Optional. The ID or name of the project. If not specified, the default project is used.
 
-    .PARAMETER ApiVersion
-        The API version to use for the request. Default is '7.1'.
+    .PARAMETER Name
+        Mandatory. The ID or name of the team to retrieve settings for.
+
+    .PARAMETER Version
+        Optional. The API version to use for the request. Default is '7.1'.
 
     .LINK
         https://learn.microsoft.com/en-us/rest/api/azure/devops/work/teamsettings/get
 
     .EXAMPLE
-        Get-AdoTeamSettings -ProjectId "my-project" -TeamId "my-team"
+        $params = @{
+            CollectionUri = 'https://dev.azure.com/my-org'
+            ProjectName   = 'my-project-1'
+        }
+        Get-AdoTeamSettings @params -Name 'my-team-1'
 
-        Retrieves the settings for the team "my-team" in the project "my-project".
+        Retrieves the settings for the team "my-team-1" in the project "my-project-1".
+
+    .EXAMPLE
+        $params = @{
+            CollectionUri = 'https://dev.azure.com/my-org'
+            ProjectName   = 'my-project-1'
+        }
+        'my-team-1' | Get-AdoTeamSettings @params
+
+        Retrieves the team settings using pipeline input.
     #>
-    [CmdletBinding()]
-    [OutputType([object])]
+    [CmdletBinding(SupportsShouldProcess)]
+    [OutputType([PSCustomObject])]
     param (
-        [Parameter(Mandatory)]
-        [string]$ProjectId,
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
+        [string]$CollectionUri = $env:DefaultAdoCollectionUri,
 
-        [Parameter(Mandatory)]
-        [string]$TeamId,
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [Alias('ProjectId')]
+        [string]$ProjectName = $env:DefaultAdoProject,
 
-        [Parameter(Mandatory = $false)]
-        [Alias('api')]
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName, ValueFromPipeline)]
+        [Alias('Team', 'TeamId', 'TeamName')]
+        [string]$Name,
+
+        [Parameter()]
+        [Alias('ApiVersion')]
         [ValidateSet('7.1', '7.2-preview.1')]
-        [string]$ApiVersion = '7.1'
+        [string]$Version = '7.1'
     )
 
     begin {
-        Write-Debug ('Command        : {0}' -f $MyInvocation.MyCommand.Name)
-        Write-Debug ('  ProjectId    : {0}' -f $ProjectId)
-        Write-Debug ('  TeamId       : {0}' -f $TeamId)
-        Write-Debug ('  ApiVersion   : {0}' -f $ApiVersion)
+        Write-Verbose ("Command: $($MyInvocation.MyCommand.Name)")
+        Write-Debug ("CollectionUri: $CollectionUri")
+        Write-Debug ("ProjectName: $ProjectName")
+        Write-Debug ("Name: $Name")
+        Write-Debug ("Version: $Version")
+
+        Confirm-Default -Defaults ([ordered]@{
+                'CollectionUri' = $CollectionUri
+                'ProjectName'   = $ProjectName
+            })
     }
 
     process {
         try {
-            $ErrorActionPreference = 'Stop'
-
-            if (-not $global:AzDevOpsIsConnected) {
-                throw 'Not connected to Azure DevOps. Please connect using Connect-AdoOrganization.'
-            }
-
-            $uriFormat = '{0}/{1}/{2}/_apis/work/teamsettings?api-version={3}'
-            $azDevOpsUri = ($uriFormat -f [uri]::new($global:AzDevOpsOrganization), [uri]::EscapeUriString($ProjectId),
-                [uri]::EscapeUriString($TeamId), $ApiVersion)
-
             $params = @{
+                Uri     = "$CollectionUri/$ProjectName/$Name/_apis/work/teamsettings"
+                Version = $Version
                 Method  = 'GET'
-                Uri     = $azDevOpsUri
-                Headers = @{
-                    'Accept'        = 'application/json'
-                    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
-                }
             }
 
-            $response = Invoke-RestMethod @params -Verbose:$VerbosePreference
+            if ($PSCmdlet.ShouldProcess($ProjectName, "Get Team Settings for: $Name")) {
+                try {
+                    $results = Invoke-AdoRestMethod @params
 
-            return $response
-
+                    [PSCustomObject]@{
+                        backlogIteration      = $results.backlogIteration
+                        backlogVisibilities   = $results.backlogVisibilities
+                        bugsBehavior          = $results.bugsBehavior
+                        defaultIteration      = $results.defaultIteration
+                        defaultIterationMacro = $results.defaultIterationMacro
+                        workingDays           = $results.workingDays
+                        url                   = $results.url
+                        projectName           = $ProjectName
+                        collectionUri         = $CollectionUri
+                    }
+                } catch {
+                    if ($_.ErrorDetails.Message -match 'NotFoundException') {
+                        Write-Warning "Team $Name does not exist in project $ProjectName, skipping."
+                    } else {
+                        throw $_
+                    }
+                }
+            } else {
+                Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 5)"
+            }
         } catch {
             throw $_
         }
     }
 
     end {
-        Write-Debug ('{0} exited' -f $MyInvocation.MyCommand)
+        Write-Verbose ("Exit: $($MyInvocation.MyCommand.Name)")
     }
 }

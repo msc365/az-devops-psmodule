@@ -1,29 +1,29 @@
 <!--
 document type: cmdlet
 external help file: Azure.DevOps.PSModule-Help.xml
-HelpUri: 
+HelpUri: https://learn.microsoft.com/en-us/rest/api/azure/devops/work/teamsettings/get
 Locale: en-NL
 Module Name: Azure.DevOps.PSModule
-ms.date: 11/24/2025
+ms.date: 01/07/2026
 PlatyPS schema version: 2024-05-01
 title: Get-AdoTeamSettings
 -->
 
+<!-- markdownlint-disable MD024 -->
 <!-- cSpell: ignore dontshow -->
 
 # Get-AdoTeamSettings
 
 ## SYNOPSIS
 
-Gets the settings for a team in an Azure DevOps project.
+Retrieves the settings for a team in an Azure DevOps project.
 
 ## SYNTAX
 
 ### __AllParameterSets
 
 ```text
-Get-AdoTeamSettings [-ProjectId] <string> [-TeamId] <string> [[-ApiVersion] <string>]
- [<CommonParameters>]
+Get-AdoTeamSettings [[-CollectionUri] <string>] [[-ProjectName] <string>] [-Name] <string> [[-Version] <string>] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -33,86 +33,135 @@ This cmdlet has the following aliases,
 
 ## DESCRIPTION
 
-The Get-AdoTeamSettings cmdlet retrieves the settings for a specified team within an Azure DevOps project.
+This cmdlet retrieves the settings for a specified team within an Azure DevOps project,
+including working days, backlog iteration, bugs behavior, and backlog visibilities.
 
 ## EXAMPLES
 
-### Example 1
+### EXAMPLE 1
 
 #### PowerShell
 
 ```powershell
-Get-AdoTeamSettings -ProjectId 'my-project-1' -TeamId 'my-team'
+$params = @{
+    CollectionUri = 'https://dev.azure.com/my-org'
+    ProjectName   = 'my-project-1'
+}
+Get-AdoTeamSettings @params -Name 'my-team-1'
 ```
 
-Retrieves the settings for the team "my-team" in the project "my-project".
+Retrieves the settings for the team "my-team-1" in the project "my-project-1".
+
+### EXAMPLE 2
+
+#### PowerShell
+
+```powershell
+$params = @{
+    CollectionUri = 'https://dev.azure.com/my-org'
+    ProjectName   = 'my-project-1'
+}
+'my-team-1' | Get-AdoTeamSettings @params
+```
+
+Retrieves the team settings using pipeline input.
 
 ## PARAMETERS
 
-### -ApiVersion
+### -CollectionUri
 
 Optional.
-The API version to use.
+The collection URI of the Azure DevOps collection/organization, e.g., <https://dev.azure.com/my-org>.
+
+```yaml
+Type: System.String
+DefaultValue: $env:DefaultAdoCollectionUri
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: (All)
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -ProjectName
+
+Optional.
+The ID or name of the project.
+If not specified, the default project is used.
+
+```yaml
+Type: System.String
+DefaultValue: $env:DefaultAdoProject
+SupportsWildcards: false
+Aliases:
+- ProjectId
+ParameterSets:
+- Name: (All)
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -Name
+
+Mandatory.
+The ID or name of the team to retrieve settings for.
+
+```yaml
+Type: System.String
+DefaultValue: ''
+SupportsWildcards: false
+Aliases:
+- Team
+- TeamId
+- TeamName
+ParameterSets:
+- Name: (All)
+  Position: Named
+  IsRequired: true
+  ValueFromPipeline: true
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -Version
+
+Optional.
+The API version to use for the request.
+Default is '7.1'.
 
 ```yaml
 Type: System.String
 DefaultValue: 7.1
 SupportsWildcards: false
 Aliases:
-- api
+- ApiVersion
 ParameterSets:
 - Name: (All)
-  Position: 2
+  Position: Named
   IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
   ValueFromRemainingArguments: false
 DontShow: false
-AcceptedValues: []
-HelpMessage: ''
-```
-
-### -ProjectId
-
-Mandatory.
-The ID or name of the project.
-
-```yaml
-Type: System.String
-DefaultValue: ''
-SupportsWildcards: false
-Aliases: []
-ParameterSets:
-- Name: (All)
-  Position: 0
-  IsRequired: true
-  ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
-  ValueFromRemainingArguments: false
-DontShow: false
-AcceptedValues: []
-HelpMessage: ''
-```
-
-### -TeamId
-
-Mandatory.
-The ID or name of the team.
-
-```yaml
-Type: System.String
-DefaultValue: ''
-SupportsWildcards: false
-Aliases: []
-ParameterSets:
-- Name: (All)
-  Position: 1
-  IsRequired: true
-  ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
-  ValueFromRemainingArguments: false
-DontShow: false
-AcceptedValues: []
+AcceptedValues:
+- 7.1
+- 7.2-preview.1
 HelpMessage: ''
 ```
 
@@ -129,13 +178,26 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### System.Object
+### PSCustomObject
 
-The team details object.
+Returns a team settings object containing:
+- backlogIteration: The backlog iteration configuration
+- backlogVisibilities: Hashtable of backlog level visibilities (Epic, Feature, Requirement categories)
+- bugsBehavior: How bugs are treated ('off', 'asRequirements', or 'asTasks')
+- defaultIteration: The default iteration configuration
+- defaultIterationMacro: Default iteration macro (e.g., '@currentIteration')
+- workingDays: Array of working days for the team
+- url: API URL for the team settings
+- projectName: The name of the project
+- collectionUri: The collection URI
 
 ## NOTES
 
-- Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
+- Requires an active Azure account login. Use `Connect-AzAccount` to authenticate:
+
+  ```powershell
+  Connect-AzAccount -Tenant '<tenant-id>' -Subscription '<subscription-id>'
+  ```
 
 ## RELATED LINKS
 
