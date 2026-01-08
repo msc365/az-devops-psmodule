@@ -2,7 +2,7 @@
 
 ## Overview
 Dynamic badges have been configured to display:
-- **Test Count Badge**: Shows number of passing tests (e.g., "42/45 passing")
+- **Test Count Badge**: Shows number of passing tests (e.g., "passing" or "3 failing, 40 passing")
 - **Code Analysis Badge**: Shows PSScriptAnalyzer results (e.g., "passing" or "0 errors, 2 warnings")
 
 ## Setup Required
@@ -27,12 +27,12 @@ In your repository settings (Settings → Secrets and variables → Actions):
    - Value: The gist ID you copied in step 1
 
 ### 4. Update README.md
-Replace `GIST_ID` in the README.md badge URLs with your actual gist ID:
+Replace `GIST_ID` and  `GIST_ACCOUNT` in the README.md badge URLs with your actual gist ID and Account:
 
 **Before:**
 ```markdown
-[![pester-tests](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/YOUR_ACCOUNT/GIST_ID/raw/az-devops-psmodule-test-badge.json)]
-[![code-analysis](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/YOUR_ACCOUNT/GIST_ID/raw/az-devops-psmodule-analysis-badge.json)]
+[![pester-tests](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/GIST_ACCOUNT/GIST_ID/raw/az-devops-psmodule-test-badge.json)]
+[![code-analysis](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/GIST_ACCOUNT/GIST_ID/raw/az-devops-psmodule-analysis-badge.json)]
 ```
 
 **After (example):**
@@ -43,7 +43,7 @@ Replace `GIST_ID` in the README.md badge URLs with your actual gist ID:
 
 ## How It Works
 
-1. When the workflow runs on the `main` branch:
+1. When the workflow runs on a `PR` to `main` branch:
    - PSScriptAnalyzer captures error and warning counts
    - Pester tests capture total, passed, and failed counts
 
@@ -56,8 +56,8 @@ Replace `GIST_ID` in the README.md badge URLs with your actual gist ID:
 ## Badge Examples
 
 ### Test Badge
-- ✅ `42/42 passing` (green) - All tests passed
-- ❌ `40/42 passing` (red) - Some tests failed
+- ✅ `passing` (green) - All tests passed
+- ❌ `3 failing, 40 passing` (red) - Some tests failed
 
 ### Code Analysis Badge
 - ✅ `passing` (green) - No errors or warnings
@@ -79,7 +79,7 @@ Replace `GIST_ID` in the README.md badge URLs with your actual gist ID:
 
 ## Alternative: Simple Workflow Status Badge
 
-If you prefer a simpler solution without dynamic counts, you can use the standard workflow status badge:
+If a simpler solution is preferred without dynamic counts, you can use the standard workflow status badge:
 
 ```markdown
 [![tests](https://github.com/msc365/az-devops-psmodule/actions/workflows/pr-code-testing.yml/badge.svg?branch=main)](https://github.com/msc365/az-devops-psmodule/actions/workflows/pr-code-testing.yml)
