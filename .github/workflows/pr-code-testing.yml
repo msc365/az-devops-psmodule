@@ -70,7 +70,7 @@ jobs:
 
             if ($errors -gt 0) {
               Write-Error "PSScriptAnalyzer found $errors error(s). Build failed."
-              exit 1
+              # exit 1
             }
           } else {
             Write-Host "No issues found!" -ForegroundColor Green
@@ -113,8 +113,8 @@ jobs:
           "TEST_FAILED=$failedTests" | Out-File -FilePath $env:GITHUB_ENV -Append
 
           if ($failedTests -gt 0) {
-            Write-Error "Pester tests failed. Failed: $failedTests, Passed: $passedTests"
-            exit 1
+            Write-Error "Pester tests found $failedTests error(s). Build failed."
+            # exit 1
           }
 
           Write-Host "All tests passed! Total: $totalTests, Passed: $passedTests" -ForegroundColor Green
@@ -187,3 +187,25 @@ jobs:
         with:
           name: test-results
           path: testResults.xml
+
+      - name: Run final results summary
+        shell: pwsh
+        run: |
+          Write-Host "Running final results summary..." -ForegroundColor Cyan
+
+          $failed = $false
+
+          if ([int]$env:ANALYZER_ERRORS -gt 0) {
+            $failed = $true
+          }
+
+          if ([int]$env:TEST_FAILED -gt 0) {
+            $failed = $true
+          }
+
+          if ($failed) {
+            Write-Error "One or more checks failed. See workflow steps for details."
+            exit 1
+          }
+
+          Write-Host "All checks passed successfully!" -ForegroundColor Green
