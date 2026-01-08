@@ -6,9 +6,6 @@ on:
 
   pull_request:
     branches: ['main']
-    paths:
-      - 'src/**'
-      - '!src/Tests/**'
 
   workflow_dispatch:
 
@@ -18,16 +15,57 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Always run - Workflow initialized
+        shell: pwsh
+        run: |
+          Write-Host "Workflow initialized successfully" -ForegroundColor Green
+          Write-Host "Event: $env:GITHUB_EVENT_NAME"
+          Write-Host "Branch: $env:GITHUB_REF_NAME"
+
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for src changes
+        id: src-changes
+        shell: pwsh
+        run: |
+          if ($env:GITHUB_EVENT_NAME -eq 'pull_request') {
+            $baseSha = "${{ github.event.pull_request.base.sha }}"
+            $headSha = "${{ github.event.pull_request.head.sha }}"
+            $changedFiles = git diff --name-only $baseSha $headSha
+          } elseif ($env:GITHUB_EVENT_NAME -eq 'push') {
+            $changedFiles = git diff --name-only ${{ github.event.before }} ${{ github.sha }}
+          } else {
+            # For workflow_dispatch or other events, assume src changes
+            "HAS_SRC_CHANGES=true" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+            Write-Host "Manual trigger detected, running all steps"
+            exit 0
+          }
+
+          Write-Host "Changed files:"
+          $changedFiles | ForEach-Object { Write-Host "  $_" }
+
+          $srcChanged = $changedFiles | Where-Object { $_ -like 'src/**' -and $_ -notlike 'src/Tests/**' }
+
+          if ($srcChanged) {
+            "HAS_SRC_CHANGES=true" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+            Write-Host "Source files changed - running all steps" -ForegroundColor Cyan
+          } else {
+            "HAS_SRC_CHANGES=false" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+            Write-Host "No source files changed - skipping analysis and tests" -ForegroundColor Yellow
+          }
 
       - name: Setup PowerShell
+        if: steps.src-changes.outputs.HAS_SRC_CHANGES == 'true'
         shell: pwsh
         run: |
           Write-Host "PowerShell Version: $($PSVersionTable.PSVersion)"
           Write-Host "OS: $($PSVersionTable.OS)"
 
       - name: Verify required modules
+        if: steps.src-changes.outputs.HAS_SRC_CHANGES == 'true'
         shell: pwsh
         run: |
           Write-Host "Installing required module dependencies..."
@@ -40,6 +78,7 @@ jobs:
           Get-Module -Name Az.Accounts -ListAvailable | Select-Object Name, Version
 
       - name: Run PSScriptAnalyzer
+        if: steps.src-changes.outputs.HAS_SRC_CHANGES == 'true'
         continue-on-error: true
         shell: pwsh
         run: |
@@ -81,6 +120,7 @@ jobs:
           }
 
       - name: Run Pester Tests
+        if: steps.src-changes.outputs.HAS_SRC_CHANGES == 'true'
         continue-on-error: true
         shell: pwsh
         run: |
@@ -122,6 +162,7 @@ jobs:
           Write-Host "All tests passed! Total: $totalTests, Passed: $passedTests" -ForegroundColor Green
 
       - name: Generate badge data
+        if: steps.src-changes.outputs.HAS_SRC_CHANGES == 'true'
         shell: pwsh
         run: |
           Write-Host "Generating badge data..." -ForegroundColor Cyan
@@ -163,6 +204,7 @@ jobs:
           Write-Host "Badge data generated successfully" -ForegroundColor Green
 
       - name: Create pester tests badge gist
+        if: steps.src-changes.outputs.HAS_SRC_CHANGES == 'true'
         uses: schneegans/dynamic-badges-action@v1.7.0
         with:
           auth: ${{ secrets.GIST_TOKEN }}
@@ -173,6 +215,7 @@ jobs:
           color: ${{ env.TEST_FAILED == '0' && 'green' || 'red' }}
 
       - name: Create analysis badge gist
+        if: steps.src-changes.outputs.HAS_SRC_CHANGES == 'true'
         uses: schneegans/dynamic-badges-action@v1.7.0
         with:
           auth: ${{ secrets.GIST_TOKEN }}
@@ -183,13 +226,14 @@ jobs:
           color: ${{ env.ANALYZER_ERRORS == '0' && env.ANALYZER_WARNINGS == '0' && 'green' || env.ANALYZER_ERRORS == '0' && 'yellow' || 'red' }}
 
       - name: Upload test results
-        if: github.event_name == 'pull_request'
+        if: steps.src-changes.outputs.HAS_SRC_CHANGES == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: test-results
           path: testResults.xml
 
       - name: Run final results summary
+        if: steps.src-changes.outputs.HAS_SRC_CHANGES == 'true'
         shell: pwsh
         run: |
           Write-Host "Running final results summary..." -ForegroundColor Cyan
