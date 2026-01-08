@@ -171,7 +171,6 @@ jobs:
           color: ${{ env.TEST_FAILED == '0' && 'green' || 'red' }}
 
       - name: Create analysis badge gist
-        if: always() && github.event_name == 'push'
         uses: schneegans/dynamic-badges-action@v1.7.0
         with:
           auth: ${{ secrets.GIST_TOKEN }}
