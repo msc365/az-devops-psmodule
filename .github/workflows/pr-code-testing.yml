@@ -120,17 +120,21 @@ jobs:
           Write-Host "All tests passed! Total: $totalTests, Passed: $passedTests" -ForegroundColor Green
 
       - name: Generate badge data
-        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
         shell: pwsh
         run: |
           Write-Host "Generating badge data..." -ForegroundColor Cyan
 
+          # Cast environment variables to integers
+          $testTotal = [int]$env:TEST_TOTAL
+          $testPassed = [int]$env:TEST_PASSED
+          $testFailed = [int]$env:TEST_FAILED
+          $analyzerTotal = [int]$env:ANALYZER_TOTAL
+          $analyzerErrors = [int]$env:ANALYZER_ERRORS
+          $analyzerWarnings = [int]$env:ANALYZER_WARNINGS
+
           # Test badge
-          $testTotal = $env:TEST_TOTAL
-          $testPassed = $env:TEST_PASSED
-          $testFailed = $env:TEST_FAILED
-          $testColor = if ($testFailed -eq '0') { 'green' } else { 'red' }
-          $testMessage = if ($testFailed -eq '0') { "$testPassed" } else { "$testFailed" }
+          $testColor = if ($testFailed -eq 0) { 'green' } else { 'red' }
+          $testMessage = if ($testFailed -eq 0) { "$testPassed passing" } else { "$testFailed / $testTotal failing" }
 
           $testBadge = @{
             schemaVersion = 1
@@ -142,11 +146,8 @@ jobs:
           $testBadge | ConvertTo-Json | Out-File -FilePath 'test-badge.json' -Encoding utf8
 
           # Code analysis badge
-          $total = $env:ANALYZER_TOTAL
-          $errors = $env:ANALYZER_ERRORS
-          $warnings = $env:ANALYZER_WARNINGS
-          $analysisColor = if ($errors -eq '0' -and $warnings -eq '0') { 'green' } elseif ($errors -eq '0') { 'yellow' } else { 'red' }
-          $analysisMessage = if ($errors -eq '0' -and $warnings -eq '0') { "$($total)" } elseif ($errors -eq '0') { "$($warnings)" } else { "$($errors)" }
+          $analysisColor = if ($analyzerErrors -eq 0 -and $analyzerWarnings -eq 0) { 'green' } elseif ($analyzerErrors -eq 0) { 'yellow' } else { 'red' }
+          $analysisMessage = if ($analyzerErrors -eq 0 -and $analyzerWarnings -eq 0) { 'passing' } elseif ($analyzerErrors -eq 0) { "0 errors, $analyzerWarnings warnings" } else { "$analyzerErrors errors, $analyzerWarnings warnings" }
 
           $analysisBadge = @{
             schemaVersion = 1
@@ -160,29 +161,28 @@ jobs:
           Write-Host "Badge data generated successfully" -ForegroundColor Green
 
       - name: Create pester tests badge gist
-        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: schneegans/dynamic-badges-action@v1.7.0
         with:
           auth: ${{ secrets.GIST_TOKEN }}
           gistID: ${{ secrets.GIST_ID }}
           filename: az-devops-psmodule-test-badge.json
           label: pester tests
-          message: ${{ env.TEST_FAILED == '0' && format('{0}', env.TEST_PASSED) || format('{0}', env.TEST_FAILED) }}
+          message: ${{ env.TEST_FAILED == '0' && format('{0} passing', env.TEST_PASSED) || format('{0} / {1} failing', env.TEST_FAILED, env.TEST_TOTAL) }}
           color: ${{ env.TEST_FAILED == '0' && 'green' || 'red' }}
 
       - name: Create analysis badge gist
-        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: always() && github.event_name == 'push'
         uses: schneegans/dynamic-badges-action@v1.7.0
         with:
           auth: ${{ secrets.GIST_TOKEN }}
           gistID: ${{ secrets.GIST_ID }}
           filename: az-devops-psmodule-analysis-badge.json
           label: code analysis
-          message: ${{ env.ANALYZER_ERRORS == '0' && env.ANALYZER_WARNINGS == '0' && format('{0}', env.ANALYZER_TOTAL) || env.ANALYZER_ERRORS == '0' && format('{0}', env.ANALYZER_WARNINGS) || format('{0}', env.ANALYZER_ERRORS) }}
+          message: ${{ env.ANALYZER_ERRORS == '0' && env.ANALYZER_WARNINGS == '0' && 'passing' || env.ANALYZER_ERRORS == '0' && format('0 errors, {0} warnings', env.ANALYZER_WARNINGS) || format('{0} errors, {1} warnings', env.ANALYZER_ERRORS, env.ANALYZER_WARNINGS) }}
           color: ${{ env.ANALYZER_ERRORS == '0' && env.ANALYZER_WARNINGS == '0' && 'green' || env.ANALYZER_ERRORS == '0' && 'yellow' || 'red' }}
 
       - name: Upload test results
-        if: always()
+        if: github.event_name == 'pull_request'
         uses: actions/upload-artifact@v4
         with:
           name: test-results
@@ -193,17 +193,11 @@ jobs:
         run: |
           Write-Host "Running final results summary..." -ForegroundColor Cyan
 
-          $failed = $false
+          # Cast environment variables to integers
+          $analyzerErrors = [int]$env:ANALYZER_ERRORS
+          $testFailed = [int]$env:TEST_FAILED
 
-          if ([int]$env:ANALYZER_ERRORS -gt 0) {
-            $failed = $true
-          }
-
-          if ([int]$env:TEST_FAILED -gt 0) {
-            $failed = $true
-          }
-
-          if ($failed) {
+          if (($analyzerErrors -gt 0) -or ($testFailed -gt 0)) {
             Write-Error "One or more checks failed. See workflow steps for details."
             exit 1
           }

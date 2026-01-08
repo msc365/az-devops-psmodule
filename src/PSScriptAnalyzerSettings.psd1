@@ -15,11 +15,11 @@
     Severity     = @('Error', 'Warning')
 
     # Rules to exclude (customize as needed)
-    # ExcludeRules = @(
-    #     'PSUseShouldProcessForStateChangingFunctions',  # Not needed for REST API functions
-    #     'PSUseConsistentWhitespace' # Disable consistent whitespace rule due to false positives
-    #     'PSAvoidGlobalVars' # Global variables are used for script configuration
-    # )
+    ExcludeRules = @(
+        'PSUseShouldProcessForStateChangingFunctions',  # Not needed for REST API functions
+        'PSUseConsistentWhitespace' # Disable consistent whitespace rule due to false positives
+        'PSAvoidGlobalVars' # Global variables are used for script configuration
+    )
 
     # Rules to include (all by default)
     IncludeRules = @('*')

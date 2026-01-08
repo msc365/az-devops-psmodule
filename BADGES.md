@@ -31,14 +31,14 @@ Replace `GIST_ID` in the README.md badge URLs with your actual gist ID:
 
 **Before:**
 ```markdown
-[![pester-tests](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/MSc365Admin/GIST_ID/raw/az-devops-psmodule-test-badge.json)]
-[![code-analysis](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/MSc365Admin/GIST_ID/raw/az-devops-psmodule-analysis-badge.json)]
+[![pester-tests](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/YOUR_ACCOUNT/GIST_ID/raw/az-devops-psmodule-test-badge.json)]
+[![code-analysis](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/YOUR_ACCOUNT/GIST_ID/raw/az-devops-psmodule-analysis-badge.json)]
 ```
 
 **After (example):**
 ```markdown
-[![pester-tests](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/MSc365Admin/abc123def456/raw/az-devops-psmodule-test-badge.json)]
-[![code-analysis](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/MSc365Admin/abc123def456/raw/az-devops-psmodule-analysis-badge.json)]
+[![pester-tests](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/msc365admin/abc123def456/raw/az-devops-psmodule-test-badge.json)]
+[![code-analysis](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/msc365admin/abc123def456/raw/az-devops-psmodule-analysis-badge.json)]
 ```
 
 ## How It Works
