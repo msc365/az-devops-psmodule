@@ -32,11 +32,39 @@ Analyze the selected function/method and generate focused unit tests that thorou
 
 ## Test Structure Requirements
 
-- Use existing project testing framework and patterns
+- Use existing project testing framework and patterns, pester is default for PowerShell
+- Each context has a single BeforeEach block that sets up common mocks
 - Follow AAA pattern: Arrange, Act, Assert
 - Write descriptive test names that explain the scenario
 - Group related tests in describe/context blocks
 - Mock external dependencies cleanly
+- Always add `-Confirm:$false` to cmdlets supporting ShouldProcess
+- Always mock `Start-Sleep` in BeforeEach blocks to prevent delays
+- Use proper `ErrorRecord` objects for error testing, not hashtables
+- Test mandatory parameters via metadata, not by omitting them
+- Mock all external dependencies consistently in BeforeEach blocks
+
+### Test Priority (Most to Least Essential)
+
+**Always Include (Most Essential):**
+- Core functionality - main purpose of cmdlet
+- Required parameter validation - mandatory parameters
+- Invalid input handling - invalid URIs, malformed data
+- API interaction - URI construction, HTTP methods
+- Error handling - specific exceptions, error propagation
+- Pipeline support - accepting input via pipeline
+- ID resolution - GUID vs name handling (if applicable)
+- Async operations - polling/status checking (if applicable)
+
+**Skip When Max Tests Reached (Less Essential):**
+- Parameter aliases - enforced by PowerShell runtime
+- ValidateSet attributes - enforced by PowerShell automatically
+- API version parameters - stable, rarely changes
+- WhatIf support - framework-level functionality
+- Verbose logging - informational only
+- Helper function calls - tested indirectly
+- Duplicate pagination scenarios - keep one representative
+- Output object property validation - covered in core tests
 
 Target function: ${input:function_name:Which function or method should be tested?}
 Target folder: ${input:target_folder:Which folder contains the functions or methods that should be tested?}
@@ -46,10 +74,12 @@ Testing framework: ${input:framework:Which framework? (pester/jest/vitest/mocha/
 ## Guidelines
 
 - Create folder structure mirroring source if needed
-- Generate 5-8 focused test cases covering the most important scenarios
+- Generate maximum 12-15 focused tests cases per cmdlet, covering the most important scenarios
 - Include realistic test data, not just simple examples
 - Add comments for complex test setup or assertions
 - Ensure tests are independent and can run in any order
 - Focus on testing behavior, not implementation details
+- Use Invoke-Pester to validate test syntax if applicable
+- **CRITICAL:** Never use `-Output Detailed` when running Invoke-Pester - it freezes the terminal
 
 Create tests that give confidence the function works correctly and help catch regressions.
