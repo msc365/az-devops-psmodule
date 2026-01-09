@@ -267,7 +267,8 @@ Returns a custom object with the following properties:
 
 ## NOTES
 
-- Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
+- Requires authentication to Azure DevOps. Use `Set-AdoDefault` to configure default organization and project values.
+- The cmdlet automatically retrieves authentication through `Invoke-AdoRestMethod` which calls `New-AdoAuthHeader`.
 - If a repository is not found, a warning is displayed and the cmdlet continues processing.
 
 ## RELATED LINKS

@@ -243,11 +243,8 @@ Returns the updated project object with the following properties:
 - Only properties that are explicitly provided will be updated
 - Requires ShouldProcess confirmation due to ConfirmImpact = 'High'
 
-- Requires an active Azure account login. Use `Connect-AzAccount` to authenticate:
-
-  ```powershell
-  Connect-AzAccount -Tenant '<tenant-id>' -Subscription '<subscription-id>'
-  ```
+- Requires authentication to Azure DevOps. Use `Set-AdoDefault` to configure default organization and project values.
+- The cmdlet automatically retrieves authentication through `Invoke-AdoRestMethod` which calls `New-AdoAuthHeader`.
 
 ## RELATED LINKS
 

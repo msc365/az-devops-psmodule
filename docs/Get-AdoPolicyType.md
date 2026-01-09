@@ -243,11 +243,8 @@ Returns a custom object with the following properties:
 
 ## NOTES
 
-- Requires an active Azure account login. Use `Connect-AzAccount` to authenticate:
-
-  ```powershell
-  Connect-AzAccount -Tenant '<tenant-id>' -Subscription '<subscription-id>'
-  ```
+- Requires authentication to Azure DevOps. Use `Set-AdoDefault` to configure default organization and project values.
+- The cmdlet automatically retrieves authentication through `Invoke-AdoRestMethod` which calls `New-AdoAuthHeader`.
 
 - Current policy type IDs include:
   - `0517f88d-4ec5-4343-9d26-9930ebd53069` Git repository settings policy name

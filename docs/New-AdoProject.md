@@ -264,11 +264,8 @@ Returns a project object with the following properties:
 - If a project with the same name already exists, it returns the existing project instead of throwing an error
 - Requires ShouldProcess confirmation due to ConfirmImpact = 'High'
 
-- Requires an active Azure account login. Use `Connect-AzAccount` to authenticate:
-
-  ```powershell
-  Connect-AzAccount -Tenant '<tenant-id>' -Subscription '<subscription-id>'
-  ```
+- Requires authentication to Azure DevOps. Use `Set-AdoDefault` to configure default organization and project values.
+- The cmdlet automatically retrieves authentication through `Invoke-AdoRestMethod` which calls `New-AdoAuthHeader`.
 
 ## RELATED LINKS
 

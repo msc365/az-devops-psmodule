@@ -454,11 +454,8 @@ Returns a custom object representing the approval check configuration:
 - Currently supports 'environment' resource type. Other resource types ('endpoint', 'variablegroup', 'repository') will throw an error indicating they are not supported yet
 - MinRequiredApprovers is automatically adjusted: when only one approver is specified, it is set to 0 regardless of input
 - ExecutionOrder is automatically adjusted: when MinRequiredApprovers is 0, ExecutionOrder is set to 'anyOrder' regardless of input
-- Requires an active Azure account login. Use `Connect-AzAccount` to authenticate:
-
-  ```powershell
-  Connect-AzAccount -Tenant '<tenant-id>' -Subscription '<subscription-id>'
-  ```
+- Requires authentication to Azure DevOps. Use `Set-AdoDefault` to configure default organization and project values.
+- The cmdlet automatically retrieves authentication through `Invoke-AdoRestMethod` which calls `New-AdoAuthHeader`.
 
 ## RELATED LINKS
 

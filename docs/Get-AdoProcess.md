@@ -173,11 +173,8 @@ Returns one or more process objects with the following properties:
 
 ## NOTES
 
-- Requires an active Azure account login. Use `Connect-AzAccount` to authenticate:
-
-  ```powershell
-  Connect-AzAccount -Tenant '<tenant-id>' -Subscription '<subscription-id>'
-  ```
+- Requires authentication to Azure DevOps. Use `Set-AdoDefault` to configure default organization and project values.
+- The cmdlet automatically retrieves authentication through `Invoke-AdoRestMethod` which calls `New-AdoAuthHeader`.
 
 - The CollectionUri parameter can be set as an environment variable ($env:DefaultAdoCollectionUri) to avoid specifying it in each call.
 - Supports ShouldProcess for -WhatIf and -Confirm functionality.

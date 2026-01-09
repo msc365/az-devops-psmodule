@@ -268,11 +268,8 @@ The updated team field value settings for the specified team with the following 
 
 ## NOTES
 
-- Requires an active Azure account login. Use `Connect-AzAccount` to authenticate:
-
-  ```powershell
-  Connect-AzAccount -Tenant '<tenant-id>' -Subscription '<subscription-id>'
-  ```
+- Requires authentication to Azure DevOps. Use `Set-AdoDefault` to configure default organization and project values.
+- The cmdlet automatically retrieves authentication through `Invoke-AdoRestMethod` which calls `New-AdoAuthHeader`.
 
 - This cmdlet supports `-WhatIf` and `-Confirm` parameters for safe execution.
 - Each value in the Values parameter must contain both 'value' (string) and 'includeChildren' (boolean) properties.

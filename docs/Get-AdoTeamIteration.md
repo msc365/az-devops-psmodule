@@ -256,11 +256,8 @@ The cmdlet returns a PSCustomObject with the following properties:
 
 ## NOTES
 
-- Requires an active Azure account login. Use `Connect-AzAccount` to authenticate:
-
-  ```powershell
-  Connect-AzAccount -Tenant '<tenant-id>' -Subscription '<subscription-id>'
-  ```
+- Requires authentication to Azure DevOps. Use `Set-AdoDefault` to configure default organization and project values.
+- The cmdlet automatically retrieves authentication through `Invoke-AdoRestMethod` which calls `New-AdoAuthHeader`.
 
 - If a specific iteration ID is not found, a warning will be issued and the cmdlet will continue without error.
 - This cmdlet supports -WhatIf and -Confirm parameters for testing queries before execution.

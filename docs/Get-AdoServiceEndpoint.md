@@ -372,11 +372,8 @@ Service endpoint objects with the following properties:
 
 - If a service endpoint is not found, a warning is displayed instead of throwing an error.
 - Supports ShouldProcess for WhatIf and Confirm parameters.
-- Requires an active Azure account login. Use `Connect-AzAccount` to authenticate:
-
-  ```powershell
-  Connect-AzAccount -Tenant '<tenant-id>' -Subscription '<subscription-id>'
-  ```
+- Requires authentication to Azure DevOps. Use `Set-AdoDefault` to configure default organization and project values.
+- The cmdlet automatically retrieves authentication through `Invoke-AdoRestMethod` which calls `New-AdoAuthHeader`.
 
 ## RELATED LINKS
 

@@ -360,11 +360,8 @@ Returns a custom object representing the branch control check configuration:
 - When a branch control check with the same configuration already exists, the existing check is returned with a warning
 - Only 'environment' resource type is currently supported
 - The check uses the 'evaluatebranchProtection' task definition
-- Requires an active Azure account login. Use `Connect-AzAccount` to authenticate:
-
-  ```powershell
-  Connect-AzAccount -Tenant '<tenant-id>' -Subscription '<subscription-id>'
-  ```
+- Requires authentication to Azure DevOps. Use `Set-AdoDefault` to configure default organization and project values.
+- The cmdlet automatically retrieves authentication through `Invoke-AdoRestMethod` which calls `New-AdoAuthHeader`.
 
 ## RELATED LINKS
 

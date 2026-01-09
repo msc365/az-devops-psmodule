@@ -211,11 +211,8 @@ This cmdlet does not return any output.
 - The cmdlet has a high impact confirmation level, so it prompts for confirmation by default unless -Confirm:$false is specified.
 - Multiple projects can be specified to remove the service endpoint from all of them in a single operation.
 - Supports ShouldProcess for WhatIf and Confirm parameters (high impact).
-- Requires an active Azure account login. Use `Connect-AzAccount` to authenticate:
-
-  ```powershell
-  Connect-AzAccount -Tenant '<tenant-id>' -Subscription '<subscription-id>'
-  ```
+- Requires authentication to Azure DevOps. Use `Set-AdoDefault` to configure default organization and project values.
+- The cmdlet automatically retrieves authentication through `Invoke-AdoRestMethod` which calls `New-AdoAuthHeader`.
 
 ## RELATED LINKS
 
