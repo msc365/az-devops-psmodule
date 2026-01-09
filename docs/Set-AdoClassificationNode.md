@@ -1,14 +1,15 @@
 <!--
 document type: cmdlet
 external help file: Azure.DevOps.PSModule-Help.xml
-HelpUri: https://learn.microsoft.com/en-us/rest/api/azure/devops/wit/classification-nodes/create-or-update
+HelpUri: https://learn.microsoft.com/en-us/rest/api/azure/devops/wit/classification-nodes/update
 Locale: en-NL
 Module Name: Azure.DevOps.PSModule
-ms.date: 11/01/2025
+ms.date: 01/09/2026
 PlatyPS schema version: 2024-05-01
 title: Set-AdoClassificationNode
 -->
 
+<!-- markdownlint-disable MD024 -->
 <!-- cSpell: ignore dontshow -->
 
 # Set-AdoClassificationNode
@@ -22,8 +23,7 @@ Updates a classification node for a project in Azure DevOps.
 ### __AllParameterSets
 
 ```text
-Set-AdoClassificationNode [-ProjectId] <string> [-StructureType] <string> [-Name] <string>
- [[-Path] <string>] [[-ApiVersion] <string>] [<CommonParameters>]
+Set-AdoClassificationNode [[-CollectionUri] <string>] [[-ProjectName] <string>] -StructureGroup <string> -Path <string> [[-Name] <string>] [[-StartDate] <datetime>] [[-FinishDate] <datetime>] [[-Version] <string>] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -33,7 +33,7 @@ This cmdlet has the following aliases,
 
 ## DESCRIPTION
 
-This function updates the name of a classification node for a specified project in Azure DevOps using the REST API.
+This cmdlet updates the name of a classification node for a specified project in Azure DevOps. For iteration nodes, you can also set StartDate and FinishDate attributes.
 
 ## EXAMPLES
 
@@ -42,30 +42,121 @@ This function updates the name of a classification node for a specified project 
 #### PowerShell
 
 ```powershell
-Set-AdoClassificationNode -ProjectId 'my-project-1' -Name 'New Area Name' -Path 'Area/SubArea'
+$params = @{
+    CollectionUri  = 'https://dev.azure.com/my-org'
+    ProjectName    = 'my-project-1'
+    StructureGroup = 'Areas'
+    Path           = 'my-team-1/my-subarea-3'
+    Name           = 'my-renamedarea-1'
+}
+Set-AdoClassificationNode @params
 ```
 
-This example updates the name of the specified area node.
+Updates the name of the specified area node.
+
+### EXAMPLE 2
+
+#### PowerShell
+
+```powershell
+$params = @{
+    CollectionUri  = 'https://dev.azure.com/my-org'
+    ProjectName    = 'my-project-1'
+    StructureGroup = 'Iterations'
+    Path           = 'Iteration 4'
+    StartDate      = (Get-Date)
+    FinishDate     = (Get-Date).AddDays(21)
+}
+Set-AdoClassificationNode @params
+```
+
+Updates the start and finish dates for an iteration node.
 
 ## PARAMETERS
 
-### -ApiVersion
+### -CollectionUri
 
-Optional.
-The API version to use.
+Optional. The collection URI of the Azure DevOps collection/organization, e.g., <https://dev.azure.com/my-org>.
+Defaults to the value of the environment variable `$env:DefaultAdoCollectionUri`.
 
 ```yaml
 Type: System.String
-DefaultValue: 7.1
+DefaultValue: $env:DefaultAdoCollectionUri
 SupportsWildcards: false
-Aliases:
-- api
+Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 4
+  Position: Named
   IsRequired: false
   ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -ProjectName
+
+Optional. The ID or name of the Azure DevOps project.
+Defaults to the value of the environment variable `$env:DefaultAdoProject`.
+
+```yaml
+Type: System.String
+DefaultValue: $env:DefaultAdoProject
+SupportsWildcards: false
+Aliases:
+- ProjectId
+ParameterSets:
+- Name: (All)
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -StructureGroup
+
+Mandatory. The type of classification node to update. Valid values are 'Areas' or 'Iterations'.
+
+```yaml
+Type: System.String
+DefaultValue: ''
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: (All)
+  Position: Named
+  IsRequired: true
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues:
+- Areas
+- Iterations
+HelpMessage: ''
+```
+
+### -Path
+
+Mandatory. The path of the classification node to update.
+
+```yaml
+Type: System.String
+DefaultValue: ''
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: (All)
+  Position: Named
+  IsRequired: true
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
   ValueFromRemainingArguments: false
 DontShow: false
 AcceptedValues: []
@@ -74,8 +165,7 @@ HelpMessage: ''
 
 ### -Name
 
-Mandatory.
-The new name for the classification node.
+Optional. The new name for the classification node.
 
 ```yaml
 Type: System.String
@@ -84,81 +174,79 @@ SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 2
-  IsRequired: true
+  Position: Named
+  IsRequired: false
   ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
+  ValueFromPipelineByPropertyName: true
   ValueFromRemainingArguments: false
 DontShow: false
 AcceptedValues: []
 HelpMessage: ''
 ```
 
-### -Path
+### -StartDate
 
-Optional.
-The path of the classification node to update.
-If not specified, the root classification node is updated.
+Optional. The start date for the iteration node. Must be used only when StructureGroup is 'Iterations'.
 
 ```yaml
-Type: System.String
+Type: System.DateTime
 DefaultValue: ''
 SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 3
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -FinishDate
+
+Optional. The finish date for the iteration node. Must be used only when StructureGroup is 'Iterations'.
+
+```yaml
+Type: System.DateTime
+DefaultValue: ''
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: (All)
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -Version
+
+Optional. The API version to use for the request. Default is '7.1'.
+
+```yaml
+Type: System.String
+DefaultValue: 7.1
+SupportsWildcards: false
+Aliases:
+- ApiVersion
+ParameterSets:
+- Name: (All)
+  Position: Named
   IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
   ValueFromRemainingArguments: false
 DontShow: false
-AcceptedValues: []
-HelpMessage: ''
-```
-
-### -ProjectId
-
-Mandatory.
-The ID or name of the Azure DevOps project.
-
-```yaml
-Type: System.String
-DefaultValue: ''
-SupportsWildcards: false
-Aliases: []
-ParameterSets:
-- Name: (All)
-  Position: 0
-  IsRequired: true
-  ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
-  ValueFromRemainingArguments: false
-DontShow: false
-AcceptedValues: []
-HelpMessage: ''
-```
-
-### -StructureType
-
-Mandatory.
-The type of classification node to update.
-Valid values are 'Areas' or 'Iterations'.
-
-```yaml
-Type: System.String
-DefaultValue: ''
-SupportsWildcards: false
-Aliases: []
-ParameterSets:
-- Name: (All)
-  Position: 1
-  IsRequired: true
-  ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
-  ValueFromRemainingArguments: false
-DontShow: false
-AcceptedValues: []
+AcceptedValues:
+- 7.1
+- 7.2-preview.2
 HelpMessage: ''
 ```
 
@@ -175,14 +263,28 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### System.Object
+### PSCustomObject
 
-The updated classification node object.
+Returns the updated classification node object with the following properties:
+- id: The integer ID of the classification node
+- identifier: The GUID identifier of the classification node
+- name: The name of the classification node
+- structureType: The type of structure (area or iteration)
+- path: The full path of the classification node
+- hasChildren: Boolean indicating if the node has child nodes
+- children: (Optional) Array of child classification nodes if present
+- attributes: (Optional) Additional attributes like startDate and finishDate for iterations
+- projectName: The name of the project
+- collectionUri: The collection URI
 
 ## NOTES
 
-- Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
+- Requires authentication to Azure DevOps. Use `Set-AdoDefault` to configure default organization and project values.
+- The cmdlet automatically retrieves authentication through `Invoke-AdoRestMethod` which calls `New-AdoAuthHeader`.
+- At least one property (Name, StartDate, or FinishDate) must be specified to update a classification node.
+- StartDate and FinishDate can only be set for Iteration nodes, not Area nodes.
+- If a classification node with the same name already exists at the specified path, a warning is displayed and the operation is skipped.
 
 ## RELATED LINKS
 
-- <https://learn.microsoft.com/en-us/rest/api/azure/devops/wit/classification-nodes/create-or-update>
+- <https://learn.microsoft.com/en-us/rest/api/azure/devops/wit/classification-nodes/update>

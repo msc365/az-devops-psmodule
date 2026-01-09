@@ -5,107 +5,173 @@ function Set-AdoClassificationNode {
         Updates a classification node for a project in Azure DevOps.
 
     .DESCRIPTION
-        This function updates the name of a classification node for a specified project in Azure DevOps using the REST API.
+        This cmdlet updates the name of a classification node for a specified project in Azure DevOps.
 
-    .PARAMETER ProjectId
+    .PARAMETER CollectionUri
+        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/my-org.
+
+    .PARAMETER ProjectName
         Mandatory. The ID or name of the Azure DevOps project.
 
-    .PARAMETER StructureType
+    .PARAMETER StructureGroup
         Mandatory. The type of classification node to update. Valid values are 'Areas' or 'Iterations'.
+
+    .PARAMETER Path
+        Optional. The path of the classification node to update.
 
     .PARAMETER Name
         Mandatory. The new name for the classification node.
 
-    .PARAMETER Path
-        Optional. The path of the classification node to update. If not specified, the root classification node is updated.
+    .PARAMETER StartDate
+        Optional. The start date for the iteration node. Must be used only when StructureType is 'Iterations'.
 
-    .PARAMETER ApiVersion
-        Optional. The API version to use.
+    .PARAMETER FinishDate
+        Optional. The finish date for the iteration node. Must be used only when StructureType is 'Iterations'.
 
-    .OUTPUTS
-        System.Object
-
-        The updated classification node object.
+    .PARAMETER Version
+        Optional. The API version to use for the request. Default is '7.1'.
 
     .LINK
-        https://learn.microsoft.com/en-us/rest/api/azure/devops/wit/classification-nodes/create-or-update
-
-    .NOTES
-        - Requires an active connection to Azure DevOps using Connect-AdoOrganization.
+        https://learn.microsoft.com/en-us/rest/api/azure/devops/wit/classification-nodes/update
 
     .EXAMPLE
-        $updatedAreaNode = Set-AdoClassificationNode -ProjectId 'my-project-1' -Name 'New Area Name' -Path 'Area/SubArea'
+        $params = @{
+            CollectionUri  = 'https://dev.azure.com/my-org'
+            ProjectName    = 'my-project-1'
+            StructureGroup = 'Areas'
+            Path           = 'my-team-1/my-subarea-1'
+            Name           = 'my-renamed-subarea-1'
+        }
+        Set-AdoClassificationNode @params
 
-        This example updates the name of the specified area node.
+        Updates the name of the specified area node.
     #>
-    [CmdletBinding()]
-    [OutputType([object])]
+    [CmdletBinding(SupportsShouldProcess)]
     param (
-        [Parameter(Mandatory)]
-        [string]$ProjectId,
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
+        [string]$CollectionUri = $env:DefaultAdoCollectionUri,
 
-        [Parameter(Mandatory)]
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [Alias('ProjectId')]
+        [string]$ProjectName = $env:DefaultAdoProject,
+
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
         [ValidateSet('Areas', 'Iterations')]
-        [string]$StructureType,
+        [string]$StructureGroup,
 
-        [Parameter(Mandatory)]
-        [string]$Name,
-
-        [Parameter(Mandatory = $false)]
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
         [string]$Path,
 
-        [Parameter(Mandatory = $false)]
-        [Alias('api')]
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [string]$Name,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [datetime]$StartDate,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [datetime]$FinishDate,
+
+        [Parameter()]
+        [Alias('ApiVersion')]
         [ValidateSet('7.1', '7.2-preview.2')]
-        [string]$ApiVersion = '7.1'
+        [string]$Version = '7.1'
     )
 
     begin {
-        Write-Debug ('Command         : {0}' -f $MyInvocation.MyCommand.Name)
-        Write-Debug ('  ProjectId     : {0}' -f $ProjectId)
-        Write-Debug ('  StructureType : {0}' -f $StructureType)
-        Write-Debug ('  Name          : {0}' -f $Name)
-        Write-Debug ('  Path          : {0}' -f $Path)
-        Write-Debug ('  ApiVersion    : {0}' -f $ApiVersion)
+        Write-Verbose ("Command: $($MyInvocation.MyCommand.Name)")
+        Write-Debug ("CollectionUri: $CollectionUri")
+        Write-Debug ("ProjectName: $ProjectName")
+        Write-Debug ("StructureGroup: $StructureGroup")
+        Write-Debug ("Path: $Path")
+        Write-Debug ("Name: $Name")
+        Write-Debug ("StartDate: $StartDate")
+        Write-Debug ("FinishDate: $FinishDate")
+        Write-Debug ("Version: $Version")
+
+        Confirm-Default -Defaults ([ordered]@{
+                'CollectionUri' = $CollectionUri
+                'ProjectName'   = $ProjectName
+            })
     }
 
     process {
         try {
-            $ErrorActionPreference = 'Stop'
-
-            if (-not $global:AzDevOpsIsConnected) {
-                throw 'Not connected to Azure DevOps. Please connect using Connect-AdoOrganization.'
+            $body = [PSCustomObject]@{}
+            if ($Name) {
+                $body | Add-Member -MemberType NoteProperty -Name 'name' -Value $Name
+            }
+            if ($StartDate) {
+                if ($StructureGroup -ne 'Iterations') {
+                    throw 'StartDate can only be set for Iteration nodes.'
+                }
+                if (-not $body.attributes) {
+                    $body | Add-Member -MemberType NoteProperty -Name 'attributes' -Value ([PSCustomObject]@{})
+                }
+                $body.attributes | Add-Member -MemberType NoteProperty -Name 'startDate' -Value $StartDate.ToString('o')
+            }
+            if ($FinishDate) {
+                if ($StructureGroup -ne 'Iterations') {
+                    throw 'FinishDate can only be set for Iteration nodes.'
+                }
+                if (-not $body.attributes) {
+                    $body | Add-Member -MemberType NoteProperty -Name 'attributes' -Value ([PSCustomObject]@{})
+                }
+                $body.attributes | Add-Member -MemberType NoteProperty -Name 'finishDate' -Value $FinishDate.ToString('o')
             }
 
-            $uriFormat = '{0}/{1}/_apis/wit/classificationnodes/{2}/{3}?api-version={4}'
-            $azDevOpsUri = ($uriFormat -f [uri]::new($global:AzDevOpsOrganization), [uri]::EscapeUriString($ProjectId),
-                $StructureType, [uri]::EscapeUriString($Path), $ApiVersion)
-
-            $body = @{
-                name = $Name
+            if (-not $body.PSObject.Properties.Count) {
+                throw 'At least one property (Name, StartDate, or FinishDate) must be specified to update a classification node.'
             }
 
             $params = @{
-                Method      = 'PATCH'
-                Uri         = $azDevOpsUri
-                ContentType = 'application/json'
-                Headers     = @{
-                    'Accept'        = 'application/json'
-                    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
-                }
-                Body        = ($body | ConvertTo-Json -Depth 3 -Compress)
+                Uri     = "$CollectionUri/$ProjectName/_apis/wit/classificationnodes/$StructureGroup/$Path"
+                Version = $Version
+                Method  = 'PATCH'
             }
 
-            $response = Invoke-RestMethod @params -Verbose:$VerbosePreference
+            if ($PSCmdlet.ShouldProcess($ProjectName, "Update classification node: $StructureGroup/$Path")) {
+                try {
+                    $results = $body | Invoke-AdoRestMethod @params
 
-            return $response
-
+                    $obj = [ordered]@{
+                        id            = $results.id
+                        identifier    = $results.identifier
+                        name          = $results.name
+                        structureType = $results.structureType
+                        path          = $results.path
+                        hasChildren   = $results.hasChildren
+                    }
+                    if ($results.children) {
+                        $obj['children'] = $results.children
+                    }
+                    if ($results.attributes) {
+                        $obj['attributes'] = $results.attributes
+                    }
+                    $obj['projectName'] = $ProjectName
+                    $obj['collectionUri'] = $CollectionUri
+                    [PSCustomObject]$obj
+                } catch {
+                    if ($_.ErrorDetails.Message -match 'DuplicateNameException') {
+                        Write-Warning "Classification node '$Name' already exists under $StructureGroup/$Path, skipping."
+                    } elseif ($_.ErrorDetails.Message -match 'NotFoundException') {
+                        Write-Warning "Classification node '$StructureGroup/$Path' not found, skipping."
+                    } else {
+                        throw $_
+                    }
+                }
+            } else {
+                $params += @{
+                    Body = $body
+                }
+                Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
+            }
         } catch {
             throw $_
         }
     }
 
     end {
-        Write-Debug ('{0} exited' -f $MyInvocation.MyCommand)
+        Write-Verbose ("Exit: $($MyInvocation.MyCommand.Name)")
     }
 }

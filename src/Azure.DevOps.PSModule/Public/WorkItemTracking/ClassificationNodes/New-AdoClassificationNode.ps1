@@ -5,112 +5,149 @@ function New-AdoClassificationNode {
         Creates a new classification node for a project in Azure DevOps.
 
     .DESCRIPTION
-        This function creates a new classification node under a specified path for a project in Azure DevOps using the REST API.
+        This cmdlet creates a new classification node under a specified path for a project in Azure DevOps.
 
-    .PARAMETER ProjectId
+    .PARAMETER CollectionUri
+        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/my-org.
+
+    .PARAMETER ProjectName
         Mandatory. The ID or name of the Azure DevOps project.
 
-    .PARAMETER StructureType
+    .PARAMETER StructureGroup
         Mandatory. The type of classification node to create. Valid values are 'Areas' or 'Iterations'.
-
-    .PARAMETER Name
-        Mandatory. The name of the new classification node to create.
 
     .PARAMETER Path
         Optional. The path under which to create the new classification node. If not specified, the node is created at the root level.
 
-    .PARAMETER ApiVersion
-        Optional. The API version to use.
+    .PARAMETER Name
+        Mandatory. The name of the new classification node to create.
 
-    .OUTPUTS
-        System.Object
-
-        Object representing the created classification node.
+    .PARAMETER Version
+        Optional. The API version to use for the request. Default is '7.1'.
 
     .LINK
         https://learn.microsoft.com/en-us/rest/api/azure/devops/wit/classification-nodes/create-or-update
 
-    .NOTES
-        - Requires an active connection to Azure DevOps using Connect-AdoOrganization.
+    .EXAMPLE
+        $params = @{
+            CollectionUri  = 'https://dev.azure.com/my-org'
+            ProjectName    = 'my-project-1'
+            StructureGroup = 'Areas'
+            Name           = 'my-team-1'
+        }
+        New-AdoClassificationNode @params
+
+        Creates a new area node named 'my-team-1' at the root level of the specified project.
 
     .EXAMPLE
-        $newAreaNode = New-AdoClassificationNode -Name 'NewArea' -ProjectId 'my-project-1' -StructureType 'Areas'
+        $params = @{
+            CollectionUri  = 'https://dev.azure.com/my-org'
+            ProjectName    = 'my-project-1'
+            StructureGroup = 'Areas'
+            Path           = 'my-team-1'
+            Name           = 'my-subarea-1'
+        }
+        New-AdoClassificationNode @params
 
-        This example creates a new area node named 'NewArea' at the root level of the specified project.
-
-    .EXAMPLE
-        $newAreaNode = New-AdoClassificationNode -Name 'SubArea' -Path 'ExistingArea' -ProjectId 'my-project-1' -StructureType 'Areas'
-
-        This example creates a new area node named 'SubArea' under the existing area node 'ExistingArea' in the specified project.
+        Creates a new area node named 'my-subarea-1' under the existing area node 'my-team-1' in the specified project.
     #>
-    [CmdletBinding()]
-    [OutputType([object])]
+    [CmdletBinding(SupportsShouldProcess)]
     param (
-        [Parameter(Mandatory)]
-        [string]$ProjectId,
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
+        [string]$CollectionUri = $env:DefaultAdoCollectionUri,
 
-        [Parameter(Mandatory)]
-        [string]$Name,
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [Alias('ProjectId')]
+        [string]$ProjectName = $env:DefaultAdoProject,
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
         [ValidateSet('Areas', 'Iterations')]
-        [string]$StructureType,
+        [string]$StructureGroup,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter(ValueFromPipelineByPropertyName)]
         [string]$Path,
 
-        [Parameter(Mandatory = $false)]
-        [Alias('api')]
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [string]$Name,
+
+        [Parameter()]
+        [Alias('ApiVersion')]
         [ValidateSet('7.1', '7.2-preview.2')]
-        [string]$ApiVersion = '7.1'
+        [string]$Version = '7.1'
     )
 
     begin {
-        Write-Debug ('Command         : {0}' -f $MyInvocation.MyCommand.Name)
-        Write-Debug ('  ProjectId     : {0}' -f $ProjectId)
-        Write-Debug ('  StructureType : {0}' -f $StructureType)
-        Write-Debug ('  Name          : {0}' -f $Name)
-        Write-Debug ('  Path          : {0}' -f $Path)
-        Write-Debug ('  ApiVersion    : {0}' -f $ApiVersion)
+        Write-Verbose ("Command: $($MyInvocation.MyCommand.Name)")
+        Write-Debug ("CollectionUri: $CollectionUri")
+        Write-Debug ("ProjectName: $ProjectName")
+        Write-Debug ("Name: $Name")
+        Write-Debug ("StructureGroup: $StructureGroup")
+        Write-Debug ("Path: $Path")
+        Write-Debug ("Version: $Version")
+
+        Confirm-Default -Defaults ([ordered]@{
+                'CollectionUri' = $CollectionUri
+                'ProjectName'   = $ProjectName
+            })
     }
 
     process {
         try {
-            $ErrorActionPreference = 'Stop'
-
-            if (-not $global:AzDevOpsIsConnected) {
-                throw 'Not connected to Azure DevOps. Please connect using Connect-AdoOrganization.'
-            }
-
-            $uriFormat = '{0}/{1}/_apis/wit/classificationnodes/{2}/{3}?api-version={4}'
-            $azDevOpsUri = ($uriFormat -f [uri]::new($global:AzDevOpsOrganization), [uri]::EscapeUriString($ProjectId),
-                [uri]::EscapeUriString($StructureType), [uri]::EscapeUriString($Path), $ApiVersion)
-
-            $body = @{
-                name = $Name
+            if ($Path) {
+                $uri = "$CollectionUri/$ProjectName/_apis/wit/classificationnodes/$StructureGroup/$Path"
+            } else {
+                $uri = "$CollectionUri/$ProjectName/_apis/wit/classificationnodes/$StructureGroup"
             }
 
             $params = @{
-                Method      = 'POST'
-                Uri         = $azDevOpsUri
-                ContentType = 'application/json'
-                Headers     = @{
-                    'Accept'        = 'application/json'
-                    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
-                }
-                Body        = ($body | ConvertTo-Json -Depth 3 -Compress)
+                Uri     = $uri
+                Version = $Version
+                Method  = 'POST'
             }
 
-            $response = Invoke-RestMethod @params -Verbose:$VerbosePreference
+            $body = [PSCustomObject]@{
+                name = $Name
+            }
 
-            return $response
+            if ($PSCmdlet.ShouldProcess($ProjectName, "Create classification node: $Name under $($Path ? "$StructureGroup/$Path" : $StructureGroup)")) {
+                try {
+                    $results = $body | Invoke-AdoRestMethod @params
 
+                    $obj = [ordered]@{
+                        id            = $results.id
+                        identifier    = $results.identifier
+                        name          = $results.name
+                        structureType = $results.structureType
+                        path          = $results.path
+                        hasChildren   = $results.hasChildren
+                    }
+                    if ($results.children) {
+                        $obj['children'] = $results.children
+                    }
+                    if ($results.attributes) {
+                        $obj['attributes'] = $results.attributes
+                    }
+                    $obj['projectName'] = $ProjectName
+                    $obj['collectionUri'] = $CollectionUri
+                    [PSCustomObject]$obj
+
+                } catch {
+                    if ($_.ErrorDetails.Message -match 'DuplicateNameException') {
+                        Write-Warning "Classification node '$Name' already exists under $($Path ? "$StructureGroup/$Path" : $StructureGroup), skipping."
+                    } else {
+                        throw $_
+                    }
+                }
+            } else {
+                Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
+            }
         } catch {
             throw $_
         }
     }
 
     end {
-        Write-Debug ('{0} exited' -f $MyInvocation.MyCommand)
+        Write-Verbose ("Exit: $($MyInvocation.MyCommand.Name)")
     }
 }

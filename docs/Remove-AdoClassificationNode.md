@@ -4,7 +4,7 @@ external help file: Azure.DevOps.PSModule-Help.xml
 HelpUri: https://learn.microsoft.com/en-us/rest/api/azure/devops/wit/classification-nodes/delete
 Locale: en-NL
 Module Name: Azure.DevOps.PSModule
-ms.date: 11/01/2025
+ms.date: 01/09/2026
 PlatyPS schema version: 2024-05-01
 title: Remove-AdoClassificationNode
 -->
@@ -23,8 +23,7 @@ Removes a classification node from a project in Azure DevOps.
 ### __AllParameterSets
 
 ```text
-Remove-AdoClassificationNode [-ProjectId] <string> [-StructureType] <string> [-Path] <string>
- [[-ReclassifyId] <int>] [[-ApiVersion] <string>] [<CommonParameters>]
+Remove-AdoClassificationNode [[-CollectionUri] <string>] [[-ProjectName] <string>] -StructureGroup <string> -Path <string> [[-ReclassifyId] <int>] [[-Version] <string>] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -34,7 +33,7 @@ This cmdlet has the following aliases,
 
 ## DESCRIPTION
 
-This function removes a classification node from a specified project in Azure DevOps using the REST API.
+This cmdlet removes a classification node from a specified project in Azure DevOps. Optionally reclassifies work items to another node instead of leaving them orphaned.
 
 ## EXAMPLES
 
@@ -43,65 +42,124 @@ This function removes a classification node from a specified project in Azure De
 #### PowerShell
 
 ```powershell
-Remove-AdoClassificationNode -ProjectId 'my-project-1' -Path 'Area/SubArea'
+$params = @{
+    CollectionUri  = 'https://dev.azure.com/my-org'
+    ProjectName    = 'my-project-1'
+    StructureGroup = 'Areas'
+    Path           = 'my-team-1/my-subarea-1'
+}
+Remove-AdoClassificationNode @params
 ```
 
-This example removes the area node at the specified path from the specified project.
+Removes the area node at the specified path from the specified project.
 
 ### EXAMPLE 2
 
 #### PowerShell
 
 ```powershell
-Remove-AdoClassificationNode -ProjectId 'my-project-1' -Path 'Area'
+$params = @{
+    CollectionUri  = 'https://dev.azure.com/my-org'
+    ProjectName    = 'my-project-1'
+    StructureGroup = 'Areas'
+    Path           = 'my-team-1'
+}
+Remove-AdoClassificationNode @params
 ```
 
-This example removes the area node named 'Area' from the specified project including its 'SubArea' child node.
+Removes the area node named 'my-team-1' from the specified project including its 'my-subarea-1' child node.
 
 ### EXAMPLE 3
 
 #### PowerShell
 
 ```powershell
-Remove-AdoClassificationNode -ProjectId 'my-project-1' -Path 'Area/SubArea' -ReclassifyId 658
+$params = @{
+    CollectionUri  = 'https://dev.azure.com/my-org'
+    ProjectName    = 'my-project-1'
+    StructureGroup = 'Areas'
+    Path           = 'my-team-1/my-subarea-1'
+    ReclassifyId   = 658
+}
+Remove-AdoClassificationNode @params
 ```
 
-This example removes the area node at the specified path and reassigns (reclassifies) the work items that were associated with that node to another existing node, the node with ID 658.
-
-> [!NOTE] Note  
-> Without `-ReclassifyId`, deleting a node could leave work items orphaned or unclassified.  
-> This parameter ensures a smooth transition by automatically moving them to a valid node.
+Removes the area node at the specified path and reassigns (reclassifies) the work items that were associated with that node to another existing node, the node with ID 658.
+Without ReclassifyId, deleting a node could leave work items orphaned or unclassified. This parameter ensures a smooth transition by automatically moving them to a valid node.
 
 ## PARAMETERS
 
-### -ApiVersion
+### -CollectionUri
 
-Optional.
-The API version to use.
+Optional. The collection URI of the Azure DevOps collection/organization, e.g., <https://dev.azure.com/my-org>.
+Defaults to the value of the environment variable `$env:DefaultAdoCollectionUri`.
 
 ```yaml
 Type: System.String
-DefaultValue: 7.1
+DefaultValue: $env:DefaultAdoCollectionUri
 SupportsWildcards: false
-Aliases:
-- api
+Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 4
+  Position: Named
   IsRequired: false
   ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
+  ValueFromPipelineByPropertyName: true
   ValueFromRemainingArguments: false
 DontShow: false
 AcceptedValues: []
+HelpMessage: ''
+```
+
+### -ProjectName
+
+Optional. The ID or name of the Azure DevOps project.
+Defaults to the value of the environment variable `$env:DefaultAdoProject`.
+
+```yaml
+Type: System.String
+DefaultValue: $env:DefaultAdoProject
+SupportsWildcards: false
+Aliases:
+- ProjectId
+ParameterSets:
+- Name: (All)
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -StructureGroup
+
+Mandatory. The type of the classification node structure (Areas or Iterations).
+
+```yaml
+Type: System.String
+DefaultValue: ''
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: (All)
+  Position: Named
+  IsRequired: true
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues:
+- Areas
+- Iterations
 HelpMessage: ''
 ```
 
 ### -Path
 
-Required.
-The path of the classification node to remove.
-The root classification node cannot be removed.
+Mandatory. The path of the classification node to remove. The root classification node cannot be removed.
 
 ```yaml
 Type: System.String
@@ -110,32 +168,10 @@ SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 2
+  Position: Named
   IsRequired: true
   ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
-  ValueFromRemainingArguments: false
-DontShow: false
-AcceptedValues: []
-HelpMessage: ''
-```
-
-### -ProjectId
-
-Mandatory.
-The ID or name of the Azure DevOps project.
-
-```yaml
-Type: System.String
-DefaultValue: ''
-SupportsWildcards: false
-Aliases: []
-ParameterSets:
-- Name: (All)
-  Position: 0
-  IsRequired: true
-  ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
+  ValueFromPipelineByPropertyName: true
   ValueFromRemainingArguments: false
 DontShow: false
 AcceptedValues: []
@@ -144,46 +180,47 @@ HelpMessage: ''
 
 ### -ReclassifyId
 
-Optional.
-The ID of the target classification node for reclassification.
-If not provided, child nodes will be deleted.
+Optional. The ID of the target classification node for reclassification of work items associated with the node being removed.
+If specified, work items associated with the removed node will be reassigned to this node. If not specified, work items may become orphaned or unclassified.
 
 ```yaml
 Type: System.Int32
-DefaultValue: 0
+DefaultValue: ''
 SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 3
+  Position: Named
   IsRequired: false
   ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
+  ValueFromPipelineByPropertyName: true
   ValueFromRemainingArguments: false
 DontShow: false
 AcceptedValues: []
 HelpMessage: ''
 ```
 
-### -StructureType
+### -Version
 
-Mandatory.
-The type of the classification node structure (Areas or Iterations).
+Optional. The API version to use for the request. Default is '7.1'.
 
 ```yaml
 Type: System.String
-DefaultValue: ''
+DefaultValue: 7.1
 SupportsWildcards: false
-Aliases: []
+Aliases:
+- ApiVersion
 ParameterSets:
 - Name: (All)
-  Position: 1
-  IsRequired: true
+  Position: Named
+  IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
   ValueFromRemainingArguments: false
 DontShow: false
-AcceptedValues: []
+AcceptedValues:
+- 7.1
+- 7.2-preview.2
 HelpMessage: ''
 ```
 
@@ -204,7 +241,9 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## NOTES
 
-- Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
+- Requires authentication to Azure DevOps. Use `Set-AdoDefault` to configure default organization and project values.
+- The cmdlet automatically retrieves authentication through `Invoke-AdoRestMethod` which calls `New-AdoAuthHeader`.
+- If the classification node is not found, a warning is displayed and the operation is skipped.
 
 ## RELATED LINKS
 

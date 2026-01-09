@@ -5,107 +5,243 @@ function Get-AdoClassificationNode {
         Gets classification nodes for a project in Azure DevOps.
 
     .DESCRIPTION
-        This function retrieves classification nodes for a specified project in Azure DevOps using the REST API.
+        This cmdlet retrieves classification nodes for a specified project in Azure DevOps.
+        You can retrieve the root node or specific nodes by path with optional depth control.
 
-    .PARAMETER ProjectId
-        Mandatory. The ID or name of the Azure DevOps project.
+    .PARAMETER CollectionUri
+        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/my-org.
 
-    .PARAMETER StructureType
-        Mandatory. The structure type (group) of the classification node. Valid values are 'Areas' or 'Iterations'.
+    .PARAMETER ProjectName
+        Optional. The ID or name of the Azure DevOps project.
+
+    .PARAMETER StructureGroup
+        Optional. The structure group of the classification node. Valid values are 'areas' or 'iterations'.
 
     .PARAMETER Path
         Optional. The path of the classification node to retrieve. If not specified, the root classification node is returned.
 
+    .PARAMETER Ids
+        Optional. The unique identifiers of the classification nodes to retrieve.
+
+    .PARAMETER ErrorPolicy
+        Optional. The error policy to apply when retrieving multiple nodes by IDs. Valid values are 'fail' and 'omit'.
+
     .PARAMETER Depth
         Optional. The depth of the classification nodes to retrieve. If not specified, only the specified node is returned.
 
-    .PARAMETER ApiVersion
-        Optional. The API version to use.
-
-    .OUTPUTS
-        System.Object
-
-        The classification node object retrieved from Azure DevOps.
+    .PARAMETER Version
+        Optional. The API version to use for the request. Default is '7.1'.
 
     .LINK
-        https://learn.microsoft.com/en-us/rest/api/azure/devops/wit/classification-nodes/get
-
-    .NOTES
-        - Requires an active connection to Azure DevOps using Connect-AdoOrganization.
-
-    .EXAMPLE
-        $classificationNode = Get-AdoClassificationNode -ProjectId 'my-project-1' -StructureType 'Areas'
-
-        This example retrieves the root area for the specified project.
+        - https://learn.microsoft.com/en-us/rest/api/azure/devops/wit/classification-nodes/get
+        - https://learn.microsoft.com/en-us/rest/api/azure/devops/wit/classification-nodes/get-root-nodes
+        - https://learn.microsoft.com/en-us/rest/api/azure/devops/wit/classification-nodes/get-classification-nodes
 
     .EXAMPLE
-        $classificationNode = Get-AdoClassificationNode -ProjectId 'my-project-1' -StructureType 'Areas' -Path 'Area/SubArea' -Depth 2
+        $params = @{
+            CollectionUri  = 'https://dev.azure.com/my-org'
+            ProjectName    = 'my-project-1'
+            StructureGroup = 'Areas'
+        }
+        Get-AdoClassificationNode @params
 
-        This example retrieves the area at the specified path with a depth of 2.
+        Retrieves the root area for the specified project.
+
+    .EXAMPLE
+        $params = @{
+            CollectionUri  = 'https://dev.azure.com/my-org'
+            ProjectName    = 'my-project-1'
+            StructureGroup = 'Areas'
+            Path           = 'my-team-1/my-subarea-1'
+            Depth          = 2
+        }
+        Get-AdoClassificationNode @params
+
+        Retrieves the area at the specified path with a depth of 2.
+
+    .EXAMPLE
+        $params = @{
+            CollectionUri = 'https://dev.azure.com/my-org'
+            ProjectName   = 'my-project-1'
+            Ids           = 1, 2, 3
+            ErrorPolicy   = 'omit'
+        }
+        Get-AdoClassificationNode @params
+
+        Retrieves multiple classification nodes by their IDs, omitting any not found.
+
+    .EXAMPLE
+        $params = @{
+            CollectionUri = 'https://dev.azure.com/my-org'
+            ProjectName   = 'my-project-1'
+            Ids           = 1, 2, 3
+            ErrorPolicy   = 'fail'
+        }
+        Get-AdoClassificationNode @params
+
+        Retrieves multiple classification nodes by their IDs, failing if any are not found.
+
+    .EXAMPLE
+        $params = @{
+            StructureGroup = 'Iterations'
+            Path           = 'Sprint 1'
+        }
+        Get-AdoClassificationNode @params
+
+        Retrieves the iteration node at the specified path from the default project and collection.
     #>
-    [CmdletBinding()]
-    [OutputType([object])]
+    [CmdletBinding(SupportsShouldProcess, DefaultParameterSetName = 'GetAll', ConfirmImpact = 'None')]
     param (
-        [Parameter(Mandatory)]
-        [string]$ProjectId,
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
+        [string]$CollectionUri = $env:DefaultAdoCollectionUri,
 
-        [Parameter(Mandatory)]
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [Alias('ProjectId')]
+        [string]$ProjectName = $env:DefaultAdoProject,
+
+        [Parameter(ValueFromPipelineByPropertyName, ParameterSetName = 'GetAll')]
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName, ParameterSetName = 'ByPath')]
         [ValidateSet('Areas', 'Iterations')]
-        [string]$StructureType,
+        [string]$StructureGroup,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter(ValueFromPipelineByPropertyName, ParameterSetName = 'ByPath')]
         [string]$Path,
 
-        [Parameter(Mandatory = $false)]
-        [int]$Depth,
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName, ParameterSetName = 'ByNodesIds')]
+        [string[]]$Ids,
 
-        [Parameter(Mandatory = $false)]
-        [Alias('api')]
+        [Parameter(ValueFromPipelineByPropertyName, ParameterSetName = 'ByNodesIds')]
+        [ValidateSet('fail', 'omit')]
+        [string]$ErrorPolicy,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [int32]$Depth,
+
+        [Parameter()]
+        [Alias('ApiVersion')]
         [ValidateSet('7.1', '7.2-preview.2')]
-        [string]$ApiVersion = '7.1'
+        [string]$Version = '7.1'
     )
 
     begin {
-        Write-Debug ('Command         : {0}' -f $MyInvocation.MyCommand.Name)
-        Write-Debug ('  ProjectId     : {0}' -f $ProjectId)
-        Write-Debug ('  StructureType : {0}' -f $StructureType)
-        Write-Debug ('  Path          : {0}' -f $Path)
-        Write-Debug ('  Depth         : {0}' -f $Depth)
-        Write-Debug ('  ApiVersion    : {0}' -f $ApiVersion)
+        Write-Verbose ("Command: $($MyInvocation.MyCommand.Name)")
+        Write-Debug ("CollectionUri: $CollectionUri")
+        Write-Debug ("ProjectName: $ProjectName")
+        Write-Debug ("StructureType: $StructureType")
+        Write-Debug ("Path: $Path")
+        Write-Debug ("Depth: $Depth")
+        Write-Debug ("Version: $Version")
+
+        Confirm-Default -Defaults ([ordered]@{
+                'CollectionUri' = $CollectionUri
+                'ProjectName'   = $ProjectName
+            })
     }
 
     process {
         try {
-            $ErrorActionPreference = 'Stop'
+            $QueryParameters = [System.Collections.Generic.List[string]]::new()
 
-            if (-not $global:AzDevOpsIsConnected) {
-                throw 'Not connected to Azure DevOps. Please connect using Connect-AdoOrganization.'
+            $uri = "$CollectionUri/$ProjectName/_apis/wit/classificationnodes"
+
+            # Adjust URI based on parameter set
+            if ($PSCmdlet.ParameterSetName -eq 'ByPath') {
+                if ($StructureGroup -and $Path) {
+                    $uri = "$CollectionUri/$ProjectName/_apis/wit/classificationnodes/$StructureGroup/$Path"
+                } elseif ($StructureGroup) {
+                    $uri = "$CollectionUri/$ProjectName/_apis/wit/classificationnodes/$StructureGroup"
+                }
+            } elseif ($PSCmdlet.ParameterSetName -eq 'GetAll' -and $StructureGroup) {
+                $uri = "$CollectionUri/$ProjectName/_apis/wit/classificationnodes/$StructureGroup"
             }
 
-            $uriFormat = '{0}/{1}/_apis/wit/classificationnodes/{2}/{3}?$depth={4}&api-version={5}'
-            $azDevOpsUri = ($uriFormat -f [uri]::new($global:AzDevOpsOrganization), [uri]::EscapeUriString($ProjectId),
-                [uri]::EscapeUriString($StructureType),
-                [uri]::EscapeUriString($Path), $Depth, $ApiVersion)
-
-            $params = @{
-                Method  = 'GET'
-                Uri     = $azDevOpsUri
-                Headers = @{
-                    'Accept'        = 'application/json'
-                    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
+            # Build query parameters
+            if ($PSCmdlet.ParameterSetName -eq 'ByNodesIds') {
+                if ($Ids) {
+                    $QueryParameters.Add("ids=$($Ids -join ',')")
+                }
+                if ($ErrorPolicy) {
+                    $QueryParameters.Add("errorPolicy=$ErrorPolicy")
                 }
             }
+            if ($Depth) {
+                $QueryParameters.Add("`$depth=$Depth")
+            }
 
-            $response = Invoke-RestMethod @params -Verbose:$VerbosePreference
+            $params = @{
+                Uri             = $uri
+                Version         = $Version
+                QueryParameters = if ($QueryParameters.Count -gt 0) { $QueryParameters -join '&' } else { $null }
+                Method          = 'GET'
+            }
 
-            return $response
+            $shouldProcessOperation = if ($PSCmdlet.ParameterSetName -eq 'GetAll') {
+                if ($StructureGroup) {
+                    "Get root classification node '$StructureGroup'"
+                } else {
+                    'Get all root classification nodes'
+                }
+            } elseif ($PSCmdlet.ParameterSetName -eq 'ByPath') {
+                if ($Path) {
+                    "Get classification node '$StructureGroup/$Path'"
+                } else {
+                    "Get root classification node '$StructureGroup'"
+                }
+            } elseif ($PSCmdlet.ParameterSetName -eq 'ByNodesIds') {
+                "Get classification node '$($Ids -join ', ')'"
+            } else {
+                'Get classification nodes'
+            }
 
+            if ($PSCmdlet.ShouldProcess($ProjectName, $shouldProcessOperation)) {
+                try {
+                    $results = (Invoke-AdoRestMethod @params)
+
+                    $items = if (($PSCmdlet.ParameterSetName -eq 'GetAll' -and $StructureGroup) -or
+                        $PSCmdlet.ParameterSetName -eq 'ByPath') {
+                        # Use array for single node response
+                        @( $results )
+                    } else {
+                        # Use value array for multiple nodes response
+                        $results.value
+                    }
+
+                    foreach ($i_ in $items) {
+                        $obj = [ordered]@{
+                            id            = $i_.id
+                            identifier    = $i_.identifier
+                            name          = $i_.name
+                            structureType = $i_.structureType
+                            path          = $i_.path
+                            hasChildren   = $i_.hasChildren
+                        }
+                        if ($i_.children) {
+                            $obj['children'] = $i_.children
+                        }
+                        if ($i_.attributes) {
+                            $obj['attributes'] = $i_.attributes
+                        }
+                        $obj['projectName'] = $ProjectName
+                        $obj['collectionUri'] = $CollectionUri
+                        [PSCustomObject]$obj
+                    }
+                } catch {
+                    if ($_.ErrorDetails.Message -match 'NotFoundException') {
+                        Write-Warning "Classification node(s) not found in project '$ProjectName', skipping."
+                    } else {
+                        throw $_
+                    }
+                }
+            } else {
+                Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
+            }
         } catch {
             throw $_
         }
     }
 
     end {
-        Write-Debug ('{0} exited' -f $MyInvocation.MyCommand)
+        Write-Verbose ("Exit: $($MyInvocation.MyCommand.Name)")
     }
 }
