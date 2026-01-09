@@ -4,7 +4,7 @@ external help file: Azure.DevOps.PSModule-Help.xml
 HelpUri: https://learn.microsoft.com/en-us/rest/api/azure/devops/work/teamfieldvalues/get
 Locale: en-NL
 Module Name: Azure.DevOps.PSModule
-ms.date: 11/01/2025
+ms.date: 01/09/2026
 PlatyPS schema version: 2024-05-01
 title: Get-AdoTeamFieldValue
 -->
@@ -16,15 +16,14 @@ title: Get-AdoTeamFieldValue
 
 ## SYNOPSIS
 
-Gets the team field value settings for a team in an Azure DevOps project.
+Retrieves the team field value settings for a team in an Azure DevOps project.
 
 ## SYNTAX
 
 ### __AllParameterSets
 
 ```text
-Get-AdoTeamFieldValue [-ProjectId] <string> [[-TeamId] <string>] [[-ApiVersion] <string>]
- [<CommonParameters>]
+Get-AdoTeamFieldValue [[-CollectionUri] <string>] [[-ProjectName] <string>] [[-TeamName] <string>] [[-Version] <string>] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -34,7 +33,7 @@ This cmdlet has the following aliases,
 
 ## DESCRIPTION
 
-This function retrieves the team field value settings for a specified team in an Azure DevOps project using the REST API.
+This cmdlet retrieves the team field value settings for a specified team in an Azure DevOps project. Team field values define which work items belong to a team based on the Area Path field.
 
 ## EXAMPLES
 
@@ -43,71 +42,96 @@ This function retrieves the team field value settings for a specified team in an
 #### PowerShell
 
 ```powershell
-Get-AdoTeamFieldValue -ProjectId 'e2egov-fantastic-four
+$params = @{
+    CollectionUri = 'https://dev.azure.com/my-org'
+    ProjectName   = 'my-project-1'
+}
+Get-AdoTeamFieldValue @params
 ```
 
-This example retrieves the team field values for the default team in the specified project.
+Retrieves the team field values for the default team in the specified project.
 
 ### EXAMPLE 2
 
 #### PowerShell
 
 ```powershell
-Get-AdoTeamFieldValue -ProjectId 'e2egov-fantastic-four' -TeamId 'Mister Fantastic'
+$params = @{
+    CollectionUri = 'https://dev.azure.com/my-org'
+    ProjectName   = 'my-project-1'
+    TeamName      = 'my-team-1'
+}
+Get-AdoTeamFieldValue @params
 ```
 
-This example retrieves the team field values for the specified team in the specified project.
+Retrieves the team field values for the specified team in the specified project.
+
+### EXAMPLE 3
+
+#### PowerShell
+
+```powershell
+$params = @{
+    CollectionUri = 'https://dev.azure.com/my-org'
+}
+[PSCustomObject]@{
+    ProjectName   = 'my-project-1'
+    TeamName      = 'my-team-1'
+} | Get-AdoTeamFieldValue @params
+```
+
+Retrieves team field values using pipeline input.
 
 ## PARAMETERS
 
-### -ApiVersion
+### -CollectionUri
 
-Optional.
-The API version to use.
+The collection URI of the Azure DevOps collection/organization, e.g., <https://dev.azure.com/my-org>.
+If not specified, the default collection URI from the environment variable `$env:DefaultAdoCollectionUri` is used.
 
 ```yaml
 Type: System.String
-DefaultValue: 7.1
+DefaultValue: $env:DefaultAdoCollectionUri
 SupportsWildcards: false
 Aliases:
-- api
+- N/A
 ParameterSets:
 - Name: (All)
-  Position: 2
+  Position: Named
   IsRequired: false
   ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
+  ValueFromPipelineByPropertyName: true
   ValueFromRemainingArguments: false
 DontShow: false
 AcceptedValues: []
 HelpMessage: ''
 ```
 
-### -ProjectId
+### -ProjectName
 
-Mandatory.
-The ID or name of the Azure DevOps project.
+The ID or name of the project.
+If not specified, the default project from the environment variable `$env:DefaultAdoProject` is used.
 
 ```yaml
 Type: System.String
-DefaultValue: ''
+DefaultValue: $env:DefaultAdoProject
 SupportsWildcards: false
-Aliases: []
+Aliases:
+- ProjectId
 ParameterSets:
 - Name: (All)
-  Position: 0
-  IsRequired: true
+  Position: Named
+  IsRequired: false
   ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
+  ValueFromPipelineByPropertyName: true
   ValueFromRemainingArguments: false
 DontShow: false
 AcceptedValues: []
 HelpMessage: ''
 ```
 
-### -TeamId
+### -TeamName
 
-Optional.
 The ID or name of the team within the project.
 If not specified, the default team is used.
 
@@ -115,16 +139,41 @@ If not specified, the default team is used.
 Type: System.String
 DefaultValue: ''
 SupportsWildcards: false
-Aliases: []
+Aliases:
+- TeamId
 ParameterSets:
 - Name: (All)
-  Position: 1
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -Version
+
+The API version to use for the request.
+
+```yaml
+Type: System.String
+DefaultValue: '7.1'
+SupportsWildcards: false
+Aliases:
+- ApiVersion
+ParameterSets:
+- Name: (All)
+  Position: Named
   IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
   ValueFromRemainingArguments: false
 DontShow: false
-AcceptedValues: []
+AcceptedValues:
+- '7.1'
+- '7.2-preview.1'
 HelpMessage: ''
 ```
 
@@ -137,15 +186,26 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
+- N/A
+
 ## OUTPUTS
 
-### System.Object
+### PSCustomObject
 
-The team field value settings for the specified team.
+The team field value settings for the specified team with the following properties:
+- defaultValue: The default area path value for the team
+- field: Object containing the field reference name and URL
+- values: Array of area path values with includeChildren settings
+- projectName: The project name used in the request
+- collectionUri: The collection URI used in the request
 
 ## NOTES
 
-- Requires an active connection to Azure DevOps using `Connect-AdoOrganization`.
+- Requires an active Azure account login. Use `Connect-AzAccount` to authenticate:
+
+  ```powershell
+  Connect-AzAccount -Tenant '<tenant-id>' -Subscription '<subscription-id>'
+  ```
 
 ## RELATED LINKS
 
