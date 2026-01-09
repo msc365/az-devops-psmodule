@@ -3,6 +3,48 @@
 
 All notable changes to this project will be documented in this file.
 
+<!-- ## [Unreleased]
+
+### Summary
+Removed legacy authentication cmdlets in favor of streamlined automatic authentication.
+
+### What's Changed
+- **BREAKING**: Removed `Connect-AdoOrganization` cmdlet
+- **BREAKING**: Removed `Disconnect-AdoOrganization` cmdlet
+- **BREAKING**: Removed `Get-AdoAccessToken` cmdlet
+- **BREAKING**: Removed `Get-AdoContext` cmdlet
+- refactor: Authentication now automatically managed via `Connect-AzAccount`
+- docs: Updated README and cmdlet documentation with new authentication flow
+- docs: Added migration guide for users transitioning from old authentication model
+
+### Breaking Changes
+- **Removed authentication cmdlets**: The module no longer requires explicit connection/disconnection
+  - Instead of `Connect-AdoOrganization`, use `Connect-AzAccount` from the Az.Accounts module
+  - Authentication is now handled automatically when executing cmdlets
+  - The module will automatically obtain required tokens from your Azure session
+  
+### Migration Guide
+**Before (deprecated):**
+```powershell
+Connect-AdoOrganization -Organization 'my-org' -PAT '******'
+Get-AdoProject -ProjectId 'my-project-1'
+Disconnect-AdoOrganization
+```
+
+**After (current):**
+```powershell
+# Authenticate once with Azure
+Connect-AzAccount -Tenant '<tenant-id>' -Subscription '<subscription-id>'
+
+# Set optional defaults to avoid repeating parameters
+Set-AdoDefault -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'my-project-1'
+
+# Execute cmdlets - authentication is automatic
+Get-AdoProject
+```
+
+--- -->
+
 ## [0.2.0-alpha4] - 2026-01-05
 
 ### Summary
