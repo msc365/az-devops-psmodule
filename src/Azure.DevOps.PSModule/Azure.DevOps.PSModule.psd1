@@ -78,13 +78,9 @@
     FunctionsToExport    = @(
         'Add-AdoGroupMember'
         'Add-AdoTeamIteration'
-        'Connect-AdoOrganization'
-        'Disconnect-AdoOrganization'
-        'Get-AdoAccessToken'
         'Get-AdoCheckConfiguration'
         'Get-AdoCheckConfigurationQuery'
         'Get-AdoClassificationNode'
-        'Get-AdoContext'
         'Get-AdoDefault'
         'Get-AdoDescriptor'
         'Get-AdoEnvironment'

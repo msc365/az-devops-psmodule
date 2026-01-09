@@ -20,11 +20,6 @@ A PowerShell module that wraps the Azure DevOps REST API into clean, task-orient
 
 | Command | Description |
 | --- | --- |
-| **Connection and Authentication** | |
-| &nbsp; • &nbsp; [Connect-AdoOrganization](Connect-AdoOrganization.md) | Connect to an Azure DevOps organization. |
-| &nbsp; • &nbsp; [Disconnect-AdoOrganization](Disconnect-AdoOrganization.md) | Disconnect from the Azure DevOps organization. |
-| &nbsp; • &nbsp; [Get-AdoAccessToken](Get-AdoAccessToken.md) | Get secure access token for Azure DevOps service principal. |
-| &nbsp; • &nbsp; [Get-AdoContext](Get-AdoContext.md) | Get the current Azure DevOps connection context. |
 | **Default Context** | |
 | &nbsp; • &nbsp; [Get-AdoDefault](Get-AdoDefault.md) | Get default Azure DevOps environment variables. |
 | &nbsp; • &nbsp; [Set-AdoDefault](Set-AdoDefault.md) | Set default Azure DevOps environment variables. |
