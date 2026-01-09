@@ -84,37 +84,44 @@ Get-Command -Name '*-Ado*'
 
 ## Quick Start
 
-### Sign in to Azure
+### Authentication
 
-To sign in, use the Connect-AzAccount cmdlet.
-
-```powershell
-  $azAccountSplat = @{
-      TenantId = '<YOUR_TENANT_ID>'
-      SubscriptionId = '<YOUR_SUBSCRIPTION_ID>'
-  }
-  Connect-AzAccount @azAccountSplat
-```
-
-### Connect
+The module uses automatic authentication through Azure PowerShell. Simply sign in with `Connect-AzAccount`:
 
 #### PowerShell
 
 ```powershell
-Connect-AdoOrganization -Organization 'my-org' -PAT '******'
+$azAccountSplat = @{
+    TenantId       = '<YOUR_TENANT_ID>'
+    SubscriptionId = '<YOUR_SUBSCRIPTION_ID>'
+}
+Connect-AzAccount @azAccountSplat
 ```
 
-This connects to an Azure DevOps organization using a personal access token (PAT). If you don't provide a PAT, the module will attempt to authenticate using the Azure DevOps service principal. Make sure the service principal (Azure Account) used has the required permissions in Azure DevOps.
+The module will automatically obtain the required authentication tokens when you execute cmdlets. Make sure your Azure account has the required permissions in Azure DevOps.
 
 ### Get project details
 
 #### PowerShell
 
 ```powershell
-Get-AdoProject -ProjectId 'my-project-1'
+Get-AdoProject -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'my-project-1'
 ```
 
 This gets the project as a `<System.Object>` with all available details.
+
+### Set default context (optional)
+
+To avoid repeating `-CollectionUri` and `-ProjectName` parameters, you can set defaults:
+
+#### PowerShell
+
+```powershell
+Set-AdoDefault -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'my-project-1'
+
+# Now you can call cmdlets without specifying these parameters
+Get-AdoProject
+```
 
 ## Commands
 
