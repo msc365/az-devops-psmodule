@@ -2,162 +2,189 @@
 function Set-AdoTeamFieldValue {
     <#
     .SYNOPSIS
-        Sets the team field value settings for a team in an Azure DevOps project.
+        Updates the team field value settings for a team in an Azure DevOps project.
 
     .DESCRIPTION
-        This function sets the team field value settings for a specified team in an Azure DevOps project using the REST API.
+        This cmdlet updates the team field value settings for a specified team in an Azure DevOps project.
+        Team field values define which work items belong to a team based on the Area Path field.
 
-    .PARAMETER ProjectId
-        Mandatory. The ID or name of the Azure DevOps project.
+    .PARAMETER CollectionUri
+        Optional. The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/my-org.
 
-    .PARAMETER TeamId
+    .PARAMETER ProjectName
+        Optional. The ID or name of the project. If not specified, the default project is used.
+
+    .PARAMETER TeamName
         Optional. The ID or name of the team within the project. If not specified, the default team is used.
 
     .PARAMETER DefaultValue
-        Mandatory. The default team field value for the team.
+        Optional. The default team field value for the team.
 
     .PARAMETER Values
-        Mandatory. An array of team field values to set for the team.
+        Optional. An array of team field values to set for the team. Each value should have a 'value' and 'includeChildren' property.
 
-    .PARAMETER ApiVersion
-        Optional. The API version to use.
-
-    .OUTPUTS
-        TeamFieldValuesPatch
-
-        The updated team field value settings for the specified team.
+    .PARAMETER Version
+        Optional. The API version to use for the request. Default is '7.1'.
 
     .LINK
         https://learn.microsoft.com/en-us/rest/api/azure/devops/work/teamfieldvalues/update
 
-    .NOTES
-        - Requires an active connection to Azure DevOps using Connect-AdoOrganization.
+    .EXAMPLE
+        $params = @{
+            CollectionUri = 'https://dev.azure.com/my-org'
+            ProjectName   = 'my-project-1'
+            DefaultValue  = 'my-project-1'
+            Values        = @(
+                @{
+                    value           = 'my-project-1\my-team-1'
+                    includeChildren = $false
+                }
+                @{
+                    value           = 'my-project-1\my-team-2'
+                    includeChildren = $false
+                }
+            )
+        }
+        Set-AdoTeamFieldValue @params
+
+        Updates the team field values for the default team in the specified project.
 
     .EXAMPLE
-        $defaultValue = 'e2egov-fantastic-four'
-        $values = @(
-            @{
-                value           = 'e2egov-fantastic-four'
-                includeChildren = $false
-            }
-            ,
-            @{
-                value           = 'e2egov-fantastic-four\Human Torch'
-                includeChildren = $false
-            },
-            @{
-                value           = 'e2egov-fantastic-four\Invisible Woman'
-                includeChildren = $false
-            },
-            @{
-                value           = 'e2egov-fantastic-four\Mister Fantastic'
-                includeChildren = $false
-            },
-            @{
-                value           = 'e2egov-fantastic-four\The Thing'
-                includeChildren = $false
-            }
-        )
-        Set-AdoTeamFieldValue -ProjectId 'e2egov-fantastic-four' -DefaultValue $defaultValue -Values $values
+        $params = @{
+            CollectionUri = 'https://dev.azure.com/my-org'
+            ProjectName   = 'my-project-1'
+            TeamName      = 'my-team-1'
+            DefaultValue  = 'my-project-1\my-team-1'
+            Values        = @(
+                @{
+                    value           = 'my-project-1\my-team-1'
+                    includeChildren = $false
+                }
+            )
+        }
+        Set-AdoTeamFieldValue @params
 
-        This example sets the team field values for the default team in the specified project.
+        Updates the team field value for team 'my-team-1' in the specified project.
 
     .EXAMPLE
-        $defaultValue = 'e2egov-fantastic-four\Mister Fantastic'
-        $values = @(
-            @{
-                value           = 'e2egov-fantastic-four\Mister Fantastic'
-                includeChildren = $false
-            }
-        )
-        Set-AdoTeamFieldValue -ProjectId 'e2egov-fantastic-four' -TeamId 'Mister Fantastic' -DefaultValue $defaultValue -Values $values
+        $params = @{
+            TeamName     = 'my-team-1'
+            DefaultValue = 'my-project-1'
+            Values       = @(
+                @{
+                    value           = 'my-project-1'
+                    includeChildren = $true
+                }
+            )
+        }
+        Set-AdoTeamFieldValue @params
 
-        This example sets the team field value for the 'Mister Fantastic' team in the specified project.
+        Updates the team field values for team 'my-team-1' in project 'my-project-1' sub-areas are included.
     #>
-    [CmdletBinding()]
-    [OutputType([TeamFieldValuesPatch])]
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
     param (
-        [Parameter(Mandatory)]
-        [string]$ProjectId,
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
+        [string]$CollectionUri = $env:DefaultAdoCollectionUri,
 
-        [Parameter(Mandatory = $false)]
-        [string]$TeamId,
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [Alias('ProjectId')]
+        [string]$ProjectName = $env:DefaultAdoProject,
 
-        [Parameter (Mandatory)]
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [Alias('TeamId')]
+        [string]$TeamName,
+
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
         [string]$DefaultValue,
 
-        [Parameter(Mandatory)]
-        [object[]]$Values,
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [hashtable[]]$Values,
 
-        [Parameter(Mandatory = $false)]
-        [Alias('api')]
+        [Parameter()]
+        [Alias('ApiVersion')]
         [ValidateSet('7.1', '7.2-preview.1')]
-        [string]$ApiVersion = '7.1'
+        [string]$Version = '7.1'
     )
 
     begin {
-        Write-Debug ('Command        : {0}' -f $MyInvocation.MyCommand.Name)
-        Write-Debug ('  ProjectId    : {0}' -f $ProjectId)
-        Write-Debug ('  TeamId       : {0}' -f $TeamId)
-        Write-Debug ('  DefaultValue : {0}' -f $DefaultValue)
-        Write-Debug ('  ValuesCount  : {0}' -f $Values.Count)
-        Write-Debug ('  ApiVersion   : {0}' -f $ApiVersion)
+        Write-Verbose ("Command: $($MyInvocation.MyCommand.Name)")
+        Write-Debug ("CollectionUri: $CollectionUri")
+        Write-Debug ("ProjectName: $ProjectName")
+        Write-Debug ("TeamName: $TeamName")
+        Write-Debug ("DefaultValue: $DefaultValue")
+        Write-Debug ("Values Count: $($Values.Count)")
+        Write-Debug ("Version: $Version")
 
-        try {
-            # Convert input to TeamFieldValuesPatch object
-            $teamFieldValues = [TeamFieldValuesPatch]::new(
-                $DefaultValue,
-                ($Values | ForEach-Object {
-                    if ([string]::IsNullOrWhiteSpace($_.value)) {
-                        throw "The 'value' property is required."
-                    }
-                    if ($null -eq $_.includeChildren -or $_.includeChildren -isnot [bool]) {
-                        throw "The 'includeChildren' property must be of type bool and cannot be null."
-                    }
-                    [TeamFieldValue]::new(
-                        $_.value,
-                        $_.includeChildren
-                    )
-                })
-            )
-        } catch {
-            throw $_
-        }
+        Confirm-Default -Defaults ([ordered]@{
+                'CollectionUri' = $CollectionUri
+                'ProjectName'   = $ProjectName
+            })
     }
 
     process {
         try {
-            $ErrorActionPreference = 'Stop'
-
-            if (-not $global:AzDevOpsIsConnected) {
-                throw 'Not connected to Azure DevOps. Please connect using Connect-AdoOrganization.'
+            # Validate input values
+            foreach ($v_ in $Values) {
+                if ([string]::IsNullOrWhiteSpace($v_.value)) {
+                    throw "The 'value' property is required for each field value."
+                }
+                if ($null -eq $v_.includeChildren -or $v_.includeChildren -isnot [bool]) {
+                    throw "The 'includeChildren' property must be of type bool and cannot be null."
+                }
             }
 
-            $uriFormat = '{0}/{1}/{2}/_apis/work/teamsettings/teamfieldvalues?api-version={3}'
-            $azDevOpsUri = ($uriFormat -f [uri]::new($global:AzDevOpsOrganization), [uri]::EscapeUriString($ProjectId),
-                [uri]::EscapeUriString($TeamId), $ApiVersion)
+            $uri = if ($TeamName) {
+                "$CollectionUri/$ProjectName/$TeamName/_apis/work/teamsettings/teamfieldvalues"
+            } else {
+                "$CollectionUri/$ProjectName/_apis/work/teamsettings/teamfieldvalues"
+            }
 
             $params = @{
-                Method      = 'PATCH'
-                Uri         = $azDevOpsUri
-                ContentType = 'application/json'
-                Headers     = @{
-                    'Accept'        = 'application/json'
-                    'Authorization' = (ConvertFrom-SecureString -SecureString $AzDevOpsAuth -AsPlainText)
-                }
-                Body        = ($teamFieldValues | ConvertTo-Json -Depth 3)
+                Uri     = $uri
+                Version = $Version
+                Method  = 'PATCH'
             }
 
-            $response = Invoke-RestMethod @params -Verbose:$VerbosePreference
+            $body = [PSCustomObject]@{
+                defaultValue = $DefaultValue
+                values       = @(
+                    foreach ($v_ in $Values) {
+                        @{
+                            value           = $v_.value
+                            includeChildren = $v_.includeChildren
+                        }
+                    }
+                )
+            }
 
-            return $response
+            if ($PSCmdlet.ShouldProcess($ProjectName, $TeamName ? "Update team field values for $TeamName" : 'Update team field values for Default Team')) {
+                try {
+                    $results = $body | Invoke-AdoRestMethod @params
 
+                    [PSCustomObject]@{
+                        defaultValue  = $results.defaultValue
+                        field         = $results.field
+                        values        = $results.values
+                        projectName   = $ProjectName
+                        collectionUri = $CollectionUri
+                    }
+                } catch {
+                    if ($_.ErrorDetails.Message -match 'NotFoundException') {
+                        Write-Warning 'Team or field value does not exist, skipping.'
+                    } else {
+                        throw $_
+                    }
+                }
+            } else {
+                Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 5)"
+            }
         } catch {
             throw $_
         }
     }
 
     end {
-        Write-Debug ('{0} exited' -f $MyInvocation.MyCommand)
+        Write-Verbose ("Exit: $($MyInvocation.MyCommand.Name)")
     }
 }
