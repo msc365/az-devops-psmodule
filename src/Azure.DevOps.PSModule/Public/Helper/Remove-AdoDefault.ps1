@@ -21,16 +21,7 @@
     process {
         try {
             if ($PSCmdlet.ShouldProcess('Default Azure DevOps environment variables', 'Remove')) {
-
-                # Remove from current session environment variables
-                $env:DefaultAdoOrganization = $null
-                $env:DefaultAdoCollectionUri = $null
-                $env:DefaultAdoProject = $null
-
-                Write-Verbose 'Removed default Azure DevOps environment variables from current session.'
-
-            } else {
-                Write-Verbose 'Would remove default Azure DevOps environment variables from current session.'
+                Set-AdoDefault -Organization $null -Project $null -Confirm:$false
             }
         } catch {
             throw $_

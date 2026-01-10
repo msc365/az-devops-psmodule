@@ -172,19 +172,37 @@ Task Test -Depends Build -RequiredVariables Output {
 
     Import-Module Pester -PassThru | Out-Null
 
-    $testPaths = (Get-ChildItem -Path $script:sourcePath -Recurse -Filter '*.Tests.ps1').FullName
-    Invoke-Pester -Path $testPaths -Output $script:Output
+    $config = New-PesterConfiguration
+    $config.Run.Path = "$script:modulePath\Tests\"
+    $config.Run.PassThru = $false
+    $config.CodeCoverage.Enabled = $true
+    # Target only module source files (Public, Private folders and .psm1)
+    $config.CodeCoverage.Path = @(
+        "$script:modulePath\Public\**\*.ps1"
+        "$script:modulePath\Private\**\*.ps1"
+        "$script:modulePath\*.psm1"
+    )
+    $config.CodeCoverage.OutputFormat = 'JaCoCo'  # Generates coverage.xml
+    $config.CodeCoverage.OutputPath = "$script:rootPath\Coverage.xml"
+    $config.Output.Verbosity = $script:Output
+
+    Invoke-Pester -Configuration $config
 }
 
 Task Build -Depends Clean, Init -RequiredVariables sourcePath, releasePath, moduleName, buildVersion {
 
-    # Copy the entire module directory to preserve structure
-    Copy-Item -Path $script:modulePath -Destination $script:releasePath -Recurse -Force
+    # Copy module directory excluding Tests folders
+    Get-ChildItem -Path $script:modulePath -Recurse | Where-Object {
+        $_.FullName -notmatch '\\Tests(\\|$)'
+    } | ForEach-Object {
+        $targetPath = $_.FullName.Replace($script:modulePath, $script:releaseModulePath)
 
-    # Remove all tests folders from the copied module
-    # Get-ChildItem -Path $script:releasePath -Recurse -Directory | Where-Object Name -EQ 'Tests' | ForEach-Object {
-    #     Remove-Item -Path $_.FullName -Recurse -Force
-    # }
+        if ($_.PSIsContainer) {
+            New-Item -ItemType Directory -Path $targetPath -Force | Out-Null
+        } else {
+            Copy-Item -Path $_.FullName -Destination $targetPath -Force
+        }
+    }
 
     # Collect all public functions (exclude 'private' folders)
     ($functionsToExport = Get-ChildItem -Path $script:releaseModulePath -Recurse -Directory | Where-Object Name -NE 'Private' | ForEach-Object {

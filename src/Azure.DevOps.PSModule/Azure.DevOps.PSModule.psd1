@@ -59,11 +59,7 @@
     # RequiredAssemblies = @()
 
     # Script files (.ps1) that are run in the caller's environment prior to importing this module.
-    ScriptsToProcess     = @(
-        'Private\Classes\Invoke-TeamFieldValueClasses.ps1'
-        'Private\Classes\Invoke-TeamIterationClasses.ps1'
-        'Private\Classes\Invoke-TeamSettingsClasses.ps1'
-    )
+    # ScriptsToProcess     = @()
 
     # Type files (.ps1xml) to be loaded when importing this module
     # TypesToProcess = @()
@@ -117,7 +113,7 @@
         'Remove-AdoRepository'
         'Remove-AdoServiceEndpoint'
         'Remove-AdoTeam'
-        'Resolve-AdoCheckConfigDefinitionRef'
+        'Resolve-AdoDefinitionRef'
         'Set-AdoClassificationNode'
         'Set-AdoDefault'
         'Set-AdoEnvironment'

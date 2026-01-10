@@ -84,7 +84,7 @@ Enhanced approval check configurations with fine-grained control parameters.
 Comprehensive quality improvements through extensive unit testing and standardized documentation.
 
 ### What's Changed
-- feat: Added `Resolve-AdoCheckConfigDefinitionRef` helper function for check definition resolution
+- feat: Added `Resolve-AdoDefinitionRef` helper function for check definition resolution
 - test: Added 30+ comprehensive Pester unit test files covering all cmdlets
 - refactor: Enhanced cmdlet parameter handling and validation across _Core_, _Git_, _Graph_, and _Pipeline_ cmdlets
 - refactor: Standardized error handling with consistent exception messages

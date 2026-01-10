@@ -107,6 +107,7 @@
                     [PSCustomObject]@{
                         id            = $results.id
                         name          = $results.name
+                        description   = $results.description
                         createdBy     = $results.createdBy.id
                         createdOn     = $results.createdOn
                         projectName   = $ProjectName
@@ -125,6 +126,7 @@
                         [PSCustomObject]@{
                             id            = $results.id
                             name          = $results.name
+                            description   = $results.description
                             createdBy     = $results.createdBy.id
                             createdOn     = $results.createdOn
                             projectName   = $ProjectName

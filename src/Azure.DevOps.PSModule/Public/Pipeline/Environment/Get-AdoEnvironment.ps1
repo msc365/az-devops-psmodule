@@ -142,8 +142,9 @@
 
                     foreach ($e_ in $environments) {
                         $obj = [ordered]@{
-                            id   = $e_.id
-                            name = $e_.name
+                            id          = $e_.id
+                            name        = $e_.name
+                            description = $e_.description
                         }
                         if ($Expands -eq 'resourceReferences') {
                             $obj['resources'] = $e_.resources

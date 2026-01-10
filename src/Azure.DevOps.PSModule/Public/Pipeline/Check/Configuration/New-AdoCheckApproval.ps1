@@ -163,7 +163,7 @@
             }
 
             # Determine definitionRef based on DefinitionType
-            $definitionRef = Resolve-AdoCheckConfigDefinitionRef -Name $DefinitionType
+            $definitionRef = Resolve-AdoDefinitionRef -Name $DefinitionType
 
             # Get resource ID
             switch ($ResourceType) {

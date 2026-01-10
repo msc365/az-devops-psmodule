@@ -116,6 +116,7 @@
                     [PSCustomObject]@{
                         id             = $results.id
                         name           = $results.name
+                        description    = $results.description
                         createdBy      = $results.createdBy.id
                         createdOn      = $results.createdOn
                         lastModifiedBy = $results.lastModifiedBy.id

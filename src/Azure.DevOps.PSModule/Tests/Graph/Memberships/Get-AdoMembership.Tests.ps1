@@ -1,0 +1,236 @@
+﻿BeforeAll {
+    # Import the module
+    $modulePath = Join-Path -Path $PSScriptRoot -ChildPath '..\..\..\..'
+    $moduleName = Join-Path -Path $modulePath -ChildPath 'Azure.DevOps.PSModule\Azure.DevOps.PSModule.psd1'
+
+    # Remove module if already loaded
+    Get-Module Azure.DevOps.PSModule | Remove-Module -Force
+
+    # Import the module
+    Import-Module $moduleName -Force -Verbose:$false
+}
+
+Describe 'Get-AdoMembership' {
+    BeforeAll {
+        # Sample response data for mocking
+        $mockCollectionUri = 'https://vssps.dev.azure.com/my-org'
+        $mockSubjectDescriptor = 'aadgp.00000000-0000-0000-0000-000000000001'
+        $mockContainerDescriptor = 'vssgp.00000000-0000-0000-0000-000000000002'
+
+        $mockMembership = [PSCustomObject]@{
+            memberDescriptor    = 'aadgp.00000000-0000-0000-0000-000000000001'
+            containerDescriptor = 'vssgp.00000000-0000-0000-0000-000000000002'
+        }
+    }
+
+    Context 'Core Functionality Tests' {
+        BeforeEach {
+            Mock -ModuleName Azure.DevOps.PSModule Invoke-AdoRestMethod { return $mockMembership }
+            Mock -ModuleName Azure.DevOps.PSModule Confirm-Default { }
+            Mock -ModuleName Azure.DevOps.PSModule Start-Sleep { }
+        }
+
+        It 'Should retrieve membership relationship between subject and container' {
+            # Act
+            $result = Get-AdoMembership -CollectionUri $mockCollectionUri -SubjectDescriptor $mockSubjectDescriptor -ContainerDescriptor $mockContainerDescriptor -Confirm:$false
+
+            # Assert
+            $result | Should -Not -BeNullOrEmpty
+            $result.memberDescriptor | Should -Be $mockSubjectDescriptor
+            $result.containerDescriptor | Should -Be $mockContainerDescriptor
+        }
+
+        It 'Should return PSCustomObject with expected properties' {
+            # Act
+            $result = Get-AdoMembership -CollectionUri $mockCollectionUri -SubjectDescriptor $mockSubjectDescriptor -ContainerDescriptor $mockContainerDescriptor -Confirm:$false
+
+            # Assert
+            $result.PSObject.Properties.Name | Should -Contain 'memberDescriptor'
+            $result.PSObject.Properties.Name | Should -Contain 'containerDescriptor'
+            $result.PSObject.Properties.Name | Should -Contain 'collectionUri'
+        }
+
+        It 'Should construct API URI correctly' {
+            # Act
+            Get-AdoMembership -CollectionUri $mockCollectionUri -SubjectDescriptor $mockSubjectDescriptor -ContainerDescriptor $mockContainerDescriptor -Confirm:$false
+
+            # Assert
+            Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1 -ParameterFilter {
+                $Uri -eq "$mockCollectionUri/_apis/graph/memberships/$mockSubjectDescriptor/$mockContainerDescriptor"
+            }
+        }
+
+        It 'Should use GET method for API call' {
+            # Act
+            Get-AdoMembership -CollectionUri $mockCollectionUri -SubjectDescriptor $mockSubjectDescriptor -ContainerDescriptor $mockContainerDescriptor -Confirm:$false
+
+            # Assert
+            Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1 -ParameterFilter {
+                $Method -eq 'GET'
+            }
+        }
+
+        It 'Should use default API version 7.1' {
+            # Act
+            Get-AdoMembership -CollectionUri $mockCollectionUri -SubjectDescriptor $mockSubjectDescriptor -ContainerDescriptor $mockContainerDescriptor -Confirm:$false
+
+            # Assert
+            Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1 -ParameterFilter {
+                $Version -eq '7.1'
+            }
+        }
+
+        It 'Should support custom API version' {
+            # Act
+            Get-AdoMembership -CollectionUri $mockCollectionUri -SubjectDescriptor $mockSubjectDescriptor -ContainerDescriptor $mockContainerDescriptor -Version '7.2-preview.1' -Confirm:$false
+
+            # Assert
+            Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1 -ParameterFilter {
+                $Version -eq '7.2-preview.1'
+            }
+        }
+
+        It 'Should include CollectionUri in output' {
+            # Act
+            $result = Get-AdoMembership -CollectionUri $mockCollectionUri -SubjectDescriptor $mockSubjectDescriptor -ContainerDescriptor $mockContainerDescriptor -Confirm:$false
+
+            # Assert
+            $result.collectionUri | Should -Be $mockCollectionUri
+        }
+    }
+
+    Context 'Pipeline Support Tests' {
+        BeforeEach {
+            Mock -ModuleName Azure.DevOps.PSModule Invoke-AdoRestMethod { return $mockMembership }
+            Mock -ModuleName Azure.DevOps.PSModule Confirm-Default { }
+            Mock -ModuleName Azure.DevOps.PSModule Start-Sleep { }
+        }
+
+        It 'Should accept SubjectDescriptor from pipeline' {
+            # Arrange
+            $subjects = @(
+                'aadgp.00000000-0000-0000-0000-000000000003',
+                'aadgp.00000000-0000-0000-0000-000000000004'
+            )
+
+            # Act
+            $result = $subjects | Get-AdoMembership -CollectionUri $mockCollectionUri -ContainerDescriptor $mockContainerDescriptor -Confirm:$false
+
+            # Assert
+            $result | Should -HaveCount 2
+            Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 2
+        }
+
+        It 'Should accept objects with SubjectDescriptor property from pipeline' {
+            # Arrange
+            $objects = @(
+                [PSCustomObject]@{ SubjectDescriptor = 'aadgp.00000000-0000-0000-0000-000000000005' }
+                [PSCustomObject]@{ SubjectDescriptor = 'aadgp.00000000-0000-0000-0000-000000000006' }
+            )
+
+            # Act
+            $result = $objects | Get-AdoMembership -CollectionUri $mockCollectionUri -ContainerDescriptor $mockContainerDescriptor -Confirm:$false
+
+            # Assert
+            $result | Should -HaveCount 2
+            Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 2
+        }
+    }
+
+    Context 'Error Handling Tests' {
+        BeforeEach {
+            Mock -ModuleName Azure.DevOps.PSModule Confirm-Default { }
+            Mock -ModuleName Azure.DevOps.PSModule Start-Sleep { }
+        }
+
+        It 'Should propagate API errors' {
+            # Arrange
+            $apiError = [System.Management.Automation.ErrorRecord]::new(
+                [System.Exception]::new('Membership not found'),
+                'MembershipNotFound',
+                [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+                $null
+            )
+            $apiError.ErrorDetails = [System.Management.Automation.ErrorDetails]::new('{"message":"VS403289: The membership does not exist."}')
+
+            Mock -ModuleName Azure.DevOps.PSModule Invoke-AdoRestMethod { throw $apiError }
+
+            # Act & Assert
+            { Get-AdoMembership -CollectionUri $mockCollectionUri -SubjectDescriptor 'invalid-subject' -ContainerDescriptor $mockContainerDescriptor -Confirm:$false } | Should -Throw
+        }
+
+        It 'Should handle invalid descriptor format errors' {
+            # Arrange
+            $invalidError = [System.Management.Automation.ErrorRecord]::new(
+                [System.Exception]::new('Invalid descriptor'),
+                'InvalidDescriptor',
+                [System.Management.Automation.ErrorCategory]::InvalidArgument,
+                $null
+            )
+            $invalidError.ErrorDetails = [System.Management.Automation.ErrorDetails]::new('{"message":"Invalid descriptor format"}')
+
+            Mock -ModuleName Azure.DevOps.PSModule Invoke-AdoRestMethod { throw $invalidError }
+
+            # Act & Assert
+            { Get-AdoMembership -CollectionUri $mockCollectionUri -SubjectDescriptor 'malformed' -ContainerDescriptor $mockContainerDescriptor -Confirm:$false } | Should -Throw
+        }
+    }
+
+    Context 'CollectionUri Handling Tests' {
+        BeforeEach {
+            Mock -ModuleName Azure.DevOps.PSModule Invoke-AdoRestMethod { return $mockMembership }
+            Mock -ModuleName Azure.DevOps.PSModule Confirm-Default { }
+            Mock -ModuleName Azure.DevOps.PSModule Start-Sleep { }
+        }
+
+        It 'Should use environment default CollectionUri when not specified' {
+            # Arrange
+            $env:DefaultAdoCollectionUri = 'https://dev.azure.com/default-org'
+
+            # Act
+            Get-AdoMembership -SubjectDescriptor $mockSubjectDescriptor -ContainerDescriptor $mockContainerDescriptor -Confirm:$false
+
+            # Assert
+            Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1 -ParameterFilter {
+                $Uri -match 'https://vssps.dev.azure.com/default-org'
+            }
+        }
+
+        It 'Should work with vssps.dev.azure.com CollectionUri' {
+            # Arrange
+            $vsspsUri = 'https://vssps.dev.azure.com/test-org'
+
+            # Act
+            Get-AdoMembership -CollectionUri $vsspsUri -SubjectDescriptor $mockSubjectDescriptor -ContainerDescriptor $mockContainerDescriptor -Confirm:$false
+
+            # Assert
+            Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1 -ParameterFilter {
+                $Uri -match $vsspsUri
+            }
+        }
+    }
+
+    Context 'Required Parameter Tests' {
+        BeforeEach {
+            Mock -ModuleName Azure.DevOps.PSModule Invoke-AdoRestMethod { return $mockMembership }
+            Mock -ModuleName Azure.DevOps.PSModule Confirm-Default { }
+            Mock -ModuleName Azure.DevOps.PSModule Start-Sleep { }
+        }
+
+        It 'Should have SubjectDescriptor as mandatory parameter' {
+            # Arrange
+            $param = (Get-Command Get-AdoMembership).Parameters['SubjectDescriptor']
+
+            # Assert
+            $param.Attributes.Mandatory | Should -Contain $true
+        }
+
+        It 'Should have ContainerDescriptor as mandatory parameter' {
+            # Arrange
+            $param = (Get-Command Get-AdoMembership).Parameters['ContainerDescriptor']
+
+            # Assert
+            $param.Attributes.Mandatory | Should -Contain $true
+        }
+    }
+}
