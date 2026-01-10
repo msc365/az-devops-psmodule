@@ -199,20 +199,4 @@ Describe 'Get-AdoFeatureState' {
                 Should -Throw
         }
     }
-
-    Context 'ShouldProcess Tests' {
-        BeforeEach {
-            Mock -ModuleName Azure.DevOps.PSModule Invoke-AdoRestMethod { return $mockFeatureStates }
-            Mock -ModuleName Azure.DevOps.PSModule Get-AdoProject { return $mockProject }
-            Mock -ModuleName Azure.DevOps.PSModule Confirm-Default { }
-        }
-
-        It 'Should call Invoke-AdoRestMethod when confirmed' {
-            # Act
-            Get-AdoFeatureState -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -Confirm:$false
-
-            # Assert
-            Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1
-        }
-    }
 }

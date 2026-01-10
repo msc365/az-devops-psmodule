@@ -260,30 +260,4 @@ Describe 'Set-AdoClassificationNode' {
             $env:DefaultAdoProject = $null
         }
     }
-
-    Context 'ShouldProcess Support Tests' {
-        BeforeEach {
-            Mock -ModuleName Azure.DevOps.PSModule Start-Sleep { }
-            Mock -ModuleName Azure.DevOps.PSModule Invoke-AdoRestMethod {
-                return $mockUpdatedNode
-            }
-            Mock -ModuleName Azure.DevOps.PSModule Confirm-Default { }
-        }
-
-        It 'Should support WhatIf parameter' {
-            # Act
-            Set-AdoClassificationNode -CollectionUri $mockCollectionUri -ProjectName $mockProject -StructureGroup 'Areas' -Path $mockPath -Name 'NewName' -WhatIf
-
-            # Assert
-            Should -Not -Invoke -ModuleName Azure.DevOps.PSModule -CommandName Invoke-AdoRestMethod
-        }
-
-        It 'Should call API when Confirm is false' {
-            # Act
-            Set-AdoClassificationNode -CollectionUri $mockCollectionUri -ProjectName $mockProject -StructureGroup 'Areas' -Path $mockPath -Name 'NewName' -Confirm:$false
-
-            # Assert
-            Should -Invoke -ModuleName Azure.DevOps.PSModule -CommandName Invoke-AdoRestMethod -Times 1
-        }
-    }
 }

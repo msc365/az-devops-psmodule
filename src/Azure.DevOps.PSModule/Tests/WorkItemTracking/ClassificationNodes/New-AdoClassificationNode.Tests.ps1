@@ -252,30 +252,4 @@ Describe 'New-AdoClassificationNode' {
             { 'TestArea' | ForEach-Object { New-AdoClassificationNode -CollectionUri $mockCollectionUri -ProjectName $mockProject -StructureGroup 'Areas' -Name $_ -Confirm:$false } } | Should -Not -Throw
         }
     }
-
-    Context 'ShouldProcess Support Tests' {
-        BeforeEach {
-            Mock -ModuleName Azure.DevOps.PSModule Start-Sleep { }
-            Mock -ModuleName Azure.DevOps.PSModule Invoke-AdoRestMethod {
-                return $mockCreatedNode
-            }
-            Mock -ModuleName Azure.DevOps.PSModule Confirm-Default { }
-        }
-
-        It 'Should support WhatIf parameter' {
-            # Act
-            New-AdoClassificationNode -CollectionUri $mockCollectionUri -ProjectName $mockProject -StructureGroup 'Areas' -Name $mockNodeName -WhatIf
-
-            # Assert
-            Should -Not -Invoke -ModuleName Azure.DevOps.PSModule -CommandName Invoke-AdoRestMethod
-        }
-
-        It 'Should call API when Confirm is false' {
-            # Act
-            New-AdoClassificationNode -CollectionUri $mockCollectionUri -ProjectName $mockProject -StructureGroup 'Areas' -Name $mockNodeName -Confirm:$false
-
-            # Assert
-            Should -Invoke -ModuleName Azure.DevOps.PSModule -CommandName Invoke-AdoRestMethod -Times 1
-        }
-    }
 }

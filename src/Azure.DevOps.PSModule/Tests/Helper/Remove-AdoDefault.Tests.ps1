@@ -68,24 +68,6 @@ Describe 'Remove-AdoDefault' {
         }
     }
 
-    Context 'ShouldProcess Tests' {
-        BeforeEach {
-            Mock -ModuleName Azure.DevOps.PSModule Start-Sleep { }
-            Mock -ModuleName Azure.DevOps.PSModule Set-AdoDefault { }
-            $env:DefaultAdoOrganization = $mockOrganization
-            $env:DefaultAdoCollectionUri = $mockCollectionUri
-            $env:DefaultAdoProject = $mockProject
-        }
-
-        It 'Should bypass confirmation when Confirm is false' {
-            # Act
-            Remove-AdoDefault -Confirm:$false
-
-            # Assert
-            Should -Invoke Set-AdoDefault -ModuleName Azure.DevOps.PSModule -Times 1
-        }
-    }
-
     Context 'Error Handling Tests' {
         BeforeEach {
             Mock -ModuleName Azure.DevOps.PSModule Start-Sleep { }

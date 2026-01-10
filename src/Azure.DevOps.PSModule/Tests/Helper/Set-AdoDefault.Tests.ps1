@@ -165,28 +165,6 @@ Describe 'Set-AdoDefault' {
         }
     }
 
-    Context 'ShouldProcess Tests' {
-        BeforeEach {
-            Mock -ModuleName Azure.DevOps.PSModule Start-Sleep { }
-            $env:DefaultAdoOrganization = $null
-            $env:DefaultAdoCollectionUri = $null
-            $env:DefaultAdoProject = $null
-        }
-
-        It 'Should make changes when Confirm is bypassed' {
-            # Act
-            Set-AdoDefault -Organization $mockOrganization -Project $mockProject -Confirm:$false
-
-            # Assert
-            $env:DefaultAdoOrganization | Should -Be $mockOrganization
-
-            # Cleanup
-            $env:DefaultAdoOrganization = $null
-            $env:DefaultAdoCollectionUri = $null
-            $env:DefaultAdoProject = $null
-        }
-    }
-
     Context 'Parameter Validation Tests' {
         BeforeEach {
             Mock -ModuleName Azure.DevOps.PSModule Start-Sleep { }

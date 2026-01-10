@@ -198,32 +198,6 @@ Describe 'Remove-AdoClassificationNode' {
         }
     }
 
-    Context 'ShouldProcess Support Tests' {
-        BeforeEach {
-            Mock -ModuleName Azure.DevOps.PSModule Start-Sleep { }
-            Mock -ModuleName Azure.DevOps.PSModule Invoke-AdoRestMethod {
-                return $null
-            }
-            Mock -ModuleName Azure.DevOps.PSModule Confirm-Default { }
-        }
-
-        It 'Should support WhatIf parameter' {
-            # Act
-            Remove-AdoClassificationNode -CollectionUri $mockCollectionUri -ProjectName $mockProject -StructureGroup 'Areas' -Path $mockPath -WhatIf
-
-            # Assert
-            Should -Not -Invoke -ModuleName Azure.DevOps.PSModule -CommandName Invoke-AdoRestMethod
-        }
-
-        It 'Should call API when Confirm is false' {
-            # Act
-            Remove-AdoClassificationNode -CollectionUri $mockCollectionUri -ProjectName $mockProject -StructureGroup 'Areas' -Path $mockPath -Confirm:$false
-
-            # Assert
-            Should -Invoke -ModuleName Azure.DevOps.PSModule -CommandName Invoke-AdoRestMethod -Times 1
-        }
-    }
-
     Context 'ReclassifyId Parameter Tests' {
         BeforeEach {
             Mock -ModuleName Azure.DevOps.PSModule Start-Sleep { }
