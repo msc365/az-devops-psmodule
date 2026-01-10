@@ -239,6 +239,7 @@ jobs:
           label: code tests
           message: ${{ env.TEST_FAILED == '0' && 'passing' || format('{0} failing, {1} passing', env.TEST_FAILED, env.TEST_PASSED) }}
           color: ${{ env.TEST_FAILED == '0' && 'brightgreen' || 'red' }}
+          forceUpdate: true
 
       - name: Create analysis badge gist
         if: steps.src-changes.outputs.HAS_SRC_CHANGES == 'true'
@@ -250,6 +251,7 @@ jobs:
           label: code analysis
           message: ${{ env.ANALYZER_ERRORS == '0' && env.ANALYZER_WARNINGS == '0' && 'passing' || env.ANALYZER_ERRORS == '0' && format('0 errors, {0} warnings', env.ANALYZER_WARNINGS) || format('{0} errors, {1} warnings', env.ANALYZER_ERRORS, env.ANALYZER_WARNINGS) }}
           color: ${{ env.ANALYZER_ERRORS == '0' && env.ANALYZER_WARNINGS == '0' && 'brightgreen' || env.ANALYZER_ERRORS == '0' && 'yellow' || 'red' }}
+          forceUpdate: true
 
       - name: Create coverage badge gist
         if: steps.src-changes.outputs.HAS_SRC_CHANGES == 'true'
@@ -261,6 +263,7 @@ jobs:
           label: code coverage
           message: ${{ format('{0}%', env.COVERAGE_PERCENT) }}
           color: ${{ fromJSON(env.COVERAGE_PERCENT) >= 80 && 'brightgreen' || fromJSON(env.COVERAGE_PERCENT) >= 60 && 'green' || fromJSON(env.COVERAGE_PERCENT) >= 40 && 'yellow' || 'red' }}
+          forceUpdate: true
 
       - name: Upload test results
         if: steps.src-changes.outputs.HAS_SRC_CHANGES == 'true'
