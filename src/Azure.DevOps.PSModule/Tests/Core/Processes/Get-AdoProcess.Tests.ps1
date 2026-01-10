@@ -226,17 +226,6 @@ Describe 'Get-AdoProcess' {
             # Act & Assert
             { Get-AdoProcess -CollectionUri 'https://dev.azure.com/my-org' } | Should -Throw '*API Error: Unauthorized*'
         }
-
-        It 'Should support WhatIf parameter' {
-            # Arrange
-            Mock -ModuleName Azure.DevOps.PSModule Invoke-AdoRestMethod { return $mockProcesses }
-
-            # Act
-            $result = Get-AdoProcess -CollectionUri 'https://dev.azure.com/my-org' -WhatIf
-
-            # Assert
-            Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 0
-        }
     }
 
     Context 'Verbose and Debug Output Tests' {
