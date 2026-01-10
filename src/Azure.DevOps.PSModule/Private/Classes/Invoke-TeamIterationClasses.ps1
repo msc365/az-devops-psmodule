@@ -38,7 +38,7 @@ class TeamIterationAttributes {
 
     # Method to return a Hashtable representation of the object
     [hashtable] AsHashtable() {
-        return = @{
+        return @{
             finishDate = $this.finishDate
             startDate  = $this.startDate
             timeFrame  = [string]$this.timeFrame
@@ -87,7 +87,7 @@ class TeamSettingsIteration {
 
     # Method to return a Hashtable representation of the object
     [hashtable] AsHashtable() {
-        return = @{
+        return @{
             id         = $this.id
             name       = $this.name
             path       = $this.path

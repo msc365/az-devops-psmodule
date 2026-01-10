@@ -30,7 +30,7 @@
 
     # Method to return a Hashtable representation of the object
     [hashtable] AsHashtable() {
-        return = @{
+        return @{
             value           = $this.value
             includeChildren = $this.includeChildren
         }
@@ -69,7 +69,7 @@ class TeamFieldValuesPatch {
 
     # Method to return a Hashtable representation of the object
     [hashtable] AsHashtable() {
-        return = @{
+        return @{
             defaultValue = $this.defaultValue
             values       = $this.values
         }
