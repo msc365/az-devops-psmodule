@@ -3,47 +3,38 @@
 
 All notable changes to this project will be documented in this file.
 
-<!-- ## [Unreleased]
+## [0.2.0] - 2026-01-10
 
 ### Summary
-Removed legacy authentication cmdlets in favor of streamlined automatic authentication.
+Major feature release introducing pipeline approvals and checks, session defaults management, comprehensive unit testing, and CI/CD workflows. This release consolidates all alpha improvements with enhanced cmdlet functionality, standardized error handling, and improved documentation.
 
 ### What's Changed
-- **BREAKING**: Removed `Connect-AdoOrganization` cmdlet
-- **BREAKING**: Removed `Disconnect-AdoOrganization` cmdlet
-- **BREAKING**: Removed `Get-AdoAccessToken` cmdlet
-- **BREAKING**: Removed `Get-AdoContext` cmdlet
-- refactor: Authentication now automatically managed via `Connect-AzAccount`
-- docs: Updated README and cmdlet documentation with new authentication flow
-- docs: Added migration guide for users transitioning from old authentication model
+- feat: Add pipeline Approvals and Checks support with multiple check types
+- feat: Add session defaults management (`Set-AdoDefault`, `Get-AdoDefault`, `Remove-AdoDefault`)
+- feat: Add `New-AdoCheckApproval`, `New-AdoCheckBranchControl` and `New-AdoCheckBusinessHours` with fine-grained control parameters
+- feat: Add `Resolve-AdoDefinitionRef` helper function
+- feat: Add CI/CD testing workflows with code analysis
+- feat: Rename `New-AdoGroupAsMember` to `Add-AdoGroupMember` for clarity
+- test: Add 750+ comprehensive Pester unit test files (all 757 tests passing)
+- refactor: Standardized API version to `7.1` and `7.2-preview.1` when preview was required
+- refactor: Enhanced parameter handling and validation across all cmdlets
+- refactor: Standardized error handling with consistent exception messages
+- refactor: Performance optimizations using Generic.List
+- docs: Updated all cmdlet documentation with consistent formatting
+- docs: Consolidated command documentation into single categorized table
+- chore: Improved testing infrastructure with configurable Pester output
 
 ### Breaking Changes
-- **Removed authentication cmdlets**: The module no longer requires explicit connection/disconnection
-  - Instead of `Connect-AdoOrganization`, use `Connect-AzAccount` from the Az.Accounts module
-  - Authentication is now handled automatically when executing cmdlets
-  - The module will automatically obtain required tokens from your Azure session
-  
-### Migration Guide
-**Before (deprecated):**
-```powershell
-Connect-AdoOrganization -Organization 'my-org' -PAT '******'
-Get-AdoProject -ProjectId 'my-project-1'
-Disconnect-AdoOrganization
-```
+- Removed `Get-AdoGroupList`, `Get-AdoProjectList`, `Get-AdoEnvironmentList` cmdlets (functionality merged into base cmdlets)
+- Renamed `New-AdoGroupAsMember` to `Add-AdoGroupMember`
+- Changed `Remove-AdoProject` to use _Name_ parameter instead of _Id_
+- Changed `Set-AdoEnvironment` _EnvironmentId_ parameter from string to int32
+- Updated `Get-AdoProject` parameter sets (ListProjects/ByNameOrId)
 
-**After (current):**
-```powershell
-# Authenticate once with Azure
-Connect-AzAccount -Tenant '<tenant-id>' -Subscription '<subscription-id>'
+### Contributors
+Special thanks to [@Antiohne](https://github.com/Antiohne) for the feature request, detailed feedback, and testing suggestions that shaped this release
 
-# Set optional defaults to avoid repeating parameters
-Set-AdoDefault -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'my-project-1'
-
-# Execute cmdlets - authentication is automatic
-Get-AdoProject
-```
-
---- -->
+---
 
 ## [0.2.0-alpha4] - 2026-01-05
 
