@@ -10,13 +10,20 @@
         Set-AdoDefault -Organization 'my-org' -Project 'my-project-1'
 
         Sets the default Azure DevOps default Organization to 'my-org', CollectionUri to "https://dev.azure.com/my-org" and Project to 'my-project-1'.
+
+    .EXAMPLE
+        Set-AdoDefault -Organization $null -Project $null
+
+        Removes the default Azure DevOps environment variables from the current session.
     #>
     [CmdletBinding(SupportsShouldProcess)]
     param (
-        [Parameter(Mandatory)]
+        [Parameter()]
+        [AllowNull()]
         [string]$Organization,
 
         [Parameter()]
+        [AllowNull()]
         [string]$Project
     )
 
