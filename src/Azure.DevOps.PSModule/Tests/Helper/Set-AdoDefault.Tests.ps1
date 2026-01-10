@@ -155,7 +155,7 @@ Describe 'Set-AdoDefault' {
             Set-AdoDefault -Organization '' -Project $mockProject -Confirm:$false
 
             # Assert
-            $env:DefaultAdoOrganization | Should -Be ''
+            $env:DefaultAdoOrganization | Should -BeNullOrEmpty
             $env:DefaultAdoCollectionUri | Should -Be 'https://dev.azure.com/'
 
             # Cleanup
