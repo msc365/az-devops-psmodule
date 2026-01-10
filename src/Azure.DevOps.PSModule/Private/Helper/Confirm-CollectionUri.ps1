@@ -22,8 +22,8 @@
 
     process {
         try {
-            if ($Uri -notmatch '^https:\/\/dev\.azure\.com\/\w+') {
-                throw  "CollectionUri must be a valid Azure DevOps collection URI starting with 'https://dev.azure.com/'"
+            if ($Uri -notmatch '^https:\/\/([\w-]+\.)?dev\.azure\.com\/[\w-]+') {
+                throw "CollectionUri must be a valid Azure DevOps collection URI (e.g., 'https://dev.azure.com/org' or 'https://vssps.dev.azure.com/org')"
             } else {
                 $true
             }
