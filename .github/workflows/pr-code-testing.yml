@@ -261,8 +261,8 @@ jobs:
           gistID: ${{ secrets.GIST_ID }}
           filename: az-devops-psmodule-coverage-badge.json
           label: code coverage
-          message: ${{ format('{0}%', env.COVERAGE_PERCENT) }}
-          color: ${{ fromJSON(env.COVERAGE_PERCENT) >= 80 && 'brightgreen' || fromJSON(env.COVERAGE_PERCENT) >= 60 && 'green' || fromJSON(env.COVERAGE_PERCENT) >= 40 && 'yellow' || 'red' }}
+          message: ${{ env.COVERAGE_PERCENT }}%
+          color: ${{ env.COVERAGE_PERCENT >= 80 && 'brightgreen' || env.COVERAGE_PERCENT >= 60 && 'green' || env.COVERAGE_PERCENT >= 40 && 'yellow' || 'red' }}
           forceUpdate: true
 
       - name: Upload test results
