@@ -11,6 +11,7 @@
 [![github-license](https://img.shields.io/github/license/msc365/az-devops-psmodule?label=licence&color=purple)](LICENSE)
 
 [![pester-tests](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/msc365admin/49cbfa1538653138a1f2c4e452d7b4b4/raw/az-devops-psmodule-test-badge.json)](https://github.com/msc365/az-devops-psmodule/actions/workflows/pr-code-testing.yml)
+[![code-coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/msc365admin/49cbfa1538653138a1f2c4e452d7b4b4/raw/az-devops-psmodule-coverage-badge.json)](https://github.com/msc365/az-devops-psmodule/actions/workflows/pr-code-testing.yml)
 [![code-analysis](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/msc365admin/49cbfa1538653138a1f2c4e452d7b4b4/raw/az-devops-psmodule-analysis-badge.json)](https://github.com/msc365/az-devops-psmodule/actions/workflows/pr-code-testing.yml)
 
 This repository provides a PowerShell module that wraps the Azure DevOps REST API into clean, task-oriented cmdlets. It simplifies automation and scripting across your DevOps workflows, making it easier to manage pipelines, repositories, builds, releases, and work items directly from PowerShell.

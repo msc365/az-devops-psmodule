@@ -44,7 +44,7 @@ jobs:
           Write-Host "Changed files:"
           $changedFiles | ForEach-Object { Write-Host "  $_" }
 
-          $srcChanged = $changedFiles | Where-Object { $_ -like 'src/**' -and $_ -notlike 'src/Tests/**' }
+          $srcChanged = $changedFiles | Where-Object { $_ -like 'src/**' -and $_ -notlike 'src/Azure.DevOps.PSModule/Tests/**' }
 
           if ($srcChanged) {
             "HAS_SRC_CHANGES=true" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
@@ -128,16 +128,24 @@ jobs:
           $env:PSModulePath = "$modulePath$([System.IO.Path]::PathSeparator)$env:PSModulePath"
           Write-Host "Module path added to PSModulePath: $modulePath"
 
-          $testsPath = Join-Path $env:GITHUB_WORKSPACE "src\Tests"
+          $codePath = Join-Path $env:GITHUB_WORKSPACE "src\Azure.DevOps.PSModule"
+          $testsPath = Join-Path $env:GITHUB_WORKSPACE "src\Azure.DevOps.PSModule\Tests"
 
           $config = New-PesterConfiguration
           $config.Run.Path = $testsPath
           $config.Run.Exit = $false
           $config.Run.PassThru = $true
-          $config.Output.Verbosity = if ($env:GITHUB_EVENT_NAME -eq 'pull_request') { 'Detailed' } else { 'Minimal' }
           $config.TestResult.Enabled = $true
           $config.TestResult.OutputPath = 'testResults.xml'
-          $config.CodeCoverage.Enabled = $false
+          $config.CodeCoverage.Enabled = $true
+          $config.CodeCoverage.Path = @(
+            (Join-Path $codePath "Public\**\*.ps1"),
+            (Join-Path $codePath "Private\**\*.ps1"),
+            (Join-Path $codePath "*.psm1")
+          )
+          $config.CodeCoverage.OutputFormat = 'JaCoCo'
+          $config.CodeCoverage.OutputPath = 'coverage.xml'
+          $config.Output.Verbosity = 'Detailed'
 
           $result = Invoke-Pester -Configuration $config
 
@@ -146,10 +154,19 @@ jobs:
           $passedTests = $result.PassedCount
           $failedTests = $result.FailedCount
 
+          # Extract code coverage metrics
+          $coverage = $result.CodeCoverage
+          $coveragePercent = if ($coverage.NumberOfCommandsAnalyzed -gt 0) {
+            [math]::Round(($coverage.NumberOfCommandsExecuted / $coverage.NumberOfCommandsAnalyzed) * 100, 2)
+          } else { 0 }
+
+          Write-Host "Code Coverage: $coveragePercent% ($($coverage.NumberOfCommandsExecuted)/$($coverage.NumberOfCommandsAnalyzed) commands)" -ForegroundColor Cyan
+
           # Store test results for badge generation
           "TEST_TOTAL=$totalTests" | Out-File -FilePath $env:GITHUB_ENV -Append
           "TEST_PASSED=$passedTests" | Out-File -FilePath $env:GITHUB_ENV -Append
           "TEST_FAILED=$failedTests" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "COVERAGE_PERCENT=$coveragePercent" | Out-File -FilePath $env:GITHUB_ENV -Append
 
           if ($failedTests -gt 0) {
             Write-Error "Pester tests found $failedTests error(s). Build failed."
@@ -173,12 +190,12 @@ jobs:
           $analyzerWarnings = [int]$env:ANALYZER_WARNINGS
 
           # Test badge
-          $testColor = if ($testFailed -eq 0) { 'green' } else { 'red' }
+          $testColor = if ($testFailed -eq 0) { 'brightgreen' } else { 'red' }
           $testMessage = if ($testFailed -eq 0) { "$testPassed passing" } else { "$testFailed / $testTotal failing" }
 
           $testBadge = @{
             schemaVersion = 1
-            label = 'pester tests'
+            label = 'code tests'
             message = $testMessage
             color = $testColor
           }
@@ -186,7 +203,7 @@ jobs:
           $testBadge | ConvertTo-Json | Out-File -FilePath 'test-badge.json' -Encoding utf8
 
           # Code analysis badge
-          $analysisColor = if ($analyzerErrors -eq 0 -and $analyzerWarnings -eq 0) { 'green' } elseif ($analyzerErrors -eq 0) { 'yellow' } else { 'red' }
+          $analysisColor = if ($analyzerErrors -eq 0 -and $analyzerWarnings -eq 0) { 'brightgreen' } elseif ($analyzerErrors -eq 0) { 'yellow' } else { 'red' }
           $analysisMessage = if ($analyzerErrors -eq 0 -and $analyzerWarnings -eq 0) { 'passing' } elseif ($analyzerErrors -eq 0) { "0 errors, $analyzerWarnings warnings" } else { "$analyzerErrors errors, $analyzerWarnings warnings" }
 
           $analysisBadge = @{
@@ -198,6 +215,20 @@ jobs:
 
           $analysisBadge | ConvertTo-Json | Out-File -FilePath 'analysis-badge.json' -Encoding utf8
 
+          # Code coverage badge
+          $coveragePercent = [decimal]$env:COVERAGE_PERCENT
+          $coverageColor = if ($coveragePercent -ge 80) { 'brightgreen' } elseif ($coveragePercent -ge 60) { 'green' } elseif ($coveragePercent -ge 40) { 'yellow' } else { 'red' }
+          $coverageMessage = "$coveragePercent%"
+
+          $coverageBadge = @{
+            schemaVersion = 1
+            label = 'code coverage'
+            message = $coverageMessage
+            color = $coverageColor
+          }
+
+          $coverageBadge | ConvertTo-Json | Out-File -FilePath 'coverage-badge.json' -Encoding utf8
+
           Write-Host "Badge data generated successfully" -ForegroundColor Green
 
       - name: Create pester tests badge gist
@@ -207,9 +238,9 @@ jobs:
           auth: ${{ secrets.GIST_TOKEN }}
           gistID: ${{ secrets.GIST_ID }}
           filename: az-devops-psmodule-test-badge.json
-          label: pester tests
+          label: code tests
           message: ${{ env.TEST_FAILED == '0' && 'passing' || format('{0} failing, {1} passing', env.TEST_FAILED, env.TEST_PASSED) }}
-          color: ${{ env.TEST_FAILED == '0' && 'green' || 'red' }}
+          color: ${{ env.TEST_FAILED == '0' && 'brightgreen' || 'red' }}
 
       - name: Create analysis badge gist
         if: steps.src-changes.outputs.HAS_SRC_CHANGES == 'true'
@@ -220,7 +251,18 @@ jobs:
           filename: az-devops-psmodule-analysis-badge.json
           label: code analysis
           message: ${{ env.ANALYZER_ERRORS == '0' && env.ANALYZER_WARNINGS == '0' && 'passing' || env.ANALYZER_ERRORS == '0' && format('0 errors, {0} warnings', env.ANALYZER_WARNINGS) || format('{0} errors, {1} warnings', env.ANALYZER_ERRORS, env.ANALYZER_WARNINGS) }}
-          color: ${{ env.ANALYZER_ERRORS == '0' && env.ANALYZER_WARNINGS == '0' && 'green' || env.ANALYZER_ERRORS == '0' && 'yellow' || 'red' }}
+          color: ${{ env.ANALYZER_ERRORS == '0' && env.ANALYZER_WARNINGS == '0' && 'brightgreen' || env.ANALYZER_ERRORS == '0' && 'yellow' || 'red' }}
+
+      - name: Create coverage badge gist
+        if: steps.src-changes.outputs.HAS_SRC_CHANGES == 'true'
+        uses: schneegans/dynamic-badges-action@v1.7.0
+        with:
+          auth: ${{ secrets.GIST_TOKEN }}
+          gistID: ${{ secrets.GIST_ID }}
+          filename: az-devops-psmodule-coverage-badge.json
+          label: code coverage
+          message: ${{ format('{0}%', env.COVERAGE_PERCENT) }}
+          color: ${{ fromJSON(env.COVERAGE_PERCENT) >= 80 && 'brightgreen' || fromJSON(env.COVERAGE_PERCENT) >= 60 && 'green' || fromJSON(env.COVERAGE_PERCENT) >= 40 && 'yellow' || 'red' }}
 
       - name: Upload test results
         if: steps.src-changes.outputs.HAS_SRC_CHANGES == 'true'
@@ -228,6 +270,13 @@ jobs:
         with:
           name: test-results
           path: testResults.xml
+
+      - name: Upload coverage results
+        if: steps.src-changes.outputs.HAS_SRC_CHANGES == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-results
+          path: coverage.xml
 
       - name: Run final results summary
         if: steps.src-changes.outputs.HAS_SRC_CHANGES == 'true'
