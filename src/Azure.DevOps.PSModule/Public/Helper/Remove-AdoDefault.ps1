@@ -11,7 +11,7 @@
 
         Removes the default Azure DevOps environment variables from both the current session.
     #>
-    [CmdletBinding(SupportsShouldProcess)]
+    [CmdletBinding()]
     param ()
 
     begin {
