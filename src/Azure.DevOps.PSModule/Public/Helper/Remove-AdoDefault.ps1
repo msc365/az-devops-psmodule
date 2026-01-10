@@ -11,7 +11,7 @@
 
         Removes the default Azure DevOps environment variables from both the current session.
     #>
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess)]
     param ()
 
     begin {
@@ -20,7 +20,9 @@
 
     process {
         try {
-            Set-AdoDefault -Organization $null -Project $null
+            if ($PSCmdlet.ShouldProcess('Default Azure DevOps environment variables', 'Remove')) {
+                Set-AdoDefault -Organization $null -Project $null -Confirm:$false
+            }
         } catch {
             throw $_
         }

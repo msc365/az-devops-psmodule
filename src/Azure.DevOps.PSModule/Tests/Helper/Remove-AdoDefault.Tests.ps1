@@ -129,7 +129,7 @@ Describe 'Remove-AdoDefault' {
             # Assert
             $result | Should -Not -BeNullOrEmpty
             $result.Organization | Should -BeNullOrEmpty
-            $result.ProjectName | Should -BeNullOrEmpty
+            $result.Project | Should -BeNullOrEmpty
 
             # Cleanup
             $env:DefaultAdoOrganization = $null
