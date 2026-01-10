@@ -16,9 +16,6 @@
 
 This repository provides a PowerShell module that wraps the Azure DevOps REST API into clean, task-oriented cmdlets. It simplifies automation and scripting across your DevOps workflows, making it easier to manage pipelines, repositories, builds, releases, and work items directly from PowerShell.
 
-> [!NOTE]
-> We are currently working on major changes to elevate this project with better PowerShell best practices, comprehensive unit tests, and improved documentation. The first result was the **v0.2.0-alpha1** release last week, followed by the current **v0.2.0-alpha2** release. Upcoming **v0.2.0-alpha** releases will test all available functions to ensure they conform to the new patterns and improvements. See the [releases page](https://github.com/msc365/az-devops-psmodule/releases) for the latest detailed information. Your feedback during this alpha phase is highly appreciated!
-
 <!-- > [!WARNING]
 > This module provides experimental features, allowing you to test and provide feedback on new functionalities before they become stable. These features are not finalized and may undergo breaking changes, so they are not recommended for production use. -->
 
@@ -109,18 +106,18 @@ The module will automatically obtain the required authentication tokens when you
 Get-AdoProject -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'my-project-1'
 ```
 
-This gets the project as a `<System.Object>` with all available details.
+This gets the project as a `[PSCustomObject]` with all available details.
 
-### Set default context (optional)
+### Set default session context (optional)
 
-To avoid repeating `-CollectionUri` and `-ProjectName` parameters, you can set defaults:
+To avoid repeating `-CollectionUri` and `-ProjectName` parameters, you can set session defaults:
 
 #### PowerShell
 
 ```powershell
-Set-AdoDefault -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'my-project-1'
+Set-AdoDefault -Organization 'my-org' -Project 'my-project-1'
 
-# Now you can call cmdlets without specifying these parameters
+# Now you can call cmdlets without specifying these parameters during a session
 Get-AdoProject
 ```
 
