@@ -156,11 +156,9 @@ jobs:
 
           # Extract code coverage metrics
           $coverage = $result.CodeCoverage
-          $coveragePercent = if ($coverage.NumberOfCommandsAnalyzed -gt 0) {
-            [math]::Round(($coverage.NumberOfCommandsExecuted / $coverage.NumberOfCommandsAnalyzed) * 100, 2)
-          } else { 0 }
+          $coveragePercent = '{0:F0}' -f $coverage.CoveragePercent
 
-          Write-Host "Code Coverage: $coveragePercent% ($($coverage.NumberOfCommandsExecuted)/$($coverage.NumberOfCommandsAnalyzed) commands)" -ForegroundColor Cyan
+          Write-Host "Code Coverage: $coveragePercent%" -ForegroundColor Cyan
 
           # Store test results for badge generation
           "TEST_TOTAL=$totalTests" | Out-File -FilePath $env:GITHUB_ENV -Append
@@ -216,7 +214,7 @@ jobs:
           $analysisBadge | ConvertTo-Json | Out-File -FilePath 'analysis-badge.json' -Encoding utf8
 
           # Code coverage badge
-          $coveragePercent = [decimal]$env:COVERAGE_PERCENT
+          $coveragePercent = [int]$env:COVERAGE_PERCENT
           $coverageColor = if ($coveragePercent -ge 80) { 'brightgreen' } elseif ($coveragePercent -ge 60) { 'green' } elseif ($coveragePercent -ge 40) { 'yellow' } else { 'red' }
           $coverageMessage = "$coveragePercent%"
 
