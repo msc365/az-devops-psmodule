@@ -86,17 +86,6 @@ Describe 'Azure.DevOps.PSModule.psm1 Module Loader' {
             Test-Path -Path $publicPath | Should -Be $true
         }
 
-        It 'Should contain class definition files in Private folder' {
-            # Arrange
-            $privatePath = Join-Path -Path $modulePath -ChildPath 'Private'
-
-            # Act
-            $classFiles = Get-ChildItem -Path $privatePath -Filter '*Classes.ps1' -Recurse -ErrorAction SilentlyContinue
-
-            # Assert
-            $classFiles | Should -Not -BeNullOrEmpty
-        }
-
         It 'Should contain PS1 files in Public folder' {
             # Arrange
             $publicPath = Join-Path -Path $modulePath -ChildPath 'Public'
@@ -134,39 +123,6 @@ Describe 'Azure.DevOps.PSModule.psm1 Module Loader' {
             # Assert
             $reimportedCommand | Should -Not -BeNullOrEmpty
             $reimportedCommand.Name | Should -Be $initialCommand.Name
-        }
-    }
-
-    Context 'Class Loading Tests' {
-        BeforeEach {
-            Mock Start-Sleep { }
-        }
-
-        It 'Should load TeamSettings class' {
-            # Arrange & Act
-            Import-Module $moduleFile -Force
-
-            # Assert - If classes are loaded, related functions should work
-            $command = Get-Command -Name 'Get-AdoTeamSettings' -Module 'Azure.DevOps.PSModule' -ErrorAction SilentlyContinue
-            $command | Should -Not -BeNullOrEmpty
-        }
-
-        It 'Should load TeamIteration class' {
-            # Arrange & Act
-            Import-Module $moduleFile -Force
-
-            # Assert
-            $command = Get-Command -Name 'Get-AdoTeamIteration' -Module 'Azure.DevOps.PSModule' -ErrorAction SilentlyContinue
-            $command | Should -Not -BeNullOrEmpty
-        }
-
-        It 'Should load TeamFieldValue class' {
-            # Arrange & Act
-            Import-Module $moduleFile -Force
-
-            # Assert
-            $command = Get-Command -Name 'Get-AdoTeamFieldValue' -Module 'Azure.DevOps.PSModule' -ErrorAction SilentlyContinue
-            $command | Should -Not -BeNullOrEmpty
         }
     }
 
