@@ -29,7 +29,7 @@
         $approverId = 0000000-0000-0000-0000-000000000000
         $environmentId = 1
 
-        $definitionRefId = (Resolve-AdoCheckConfigDefinitionRef -Name approval).id
+        $definitionRefId = (Resolve-AdoDefinitionRef -Name approval).id
 
         $configJson = @{
             settings = @{

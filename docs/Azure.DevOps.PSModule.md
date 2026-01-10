@@ -39,7 +39,7 @@ A PowerShell module that wraps the Azure DevOps REST API into clean, task-orient
 | &nbsp; • &nbsp; [New-AdoCheckApproval](New-AdoCheckApproval.md) | Create a new approval check for a specific resource. |
 | &nbsp; • &nbsp; [New-AdoCheckBranchControl](New-AdoCheckBranchControl.md) | Create a new branch control check for a specific resource. |
 | &nbsp; • &nbsp; [New-AdoCheckBusinessHours](New-AdoCheckBusinessHours.md) | Create a new business hours check for a specific resource. |
-| &nbsp; • &nbsp; [Resolve-AdoCheckConfigDefinitionRef](Resolve-AdoCheckConfigDefinitionRef.md) | Resolve a check definition reference by its name or ID. |
+| &nbsp; • &nbsp; [Resolve-AdoDefinitionRef](Resolve-AdoDefinitionRef.md) | Resolve a check definition reference by its name or ID. |
 | **Environments** | |
 | &nbsp; • &nbsp; [Get-AdoEnvironment](Get-AdoEnvironment.md) | Get a list of Azure DevOps Pipeline Environments with optional name filtering. |
 | &nbsp; • &nbsp; [New-AdoEnvironment](New-AdoEnvironment.md) | Create a new Azure DevOps Pipeline Environment. |

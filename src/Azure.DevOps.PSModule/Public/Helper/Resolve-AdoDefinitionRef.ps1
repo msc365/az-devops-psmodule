@@ -1,4 +1,4 @@
-﻿function Resolve-AdoCheckConfigDefinitionRef {
+﻿function Resolve-AdoDefinitionRef {
     <#
     .SYNOPSIS
         Resolve a check definition reference by its name or ID.
@@ -35,17 +35,17 @@
         When using -ListAll, returns an array of all definition reference objects.
 
     .EXAMPLE
-        Resolve-AdoCheckConfigDefinitionRef -Name 'approval'
+        Resolve-AdoDefinitionRef -Name 'approval'
 
         Resolves the definition reference for the 'approval' check.
 
     .EXAMPLE
-        Resolve-AdoCheckConfigDefinitionRef -Id '26014962-64a0-49f4-885b-4b874119a5cc'
+        Resolve-AdoDefinitionRef -Id '26014962-64a0-49f4-885b-4b874119a5cc'
 
         Resolves the definition reference for the check with the specified ID.
 
     .EXAMPLE
-        Resolve-AdoCheckConfigDefinitionRef -ListAll
+        Resolve-AdoDefinitionRef -ListAll
 
         Returns all available check definition references.
 

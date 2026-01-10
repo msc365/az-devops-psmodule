@@ -6,13 +6,13 @@ Locale: en-NL
 Module Name: Azure.DevOps.PSModule
 ms.date: 01/03/2026
 PlatyPS schema version: 2024-05-01
-title: Resolve-AdoCheckConfigDefinitionRef
+title: Resolve-AdoDefinitionRef
 -->
 
 <!-- markdownlint-disable MD024 -->
 <!-- cSpell: ignore dontshow -->
 
-# Resolve-AdoCheckConfigDefinitionRef
+# Resolve-AdoDefinitionRef
 
 ## SYNOPSIS
 
@@ -23,19 +23,19 @@ Resolve a check definition reference by its name or ID.
 ### ById
 
 ```text
-Resolve-AdoCheckConfigDefinitionRef -Id <string> [<CommonParameters>]
+Resolve-AdoDefinitionRef -Id <string> [<CommonParameters>]
 ```
 
 ### ByName
 
 ```text
-Resolve-AdoCheckConfigDefinitionRef -Name <string> [<CommonParameters>]
+Resolve-AdoDefinitionRef -Name <string> [<CommonParameters>]
 ```
 
 ### ListAll
 
 ```text
-Resolve-AdoCheckConfigDefinitionRef -ListAll [<CommonParameters>]
+Resolve-AdoDefinitionRef -ListAll [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -54,7 +54,7 @@ This function resolves a check definition reference in Azure DevOps by either it
 #### PowerShell
 
 ```powershell
-Resolve-AdoCheckConfigDefinitionRef -Name 'approval'
+Resolve-AdoDefinitionRef -Name 'approval'
 ```
 
 Resolves the definition reference for the 'approval' check, returning the check definition with name, ID, and display name.
@@ -64,7 +64,7 @@ Resolves the definition reference for the 'approval' check, returning the check 
 #### PowerShell
 
 ```powershell
-Resolve-AdoCheckConfigDefinitionRef -Id '26014962-64a0-49f4-885b-4b874119a5cc'
+Resolve-AdoDefinitionRef -Id '26014962-64a0-49f4-885b-4b874119a5cc'
 ```
 
 Resolves the definition reference for the check with the specified ID, returning the approval check definition.
@@ -74,7 +74,7 @@ Resolves the definition reference for the check with the specified ID, returning
 #### PowerShell
 
 ```powershell
-Resolve-AdoCheckConfigDefinitionRef -ListAll
+Resolve-AdoDefinitionRef -ListAll
 ```
 
 Returns all available check definition references sorted by name.
@@ -84,7 +84,7 @@ Returns all available check definition references sorted by name.
 #### PowerShell
 
 ```powershell
-$checkDef = Resolve-AdoCheckConfigDefinitionRef -Name 'branchControl'
+$checkDef = Resolve-AdoDefinitionRef -Name 'branchControl'
 Write-Host "Check: $($checkDef.displayName) - $($checkDef.id)"
 ```
 

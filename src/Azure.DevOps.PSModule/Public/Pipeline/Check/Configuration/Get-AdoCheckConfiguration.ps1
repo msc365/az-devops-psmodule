@@ -178,7 +178,7 @@
                 # If DefinitionType is provided, resolve it to get the definitionRef
                 if ($DefinitionType) {
                     foreach ($definitionType_ in $DefinitionType) {
-                        $definitionRef = Resolve-AdoCheckConfigDefinitionRef -Name $definitionType_
+                        $definitionRef = Resolve-AdoDefinitionRef -Name $definitionType_
                         $DefinitionRefIds.Add($definitionRef.id)
                     }
                     $Expands = 'settings'
