@@ -1,6 +1,6 @@
 ﻿BeforeAll {
     # Import the module
-    $modulePath = Join-Path -Path $PSScriptRoot -ChildPath '..\..'
+    $modulePath = Join-Path -Path $PSScriptRoot -ChildPath '..\..\..'
     $moduleName = Join-Path -Path $modulePath -ChildPath 'Azure.DevOps.PSModule.psd1'
 
     # Remove module if already loaded
@@ -13,8 +13,8 @@
 Describe 'Confirm-Default' -Tag 'Private' {
     BeforeAll {
         $mockValidDefaults = @{
-            Organization = 'my-org'
-            Project = 'my-project'
+            Organization  = 'my-org'
+            Project       = 'my-project'
             CollectionUri = 'https://dev.azure.com/my-org'
         }
     }
@@ -30,8 +30,8 @@ Describe 'Confirm-Default' -Tag 'Private' {
             InModuleScope Azure.DevOps.PSModule {
                 # Arrange
                 $mockValidDefaults = @{
-                    Organization = 'my-org'
-                    Project = 'my-project'
+                    Organization  = 'my-org'
+                    Project       = 'my-project'
                     CollectionUri = 'https://dev.azure.com/my-org'
                 }
 
@@ -55,8 +55,8 @@ Describe 'Confirm-Default' -Tag 'Private' {
                 # Arrange
                 $multipleDefaults = @{
                     Organization = 'org1'
-                    Project = 'project1'
-                    Repository = 'repo1'
+                    Project      = 'project1'
+                    Repository   = 'repo1'
                 }
 
                 # Act & Assert
@@ -68,8 +68,8 @@ Describe 'Confirm-Default' -Tag 'Private' {
             InModuleScope Azure.DevOps.PSModule {
                 # Arrange
                 $mockValidDefaults = @{
-                    Organization = 'my-org'
-                    Project = 'my-project'
+                    Organization  = 'my-org'
+                    Project       = 'my-project'
                     CollectionUri = 'https://dev.azure.com/my-org'
                 }
 
@@ -95,7 +95,7 @@ Describe 'Confirm-Default' -Tag 'Private' {
                 $nullDefault = @{ Organization = $null }
 
                 # Act & Assert
-                { Confirm-Default -Defaults $nullDefault } | Should -Throw "*Organization*required*Set-AdoDefault*"
+                { Confirm-Default -Defaults $nullDefault } | Should -Throw '*Organization*required*Set-AdoDefault*'
             }
         }
 
@@ -105,7 +105,7 @@ Describe 'Confirm-Default' -Tag 'Private' {
                 $emptyDefault = @{ Project = '' }
 
                 # Act & Assert
-                { Confirm-Default -Defaults $emptyDefault } | Should -Throw "*Project*required*Set-AdoDefault*"
+                { Confirm-Default -Defaults $emptyDefault } | Should -Throw '*Project*required*Set-AdoDefault*'
             }
         }
 
@@ -115,7 +115,7 @@ Describe 'Confirm-Default' -Tag 'Private' {
                 $missingParam = @{ CollectionUri = '' }
 
                 # Act & Assert
-                { Confirm-Default -Defaults $missingParam } | Should -Throw "*CollectionUri*"
+                { Confirm-Default -Defaults $missingParam } | Should -Throw '*CollectionUri*'
             }
         }
 
@@ -124,11 +124,11 @@ Describe 'Confirm-Default' -Tag 'Private' {
                 # Arrange
                 $multipleEmpty = @{
                     Organization = ''
-                    Project = ''
+                    Project      = ''
                 }
 
                 # Act & Assert
-                { Confirm-Default -Defaults $multipleEmpty } | Should -Throw "*required*"
+                { Confirm-Default -Defaults $multipleEmpty } | Should -Throw '*required*'
             }
         }
 
@@ -138,7 +138,7 @@ Describe 'Confirm-Default' -Tag 'Private' {
                 $emptyDefault = @{ Organization = '' }
 
                 # Act & Assert
-                { Confirm-Default -Defaults $emptyDefault } | Should -Throw "*Set-AdoDefault*"
+                { Confirm-Default -Defaults $emptyDefault } | Should -Throw '*Set-AdoDefault*'
             }
         }
     }
@@ -185,10 +185,10 @@ Describe 'Confirm-Default' -Tag 'Private' {
             InModuleScope Azure.DevOps.PSModule {
                 # Arrange
                 $completeDefaults = @{
-                    Organization = 'test-org'
-                    Project = 'test-project'
+                    Organization  = 'test-org'
+                    Project       = 'test-project'
                     CollectionUri = 'https://dev.azure.com/test-org'
-                    Repository = 'test-repo'
+                    Repository    = 'test-repo'
                 }
 
                 # Act & Assert
@@ -208,8 +208,8 @@ Describe 'Confirm-Default' -Tag 'Private' {
             InModuleScope Azure.DevOps.PSModule {
                 # Arrange
                 $variousCasing = @{
-                    organization = 'my-org'
-                    PROJECT = 'my-project'
+                    organization  = 'my-org'
+                    PROJECT       = 'my-project'
                     CollectionUri = 'https://dev.azure.com/my-org'
                 }
 

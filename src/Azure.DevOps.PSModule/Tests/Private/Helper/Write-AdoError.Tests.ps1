@@ -1,6 +1,6 @@
 ﻿BeforeAll {
     # Import the module
-    $modulePath = Join-Path -Path $PSScriptRoot -ChildPath '..\..'
+    $modulePath = Join-Path -Path $PSScriptRoot -ChildPath '..\..\..'
     $moduleName = Join-Path -Path $modulePath -ChildPath 'Azure.DevOps.PSModule.psd1'
 
     # Remove module if already loaded
@@ -110,7 +110,7 @@ Describe 'Write-AdoError' -Tag 'Private' {
         It 'Should handle messages with special characters' {
             InModuleScope Azure.DevOps.PSModule {
                 # Arrange
-                $specialMessage = "Error with special chars: test!test"
+                $specialMessage = 'Error with special chars: test!test'
 
                 # Act & Assert
                 { Write-AdoError -Message $specialMessage } | Should -Throw -ExpectedMessage $specialMessage

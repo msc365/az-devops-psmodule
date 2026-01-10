@@ -1,6 +1,6 @@
 ﻿BeforeAll {
     # Import the module
-    $modulePath = Join-Path -Path $PSScriptRoot -ChildPath '..\..'
+    $modulePath = Join-Path -Path $PSScriptRoot -ChildPath '..\..\..'
     $moduleName = Join-Path -Path $modulePath -ChildPath 'Azure.DevOps.PSModule.psd1'
 
     # Remove module if already loaded
@@ -87,7 +87,7 @@ Describe 'Confirm-CollectionUri' -Tag 'Private' {
                 $httpUri = 'http://dev.azure.com/myorg'
 
                 # Act & Assert
-                { Confirm-CollectionUri -Uri $httpUri } | Should -Throw "*valid Azure DevOps collection URI*"
+                { Confirm-CollectionUri -Uri $httpUri } | Should -Throw '*valid Azure DevOps collection URI*'
             }
         }
 
@@ -97,7 +97,7 @@ Describe 'Confirm-CollectionUri' -Tag 'Private' {
                 $wrongDomain = 'https://github.com/myorg'
 
                 # Act & Assert
-                { Confirm-CollectionUri -Uri $wrongDomain } | Should -Throw "*valid Azure DevOps collection URI*"
+                { Confirm-CollectionUri -Uri $wrongDomain } | Should -Throw '*valid Azure DevOps collection URI*'
             }
         }
 
@@ -107,7 +107,7 @@ Describe 'Confirm-CollectionUri' -Tag 'Private' {
                 $noOrg = 'https://dev.azure.com/'
 
                 # Act & Assert
-                { Confirm-CollectionUri -Uri $noOrg } | Should -Throw "*valid Azure DevOps collection URI*"
+                { Confirm-CollectionUri -Uri $noOrg } | Should -Throw '*valid Azure DevOps collection URI*'
             }
         }
 
@@ -118,7 +118,7 @@ Describe 'Confirm-CollectionUri' -Tag 'Private' {
 
                 # Act & Assert
                 # PowerShell parameter binding throws before the function validates
-                { Confirm-CollectionUri -Uri $emptyUri } | Should -Throw "*empty string*"
+                { Confirm-CollectionUri -Uri $emptyUri } | Should -Throw '*empty string*'
             }
         }
 
@@ -128,7 +128,7 @@ Describe 'Confirm-CollectionUri' -Tag 'Private' {
                 $malformedUri = 'not-a-valid-uri'
 
                 # Act & Assert
-                { Confirm-CollectionUri -Uri $malformedUri } | Should -Throw "*valid Azure DevOps collection URI*"
+                { Confirm-CollectionUri -Uri $malformedUri } | Should -Throw '*valid Azure DevOps collection URI*'
             }
         }
 

@@ -1,6 +1,6 @@
 ﻿BeforeAll {
     # Import the module
-    $modulePath = Join-Path -Path $PSScriptRoot -ChildPath '..\..'
+    $modulePath = Join-Path -Path $PSScriptRoot -ChildPath '..\..\..'
     $moduleName = Join-Path -Path $modulePath -ChildPath 'Azure.DevOps.PSModule.psd1'
 
     # Remove module if already loaded
