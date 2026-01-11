@@ -16,35 +16,35 @@ Describe 'Get-AdoEnvironment' {
         $mockEnvironments = @{
             value = @(
                 @{
-                    id               = 1
-                    name             = 'TestEnvironment1'
-                    description      = 'Test environment 1'
-                    createdBy        = @{ id = 'user1' }
-                    createdOn        = '2024-01-01T00:00:00Z'
-                    lastModifiedBy   = @{ id = 'user1' }
-                    lastModifiedOn   = '2024-01-02T00:00:00Z'
+                    id             = 1
+                    name           = 'TestEnvironment1'
+                    description    = 'Test environment 1'
+                    createdBy      = @{ id = 'user1' }
+                    createdOn      = '2024-01-01T00:00:00Z'
+                    lastModifiedBy = @{ id = 'user1' }
+                    lastModifiedOn = '2024-01-02T00:00:00Z'
                 }
                 @{
-                    id               = 2
-                    name             = 'TestEnvironment2'
-                    description      = 'Test environment 2'
-                    createdBy        = @{ id = 'user2' }
-                    createdOn        = '2024-01-03T00:00:00Z'
-                    lastModifiedBy   = @{ id = 'user2' }
-                    lastModifiedOn   = '2024-01-04T00:00:00Z'
+                    id             = 2
+                    name           = 'TestEnvironment2'
+                    description    = 'Test environment 2'
+                    createdBy      = @{ id = 'user2' }
+                    createdOn      = '2024-01-03T00:00:00Z'
+                    lastModifiedBy = @{ id = 'user2' }
+                    lastModifiedOn = '2024-01-04T00:00:00Z'
                 }
             )
         }
 
         $mockSingleEnvironment = @{
-            id               = 1
-            name             = 'TestEnvironment1'
-            description      = 'Test environment 1'
-            createdBy        = @{ id = 'user1' }
-            createdOn        = '2024-01-01T00:00:00Z'
-            lastModifiedBy   = @{ id = 'user1' }
-            lastModifiedOn   = '2024-01-02T00:00:00Z'
-            resources        = @(
+            id             = 1
+            name           = 'TestEnvironment1'
+            description    = 'Test environment 1'
+            createdBy      = @{ id = 'user1' }
+            createdOn      = '2024-01-01T00:00:00Z'
+            lastModifiedBy = @{ id = 'user1' }
+            lastModifiedOn = '2024-01-02T00:00:00Z'
+            resources      = @(
                 @{ id = 'res1'; name = 'Resource1' }
             )
         }
@@ -90,9 +90,9 @@ Describe 'Get-AdoEnvironment' {
             $result.id | Should -Be 1
             $result.name | Should -Be 'TestEnvironment1'
             $result.description | Should -Be 'Test environment 1'
-            $result.createdBy | Should -Be 'user1'
+            $result.createdBy.id | Should -Be 'user1'
             $result.createdOn | Should -Be '2024-01-01T00:00:00Z'
-            $result.lastModifiedBy | Should -Be 'user1'
+            $result.lastModifiedBy.id | Should -Be 'user1'
             $result.lastModifiedOn | Should -Be '2024-01-02T00:00:00Z'
             $result.projectName | Should -Be 'TestProject'
             $result.collectionUri | Should -Be 'https://dev.azure.com/my-org'

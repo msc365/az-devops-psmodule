@@ -68,7 +68,7 @@ Describe 'New-AdoEnvironment' {
             $result.id | Should -Be 1
             $result.name | Should -Be 'NewEnvironment'
             $result.description | Should -Be 'New environment description'
-            $result.createdBy | Should -Be 'user1'
+            $result.createdBy.id | Should -Be 'user1'
             $result.createdOn | Should -Be '2024-01-01T00:00:00Z'
             $result.projectName | Should -Be 'TestProject'
             $result.collectionUri | Should -Be 'https://dev.azure.com/my-org'
