@@ -16,7 +16,7 @@
         Mandatory. The ID of the environment to update.
 
     .PARAMETER Name
-        Mandatory. The name of the environment to update.
+        Optional. The name of the environment to update.
 
     .PARAMETER Description
         Optional. The description of the updated environment.
@@ -68,7 +68,7 @@
         [Alias('EnvironmentId')]
         [int32]$Id,
 
-        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [Parameter(ValueFromPipelineByPropertyName)]
         [Alias('EnvironmentName')]
         [string]$Name,
 
