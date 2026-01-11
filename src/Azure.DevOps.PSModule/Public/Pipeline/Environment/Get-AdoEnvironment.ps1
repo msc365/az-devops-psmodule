@@ -149,9 +149,9 @@
                         if ($Expands -eq 'resourceReferences') {
                             $obj['resources'] = $e_.resources
                         }
-                        $obj['createdBy'] = $e_.createdBy.id
+                        $obj['createdBy'] = $e_.createdBy
                         $obj['createdOn'] = $e_.createdOn
-                        $obj['lastModifiedBy'] = $e_.lastModifiedBy.id
+                        $obj['lastModifiedBy'] = $e_.lastModifiedBy
                         $obj['lastModifiedOn'] = $e_.lastModifiedOn
                         $obj['projectName'] = $ProjectName
                         $obj['collectionUri'] = $CollectionUri

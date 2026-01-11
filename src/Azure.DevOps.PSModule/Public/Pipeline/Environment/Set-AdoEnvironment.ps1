@@ -117,9 +117,9 @@
                         id             = $results.id
                         name           = $results.name
                         description    = $results.description
-                        createdBy      = $results.createdBy.id
+                        createdBy      = $results.createdBy
                         createdOn      = $results.createdOn
-                        lastModifiedBy = $results.lastModifiedBy.id
+                        lastModifiedBy = $results.lastModifiedBy
                         lastModifiedOn = $results.lastModifiedOn
                         projectName    = $ProjectName
                         collectionUri  = $CollectionUri

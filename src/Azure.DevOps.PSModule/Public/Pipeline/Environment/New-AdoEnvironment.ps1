@@ -103,17 +103,6 @@
             if ($PSCmdlet.ShouldProcess($ProjectName, "Create environment: $Name")) {
                 try {
                     $results = $body | Invoke-AdoRestMethod @params
-
-                    [PSCustomObject]@{
-                        id            = $results.id
-                        name          = $results.name
-                        description   = $results.description
-                        createdBy     = $results.createdBy.id
-                        createdOn     = $results.createdOn
-                        projectName   = $ProjectName
-                        collectionUri = $CollectionUri
-                    }
-
                 } catch {
                     if ($_.ErrorDetails.Message -match 'EnvironmentExistsException') {
                         Write-Warning "Environment $Name already exists, trying to get it"
@@ -122,16 +111,6 @@
                         $params.QueryParameters = "name=$Name"
 
                         $results = (Invoke-AdoRestMethod @params).value
-
-                        [PSCustomObject]@{
-                            id            = $results.id
-                            name          = $results.name
-                            description   = $results.description
-                            createdBy     = $results.createdBy.id
-                            createdOn     = $results.createdOn
-                            projectName   = $ProjectName
-                            collectionUri = $CollectionUri
-                        }
                     } else {
                         throw $_
                     }
@@ -148,6 +127,24 @@
     }
 
     end {
+        if ($results) {
+            $obj = [ordered]@{
+                id          = $results.id
+                name        = $results.name
+                description = $results.description
+                createdBy   = $results.createdBy
+                createdOn   = $results.createdOn
+            }
+            if ($results.lastModifiedBy) {
+                $obj['lastModifiedBy'] = $results.lastModifiedBy
+                $obj['lastModifiedOn'] = $results.lastModifiedOn
+            }
+            $obj['projectName'] = $ProjectName
+            $obj['collectionUri'] = $CollectionUri
+
+            [PSCustomObject]$obj
+        }
+
         Write-Verbose ("Exit: $($MyInvocation.MyCommand.Name)")
     }
 }
