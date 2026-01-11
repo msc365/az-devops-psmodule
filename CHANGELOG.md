@@ -3,6 +3,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [UNRELEASED]
+
+### What's Changed
+- fix: Update `Set-AdoEnvironment` Name param from mandatory to optional (#81)
+- fix: Update `*-AdoEnvironment` cmdlets to return full user objects for `createdBy` and `lastModifiedBy` (#82)
+
+### Breaking Changes
+- _None_
+
 ## [0.2.0] - 2026-01-10
 
 ### Summary
