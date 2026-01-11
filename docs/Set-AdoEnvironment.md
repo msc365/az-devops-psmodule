@@ -146,7 +146,7 @@ HelpMessage: ''
 
 ### -Name
 
-Mandatory.
+Optional.
 The name of the environment to update.
 
 ```yaml
