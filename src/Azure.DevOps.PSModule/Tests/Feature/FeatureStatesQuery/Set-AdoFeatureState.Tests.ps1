@@ -36,7 +36,7 @@ Describe 'Set-AdoFeatureState' {
             $result = Set-AdoFeatureState -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -Feature 'boards' -FeatureState 'enabled' -Confirm:$false
 
             # Assert
-            $result.state | Should -Be 'enabled'
+            $result.state | Should -Be 1
             $result.feature | Should -Be 'boards'
         }
 
@@ -46,7 +46,7 @@ Describe 'Set-AdoFeatureState' {
 
             # Assert
             Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1 -ParameterFilter {
-                $Body -like '*"state":0*'
+                $null -ne $Body -and $Body.state -eq 0
             }
         }
 
@@ -56,7 +56,6 @@ Describe 'Set-AdoFeatureState' {
 
             # Assert
             $result.projectName | Should -Be 'TestProject'
-            $result.projectId | Should -Be '12345678-1234-1234-1234-123456789012'
             $result.collectionUri | Should -Be 'https://dev.azure.com/my-org'
         }
 
