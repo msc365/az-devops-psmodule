@@ -23,9 +23,13 @@
         Optional. The API version to use. Default is '4.1-preview.1'.
 
     .OUTPUTS
-        PSCustomObject
-
-        Object representing the updated feature state for the specified Azure DevOps project.
+        [PSCustomObject]@{
+            feature       : Feature name (e.g., 'boards', 'repos', 'pipelines', 'testPlans', 'artifacts')
+            state         : State of the feature (e.g., 'enabled', 'disabled')
+            featureId     : Feature ID (e.g., 'ms.vss-code.version-control')
+            projectName   : Name of the project
+            collectionUri : Collection URI used
+        }
 
     .NOTES
         - Turning off a feature hides this service for all members of this project.
@@ -111,7 +115,7 @@
 
             $uri = "$CollectionUri/_apis/FeatureManagement/FeatureStates/host/project/$projectId/$featureId"
 
-            $body = @{
+            $body = [PSCustomObject]@{
                 featureId = $featureId
                 scope     = @{
                     settingScope = 'project'
@@ -121,11 +125,10 @@
             }
 
             $params = @{
-                Uri         = $uri
-                Version     = $Version
-                Method      = 'PATCH'
-                Body        = ($body | ConvertTo-Json -Depth 3 -Compress)
-                ContentType = 'application/json'
+                Uri     = $uri
+                Version = $Version
+                Method  = 'PATCH'
+                Body    = $body
             }
 
             if ($PSCmdlet.ShouldProcess($CollectionUri, "Set Feature State: $Feature to $FeatureState for Project: $ProjectName")) {
@@ -133,11 +136,10 @@
 
                 # Add additional context to the output
                 [PSCustomObject]@{
-                    featureId     = $results.featureId
-                    state         = ($results.state -eq 1 ? 'enabled' : 'disabled')
                     feature       = $Feature
+                    state         = $results.state
+                    featureId     = $results.featureId
                     projectName   = $ProjectName
-                    projectId     = $projectId
                     collectionUri = $CollectionUri
                 }
             } else {
