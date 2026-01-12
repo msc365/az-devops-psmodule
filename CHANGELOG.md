@@ -3,15 +3,22 @@
 
 All notable changes to this project will be documented in this file.
 
-## [UNRELEASED]
+## [0.2.1] - 2026-01-12
+
+### Summary
+This is a maintenance release focused on improving _Environment_ and _FeatureState_ cmdlet usability and output consistency. Enhanced parameter flexibility and enriched response objects for better integration scenarios.
 
 ### What's Changed
 - fix: Update `Set-AdoEnvironment` Name param from mandatory to optional (#81)
 - fix: Update `*-AdoEnvironment` cmdlets to return full user objects for `createdBy` and `lastModifiedBy` (#82)
 - fix: Enhance output structure for `*-AdoFeatureState` cmdlets; update unit tests (#84)
+- chore: Update CHANGELOG for v0.2.1 maintenance release (#85)
+- chore: Update build version to 0.2.1 (#85)
 
 ### Breaking Changes
 - _None_
+
+---
 
 ## [0.2.0] - 2026-01-10
 
