@@ -17,9 +17,13 @@
         Optional. The API version to use. Default is '4.1-preview.1'.
 
     .OUTPUTS
-        PSCustomObject
-
-        Object representing the feature states for the specified Azure DevOps project.
+        [PSCustomObject]@{
+            feature       : Feature name (e.g., 'boards', 'repos', 'pipelines', 'testPlans', 'artifacts')
+            state         : State of the feature (e.g., 'enabled', 'disabled')
+            featureId     : Feature ID (e.g., 'ms.vss-code.version-control')
+            projectName   : Name of the project
+            collectionUri : Collection URI used
+        }
 
     .LINK
         https://learn.microsoft.com/en-us/rest/api/azure/devops/feature-management/featurestatesquery
@@ -80,13 +84,13 @@
 
             $uri = "$CollectionUri/_apis/FeatureManagement/FeatureStatesQuery/host/project/$projectId"
 
-            $body = @{
+            $body = [PSCustomObject]@{
                 featureIds    = @(
-                    'ms.vss-work.agile'           # Boards
-                    'ms.vss-code.version-control' # Repos
-                    'ms.vss-build.pipelines'      # Pipelines
-                    'ms.vss-test-web.test'        # Test Plans
-                    'ms.azure-artifacts.feature'  # Artifacts
+                    'ms.vss-work.agile'           # boards
+                    'ms.vss-code.version-control' # repos
+                    'ms.vss-build.pipelines'      # pipelines
+                    'ms.vss-test-web.test'        # testPlans
+                    'ms.azure-artifacts.feature'  # artifacts
                 )
                 featureStates = @{}
                 scopeValues   = @{
@@ -98,29 +102,30 @@
                 Uri     = $uri
                 Version = $Version
                 Method  = 'POST'
-                Body    = ($body | ConvertTo-Json -Depth 3 -Compress)
+                Body    = $body
             }
 
             if ($PSCmdlet.ShouldProcess($CollectionUri, "Get Feature States for project '$ProjectName'")) {
                 $results = Invoke-AdoRestMethod @params
 
-                # Process and enhance each feature state result
-                foreach ($fs_ in $results.featureStates) {
-                    $featureName = switch ($fs_.featureId) {
-                        'ms.vss-work.agile' { 'Boards' }
-                        'ms.vss-code.version-control' { 'Repos' }
-                        'ms.vss-build.pipelines' { 'Pipelines' }
-                        'ms.vss-test-web.test' { 'TestPlans' }
-                        'ms.azure-artifacts.feature' { 'Artifacts' }
-                        default { $_.featureId }
+                foreach ($featureId in $results.featureStates.PSObject.Properties.Name) {
+                    # Get user-friendly feature name
+                    $feature = switch ($featureId) {
+                        'ms.vss-work.agile' { 'boards' }
+                        'ms.vss-code.version-control' { 'repos' }
+                        'ms.vss-build.pipelines' { 'pipelines' }
+                        'ms.vss-test-web.test' { 'testPlans' }
+                        'ms.azure-artifacts.feature' { 'artifacts' }
+                        default { $featureId }
                     }
+                    # Get feature state
+                    $state = $results.featureStates.$featureId.state
 
                     [PSCustomObject]@{
-                        feature       = $featureName
-                        featureId     = $fs_.featureId
-                        state         = ($fs_.state -eq 1 ? 'enabled' : 'disabled')
+                        feature       = $feature
+                        state         = $state
+                        featureId     = $featureId
                         projectName   = $ProjectName
-                        projectId     = $projectId
                         collectionUri = $CollectionUri
                     }
                 }

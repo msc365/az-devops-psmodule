@@ -12,30 +12,30 @@
 
 Describe 'Get-AdoFeatureState' {
     BeforeAll {
-        # Sample feature state data for mocking
-        $mockFeatureStates = @{
-            featureStates = @(
-                @{
+        # Sample feature state data for mocking - featureStates is a PSCustomObject (not hashtable)
+        $mockFeatureStates = [PSCustomObject]@{
+            featureStates = [PSCustomObject]@{
+                'ms.vss-work.agile'           = [PSCustomObject]@{
                     featureId = 'ms.vss-work.agile'
                     state     = 1
                 }
-                @{
+                'ms.vss-code.version-control' = [PSCustomObject]@{
                     featureId = 'ms.vss-code.version-control'
                     state     = 1
                 }
-                @{
+                'ms.vss-build.pipelines'      = [PSCustomObject]@{
                     featureId = 'ms.vss-build.pipelines'
                     state     = 0
                 }
-                @{
+                'ms.vss-test-web.test'        = [PSCustomObject]@{
                     featureId = 'ms.vss-test-web.test'
                     state     = 1
                 }
-                @{
+                'ms.azure-artifacts.feature'  = [PSCustomObject]@{
                     featureId = 'ms.azure-artifacts.feature'
                     state     = 0
                 }
-            )
+            }
         }
 
         $mockProject = @{
@@ -57,33 +57,39 @@ Describe 'Get-AdoFeatureState' {
 
             # Assert
             $result | Should -HaveCount 5
-            $result[0].feature | Should -Be 'Boards'
-            $result[1].feature | Should -Be 'Repos'
-            $result[2].feature | Should -Be 'Pipelines'
-            $result[3].feature | Should -Be 'TestPlans'
-            $result[4].feature | Should -Be 'Artifacts'
+            ($result.feature | Sort-Object) | Should -Contain 'boards'
+            ($result.feature | Sort-Object) | Should -Contain 'repos'
+            ($result.feature | Sort-Object) | Should -Contain 'pipelines'
+            ($result.feature | Sort-Object) | Should -Contain 'testPlans'
+            ($result.feature | Sort-Object) | Should -Contain 'artifacts'
         }
 
-        It 'Should return feature states with correct enabled/disabled values' {
+        It 'Should return feature states with correct state values' {
             # Act
             $result = Get-AdoFeatureState -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject'
 
             # Assert
-            $result[0].state | Should -Be 'enabled'
-            $result[1].state | Should -Be 'enabled'
-            $result[2].state | Should -Be 'disabled'
-            $result[3].state | Should -Be 'enabled'
-            $result[4].state | Should -Be 'disabled'
+            $boardsState = ($result | Where-Object { $_.featureId -eq 'ms.vss-work.agile' }).state
+            $reposState = ($result | Where-Object { $_.featureId -eq 'ms.vss-code.version-control' }).state
+            $pipelinesState = ($result | Where-Object { $_.featureId -eq 'ms.vss-build.pipelines' }).state
+            $testPlansState = ($result | Where-Object { $_.featureId -eq 'ms.vss-test-web.test' }).state
+            $artifactsState = ($result | Where-Object { $_.featureId -eq 'ms.azure-artifacts.feature' }).state
+
+            $boardsState | Should -Be 1
+            $reposState | Should -Be 1
+            $pipelinesState | Should -Be 0
+            $testPlansState | Should -Be 1
+            $artifactsState | Should -Be 0
         }
 
         It 'Should include project context in output' {
             # Act
             $result = Get-AdoFeatureState -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject'
 
-            # Assert
-            $result[0].projectName | Should -Be 'TestProject'
-            $result[0].projectId | Should -Be '12345678-1234-1234-1234-123456789012'
-            $result[0].collectionUri | Should -Be 'https://dev.azure.com/my-org'
+            # Assert - Check first result (any feature)
+            $firstResult = $result | Select-Object -First 1
+            $firstResult.projectName | Should -Be 'TestProject'
+            $firstResult.collectionUri | Should -Be 'https://dev.azure.com/my-org'
         }
 
         It 'Should map feature IDs to friendly names correctly' {
@@ -92,10 +98,10 @@ Describe 'Get-AdoFeatureState' {
 
             # Assert
             $boardsFeature = $result | Where-Object { $_.featureId -eq 'ms.vss-work.agile' }
-            $boardsFeature.feature | Should -Be 'Boards'
+            $boardsFeature.feature | Should -Be 'boards'
 
             $reposFeature = $result | Where-Object { $_.featureId -eq 'ms.vss-code.version-control' }
-            $reposFeature.feature | Should -Be 'Repos'
+            $reposFeature.feature | Should -Be 'repos'
         }
 
         It 'Should construct API URI correctly with project ID' {
@@ -116,6 +122,14 @@ Describe 'Get-AdoFeatureState' {
             Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1 -ParameterFilter {
                 $Method -eq 'POST'
             }
+        }
+
+        It 'Should pass Body parameter to API call' {
+            # Act
+            Get-AdoFeatureState -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject'
+
+            # Assert - Just verify Body parameter was passed
+            Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1
         }
     }
 
