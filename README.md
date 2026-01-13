@@ -158,7 +158,7 @@ Invoke-psake .\src\Build.ps1 -taskList Clean
 ## Support
 
 This project uses GitHub Issues to track bugs and feature requests.
-Please [search the existing issues](https://github.com/msc365/az-devops-psmodule/issues) before filing
+Please [search the existing issues](https://github.com/msc365/az-devops-psmodule/issues?q=is%3Aissue) before filing
 new issues to avoid duplicates.
 
 - For new issues, file your bug or feature request as a [new issue](https://github.com/msc365/az-devops-psmodule/issues/new/choose).
