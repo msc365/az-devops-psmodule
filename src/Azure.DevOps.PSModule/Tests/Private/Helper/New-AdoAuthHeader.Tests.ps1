@@ -33,7 +33,7 @@ Describe 'New-AdoAuthHeader' -Tag 'Private' {
                 $expectedAuth = "Basic $expectedBase64"
 
                 # Act
-                New-AdoAuthHeader -PAT $mockPAT -Confirm:$false
+                New-AdoAuthHeader -PAT $mockPAT
 
                 # Assert
                 $script:header | Should -Not -BeNullOrEmpty
@@ -47,6 +47,7 @@ Describe 'New-AdoAuthHeader' -Tag 'Private' {
                 # Arrange
                 $mockAccessToken = 'fake-access-token-67890'
                 $principalAppId = '499b84ac-1321-427f-aa17-267ca6975798'
+                [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
                 $mockSecureToken = ConvertTo-SecureString -String $mockAccessToken -AsPlainText -Force
                 $mockContext = @{ Account = 'test@example.com' }
                 $mockTokenResponse = @{ token = $mockSecureToken }
@@ -55,7 +56,7 @@ Describe 'New-AdoAuthHeader' -Tag 'Private' {
                 Mock Get-AzAccessToken { return $mockTokenResponse }
 
                 # Act
-                New-AdoAuthHeader -PAT '' -Confirm:$false
+                New-AdoAuthHeader -PAT ''
 
                 # Assert
                 $script:header | Should -Not -BeNullOrEmpty
@@ -70,6 +71,7 @@ Describe 'New-AdoAuthHeader' -Tag 'Private' {
             InModuleScope Azure.DevOps.PSModule {
                 # Arrange
                 $mockAccessToken = 'fake-access-token-67890'
+                [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
                 $mockSecureToken = ConvertTo-SecureString -String $mockAccessToken -AsPlainText -Force
                 $mockContext = @{ Account = 'test@example.com' }
                 $mockTokenResponse = @{ token = $mockSecureToken }
@@ -78,7 +80,7 @@ Describe 'New-AdoAuthHeader' -Tag 'Private' {
                 Mock Get-AzAccessToken { return $mockTokenResponse }
 
                 # Act
-                New-AdoAuthHeader -Confirm:$false
+                New-AdoAuthHeader
 
                 # Assert
                 Should -Invoke Get-AzAccessToken -Times 1 -ParameterFilter {
@@ -94,7 +96,7 @@ Describe 'New-AdoAuthHeader' -Tag 'Private' {
                 $script:header = $null
 
                 # Act
-                New-AdoAuthHeader -PAT $mockPAT -Confirm:$false
+                New-AdoAuthHeader -PAT $mockPAT
 
                 # Assert
                 $script:header | Should -Not -BeNullOrEmpty
@@ -119,7 +121,7 @@ Describe 'New-AdoAuthHeader' -Tag 'Private' {
                 Mock Write-Error { }
 
                 # Act & Assert
-                { New-AdoAuthHeader -Confirm:$false -ErrorAction Stop } | Should -Throw
+                { New-AdoAuthHeader -ErrorAction Stop } | Should -Throw
             }
         }
 
@@ -131,7 +133,7 @@ Describe 'New-AdoAuthHeader' -Tag 'Private' {
                 Mock Write-Error { }
 
                 # Act & Assert
-                { New-AdoAuthHeader -Confirm:$false -ErrorAction Stop 2>$null } | Should -Throw '*login to Azure PowerShell*'
+                { New-AdoAuthHeader -ErrorAction Stop 2>$null } | Should -Throw '*login to Azure PowerShell*'
             }
         }
 
@@ -143,7 +145,7 @@ Describe 'New-AdoAuthHeader' -Tag 'Private' {
                 Mock Get-AzAccessToken { throw 'Access token error' }
 
                 # Act & Assert
-                { New-AdoAuthHeader -Confirm:$false } | Should -Throw
+                { New-AdoAuthHeader } | Should -Throw
             }
         }
     }
@@ -160,6 +162,7 @@ Describe 'New-AdoAuthHeader' -Tag 'Private' {
             InModuleScope Azure.DevOps.PSModule {
                 # Arrange
                 $mockAccessToken = 'fake-access-token-67890'
+                [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
                 $mockSecureToken = ConvertTo-SecureString -String $mockAccessToken -AsPlainText -Force
                 $mockContext = @{ Account = 'test@example.com' }
                 $mockTokenResponse = @{ token = $mockSecureToken }
@@ -168,7 +171,7 @@ Describe 'New-AdoAuthHeader' -Tag 'Private' {
                 Mock Get-AzAccessToken { return $mockTokenResponse }
 
                 # Act
-                New-AdoAuthHeader -PAT '' -Confirm:$false
+                New-AdoAuthHeader -PAT ''
 
                 # Assert
                 $script:header.Authorization | Should -Match '^Bearer '
@@ -182,7 +185,7 @@ Describe 'New-AdoAuthHeader' -Tag 'Private' {
                 $specialPAT = 'pat!@#$%^&*()_+-=[]{}|;:,.<>?'
 
                 # Act
-                New-AdoAuthHeader -PAT $specialPAT -Confirm:$false
+                New-AdoAuthHeader -PAT $specialPAT
 
                 # Assert
                 $script:header | Should -Not -BeNullOrEmpty

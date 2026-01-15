@@ -36,7 +36,7 @@ Describe 'Invoke-AdoRestMethod' -Tag 'Private' {
                 $expectedUri = "$mockUri`?api-version=$mockVersion"
 
                 # Act
-                Invoke-AdoRestMethod -Uri $mockUri -Version $mockVersion -Method GET -Confirm:$false
+                Invoke-AdoRestMethod -Uri $mockUri -Version $mockVersion -Method GET
 
                 # Assert
                 Should -Invoke Invoke-RestMethod -Times 1 -ParameterFilter {
@@ -52,7 +52,7 @@ Describe 'Invoke-AdoRestMethod' -Tag 'Private' {
                 $mockVersion = '7.0'
 
                 # Act
-                Invoke-AdoRestMethod -Uri $mockUri -Version $mockVersion -Method POST -Body @{} -Confirm:$false
+                Invoke-AdoRestMethod -Uri $mockUri -Version $mockVersion -Method POST -Body @{}
 
                 # Assert
                 Should -Invoke Invoke-RestMethod -Times 1 -ParameterFilter {
@@ -70,7 +70,7 @@ Describe 'Invoke-AdoRestMethod' -Tag 'Private' {
                 $expectedUri = "$mockUri`?$queryParams&api-version=$mockVersion"
 
                 # Act
-                Invoke-AdoRestMethod -Uri $mockUri -Version $mockVersion -Method GET -QueryParameters $queryParams -Confirm:$false
+                Invoke-AdoRestMethod -Uri $mockUri -Version $mockVersion -Method GET -QueryParameters $queryParams
 
                 # Assert
                 Should -Invoke Invoke-RestMethod -Times 1 -ParameterFilter {
@@ -87,7 +87,7 @@ Describe 'Invoke-AdoRestMethod' -Tag 'Private' {
                 $script:header = @{ Authorization = 'Basic testtoken123' }
 
                 # Act
-                Invoke-AdoRestMethod -Uri $mockUri -Version $mockVersion -Method GET -Confirm:$false
+                Invoke-AdoRestMethod -Uri $mockUri -Version $mockVersion -Method GET
 
                 # Assert
                 Should -Invoke Invoke-RestMethod -Times 1 -ParameterFilter {
@@ -104,7 +104,7 @@ Describe 'Invoke-AdoRestMethod' -Tag 'Private' {
                 $mockBody = @{ name = 'TestProject'; description = 'Test Description' }
 
                 # Act
-                Invoke-AdoRestMethod -Uri $mockUri -Version $mockVersion -Method POST -Body $mockBody -Confirm:$false
+                Invoke-AdoRestMethod -Uri $mockUri -Version $mockVersion -Method POST -Body $mockBody
 
                 # Assert
                 Should -Invoke Invoke-RestMethod -Times 1 -ParameterFilter {
@@ -133,7 +133,7 @@ Describe 'Invoke-AdoRestMethod' -Tag 'Private' {
                 $script:header = $null
 
                 # Act
-                Invoke-AdoRestMethod -Uri $mockUri -Version $mockVersion -Method GET -Confirm:$false
+                Invoke-AdoRestMethod -Uri $mockUri -Version $mockVersion -Method GET
 
                 # Assert
                 Should -Invoke New-AdoAuthHeader -Times 1
@@ -155,7 +155,7 @@ Describe 'Invoke-AdoRestMethod' -Tag 'Private' {
                 }
 
                 # Act
-                Invoke-AdoRestMethod -Uri $mockUri -Version $mockVersion -Method GET -Confirm:$false
+                Invoke-AdoRestMethod -Uri $mockUri -Version $mockVersion -Method GET
 
                 # Assert
                 Should -Invoke New-AdoAuthHeader -Times 1
@@ -178,7 +178,7 @@ Describe 'Invoke-AdoRestMethod' -Tag 'Private' {
                 }
 
                 # Act
-                Invoke-AdoRestMethod -Uri $mockUri -Version $mockVersion -Method GET -Confirm:$false
+                Invoke-AdoRestMethod -Uri $mockUri -Version $mockVersion -Method GET
 
                 # Assert
                 Should -Invoke Invoke-RestMethod -Times 2
@@ -204,7 +204,7 @@ Describe 'Invoke-AdoRestMethod' -Tag 'Private' {
                 $mockVersion = '7.0'
 
                 # Act
-                Invoke-AdoRestMethod -Uri $mockUri -Version $mockVersion -Method GET -Confirm:$false
+                Invoke-AdoRestMethod -Uri $mockUri -Version $mockVersion -Method GET
 
                 # Assert
                 Should -Invoke Invoke-RestMethod -Times 1 -ParameterFilter {
@@ -221,7 +221,7 @@ Describe 'Invoke-AdoRestMethod' -Tag 'Private' {
                 $mockBody = @{ name = 'Updated Name' }
 
                 # Act
-                Invoke-AdoRestMethod -Uri $mockUri -Version $mockVersion -Method PATCH -Body $mockBody -Confirm:$false
+                Invoke-AdoRestMethod -Uri $mockUri -Version $mockVersion -Method PATCH -Body $mockBody
 
                 # Assert
                 Should -Invoke Invoke-RestMethod -Times 1 -ParameterFilter {
@@ -237,7 +237,7 @@ Describe 'Invoke-AdoRestMethod' -Tag 'Private' {
                 $mockVersion = '7.0'
 
                 # Act
-                Invoke-AdoRestMethod -Uri $mockUri -Version $mockVersion -Method DELETE -Confirm:$false
+                Invoke-AdoRestMethod -Uri $mockUri -Version $mockVersion -Method DELETE
 
                 # Assert
                 Should -Invoke Invoke-RestMethod -Times 1 -ParameterFilter {
@@ -254,7 +254,7 @@ Describe 'Invoke-AdoRestMethod' -Tag 'Private' {
                 $mockBody = @{ enabled = $true }
 
                 # Act
-                Invoke-AdoRestMethod -Uri $mockUri -Version $mockVersion -Method PUT -Body $mockBody -Confirm:$false
+                Invoke-AdoRestMethod -Uri $mockUri -Version $mockVersion -Method PUT -Body $mockBody
 
                 # Assert
                 Should -Invoke Invoke-RestMethod -Times 1 -ParameterFilter {
@@ -282,7 +282,7 @@ Describe 'Invoke-AdoRestMethod' -Tag 'Private' {
                 $mockVersion = '7.0'
 
                 # Act
-                Invoke-AdoRestMethod -Uri $mockUri -Version $mockVersion -Method GET -Confirm:$false
+                Invoke-AdoRestMethod -Uri $mockUri -Version $mockVersion -Method GET
 
                 # Assert
                 Should -Invoke Invoke-RestMethod -Times 1 -ParameterFilter {
@@ -298,7 +298,7 @@ Describe 'Invoke-AdoRestMethod' -Tag 'Private' {
                 $mockVersion = '7.0'
 
                 # Act
-                Invoke-AdoRestMethod -Uri $mockUri -Version $mockVersion -Method PATCH -ContentType 'application/json-patch+json' -Confirm:$false
+                Invoke-AdoRestMethod -Uri $mockUri -Version $mockVersion -Method PATCH -ContentType 'application/json-patch+json'
 
                 # Assert
                 Should -Invoke Invoke-RestMethod -Times 1 -ParameterFilter {
@@ -328,7 +328,7 @@ Describe 'Invoke-AdoRestMethod' -Tag 'Private' {
                 }
 
                 # Act & Assert
-                { Invoke-AdoRestMethod -Uri $mockUri -Version $mockVersion -Method GET -Confirm:$false } | Should -Throw
+                { Invoke-AdoRestMethod -Uri $mockUri -Version $mockVersion -Method GET } | Should -Throw
             }
         }
 
@@ -343,7 +343,7 @@ Describe 'Invoke-AdoRestMethod' -Tag 'Private' {
                 }
 
                 # Act & Assert
-                { Invoke-AdoRestMethod -Uri $mockUri -Version $mockVersion -Method GET -Confirm:$false } | Should -Throw
+                { Invoke-AdoRestMethod -Uri $mockUri -Version $mockVersion -Method GET } | Should -Throw
             }
         }
     }
