@@ -1,4 +1,4 @@
-﻿BeforeAll {
+BeforeAll {
     # Import the module
     $modulePath = Join-Path -Path $PSScriptRoot -ChildPath '..\..\..\'
     $moduleName = Join-Path -Path $modulePath -ChildPath 'Azure.DevOps.PSModule.psd1'
@@ -100,7 +100,7 @@ Describe 'Get-AdoClassificationNode' {
             }
 
             # Act
-            $result = Get-AdoClassificationNode -CollectionUri $mockCollectionUri -ProjectName $mockProject -StructureGroup 'Areas' -Confirm:$false
+            $result = Get-AdoClassificationNode -CollectionUri $mockCollectionUri -ProjectName $mockProject -StructureGroup 'Areas'
 
             # Assert
             $result.name | Should -Be 'Area'
@@ -115,7 +115,7 @@ Describe 'Get-AdoClassificationNode' {
             }
 
             # Act
-            $result = Get-AdoClassificationNode -CollectionUri $mockCollectionUri -ProjectName $mockProject -StructureGroup 'Areas' -Path $mockAreaPath -Confirm:$false
+            $result = Get-AdoClassificationNode -CollectionUri $mockCollectionUri -ProjectName $mockProject -StructureGroup 'Areas' -Path $mockAreaPath
 
             # Assert
             $result.id | Should -Be 123
@@ -130,7 +130,7 @@ Describe 'Get-AdoClassificationNode' {
             }
 
             # Act
-            $result = Get-AdoClassificationNode -CollectionUri $mockCollectionUri -ProjectName $mockProject -StructureGroup 'Iterations' -Path $mockIterationPath -Confirm:$false
+            $result = Get-AdoClassificationNode -CollectionUri $mockCollectionUri -ProjectName $mockProject -StructureGroup 'Iterations' -Path $mockIterationPath
 
             # Assert
             $result.name | Should -Be 'Sprint-1'
@@ -145,7 +145,7 @@ Describe 'Get-AdoClassificationNode' {
             }
 
             # Act
-            $result = Get-AdoClassificationNode -CollectionUri $mockCollectionUri -ProjectName $mockProject -StructureGroup 'Iterations' -Path $mockIterationPath -Confirm:$false
+            $result = Get-AdoClassificationNode -CollectionUri $mockCollectionUri -ProjectName $mockProject -StructureGroup 'Iterations' -Path $mockIterationPath
 
             # Assert
             $result.hasChildren | Should -Be $true
@@ -162,7 +162,7 @@ Describe 'Get-AdoClassificationNode' {
             }
 
             # Act
-            $result = Get-AdoClassificationNode -CollectionUri $mockCollectionUri -ProjectName $mockProject -Ids @('123', '456') -Confirm:$false
+            $result = Get-AdoClassificationNode -CollectionUri $mockCollectionUri -ProjectName $mockProject -Ids @('123', '456')
 
             # Assert
             $result.Count | Should -Be 2
@@ -170,7 +170,7 @@ Describe 'Get-AdoClassificationNode' {
 
         It 'Should include projectName and collectionUri in output' {
             # Act
-            $result = Get-AdoClassificationNode -CollectionUri $mockCollectionUri -ProjectName $mockProject -StructureGroup 'Areas' -Path $mockAreaPath -Confirm:$false
+            $result = Get-AdoClassificationNode -CollectionUri $mockCollectionUri -ProjectName $mockProject -StructureGroup 'Areas' -Path $mockAreaPath
 
             # Assert
             $result.projectName | Should -Be $mockProject
@@ -189,7 +189,7 @@ Describe 'Get-AdoClassificationNode' {
 
         It 'Should construct correct URI for root node retrieval' {
             # Act
-            Get-AdoClassificationNode -CollectionUri $mockCollectionUri -ProjectName $mockProject -StructureGroup 'Areas' -Confirm:$false
+            Get-AdoClassificationNode -CollectionUri $mockCollectionUri -ProjectName $mockProject -StructureGroup 'Areas'
 
             # Assert
             Should -Invoke -ModuleName Azure.DevOps.PSModule -CommandName Invoke-AdoRestMethod -ParameterFilter {
@@ -199,7 +199,7 @@ Describe 'Get-AdoClassificationNode' {
 
         It 'Should construct correct URI with path' {
             # Act
-            Get-AdoClassificationNode -CollectionUri $mockCollectionUri -ProjectName $mockProject -StructureGroup 'Areas' -Path $mockAreaPath -Confirm:$false
+            Get-AdoClassificationNode -CollectionUri $mockCollectionUri -ProjectName $mockProject -StructureGroup 'Areas' -Path $mockAreaPath
 
             # Assert
             Should -Invoke -ModuleName Azure.DevOps.PSModule -CommandName Invoke-AdoRestMethod -ParameterFilter {
@@ -209,7 +209,7 @@ Describe 'Get-AdoClassificationNode' {
 
         It 'Should include Depth in query parameters when specified' {
             # Act
-            Get-AdoClassificationNode -CollectionUri $mockCollectionUri -ProjectName $mockProject -StructureGroup 'Areas' -Depth 2 -Confirm:$false
+            Get-AdoClassificationNode -CollectionUri $mockCollectionUri -ProjectName $mockProject -StructureGroup 'Areas' -Depth 2
 
             # Assert
             Should -Invoke -ModuleName Azure.DevOps.PSModule -CommandName Invoke-AdoRestMethod -ParameterFilter {
@@ -219,7 +219,7 @@ Describe 'Get-AdoClassificationNode' {
 
         It 'Should include IDs in query parameters when specified' {
             # Act
-            Get-AdoClassificationNode -CollectionUri $mockCollectionUri -ProjectName $mockProject -Ids @('1', '2', '3') -Confirm:$false
+            Get-AdoClassificationNode -CollectionUri $mockCollectionUri -ProjectName $mockProject -Ids @('1', '2', '3')
 
             # Assert
             Should -Invoke -ModuleName Azure.DevOps.PSModule -CommandName Invoke-AdoRestMethod -ParameterFilter {
@@ -229,7 +229,7 @@ Describe 'Get-AdoClassificationNode' {
 
         It 'Should include ErrorPolicy in query parameters when specified with IDs' {
             # Act
-            Get-AdoClassificationNode -CollectionUri $mockCollectionUri -ProjectName $mockProject -Ids @('1', '2') -ErrorPolicy 'omit' -Confirm:$false
+            Get-AdoClassificationNode -CollectionUri $mockCollectionUri -ProjectName $mockProject -Ids @('1', '2') -ErrorPolicy 'omit'
 
             # Assert
             Should -Invoke -ModuleName Azure.DevOps.PSModule -CommandName Invoke-AdoRestMethod -ParameterFilter {
@@ -258,7 +258,7 @@ Describe 'Get-AdoClassificationNode' {
             }
 
             # Act & Assert - Should not throw, only produce warning
-            { Get-AdoClassificationNode -CollectionUri $mockCollectionUri -ProjectName $mockProject -StructureGroup 'Areas' -Path 'NonExistent' -Confirm:$false -WarningAction SilentlyContinue } | Should -Not -Throw
+            { Get-AdoClassificationNode -CollectionUri $mockCollectionUri -ProjectName $mockProject -StructureGroup 'Areas' -Path 'NonExistent' -WarningAction SilentlyContinue } | Should -Not -Throw
 
             Should -Invoke -ModuleName Azure.DevOps.PSModule -CommandName Invoke-AdoRestMethod
         }
@@ -270,7 +270,7 @@ Describe 'Get-AdoClassificationNode' {
             }
 
             # Act & Assert
-            { Get-AdoClassificationNode -CollectionUri $mockCollectionUri -ProjectName $mockProject -StructureGroup 'Areas' -Confirm:$false } | Should -Throw
+            { Get-AdoClassificationNode -CollectionUri $mockCollectionUri -ProjectName $mockProject -StructureGroup 'Areas' } | Should -Throw
         }
     }
 
@@ -287,7 +287,7 @@ Describe 'Get-AdoClassificationNode' {
             }
 
             # Act & Assert
-            { Get-AdoClassificationNode -CollectionUri 'https://dev.azure.com/test-org' -ProjectName $mockProject -StructureGroup 'Areas' -Confirm:$false } | Should -Not -Throw
+            { Get-AdoClassificationNode -CollectionUri 'https://dev.azure.com/test-org' -ProjectName $mockProject -StructureGroup 'Areas' } | Should -Not -Throw
         }
 
         It 'Should use environment defaults when not specified' {
@@ -299,7 +299,7 @@ Describe 'Get-AdoClassificationNode' {
             }
 
             # Act
-            $result = Get-AdoClassificationNode -StructureGroup 'Areas' -Confirm:$false
+            $result = Get-AdoClassificationNode -StructureGroup 'Areas'
 
             # Assert
             $result | Should -Not -BeNullOrEmpty

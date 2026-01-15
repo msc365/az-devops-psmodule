@@ -1,4 +1,4 @@
-﻿BeforeAll {
+BeforeAll {
     # Import the module
     $modulePath = Join-Path -Path $PSScriptRoot -ChildPath '..\..\..\..'
     $moduleName = Join-Path -Path $modulePath -ChildPath 'Azure.DevOps.PSModule\Azure.DevOps.PSModule.psd1'
@@ -53,7 +53,7 @@ Describe 'Get-AdoGroup' {
 
         It 'Should retrieve all groups in organization' {
             # Act
-            $result = Get-AdoGroup -CollectionUri $mockCollectionUri -Confirm:$false
+            $result = Get-AdoGroup -CollectionUri $mockCollectionUri
 
             # Assert
             $result | Should -HaveCount 2
@@ -63,7 +63,7 @@ Describe 'Get-AdoGroup' {
 
         It 'Should return PSCustomObject with expected properties' {
             # Act
-            $result = Get-AdoGroup -CollectionUri $mockCollectionUri -Confirm:$false
+            $result = Get-AdoGroup -CollectionUri $mockCollectionUri
 
             # Assert
             $result[0].PSObject.Properties.Name | Should -Contain 'displayName'
@@ -77,7 +77,7 @@ Describe 'Get-AdoGroup' {
 
         It 'Should construct API URI correctly for listing groups' {
             # Act
-            Get-AdoGroup -CollectionUri $mockCollectionUri -Confirm:$false
+            Get-AdoGroup -CollectionUri $mockCollectionUri
 
             # Assert
             Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1 -ParameterFilter {
@@ -87,7 +87,7 @@ Describe 'Get-AdoGroup' {
 
         It 'Should use GET method for API call' {
             # Act
-            Get-AdoGroup -CollectionUri $mockCollectionUri -Confirm:$false
+            Get-AdoGroup -CollectionUri $mockCollectionUri
 
             # Assert
             Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1 -ParameterFilter {
@@ -97,7 +97,7 @@ Describe 'Get-AdoGroup' {
 
         It 'Should use default API version 7.2-preview.1' {
             # Act
-            Get-AdoGroup -CollectionUri $mockCollectionUri -Confirm:$false
+            Get-AdoGroup -CollectionUri $mockCollectionUri
 
             # Assert
             Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1 -ParameterFilter {
@@ -107,7 +107,7 @@ Describe 'Get-AdoGroup' {
 
         It 'Should filter groups by Name parameter' {
             # Act
-            $result = Get-AdoGroup -CollectionUri $mockCollectionUri -Name 'Project Administrators' -Confirm:$false
+            $result = Get-AdoGroup -CollectionUri $mockCollectionUri -Name 'Project Administrators'
 
             # Assert
             $result | Should -HaveCount 1
@@ -116,7 +116,7 @@ Describe 'Get-AdoGroup' {
 
         It 'Should support wildcard filtering by name' {
             # Act
-            $result = Get-AdoGroup -CollectionUri $mockCollectionUri -Name '*Admin*' -Confirm:$false
+            $result = Get-AdoGroup -CollectionUri $mockCollectionUri -Name '*Admin*'
 
             # Assert
             $result | Should -HaveCount 1
@@ -133,7 +133,7 @@ Describe 'Get-AdoGroup' {
 
         It 'Should retrieve group by descriptor using ByDescriptor parameter set' {
             # Act
-            $result = Get-AdoGroup -CollectionUri $mockCollectionUri -GroupDescriptor $mockGroupDescriptor -Confirm:$false
+            $result = Get-AdoGroup -CollectionUri $mockCollectionUri -GroupDescriptor $mockGroupDescriptor
 
             # Assert
             $result | Should -Not -BeNullOrEmpty
@@ -148,7 +148,7 @@ Describe 'Get-AdoGroup' {
             Mock -ModuleName Azure.DevOps.PSModule Invoke-AdoRestMethod { return $mockListResponse }
 
             # Act
-            Get-AdoGroup -CollectionUri $mockCollectionUri -ScopeDescriptor $mockScopeDescriptor -Confirm:$false
+            Get-AdoGroup -CollectionUri $mockCollectionUri -ScopeDescriptor $mockScopeDescriptor
 
             # Assert
             Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1 -ParameterFilter {
@@ -161,7 +161,7 @@ Describe 'Get-AdoGroup' {
             Mock -ModuleName Azure.DevOps.PSModule Invoke-AdoRestMethod { return $mockListResponse }
 
             # Act
-            Get-AdoGroup -CollectionUri $mockCollectionUri -SubjectTypes @('vssgp', 'aadgp') -Confirm:$false
+            Get-AdoGroup -CollectionUri $mockCollectionUri -SubjectTypes @('vssgp', 'aadgp')
 
             # Assert
             Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1 -ParameterFilter {
@@ -175,7 +175,7 @@ Describe 'Get-AdoGroup' {
             $token = 'continuation-token-12345'
 
             # Act
-            Get-AdoGroup -CollectionUri $mockCollectionUri -ContinuationToken $token -Confirm:$false
+            Get-AdoGroup -CollectionUri $mockCollectionUri -ContinuationToken $token
 
             # Assert
             Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1 -ParameterFilter {
@@ -199,7 +199,7 @@ Describe 'Get-AdoGroup' {
             )
 
             # Act
-            $result = $descriptors | Get-AdoGroup -CollectionUri $mockCollectionUri -Confirm:$false
+            $result = $descriptors | Get-AdoGroup -CollectionUri $mockCollectionUri
 
             # Assert
             $result | Should -HaveCount 2
@@ -214,7 +214,7 @@ Describe 'Get-AdoGroup' {
             )
 
             # Act
-            $result = $objects | Get-AdoGroup -CollectionUri $mockCollectionUri -Confirm:$false
+            $result = $objects | Get-AdoGroup -CollectionUri $mockCollectionUri
 
             # Assert
             $result | Should -HaveCount 2
@@ -242,7 +242,7 @@ Describe 'Get-AdoGroup' {
             Mock -ModuleName Azure.DevOps.PSModule Write-Warning { }
 
             # Act
-            $result = Get-AdoGroup -CollectionUri $mockCollectionUri -ScopeDescriptor 'invalid-scope' -Confirm:$false -WarningAction SilentlyContinue
+            $result = Get-AdoGroup -CollectionUri $mockCollectionUri -ScopeDescriptor 'invalid-scope' -WarningAction SilentlyContinue
 
             # Assert
             $result | Should -BeNullOrEmpty
@@ -263,7 +263,7 @@ Describe 'Get-AdoGroup' {
             Mock -ModuleName Azure.DevOps.PSModule Write-Warning { }
 
             # Act
-            $result = Get-AdoGroup -CollectionUri $mockCollectionUri -GroupDescriptor 'invalid-descriptor' -Confirm:$false -WarningAction SilentlyContinue
+            $result = Get-AdoGroup -CollectionUri $mockCollectionUri -GroupDescriptor 'invalid-descriptor' -WarningAction SilentlyContinue
 
             # Assert
             $result | Should -BeNullOrEmpty
@@ -283,7 +283,7 @@ Describe 'Get-AdoGroup' {
             Mock -ModuleName Azure.DevOps.PSModule Invoke-AdoRestMethod { throw $genericError }
 
             # Act & Assert
-            { Get-AdoGroup -CollectionUri $mockCollectionUri -Confirm:$false } | Should -Throw
+            { Get-AdoGroup -CollectionUri $mockCollectionUri } | Should -Throw
         }
     }
 
@@ -299,7 +299,7 @@ Describe 'Get-AdoGroup' {
             $env:DefaultAdoCollectionUri = 'https://dev.azure.com/default-org'
 
             # Act
-            Get-AdoGroup -Confirm:$false
+            Get-AdoGroup
 
             # Assert
             Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1 -ParameterFilter {
@@ -312,7 +312,7 @@ Describe 'Get-AdoGroup' {
             $vsspsUri = 'https://vssps.dev.azure.com/test-org'
 
             # Act
-            Get-AdoGroup -CollectionUri $vsspsUri -Confirm:$false
+            Get-AdoGroup -CollectionUri $vsspsUri
 
             # Assert
             Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1 -ParameterFilter {

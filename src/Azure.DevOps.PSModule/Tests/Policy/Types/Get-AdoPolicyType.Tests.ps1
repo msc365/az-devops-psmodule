@@ -1,4 +1,4 @@
-﻿BeforeAll {
+BeforeAll {
     # Import the module
     $modulePath = Join-Path -Path $PSScriptRoot -ChildPath '..\..\..\'
     $moduleName = Join-Path -Path $modulePath -ChildPath 'Azure.DevOps.PSModule.psd1'
@@ -61,7 +61,7 @@ Describe 'Get-AdoPolicyType' {
 
         It 'Should retrieve specific policy type by ID' {
             # Act
-            $result = Get-AdoPolicyType -CollectionUri $mockCollectionUri -ProjectName $mockProject -Id $mockPolicyTypeId -Confirm:$false
+            $result = Get-AdoPolicyType -CollectionUri $mockCollectionUri -ProjectName $mockProject -Id $mockPolicyTypeId
 
             # Assert
             $result.id | Should -Be $mockPolicyTypeId
@@ -78,7 +78,7 @@ Describe 'Get-AdoPolicyType' {
             }
 
             # Act
-            $result = Get-AdoPolicyType -CollectionUri $mockCollectionUri -ProjectName $mockProject -Confirm:$false
+            $result = Get-AdoPolicyType -CollectionUri $mockCollectionUri -ProjectName $mockProject
 
             # Assert
             $result.Count | Should -Be 3
@@ -88,7 +88,7 @@ Describe 'Get-AdoPolicyType' {
 
         It 'Should include projectName and collectionUri in output' {
             # Act
-            $result = Get-AdoPolicyType -CollectionUri $mockCollectionUri -ProjectName $mockProject -Id $mockPolicyTypeId -Confirm:$false
+            $result = Get-AdoPolicyType -CollectionUri $mockCollectionUri -ProjectName $mockProject -Id $mockPolicyTypeId
 
             # Assert
             $result.projectName | Should -Be $mockProject
@@ -109,7 +109,7 @@ Describe 'Get-AdoPolicyType' {
             } -ParameterFilter { $Uri -like "*$typeId2" }
 
             # Act
-            $result = $typeId1, $typeId2 | Get-AdoPolicyType -CollectionUri $mockCollectionUri -ProjectName $mockProject -Confirm:$false
+            $result = $typeId1, $typeId2 | Get-AdoPolicyType -CollectionUri $mockCollectionUri -ProjectName $mockProject
 
             # Assert
             $result.Count | Should -Be 2
@@ -132,7 +132,7 @@ Describe 'Get-AdoPolicyType' {
 
         It 'Should reject invalid CollectionUri format' {
             # Act & Assert
-            { Get-AdoPolicyType -CollectionUri 'invalid-uri' -ProjectName $mockProject -Confirm:$false } | Should -Throw
+            { Get-AdoPolicyType -CollectionUri 'invalid-uri' -ProjectName $mockProject } | Should -Throw
         }
 
         It 'Should use default CollectionUri from environment when not specified' {
@@ -142,7 +142,7 @@ Describe 'Get-AdoPolicyType' {
             }
 
             # Act
-            $result = Get-AdoPolicyType -ProjectName $mockProject -Id $mockPolicyTypeId -Confirm:$false
+            $result = Get-AdoPolicyType -ProjectName $mockProject -Id $mockPolicyTypeId
 
             # Assert
             Should -Invoke -ModuleName Azure.DevOps.PSModule -CommandName Invoke-AdoRestMethod -ParameterFilter {
@@ -157,7 +157,7 @@ Describe 'Get-AdoPolicyType' {
             }
 
             # Act
-            $result = Get-AdoPolicyType -CollectionUri $mockCollectionUri -Id $mockPolicyTypeId -Confirm:$false
+            $result = Get-AdoPolicyType -CollectionUri $mockCollectionUri -Id $mockPolicyTypeId
 
             # Assert
             Should -Invoke -ModuleName Azure.DevOps.PSModule -CommandName Invoke-AdoRestMethod -ParameterFilter {
@@ -185,7 +185,7 @@ Describe 'Get-AdoPolicyType' {
 
         It 'Should construct correct URI for retrieving by ID' {
             # Act
-            Get-AdoPolicyType -CollectionUri $mockCollectionUri -ProjectName $mockProject -Id $mockPolicyTypeId -Confirm:$false
+            Get-AdoPolicyType -CollectionUri $mockCollectionUri -ProjectName $mockProject -Id $mockPolicyTypeId
 
             # Assert
             Should -Invoke -ModuleName Azure.DevOps.PSModule -CommandName Invoke-AdoRestMethod -ParameterFilter {
@@ -200,7 +200,7 @@ Describe 'Get-AdoPolicyType' {
             }
 
             # Act
-            Get-AdoPolicyType -CollectionUri $mockCollectionUri -ProjectName $mockProject -Confirm:$false
+            Get-AdoPolicyType -CollectionUri $mockCollectionUri -ProjectName $mockProject
 
             # Assert
             Should -Invoke -ModuleName Azure.DevOps.PSModule -CommandName Invoke-AdoRestMethod -ParameterFilter {
@@ -210,7 +210,7 @@ Describe 'Get-AdoPolicyType' {
 
         It 'Should use GET HTTP method' {
             # Act
-            Get-AdoPolicyType -CollectionUri $mockCollectionUri -ProjectName $mockProject -Id $mockPolicyTypeId -Confirm:$false
+            Get-AdoPolicyType -CollectionUri $mockCollectionUri -ProjectName $mockProject -Id $mockPolicyTypeId
 
             # Assert
             Should -Invoke -ModuleName Azure.DevOps.PSModule -CommandName Invoke-AdoRestMethod -ParameterFilter {
@@ -220,7 +220,7 @@ Describe 'Get-AdoPolicyType' {
 
         It 'Should use correct API version' {
             # Act
-            Get-AdoPolicyType -CollectionUri $mockCollectionUri -ProjectName $mockProject -Id $mockPolicyTypeId -Version '7.1' -Confirm:$false
+            Get-AdoPolicyType -CollectionUri $mockCollectionUri -ProjectName $mockProject -Id $mockPolicyTypeId -Version '7.1'
 
             # Assert
             Should -Invoke -ModuleName Azure.DevOps.PSModule -CommandName Invoke-AdoRestMethod -ParameterFilter {
@@ -260,7 +260,7 @@ Describe 'Get-AdoPolicyType' {
             }
 
             # Act
-            $result = Get-AdoPolicyType -CollectionUri $mockCollectionUri -ProjectName $mockProject -Id $validId -Confirm:$false -WarningAction SilentlyContinue
+            $result = Get-AdoPolicyType -CollectionUri $mockCollectionUri -ProjectName $mockProject -Id $validId -WarningAction SilentlyContinue
 
             # Assert
             $result | Should -BeNullOrEmpty
@@ -281,7 +281,7 @@ Describe 'Get-AdoPolicyType' {
             }
 
             # Act & Assert
-            { Get-AdoPolicyType -CollectionUri $mockCollectionUri -ProjectName $mockProject -Id $mockPolicyTypeId -Confirm:$false -ErrorAction Stop } | Should -Throw
+            { Get-AdoPolicyType -CollectionUri $mockCollectionUri -ProjectName $mockProject -Id $mockPolicyTypeId -ErrorAction Stop } | Should -Throw
         }
     }
 }

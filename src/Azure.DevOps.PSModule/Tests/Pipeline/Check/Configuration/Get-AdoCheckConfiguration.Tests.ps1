@@ -1,4 +1,4 @@
-﻿BeforeAll {
+BeforeAll {
     # Import the module
     $modulePath = Join-Path -Path $PSScriptRoot -ChildPath '..\..\..\..\..'
     $moduleName = Join-Path -Path $modulePath -ChildPath 'Azure.DevOps.PSModule\Azure.DevOps.PSModule.psd1'
@@ -68,7 +68,7 @@ Describe 'Get-AdoCheckConfiguration' {
 
         It 'Should retrieve all check configurations for a resource' {
             # Act
-            $result = Get-AdoCheckConfiguration -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -ResourceType 'environment' -ResourceName 'TestEnvironment' -Confirm:$false
+            $result = Get-AdoCheckConfiguration -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -ResourceType 'environment' -ResourceName 'TestEnvironment'
 
             # Assert
             $result | Should -HaveCount 2
@@ -81,7 +81,7 @@ Describe 'Get-AdoCheckConfiguration' {
             Mock -ModuleName Azure.DevOps.PSModule Invoke-AdoRestMethod { return $mockCheckConfigurations.value[0] }
 
             # Act
-            $result = Get-AdoCheckConfiguration -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -Id 1 -Confirm:$false
+            $result = Get-AdoCheckConfiguration -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -Id 1
 
             # Assert
             $result | Should -Not -BeNullOrEmpty
@@ -90,7 +90,7 @@ Describe 'Get-AdoCheckConfiguration' {
 
         It 'Should accept resource names via pipeline' {
             # Act
-            $result = 'TestEnvironment' | Get-AdoCheckConfiguration -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -ResourceType 'environment' -Confirm:$false
+            $result = 'TestEnvironment' | Get-AdoCheckConfiguration -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -ResourceType 'environment'
 
             # Assert
             $result | Should -Not -BeNullOrEmpty
@@ -98,7 +98,7 @@ Describe 'Get-AdoCheckConfiguration' {
 
         It 'Should filter by DefinitionType parameter' {
             # Act
-            Get-AdoCheckConfiguration -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -ResourceType 'environment' -ResourceName 'TestEnvironment' -DefinitionType 'approval' -Confirm:$false
+            Get-AdoCheckConfiguration -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -ResourceType 'environment' -ResourceName 'TestEnvironment' -DefinitionType 'approval'
 
             # Assert
             Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1
@@ -106,7 +106,7 @@ Describe 'Get-AdoCheckConfiguration' {
 
         It 'Should support Expands parameter' {
             # Act
-            Get-AdoCheckConfiguration -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -ResourceType 'environment' -ResourceName 'TestEnvironment' -Expands 'settings' -Confirm:$false
+            Get-AdoCheckConfiguration -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -ResourceType 'environment' -ResourceName 'TestEnvironment' -Expands 'settings'
 
             # Assert
             Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1 -ParameterFilter {
@@ -124,7 +124,7 @@ Describe 'Get-AdoCheckConfiguration' {
 
         It 'Should validate CollectionUri format' {
             # Act & Assert
-            { Get-AdoCheckConfiguration -CollectionUri 'invalid-uri' -ProjectName 'TestProject' -ResourceType 'environment' -ResourceName 'TestEnv' -Confirm:$false } | Should -Throw
+            { Get-AdoCheckConfiguration -CollectionUri 'invalid-uri' -ProjectName 'TestProject' -ResourceType 'environment' -ResourceName 'TestEnv' } | Should -Throw
         }
 
         It 'Should use default CollectionUri from environment variable when not provided' {
@@ -132,7 +132,7 @@ Describe 'Get-AdoCheckConfiguration' {
             $env:DefaultAdoCollectionUri = 'https://dev.azure.com/default-org'
 
             # Act
-            $result = Get-AdoCheckConfiguration -ProjectName 'TestProject' -ResourceType 'environment' -ResourceName 'TestEnvironment' -Confirm:$false
+            $result = Get-AdoCheckConfiguration -ProjectName 'TestProject' -ResourceType 'environment' -ResourceName 'TestEnvironment'
 
             # Assert
             Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1 -ParameterFilter {
@@ -153,7 +153,7 @@ Describe 'Get-AdoCheckConfiguration' {
 
         It 'Should construct correct REST API URI for listing configurations' {
             # Act
-            Get-AdoCheckConfiguration -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -ResourceType 'environment' -ResourceName 'TestEnvironment' -Confirm:$false
+            Get-AdoCheckConfiguration -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -ResourceType 'environment' -ResourceName 'TestEnvironment'
 
             # Assert
             Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1 -ParameterFilter {
@@ -168,7 +168,7 @@ Describe 'Get-AdoCheckConfiguration' {
             Mock -ModuleName Azure.DevOps.PSModule Invoke-AdoRestMethod { return $mockCheckConfigurations.value[0] }
 
             # Act
-            Get-AdoCheckConfiguration -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -Id 1 -Confirm:$false
+            Get-AdoCheckConfiguration -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -Id 1
 
             # Assert
             Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1 -ParameterFilter {
@@ -179,7 +179,7 @@ Describe 'Get-AdoCheckConfiguration' {
 
         It 'Should call Get-AdoEnvironment to resolve resource ID' {
             # Act
-            Get-AdoCheckConfiguration -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -ResourceType 'environment' -ResourceName 'TestEnvironment' -Confirm:$false
+            Get-AdoCheckConfiguration -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -ResourceType 'environment' -ResourceName 'TestEnvironment'
 
             # Assert
             Should -Invoke Get-AdoEnvironment -ModuleName Azure.DevOps.PSModule -Times 1
@@ -197,7 +197,7 @@ Describe 'Get-AdoCheckConfiguration' {
             Mock -ModuleName Azure.DevOps.PSModule Invoke-AdoRestMethod { return @{ value = @() } }
 
             # Act
-            $result = Get-AdoCheckConfiguration -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -ResourceType 'environment' -ResourceName 'TestEnvironment' -Confirm:$false
+            $result = Get-AdoCheckConfiguration -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -ResourceType 'environment' -ResourceName 'TestEnvironment'
 
             # Assert
             $result | Should -BeNullOrEmpty
@@ -208,7 +208,7 @@ Describe 'Get-AdoCheckConfiguration' {
             Mock -ModuleName Azure.DevOps.PSModule Invoke-AdoRestMethod { throw 'API Error: Unauthorized' }
 
             # Act & Assert
-            { Get-AdoCheckConfiguration -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -ResourceType 'environment' -ResourceName 'TestEnvironment' -Confirm:$false } | Should -Throw '*API Error: Unauthorized*'
+            { Get-AdoCheckConfiguration -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -ResourceType 'environment' -ResourceName 'TestEnvironment' } | Should -Throw '*API Error: Unauthorized*'
         }
     }
 }

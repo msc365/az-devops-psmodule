@@ -1,4 +1,4 @@
-﻿BeforeAll {
+BeforeAll {
     # Import the module
     $modulePath = Join-Path -Path $PSScriptRoot -ChildPath '..\..\..\..'
     $moduleName = Join-Path -Path $modulePath -ChildPath 'Azure.DevOps.PSModule.psd1'
@@ -41,7 +41,7 @@ Describe 'Get-AdoTeamFieldValue' {
 
         It 'Should retrieve team field values for specified team' {
             # Act
-            $result = Get-AdoTeamFieldValue -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'my-project-1' -TeamName 'my-team-1' -Confirm:$false
+            $result = Get-AdoTeamFieldValue -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'my-project-1' -TeamName 'my-team-1'
 
             # Assert
             $result | Should -Not -BeNullOrEmpty
@@ -52,7 +52,7 @@ Describe 'Get-AdoTeamFieldValue' {
 
         It 'Should retrieve team field values for default team when TeamName not specified' {
             # Act
-            $result = Get-AdoTeamFieldValue -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'my-project-1' -Confirm:$false
+            $result = Get-AdoTeamFieldValue -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'my-project-1'
 
             # Assert
             $result | Should -Not -BeNullOrEmpty
@@ -63,7 +63,7 @@ Describe 'Get-AdoTeamFieldValue' {
 
         It 'Should construct correct URI with team name' {
             # Act
-            Get-AdoTeamFieldValue -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -TeamName 'TestTeam' -Confirm:$false
+            Get-AdoTeamFieldValue -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -TeamName 'TestTeam'
 
             # Assert
             Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1 -ParameterFilter {
@@ -73,7 +73,7 @@ Describe 'Get-AdoTeamFieldValue' {
 
         It 'Should return team field value with all expected properties' {
             # Act
-            $result = Get-AdoTeamFieldValue -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'my-project-1' -TeamName 'my-team-1' -Confirm:$false
+            $result = Get-AdoTeamFieldValue -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'my-project-1' -TeamName 'my-team-1'
 
             # Assert
             $result.defaultValue | Should -Be 'my-project-1\my-team-1'
@@ -85,7 +85,7 @@ Describe 'Get-AdoTeamFieldValue' {
 
         It 'Should return correct field reference information' {
             # Act
-            $result = Get-AdoTeamFieldValue -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'my-project-1' -TeamName 'my-team-1' -Confirm:$false
+            $result = Get-AdoTeamFieldValue -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'my-project-1' -TeamName 'my-team-1'
 
             # Assert
             $result.field.referenceName | Should -Be 'System.AreaPath'
@@ -94,7 +94,7 @@ Describe 'Get-AdoTeamFieldValue' {
 
         It 'Should return values with includeChildren property' {
             # Act
-            $result = Get-AdoTeamFieldValue -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'my-project-1' -TeamName 'my-team-1' -Confirm:$false
+            $result = Get-AdoTeamFieldValue -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'my-project-1' -TeamName 'my-team-1'
 
             # Assert
             $result.values[0].includeChildren | Should -Be $false
@@ -103,7 +103,7 @@ Describe 'Get-AdoTeamFieldValue' {
 
         It 'Should use correct API version by default' {
             # Act
-            Get-AdoTeamFieldValue -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -TeamName 'TestTeam' -Confirm:$false
+            Get-AdoTeamFieldValue -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -TeamName 'TestTeam'
 
             # Assert
             Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1 -ParameterFilter {
@@ -117,7 +117,7 @@ Describe 'Get-AdoTeamFieldValue' {
             $env:DefaultAdoProject = 'DefaultProject'
 
             # Act
-            Get-AdoTeamFieldValue -Confirm:$false
+            Get-AdoTeamFieldValue
 
             # Assert
             Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1 -ParameterFilter {
@@ -138,7 +138,7 @@ Describe 'Get-AdoTeamFieldValue' {
             }
 
             # Act
-            $result = $teamInput | Get-AdoTeamFieldValue -Confirm:$false
+            $result = $teamInput | Get-AdoTeamFieldValue
 
             # Assert
             $result | Should -Not -BeNullOrEmpty
@@ -154,7 +154,7 @@ Describe 'Get-AdoTeamFieldValue' {
             }
 
             # Act
-            $result = $teamInput | Get-AdoTeamFieldValue -Confirm:$false
+            $result = $teamInput | Get-AdoTeamFieldValue
 
             # Assert
             $result | Should -Not -BeNullOrEmpty
@@ -173,12 +173,12 @@ Describe 'Get-AdoTeamFieldValue' {
 
         It 'Should validate CollectionUri format' {
             # Act & Assert
-            { Get-AdoTeamFieldValue -CollectionUri 'invalid-uri' -ProjectName 'TestProject' -Confirm:$false } | Should -Throw
+            { Get-AdoTeamFieldValue -CollectionUri 'invalid-uri' -ProjectName 'TestProject' } | Should -Throw
         }
 
         It 'Should use correct HTTP method' {
             # Act
-            Get-AdoTeamFieldValue -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -Confirm:$false
+            Get-AdoTeamFieldValue -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject'
 
             # Assert
             Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1 -ParameterFilter {
@@ -206,7 +206,7 @@ Describe 'Get-AdoTeamFieldValue' {
             Mock -ModuleName Azure.DevOps.PSModule Invoke-AdoRestMethod { throw $errorRecord }
 
             # Act
-            $result = Get-AdoTeamFieldValue -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -TeamName 'NonExistentTeam' -Confirm:$false -WarningAction SilentlyContinue
+            $result = Get-AdoTeamFieldValue -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -TeamName 'NonExistentTeam' -WarningAction SilentlyContinue
 
             # Assert
             $result | Should -BeNullOrEmpty
@@ -217,7 +217,7 @@ Describe 'Get-AdoTeamFieldValue' {
             Mock -ModuleName Azure.DevOps.PSModule Invoke-AdoRestMethod { throw 'Unexpected API error' }
 
             # Act & Assert
-            { Get-AdoTeamFieldValue -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -Confirm:$false -ErrorAction Stop } | Should -Throw 'Unexpected API error'
+            { Get-AdoTeamFieldValue -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -ErrorAction Stop } | Should -Throw 'Unexpected API error'
         }
     }
 }

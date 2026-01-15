@@ -1,4 +1,4 @@
-﻿BeforeAll {
+BeforeAll {
     # Import the module
     $modulePath = Join-Path -Path $PSScriptRoot -ChildPath '..\..\..\..'
     $moduleName = Join-Path -Path $modulePath -ChildPath 'Azure.DevOps.PSModule.psd1'
@@ -84,7 +84,7 @@ Describe 'Get-AdoTeamIteration' {
 
         It 'Should retrieve all team iterations' {
             # Act
-            $result = Get-AdoTeamIteration -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -TeamName 'TestTeam' -Confirm:$false
+            $result = Get-AdoTeamIteration -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -TeamName 'TestTeam'
 
             # Assert
             $result | Should -HaveCount 3
@@ -98,7 +98,7 @@ Describe 'Get-AdoTeamIteration' {
             Mock -ModuleName Azure.DevOps.PSModule Invoke-AdoRestMethod { return $mockSingleIteration }
 
             # Act
-            $result = Get-AdoTeamIteration -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -TeamName 'TestTeam' -Id '22222222-2222-2222-2222-222222222222' -Confirm:$false
+            $result = Get-AdoTeamIteration -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -TeamName 'TestTeam' -Id '22222222-2222-2222-2222-222222222222'
 
             # Assert
             $result | Should -HaveCount 1
@@ -111,7 +111,7 @@ Describe 'Get-AdoTeamIteration' {
             Mock -ModuleName Azure.DevOps.PSModule Invoke-AdoRestMethod { return $mockCurrentIterationsList }
 
             # Act
-            $result = Get-AdoTeamIteration -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -TeamName 'TestTeam' -TimeFrame 'current' -Confirm:$false
+            $result = Get-AdoTeamIteration -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -TeamName 'TestTeam' -TimeFrame 'current'
 
             # Assert
             $result | Should -HaveCount 1
@@ -121,7 +121,7 @@ Describe 'Get-AdoTeamIteration' {
 
         It 'Should construct correct URI for listing iterations' {
             # Act
-            Get-AdoTeamIteration -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -TeamName 'TestTeam' -Confirm:$false
+            Get-AdoTeamIteration -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -TeamName 'TestTeam'
 
             # Assert
             Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1 -ParameterFilter {
@@ -134,7 +134,7 @@ Describe 'Get-AdoTeamIteration' {
             Mock -ModuleName Azure.DevOps.PSModule Invoke-AdoRestMethod { return $mockSingleIteration }
 
             # Act
-            Get-AdoTeamIteration -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -TeamName 'TestTeam' -Id '22222222-2222-2222-2222-222222222222' -Confirm:$false
+            Get-AdoTeamIteration -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -TeamName 'TestTeam' -Id '22222222-2222-2222-2222-222222222222'
 
             # Assert
             Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1 -ParameterFilter {
@@ -147,7 +147,7 @@ Describe 'Get-AdoTeamIteration' {
             Mock -ModuleName Azure.DevOps.PSModule Invoke-AdoRestMethod { return $mockSingleIteration }
 
             # Act
-            $result = Get-AdoTeamIteration -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -TeamName 'TestTeam' -Id '22222222-2222-2222-2222-222222222222' -Confirm:$false
+            $result = Get-AdoTeamIteration -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -TeamName 'TestTeam' -Id '22222222-2222-2222-2222-222222222222'
 
             # Assert
             $result.id | Should -Be '22222222-2222-2222-2222-222222222222'
@@ -164,7 +164,7 @@ Describe 'Get-AdoTeamIteration' {
             $env:DefaultAdoProject = 'DefaultProject'
 
             # Act
-            Get-AdoTeamIteration -TeamName 'TestTeam' -Confirm:$false
+            Get-AdoTeamIteration -TeamName 'TestTeam'
 
             # Assert
             Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1 -ParameterFilter {
@@ -178,7 +178,7 @@ Describe 'Get-AdoTeamIteration' {
 
         It 'Should use correct API version by default' {
             # Act
-            Get-AdoTeamIteration -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -TeamName 'TestTeam' -Confirm:$false
+            Get-AdoTeamIteration -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -TeamName 'TestTeam'
 
             # Assert
             Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1 -ParameterFilter {
@@ -195,7 +195,7 @@ Describe 'Get-AdoTeamIteration' {
             }
 
             # Act
-            $result = $teamInput | Get-AdoTeamIteration -Confirm:$false
+            $result = $teamInput | Get-AdoTeamIteration
 
             # Assert
             $result | Should -Not -BeNullOrEmpty
@@ -212,12 +212,12 @@ Describe 'Get-AdoTeamIteration' {
 
         It 'Should validate CollectionUri format' {
             # Act & Assert
-            { Get-AdoTeamIteration -CollectionUri 'invalid-uri' -ProjectName 'TestProject' -TeamName 'TestTeam' -Confirm:$false } | Should -Throw
+            { Get-AdoTeamIteration -CollectionUri 'invalid-uri' -ProjectName 'TestProject' -TeamName 'TestTeam' } | Should -Throw
         }
 
         It 'Should include timeframe query parameter when specified' {
             # Act
-            Get-AdoTeamIteration -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -TeamName 'TestTeam' -TimeFrame 'future' -Confirm:$false
+            Get-AdoTeamIteration -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -TeamName 'TestTeam' -TimeFrame 'future'
 
             # Assert
             Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1 -ParameterFilter {
@@ -253,7 +253,7 @@ Describe 'Get-AdoTeamIteration' {
             Mock -ModuleName Azure.DevOps.PSModule Invoke-AdoRestMethod { throw $errorRecord }
 
             # Act
-            $result = Get-AdoTeamIteration -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -TeamName 'TestTeam' -Id 'nonexistent-id' -Confirm:$false -WarningAction SilentlyContinue
+            $result = Get-AdoTeamIteration -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -TeamName 'TestTeam' -Id 'nonexistent-id' -WarningAction SilentlyContinue
 
             # Assert
             $result | Should -BeNullOrEmpty
@@ -264,7 +264,7 @@ Describe 'Get-AdoTeamIteration' {
             Mock -ModuleName Azure.DevOps.PSModule Invoke-AdoRestMethod { throw 'Unexpected error' }
 
             # Act & Assert
-            { Get-AdoTeamIteration -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -TeamName 'TestTeam' -Confirm:$false -ErrorAction Stop } | Should -Throw 'Unexpected error'
+            { Get-AdoTeamIteration -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -TeamName 'TestTeam' -ErrorAction Stop } | Should -Throw 'Unexpected error'
         }
     }
 }

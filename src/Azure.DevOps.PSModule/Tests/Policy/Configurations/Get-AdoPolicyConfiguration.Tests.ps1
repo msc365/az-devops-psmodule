@@ -1,4 +1,4 @@
-﻿BeforeAll {
+BeforeAll {
     # Import the module
     $modulePath = Join-Path -Path $PSScriptRoot -ChildPath '..\..\..\'
     $moduleName = Join-Path -Path $modulePath -ChildPath 'Azure.DevOps.PSModule.psd1'
@@ -65,7 +65,7 @@ Describe 'Get-AdoPolicyConfiguration' {
 
         It 'Should retrieve specific policy configuration by ID' {
             # Act
-            $result = Get-AdoPolicyConfiguration -CollectionUri $mockCollectionUri -ProjectName $mockProject -Id $mockConfigId -Confirm:$false
+            $result = Get-AdoPolicyConfiguration -CollectionUri $mockCollectionUri -ProjectName $mockProject -Id $mockConfigId
 
             # Assert
             $result.id | Should -Be $mockConfigId
@@ -83,7 +83,7 @@ Describe 'Get-AdoPolicyConfiguration' {
             }
 
             # Act
-            $result = Get-AdoPolicyConfiguration -CollectionUri $mockCollectionUri -ProjectName $mockProject -Confirm:$false
+            $result = Get-AdoPolicyConfiguration -CollectionUri $mockCollectionUri -ProjectName $mockProject
 
             # Assert
             $result.Count | Should -Be 2
@@ -99,7 +99,7 @@ Describe 'Get-AdoPolicyConfiguration' {
             }
 
             # Act
-            $result = Get-AdoPolicyConfiguration -CollectionUri $mockCollectionUri -ProjectName $mockProject -PolicyType $mockPolicyTypeId -Confirm:$false
+            $result = Get-AdoPolicyConfiguration -CollectionUri $mockCollectionUri -ProjectName $mockProject -PolicyType $mockPolicyTypeId
 
             # Assert
             $result.Count | Should -Be 1
@@ -113,7 +113,7 @@ Describe 'Get-AdoPolicyConfiguration' {
             }
 
             # Act
-            $result = 42, 43 | Get-AdoPolicyConfiguration -CollectionUri $mockCollectionUri -ProjectName $mockProject -Confirm:$false
+            $result = 42, 43 | Get-AdoPolicyConfiguration -CollectionUri $mockCollectionUri -ProjectName $mockProject
 
             # Assert
             $result.Count | Should -Be 2
@@ -121,7 +121,7 @@ Describe 'Get-AdoPolicyConfiguration' {
 
         It 'Should include projectName and collectionUri in output' {
             # Act
-            $result = Get-AdoPolicyConfiguration -CollectionUri $mockCollectionUri -ProjectName $mockProject -Id $mockConfigId -Confirm:$false
+            $result = Get-AdoPolicyConfiguration -CollectionUri $mockCollectionUri -ProjectName $mockProject -Id $mockConfigId
 
             # Assert
             $result.projectName | Should -Be $mockProject
@@ -138,7 +138,7 @@ Describe 'Get-AdoPolicyConfiguration' {
             }
 
             # Act
-            $result = Get-AdoPolicyConfiguration -CollectionUri $mockCollectionUri -ProjectName $mockProject -Top 10 -Confirm:$false
+            $result = Get-AdoPolicyConfiguration -CollectionUri $mockCollectionUri -ProjectName $mockProject -Top 10
 
             # Assert
             Should -Invoke -ModuleName Azure.DevOps.PSModule -CommandName Invoke-AdoRestMethod -ParameterFilter {
@@ -157,7 +157,7 @@ Describe 'Get-AdoPolicyConfiguration' {
             $token = 'abc123'
 
             # Act
-            $result = Get-AdoPolicyConfiguration -CollectionUri $mockCollectionUri -ProjectName $mockProject -ContinuationToken $token -Confirm:$false
+            $result = Get-AdoPolicyConfiguration -CollectionUri $mockCollectionUri -ProjectName $mockProject -ContinuationToken $token
 
             # Assert
             Should -Invoke -ModuleName Azure.DevOps.PSModule -CommandName Invoke-AdoRestMethod -ParameterFilter {
@@ -182,7 +182,7 @@ Describe 'Get-AdoPolicyConfiguration' {
 
         It 'Should reject invalid CollectionUri format' {
             # Act & Assert
-            { Get-AdoPolicyConfiguration -CollectionUri 'invalid-uri' -ProjectName $mockProject -Confirm:$false } | Should -Throw
+            { Get-AdoPolicyConfiguration -CollectionUri 'invalid-uri' -ProjectName $mockProject } | Should -Throw
         }
 
         It 'Should use default CollectionUri from environment when not specified' {
@@ -192,7 +192,7 @@ Describe 'Get-AdoPolicyConfiguration' {
             }
 
             # Act
-            $result = Get-AdoPolicyConfiguration -ProjectName $mockProject -Id $mockConfigId -Confirm:$false
+            $result = Get-AdoPolicyConfiguration -ProjectName $mockProject -Id $mockConfigId
 
             # Assert
             Should -Invoke -ModuleName Azure.DevOps.PSModule -CommandName Invoke-AdoRestMethod -ParameterFilter {
@@ -207,7 +207,7 @@ Describe 'Get-AdoPolicyConfiguration' {
             }
 
             # Act
-            $result = Get-AdoPolicyConfiguration -CollectionUri $mockCollectionUri -Id $mockConfigId -Confirm:$false
+            $result = Get-AdoPolicyConfiguration -CollectionUri $mockCollectionUri -Id $mockConfigId
 
             # Assert
             Should -Invoke -ModuleName Azure.DevOps.PSModule -CommandName Invoke-AdoRestMethod -ParameterFilter {
@@ -235,7 +235,7 @@ Describe 'Get-AdoPolicyConfiguration' {
 
         It 'Should construct correct URI for retrieving by ID' {
             # Act
-            Get-AdoPolicyConfiguration -CollectionUri $mockCollectionUri -ProjectName $mockProject -Id $mockConfigId -Confirm:$false
+            Get-AdoPolicyConfiguration -CollectionUri $mockCollectionUri -ProjectName $mockProject -Id $mockConfigId
 
             # Assert
             Should -Invoke -ModuleName Azure.DevOps.PSModule -CommandName Invoke-AdoRestMethod -ParameterFilter {
@@ -250,7 +250,7 @@ Describe 'Get-AdoPolicyConfiguration' {
             }
 
             # Act
-            Get-AdoPolicyConfiguration -CollectionUri $mockCollectionUri -ProjectName $mockProject -Confirm:$false
+            Get-AdoPolicyConfiguration -CollectionUri $mockCollectionUri -ProjectName $mockProject
 
             # Assert
             Should -Invoke -ModuleName Azure.DevOps.PSModule -CommandName Invoke-AdoRestMethod -ParameterFilter {
@@ -260,7 +260,7 @@ Describe 'Get-AdoPolicyConfiguration' {
 
         It 'Should use GET HTTP method' {
             # Act
-            Get-AdoPolicyConfiguration -CollectionUri $mockCollectionUri -ProjectName $mockProject -Id $mockConfigId -Confirm:$false
+            Get-AdoPolicyConfiguration -CollectionUri $mockCollectionUri -ProjectName $mockProject -Id $mockConfigId
 
             # Assert
             Should -Invoke -ModuleName Azure.DevOps.PSModule -CommandName Invoke-AdoRestMethod -ParameterFilter {
@@ -270,7 +270,7 @@ Describe 'Get-AdoPolicyConfiguration' {
 
         It 'Should use correct API version' {
             # Act
-            Get-AdoPolicyConfiguration -CollectionUri $mockCollectionUri -ProjectName $mockProject -Id $mockConfigId -Version '7.1' -Confirm:$false
+            Get-AdoPolicyConfiguration -CollectionUri $mockCollectionUri -ProjectName $mockProject -Id $mockConfigId -Version '7.1'
 
             # Assert
             Should -Invoke -ModuleName Azure.DevOps.PSModule -CommandName Invoke-AdoRestMethod -ParameterFilter {
@@ -300,7 +300,7 @@ Describe 'Get-AdoPolicyConfiguration' {
             }
 
             # Act & Assert
-            { Get-AdoPolicyConfiguration -CollectionUri $mockCollectionUri -ProjectName $mockProject -Id $mockConfigId -Confirm:$false -ErrorAction Stop } | Should -Throw
+            { Get-AdoPolicyConfiguration -CollectionUri $mockCollectionUri -ProjectName $mockProject -Id $mockConfigId -ErrorAction Stop } | Should -Throw
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿BeforeAll {
+BeforeAll {
     # Import the module
     $modulePath = Join-Path -Path $PSScriptRoot -ChildPath '..\..\..\..'
     $moduleName = Join-Path -Path $modulePath -ChildPath 'Azure.DevOps.PSModule\Azure.DevOps.PSModule.psd1'
@@ -142,7 +142,7 @@ Describe 'Get-AdoFeatureState' {
 
         It 'Should accept project GUID directly without calling Get-AdoProject' {
             # Act
-            Get-AdoFeatureState -CollectionUri 'https://dev.azure.com/my-org' -ProjectName '12345678-1234-1234-1234-123456789012' -Confirm:$false
+            Get-AdoFeatureState -CollectionUri 'https://dev.azure.com/my-org' -ProjectName '12345678-1234-1234-1234-123456789012'
 
             # Assert
             Should -Not -Invoke Get-AdoProject -ModuleName Azure.DevOps.PSModule
@@ -150,7 +150,7 @@ Describe 'Get-AdoFeatureState' {
 
         It 'Should resolve project name to ID via Get-AdoProject' {
             # Act
-            Get-AdoFeatureState -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -Confirm:$false
+            Get-AdoFeatureState -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject'
 
             # Assert
             Should -Invoke Get-AdoProject -ModuleName Azure.DevOps.PSModule -Times 1
@@ -161,7 +161,7 @@ Describe 'Get-AdoFeatureState' {
             Mock -ModuleName Azure.DevOps.PSModule Get-AdoProject { return $null }
 
             # Act
-            $result = Get-AdoFeatureState -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'NonExistentProject' -Confirm:$false
+            $result = Get-AdoFeatureState -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'NonExistentProject'
 
             # Assert
             $result | Should -BeNullOrEmpty
@@ -184,7 +184,7 @@ Describe 'Get-AdoFeatureState' {
             }
 
             # Act
-            $result = $input | Get-AdoFeatureState -Confirm:$false
+            $result = $input | Get-AdoFeatureState
 
             # Assert
             $result | Should -Not -BeNullOrEmpty
@@ -209,7 +209,7 @@ Describe 'Get-AdoFeatureState' {
             Mock -ModuleName Azure.DevOps.PSModule Invoke-AdoRestMethod { throw $errorRecord }
 
             # Act & Assert
-            { Get-AdoFeatureState -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -Confirm:$false } |
+            { Get-AdoFeatureState -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' } |
                 Should -Throw
         }
     }

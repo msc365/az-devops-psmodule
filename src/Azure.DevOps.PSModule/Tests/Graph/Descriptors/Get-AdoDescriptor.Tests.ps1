@@ -1,4 +1,4 @@
-﻿BeforeAll {
+BeforeAll {
     # Import the module
     $modulePath = Join-Path -Path $PSScriptRoot -ChildPath '..\..\..\..'
     $moduleName = Join-Path -Path $modulePath -ChildPath 'Azure.DevOps.PSModule\Azure.DevOps.PSModule.psd1'
@@ -31,7 +31,7 @@ Describe 'Get-AdoDescriptor' {
 
         It 'Should resolve a storage key to its descriptor' {
             # Act
-            $result = Get-AdoDescriptor -CollectionUri $mockCollectionUri -StorageKey $mockStorageKey -Confirm:$false
+            $result = Get-AdoDescriptor -CollectionUri $mockCollectionUri -StorageKey $mockStorageKey
 
             # Assert
             $result | Should -Not -BeNullOrEmpty
@@ -42,7 +42,7 @@ Describe 'Get-AdoDescriptor' {
 
         It 'Should return PSCustomObject with expected properties' {
             # Act
-            $result = Get-AdoDescriptor -CollectionUri $mockCollectionUri -StorageKey $mockStorageKey -Confirm:$false
+            $result = Get-AdoDescriptor -CollectionUri $mockCollectionUri -StorageKey $mockStorageKey
 
             # Assert
             $result.PSObject.Properties.Name | Should -Contain 'storageKey'
@@ -52,7 +52,7 @@ Describe 'Get-AdoDescriptor' {
 
         It 'Should construct API URI correctly' {
             # Act
-            Get-AdoDescriptor -CollectionUri $mockCollectionUri -StorageKey $mockStorageKey -Confirm:$false
+            Get-AdoDescriptor -CollectionUri $mockCollectionUri -StorageKey $mockStorageKey
 
             # Assert
             Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1 -ParameterFilter {
@@ -62,7 +62,7 @@ Describe 'Get-AdoDescriptor' {
 
         It 'Should use GET method for API call' {
             # Act
-            Get-AdoDescriptor -CollectionUri $mockCollectionUri -StorageKey $mockStorageKey -Confirm:$false
+            Get-AdoDescriptor -CollectionUri $mockCollectionUri -StorageKey $mockStorageKey
 
             # Assert
             Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1 -ParameterFilter {
@@ -72,7 +72,7 @@ Describe 'Get-AdoDescriptor' {
 
         It 'Should use default API version 7.1' {
             # Act
-            Get-AdoDescriptor -CollectionUri $mockCollectionUri -StorageKey $mockStorageKey -Confirm:$false
+            Get-AdoDescriptor -CollectionUri $mockCollectionUri -StorageKey $mockStorageKey
 
             # Assert
             Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1 -ParameterFilter {
@@ -82,7 +82,7 @@ Describe 'Get-AdoDescriptor' {
 
         It 'Should use specified API version when provided' {
             # Act
-            Get-AdoDescriptor -CollectionUri $mockCollectionUri -StorageKey $mockStorageKey -Version '7.2-preview.1' -Confirm:$false
+            Get-AdoDescriptor -CollectionUri $mockCollectionUri -StorageKey $mockStorageKey -Version '7.2-preview.1'
 
             # Assert
             Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1 -ParameterFilter {
@@ -106,7 +106,7 @@ Describe 'Get-AdoDescriptor' {
             )
 
             # Act
-            $result = $storageKeys | Get-AdoDescriptor -CollectionUri $mockCollectionUri -Confirm:$false
+            $result = $storageKeys | Get-AdoDescriptor -CollectionUri $mockCollectionUri
 
             # Assert
             $result | Should -HaveCount 3
@@ -121,7 +121,7 @@ Describe 'Get-AdoDescriptor' {
             )
 
             # Act
-            $result = $objects | Get-AdoDescriptor -CollectionUri $mockCollectionUri -Confirm:$false
+            $result = $objects | Get-AdoDescriptor -CollectionUri $mockCollectionUri
 
             # Assert
             $result | Should -HaveCount 2
@@ -148,7 +148,7 @@ Describe 'Get-AdoDescriptor' {
             Mock -ModuleName Azure.DevOps.PSModule Write-Warning { }
 
             # Act
-            $result = Get-AdoDescriptor -CollectionUri $mockCollectionUri -StorageKey 'nonexistent-key' -Confirm:$false -WarningAction SilentlyContinue
+            $result = Get-AdoDescriptor -CollectionUri $mockCollectionUri -StorageKey 'nonexistent-key' -WarningAction SilentlyContinue
 
             # Assert
             $result | Should -BeNullOrEmpty
@@ -168,7 +168,7 @@ Describe 'Get-AdoDescriptor' {
             Mock -ModuleName Azure.DevOps.PSModule Invoke-AdoRestMethod { throw $genericError }
 
             # Act & Assert
-            { Get-AdoDescriptor -CollectionUri $mockCollectionUri -StorageKey $mockStorageKey -Confirm:$false } | Should -Throw
+            { Get-AdoDescriptor -CollectionUri $mockCollectionUri -StorageKey $mockStorageKey } | Should -Throw
         }
 
         It 'Should return null when API returns null result' {
@@ -176,7 +176,7 @@ Describe 'Get-AdoDescriptor' {
             Mock -ModuleName Azure.DevOps.PSModule Invoke-AdoRestMethod { return @{ value = $null } }
 
             # Act
-            $result = Get-AdoDescriptor -CollectionUri $mockCollectionUri -StorageKey $mockStorageKey -Confirm:$false
+            $result = Get-AdoDescriptor -CollectionUri $mockCollectionUri -StorageKey $mockStorageKey
 
             # Assert
             $result | Should -BeNullOrEmpty
@@ -194,7 +194,7 @@ Describe 'Get-AdoDescriptor' {
             $env:DefaultAdoCollectionUri = 'https://dev.azure.com/default-org'
 
             # Act
-            Get-AdoDescriptor -StorageKey $mockStorageKey -Confirm:$false
+            Get-AdoDescriptor -StorageKey $mockStorageKey
 
             # Assert
             Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1 -ParameterFilter {
@@ -207,7 +207,7 @@ Describe 'Get-AdoDescriptor' {
             $vsspsUri = 'https://vssps.dev.azure.com/my-org'
 
             # Act
-            Get-AdoDescriptor -CollectionUri $vsspsUri -StorageKey $mockStorageKey -Confirm:$false
+            Get-AdoDescriptor -CollectionUri $vsspsUri -StorageKey $mockStorageKey
 
             # Assert
             Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1 -ParameterFilter {
