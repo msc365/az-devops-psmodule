@@ -9,6 +9,9 @@ All notable changes to this project will be documented in this file.
 
 - fix: Remove ShouldProcess support from multiple cmdlets to simplify execution flow
 - fix: Update multiple test files to eliminate the use of the `-Confirm:$false` parameter
+- fix: Remove ShouldProcess support from private cmdlets to simplify execution flow
+- fix: Update private test files to eliminate the use of the -Confirm:$false parameter
+- chore: Update CHANGELOG to reflect recent changes and fixes
 
 ### Breaking Changes
 - _None_
