@@ -3,6 +3,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [UNRELEASED]
+
+### What's Changed
+
+- fix: Remove ShouldProcess support from multiple cmdlets to simplify execution flow
+- fix: Update multiple test files to eliminate the use of the `-Confirm:$false` parameter
+
+### Breaking Changes
+- _None_
+
+<br>
+
 ## [0.2.1] - 2026-01-12
 
 ### Summary
