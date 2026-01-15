@@ -10,7 +10,7 @@
     .PARAMETER PAT
         The personal access token (PAT) to use for the authentication. If not provided, the token is retrieved using Get-AzAccessToken.
     #>
-    [CmdletBinding(SupportsShouldProcess)]
+    [CmdletBinding()]
     param (
         [Parameter()]
         [String]$PAT
@@ -23,29 +23,27 @@
 
     process {
         try {
-            if ($PSCmdlet.ShouldProcess('Authentication header', 'Create')) {
-                if ($PAT -eq '') {
-                    Write-Verbose 'Using access token'
+            if ($PAT -eq '') {
+                Write-Verbose 'Using access token'
 
-                    try {
-                        if ($null -eq (Get-AzContext).Account) {
-                            Write-Error 'Please login to Azure PowerShell first'
-                            $PSCmdlet.ThrowTerminatingError($PSItem)
-                        }
-
-                        $token = (Get-AzAccessToken -Resource $principalAppId -AsSecureString).token
-                        $script:header = @{
-                            Authorization = 'Bearer {0}' -f ($token | ConvertFrom-SecureString -AsPlainText)
-                        }
-                    } catch {
-                        throw 'Please login to Azure PowerShell first'
+                try {
+                    if ($null -eq (Get-AzContext).Account) {
+                        Write-Error 'Please login to Azure PowerShell first'
+                        $PSCmdlet.ThrowTerminatingError($PSItem)
                     }
-                } else {
-                    Write-Verbose 'Using PAT'
 
+                    $token = (Get-AzAccessToken -Resource $principalAppId -AsSecureString).token
                     $script:header = @{
-                        Authorization = 'Basic {0}' -f [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(":$($PAT)"))
+                        Authorization = 'Bearer {0}' -f ($token | ConvertFrom-SecureString -AsPlainText)
                     }
+                } catch {
+                    throw 'Please login to Azure PowerShell first'
+                }
+            } else {
+                Write-Verbose 'Using PAT'
+
+                $script:header = @{
+                    Authorization = 'Basic {0}' -f [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(":$($PAT)"))
                 }
             }
         } catch {

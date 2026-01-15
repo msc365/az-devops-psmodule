@@ -25,7 +25,7 @@
     .PARAMETER ContentType
         The content type of the request. Default is 'application/json'.
     #>
-    [CmdletBinding(SupportsShouldProcess)]
+    [CmdletBinding()]
     param (
         [Parameter(Mandatory)]
         [string]$Uri,
@@ -102,9 +102,8 @@
                 Write-Verbose "Body: $($Body | ConvertTo-Json -Depth 10)"
                 $params.Body = $Body | ConvertTo-Json -Depth 10
             }
-            if ($PSCmdlet.ShouldProcess($ProjectName, "Invoke Rest method on: $ProjectName")) {
-                Invoke-RestMethod @params
-            }
+
+            Invoke-RestMethod @params
         } catch {
             throw $_
         }
