@@ -1,4 +1,4 @@
-﻿BeforeAll {
+BeforeAll {
     # Import the module
     $modulePath = Join-Path -Path $PSScriptRoot -ChildPath '..\..\..\..'
     $moduleName = Join-Path -Path $modulePath -ChildPath 'Azure.DevOps.PSModule\Azure.DevOps.PSModule.psd1'
@@ -104,7 +104,7 @@ Describe 'Get-AdoServiceEndpoint' {
 
         It 'Should retrieve all service endpoints when no parameters provided' {
             # Act
-            $result = Get-AdoServiceEndpoint -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -Confirm:$false
+            $result = Get-AdoServiceEndpoint -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject'
 
             # Assert
             $result | Should -HaveCount 2
@@ -117,7 +117,7 @@ Describe 'Get-AdoServiceEndpoint' {
             Mock -ModuleName Azure.DevOps.PSModule Invoke-AdoRestMethod { return $mockSingleEndpoint }
 
             # Act
-            $result = Get-AdoServiceEndpoint -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -Names 'TestEndpoint1' -Confirm:$false
+            $result = Get-AdoServiceEndpoint -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -Names 'TestEndpoint1'
 
             # Assert
             $result | Should -HaveCount 1
@@ -130,7 +130,7 @@ Describe 'Get-AdoServiceEndpoint' {
             Mock -ModuleName Azure.DevOps.PSModule Invoke-AdoRestMethod { return $mockSingleEndpoint }
 
             # Act
-            $result = Get-AdoServiceEndpoint -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -Ids '11111111-1111-1111-1111-111111111111' -Confirm:$false
+            $result = Get-AdoServiceEndpoint -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -Ids '11111111-1111-1111-1111-111111111111'
 
             # Assert
             $result | Should -HaveCount 1
@@ -142,7 +142,7 @@ Describe 'Get-AdoServiceEndpoint' {
             Mock -ModuleName Azure.DevOps.PSModule Invoke-AdoRestMethod { return $mockSingleEndpoint }
 
             # Act
-            $result = Get-AdoServiceEndpoint -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -Names 'TestEndpoint1' -Confirm:$false
+            $result = Get-AdoServiceEndpoint -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -Names 'TestEndpoint1'
 
             # Assert
             $result.id | Should -Be '11111111-1111-1111-1111-111111111111'
@@ -161,7 +161,7 @@ Describe 'Get-AdoServiceEndpoint' {
             Mock -ModuleName Azure.DevOps.PSModule Invoke-AdoRestMethod { return $mockSingleEndpoint }
 
             # Act
-            $result = 'TestEndpoint1' | Get-AdoServiceEndpoint -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -Confirm:$false
+            $result = 'TestEndpoint1' | Get-AdoServiceEndpoint -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject'
 
             # Assert
             $result | Should -Not -BeNullOrEmpty
@@ -170,7 +170,7 @@ Describe 'Get-AdoServiceEndpoint' {
 
         It 'Should support multiple endpoint names' {
             # Act
-            Get-AdoServiceEndpoint -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -Names 'TestEndpoint1', 'TestEndpoint2' -Confirm:$false
+            Get-AdoServiceEndpoint -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -Names 'TestEndpoint1', 'TestEndpoint2'
 
             # Assert
             Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1 -ParameterFilter {
@@ -180,7 +180,7 @@ Describe 'Get-AdoServiceEndpoint' {
 
         It 'Should support multiple endpoint IDs' {
             # Act
-            Get-AdoServiceEndpoint -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -Ids '11111111-1111-1111-1111-111111111111', '55555555-5555-5555-5555-555555555555' -Confirm:$false
+            Get-AdoServiceEndpoint -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -Ids '11111111-1111-1111-1111-111111111111', '55555555-5555-5555-5555-555555555555'
 
             # Assert
             Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1 -ParameterFilter {
@@ -197,7 +197,7 @@ Describe 'Get-AdoServiceEndpoint' {
 
         It 'Should validate CollectionUri format' {
             # Act & Assert
-            { Get-AdoServiceEndpoint -CollectionUri 'invalid-uri' -ProjectName 'TestProject' -Confirm:$false } | Should -Throw
+            { Get-AdoServiceEndpoint -CollectionUri 'invalid-uri' -ProjectName 'TestProject' } | Should -Throw
         }
 
         It 'Should use default CollectionUri from environment variable when not provided' {
@@ -205,7 +205,7 @@ Describe 'Get-AdoServiceEndpoint' {
             $env:DefaultAdoCollectionUri = 'https://dev.azure.com/default-org'
 
             # Act
-            $result = Get-AdoServiceEndpoint -ProjectName 'TestProject' -Confirm:$false
+            $result = Get-AdoServiceEndpoint -ProjectName 'TestProject'
 
             # Assert
             Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1 -ParameterFilter {
@@ -221,7 +221,7 @@ Describe 'Get-AdoServiceEndpoint' {
             $env:DefaultAdoProject = 'DefaultProject'
 
             # Act
-            $result = Get-AdoServiceEndpoint -CollectionUri 'https://dev.azure.com/my-org' -Confirm:$false
+            $result = Get-AdoServiceEndpoint -CollectionUri 'https://dev.azure.com/my-org'
 
             # Assert
             Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1 -ParameterFilter {
@@ -241,7 +241,7 @@ Describe 'Get-AdoServiceEndpoint' {
 
         It 'Should construct correct REST API URI' {
             # Act
-            Get-AdoServiceEndpoint -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -Confirm:$false
+            Get-AdoServiceEndpoint -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject'
 
             # Assert
             Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1 -ParameterFilter {
@@ -253,7 +253,7 @@ Describe 'Get-AdoServiceEndpoint' {
 
         It 'Should support Owner parameter with library value' {
             # Act
-            Get-AdoServiceEndpoint -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -Owner 'library' -Confirm:$false
+            Get-AdoServiceEndpoint -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -Owner 'library'
 
             # Assert
             Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1 -ParameterFilter {
@@ -263,7 +263,7 @@ Describe 'Get-AdoServiceEndpoint' {
 
         It 'Should support Type parameter' {
             # Act
-            Get-AdoServiceEndpoint -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -Type 'azurerm' -Confirm:$false
+            Get-AdoServiceEndpoint -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -Type 'azurerm'
 
             # Assert
             Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1 -ParameterFilter {
@@ -273,7 +273,7 @@ Describe 'Get-AdoServiceEndpoint' {
 
         It 'Should support IncludeFailed switch parameter' {
             # Act
-            Get-AdoServiceEndpoint -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -IncludeFailed -Confirm:$false
+            Get-AdoServiceEndpoint -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -IncludeFailed
 
             # Assert
             Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1 -ParameterFilter {
@@ -283,7 +283,7 @@ Describe 'Get-AdoServiceEndpoint' {
 
         It 'Should support ActionFilter parameter' {
             # Act
-            Get-AdoServiceEndpoint -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -Ids '11111111-1111-1111-1111-111111111111' -ActionFilter 'manage' -Confirm:$false
+            Get-AdoServiceEndpoint -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -Ids '11111111-1111-1111-1111-111111111111' -ActionFilter 'manage'
 
             # Assert
             Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1 -ParameterFilter {
@@ -293,7 +293,7 @@ Describe 'Get-AdoServiceEndpoint' {
 
         It 'Should call Confirm-Default to validate defaults' {
             # Act
-            Get-AdoServiceEndpoint -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -Confirm:$false
+            Get-AdoServiceEndpoint -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject'
 
             # Assert
             Should -Invoke Confirm-Default -ModuleName Azure.DevOps.PSModule -Times 1
@@ -310,7 +310,7 @@ Describe 'Get-AdoServiceEndpoint' {
             Mock -ModuleName Azure.DevOps.PSModule Invoke-AdoRestMethod { return @{ value = @() } }
 
             # Act
-            $result = Get-AdoServiceEndpoint -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -Confirm:$false
+            $result = Get-AdoServiceEndpoint -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject'
 
             # Assert
             $result | Should -BeNullOrEmpty
@@ -324,7 +324,7 @@ Describe 'Get-AdoServiceEndpoint' {
             Mock -ModuleName Azure.DevOps.PSModule Invoke-AdoRestMethod { throw $errorRecord }
 
             # Act & Assert - Should write warning but not throw
-            { Get-AdoServiceEndpoint -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -Ids 'NonExistentId' -WarningAction SilentlyContinue -Confirm:$false } | Should -Not -Throw
+            { Get-AdoServiceEndpoint -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -Ids 'NonExistentId' -WarningAction SilentlyContinue } | Should -Not -Throw
         }
 
         It 'Should warn when endpoint does not exist by name (NotFoundException)' {
@@ -335,7 +335,7 @@ Describe 'Get-AdoServiceEndpoint' {
             Mock -ModuleName Azure.DevOps.PSModule Invoke-AdoRestMethod { throw $errorRecord }
 
             # Act & Assert - Should write warning but not throw
-            { Get-AdoServiceEndpoint -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -Names 'NonExistentEndpoint' -WarningAction SilentlyContinue -Confirm:$false } | Should -Not -Throw
+            { Get-AdoServiceEndpoint -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -Names 'NonExistentEndpoint' -WarningAction SilentlyContinue } | Should -Not -Throw
         }
 
         It 'Should propagate other errors from Invoke-AdoRestMethod' {
@@ -343,7 +343,7 @@ Describe 'Get-AdoServiceEndpoint' {
             Mock -ModuleName Azure.DevOps.PSModule Invoke-AdoRestMethod { throw 'API Error: Unauthorized' }
 
             # Act & Assert
-            { Get-AdoServiceEndpoint -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -Confirm:$false } | Should -Throw '*API Error: Unauthorized*'
+            { Get-AdoServiceEndpoint -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' } | Should -Throw '*API Error: Unauthorized*'
         }
     }
 }
