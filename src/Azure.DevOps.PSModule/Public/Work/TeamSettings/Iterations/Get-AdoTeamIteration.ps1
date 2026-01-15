@@ -62,7 +62,7 @@ function Get-AdoTeamIteration {
 
         Retrieves the specified iteration by ID.
     #>
-    [CmdletBinding(DefaultParameterSetName = 'ListIterations', SupportsShouldProcess)]
+    [CmdletBinding(DefaultParameterSetName = 'ListIterations')]
     [OutputType([object])]
     param (
         [Parameter(ValueFromPipelineByPropertyName)]
@@ -130,31 +130,27 @@ function Get-AdoTeamIteration {
                 Method          = 'GET'
             }
 
-            if ($PSCmdlet.ShouldProcess($ProjectName, $Id ? "Get Iteration: $Id for: $TeamName" : "Get iterations for: $TeamName")) {
-                try {
-                    $results = Invoke-AdoRestMethod @params
-                    $items = if ($Id) { @($results) } else { $results.value }
+            try {
+                $results = Invoke-AdoRestMethod @params
+                $items = if ($Id) { @($results) } else { $results.value }
 
-                    # Build output objects
-                    foreach ($i_ in $items) {
-                        [PSCustomObject]@{
-                            id            = $i_.id
-                            name          = $i_.name
-                            attributes    = $i_.attributes
-                            team          = $TeamName    # TeamName or TeamId
-                            project       = $ProjectName # ProjectName or ProjectId
-                            collectionUri = $CollectionUri
-                        }
-                    }
-                } catch {
-                    if ($_.ErrorDetails.Message -match 'NotFoundException') {
-                        Write-Warning "Iteration with ID $Id does not exist, skipping."
-                    } else {
-                        throw $_
+                # Build output objects
+                foreach ($i_ in $items) {
+                    [PSCustomObject]@{
+                        id            = $i_.id
+                        name          = $i_.name
+                        attributes    = $i_.attributes
+                        team          = $TeamName    # TeamName or TeamId
+                        project       = $ProjectName # ProjectName or ProjectId
+                        collectionUri = $CollectionUri
                     }
                 }
-            } else {
-                Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 5)"
+            } catch {
+                if ($_.ErrorDetails.Message -match 'NotFoundException') {
+                    Write-Warning "Iteration with ID $Id does not exist, skipping."
+                } else {
+                    throw $_
+                }
             }
         } catch {
             throw $_

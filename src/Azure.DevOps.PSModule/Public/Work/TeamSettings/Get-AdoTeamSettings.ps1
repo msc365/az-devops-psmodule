@@ -41,7 +41,7 @@ function Get-AdoTeamSettings {
 
         Retrieves the team settings using pipeline input.
     #>
-    [CmdletBinding(SupportsShouldProcess)]
+    [CmdletBinding()]
     [OutputType([PSCustomObject])]
     param (
         [Parameter(ValueFromPipelineByPropertyName)]
@@ -83,30 +83,26 @@ function Get-AdoTeamSettings {
                 Method  = 'GET'
             }
 
-            if ($PSCmdlet.ShouldProcess($ProjectName, "Get Team Settings for: $Name")) {
-                try {
-                    $results = Invoke-AdoRestMethod @params
+            try {
+                $results = Invoke-AdoRestMethod @params
 
-                    [PSCustomObject]@{
-                        backlogIteration      = $results.backlogIteration
-                        backlogVisibilities   = $results.backlogVisibilities
-                        bugsBehavior          = $results.bugsBehavior
-                        defaultIteration      = $results.defaultIteration
-                        defaultIterationMacro = $results.defaultIterationMacro
-                        workingDays           = $results.workingDays
-                        url                   = $results.url
-                        projectName           = $ProjectName
-                        collectionUri         = $CollectionUri
-                    }
-                } catch {
-                    if ($_.ErrorDetails.Message -match 'NotFoundException') {
-                        Write-Warning "Team $Name does not exist in project $ProjectName, skipping."
-                    } else {
-                        throw $_
-                    }
+                [PSCustomObject]@{
+                    backlogIteration      = $results.backlogIteration
+                    backlogVisibilities   = $results.backlogVisibilities
+                    bugsBehavior          = $results.bugsBehavior
+                    defaultIteration      = $results.defaultIteration
+                    defaultIterationMacro = $results.defaultIterationMacro
+                    workingDays           = $results.workingDays
+                    url                   = $results.url
+                    projectName           = $ProjectName
+                    collectionUri         = $CollectionUri
                 }
-            } else {
-                Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 5)"
+            } catch {
+                if ($_.ErrorDetails.Message -match 'NotFoundException') {
+                    Write-Warning "Team $Name does not exist in project $ProjectName, skipping."
+                } else {
+                    throw $_
+                }
             }
         } catch {
             throw $_

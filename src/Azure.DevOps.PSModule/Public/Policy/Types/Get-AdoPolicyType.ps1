@@ -44,7 +44,7 @@
 
         Retrieves the specified policy type from the project.
     #>
-    [CmdletBinding(DefaultParameterSetName = 'ListPolicyTypes', SupportsShouldProcess)]
+    [CmdletBinding(DefaultParameterSetName = 'ListPolicyTypes')]
     [OutputType([PSCustomObject])]
     param (
         [Parameter(ValueFromPipelineByPropertyName)]
@@ -111,29 +111,25 @@
                 Method  = 'GET'
             }
 
-            if ($PSCmdlet.ShouldProcess($CollectionUri, $Id ? "Get policy type '$Id' in project '$ProjectName'" : "Get policy types for project '$ProjectName'")) {
-                try {
-                    $results = Invoke-AdoRestMethod @params
-                    $items = if ($Id) { @($results) } else { $results.value }
+            try {
+                $results = Invoke-AdoRestMethod @params
+                $items = if ($Id) { @($results) } else { $results.value }
 
-                    foreach ($i_ in $items) {
-                        [PSCustomObject]@{
-                            id            = $i_.id
-                            displayName   = $i_.displayName
-                            description   = $i_.description
-                            projectName   = $ProjectName
-                            collectionUri = $CollectionUri
-                        }
-                    }
-                } catch {
-                    if ($_.ErrorDetails.Message -match 'NotFoundException') {
-                        Write-Warning "Policy type with ID $Id does not exist in project $ProjectName, skipping."
-                    } else {
-                        throw $_
+                foreach ($i_ in $items) {
+                    [PSCustomObject]@{
+                        id            = $i_.id
+                        displayName   = $i_.displayName
+                        description   = $i_.description
+                        projectName   = $ProjectName
+                        collectionUri = $CollectionUri
                     }
                 }
-            } else {
-                Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
+            } catch {
+                if ($_.ErrorDetails.Message -match 'NotFoundException') {
+                    Write-Warning "Policy type with ID $Id does not exist in project $ProjectName, skipping."
+                } else {
+                    throw $_
+                }
             }
         } catch {
             throw $_

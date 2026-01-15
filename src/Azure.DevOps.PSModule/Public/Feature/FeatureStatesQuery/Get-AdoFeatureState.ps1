@@ -42,7 +42,7 @@
 
         Retrieves the feature states using the default collection URI from environment variable.
     #>
-    [CmdletBinding(SupportsShouldProcess)]
+    [CmdletBinding()]
     [OutputType([PSCustomObject])]
     param (
         [Parameter(ValueFromPipelineByPropertyName)]
@@ -105,32 +105,28 @@
                 Body    = $body
             }
 
-            if ($PSCmdlet.ShouldProcess($CollectionUri, "Get Feature States for project '$ProjectName'")) {
-                $results = Invoke-AdoRestMethod @params
+            $results = Invoke-AdoRestMethod @params
 
-                foreach ($featureId in $results.featureStates.PSObject.Properties.Name) {
-                    # Get user-friendly feature name
-                    $feature = switch ($featureId) {
-                        'ms.vss-work.agile' { 'boards' }
-                        'ms.vss-code.version-control' { 'repos' }
-                        'ms.vss-build.pipelines' { 'pipelines' }
-                        'ms.vss-test-web.test' { 'testPlans' }
-                        'ms.azure-artifacts.feature' { 'artifacts' }
-                        default { $featureId }
-                    }
-                    # Get feature state
-                    $state = $results.featureStates.$featureId.state
-
-                    [PSCustomObject]@{
-                        feature       = $feature
-                        state         = $state
-                        featureId     = $featureId
-                        projectName   = $ProjectName
-                        collectionUri = $CollectionUri
-                    }
+            foreach ($featureId in $results.featureStates.PSObject.Properties.Name) {
+                # Get user-friendly feature name
+                $feature = switch ($featureId) {
+                    'ms.vss-work.agile' { 'boards' }
+                    'ms.vss-code.version-control' { 'repos' }
+                    'ms.vss-build.pipelines' { 'pipelines' }
+                    'ms.vss-test-web.test' { 'testPlans' }
+                    'ms.azure-artifacts.feature' { 'artifacts' }
+                    default { $featureId }
                 }
-            } else {
-                Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
+                # Get feature state
+                $state = $results.featureStates.$featureId.state
+
+                [PSCustomObject]@{
+                    feature       = $feature
+                    state         = $state
+                    featureId     = $featureId
+                    projectName   = $ProjectName
+                    collectionUri = $CollectionUri
+                }
             }
         } catch {
             throw $_

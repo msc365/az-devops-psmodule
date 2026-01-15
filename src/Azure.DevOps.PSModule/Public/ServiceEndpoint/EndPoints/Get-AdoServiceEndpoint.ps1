@@ -55,14 +55,14 @@
 
         Retrieves multiple service endpoints by piping their names to the cmdlet.
     #>
-    [CmdletBinding(SupportsShouldProcess, DefaultParameterSetName = 'ByNames')]
+    [CmdletBinding(DefaultParameterSetName = 'ByNames')]
     [OutputType([PSCustomObject])]
     param (
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
         [string]$CollectionUri = $env:DefaultAdoCollectionUri,
 
-        [Parameter( ValueFromPipelineByPropertyName)]
+        [Parameter(ValueFromPipelineByPropertyName)]
         [Alias('ProjectId')]
         [string]$ProjectName = $env:DefaultAdoProject,
 
@@ -147,48 +147,36 @@
                 Method          = 'GET'
             }
 
-            $shouldProcessOperation = if ($Names) {
-                "Get service endpoint(s) '$($Names -join ', ')'"
-            } elseif ($Ids) {
-                "Get service endpoint(s) '$($Ids -join ', ')'"
-            } else {
-                'Get service endpoints'
-            }
+            try {
+                $results = Invoke-AdoRestMethod @params
+                $items = $results.value
 
-            if ($PSCmdlet.ShouldProcess($ProjectName, $shouldProcessOperation)) {
-                try {
-                    $results = Invoke-AdoRestMethod @params
-                    $items = $results.value
-
-                    foreach ($i_ in $items) {
-                        [PSCustomObject]@{
-                            id                               = $i_.id
-                            name                             = $i_.name
-                            type                             = $i_.type
-                            description                      = $i_.description
-                            authorization                    = $i_.authorization
-                            isShared                         = $i_.isShared
-                            isReady                          = $i_.isReady
-                            owner                            = $i_.owner
-                            data                             = $i_.data
-                            serviceEndpointProjectReferences = $i_.serviceEndpointProjectReferences
-                            projectName                      = $ProjectName
-                            collectionUri                    = $CollectionUri
-                        }
-                    }
-                } catch {
-                    if ($_.ErrorDetails.Message -match 'NotFoundException') {
-                        if ($PSCmdlet.ParameterSetName -eq 'ByIds') {
-                            Write-Warning "Service endpoint(s) with id(s) '$($Ids -join ', ')' do not exist in project $ProjectName, skipping."
-                        } else {
-                            Write-Warning "Service endpoint(s) with name(s) '$($Names -join ', ')' do not exist in project $ProjectName, skipping."
-                        }
-                    } else {
-                        throw $_
+                foreach ($i_ in $items) {
+                    [PSCustomObject]@{
+                        id                               = $i_.id
+                        name                             = $i_.name
+                        type                             = $i_.type
+                        description                      = $i_.description
+                        authorization                    = $i_.authorization
+                        isShared                         = $i_.isShared
+                        isReady                          = $i_.isReady
+                        owner                            = $i_.owner
+                        data                             = $i_.data
+                        serviceEndpointProjectReferences = $i_.serviceEndpointProjectReferences
+                        projectName                      = $ProjectName
+                        collectionUri                    = $CollectionUri
                     }
                 }
-            } else {
-                Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
+            } catch {
+                if ($_.ErrorDetails.Message -match 'NotFoundException') {
+                    if ($PSCmdlet.ParameterSetName -eq 'ByIds') {
+                        Write-Warning "Service endpoint(s) with id(s) '$($Ids -join ', ')' do not exist in project $ProjectName, skipping."
+                    } else {
+                        Write-Warning "Service endpoint(s) with name(s) '$($Names -join ', ')' do not exist in project $ProjectName, skipping."
+                    }
+                } else {
+                    throw $_
+                }
             }
         } catch {
             throw $_

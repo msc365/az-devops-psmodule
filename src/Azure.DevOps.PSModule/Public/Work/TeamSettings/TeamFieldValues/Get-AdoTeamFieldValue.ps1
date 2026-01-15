@@ -53,7 +53,7 @@ function Get-AdoTeamFieldValue {
 
         Retrieves team field values using pipeline input.
     #>
-    [CmdletBinding(SupportsShouldProcess)]
+    [CmdletBinding()]
     param (
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
@@ -100,26 +100,22 @@ function Get-AdoTeamFieldValue {
                 Method  = 'GET'
             }
 
-            if ($PSCmdlet.ShouldProcess($ProjectName, $TeamName ? "Get team field values for $TeamName" : 'Get team field values for Default Team')) {
-                try {
-                    $results = Invoke-AdoRestMethod @params
+            try {
+                $results = Invoke-AdoRestMethod @params
 
-                    [PSCustomObject]@{
-                        defaultValue  = $results.defaultValue
-                        field         = $results.field
-                        values        = $results.values
-                        projectName   = $ProjectName
-                        collectionUri = $CollectionUri
-                    }
-                } catch {
-                    if ($_.ErrorDetails.Message -match 'NotFoundException') {
-                        Write-Warning 'Team field value(s) does not exist, skipping.'
-                    } else {
-                        throw $_
-                    }
+                [PSCustomObject]@{
+                    defaultValue  = $results.defaultValue
+                    field         = $results.field
+                    values        = $results.values
+                    projectName   = $ProjectName
+                    collectionUri = $CollectionUri
                 }
-            } else {
-                Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 5)"
+            } catch {
+                if ($_.ErrorDetails.Message -match 'NotFoundException') {
+                    Write-Warning 'Team field value(s) does not exist, skipping.'
+                } else {
+                    throw $_
+                }
             }
         } catch {
             throw $_

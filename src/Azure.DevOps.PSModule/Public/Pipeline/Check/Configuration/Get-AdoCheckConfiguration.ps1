@@ -95,7 +95,7 @@
 
         Retrieves check configurations for the specified environment filtered by multiple definition types.
     #>
-    [CmdletBinding(SupportsShouldProcess, DefaultParameterSetName = 'ConfigurationList')]
+    [CmdletBinding(DefaultParameterSetName = 'ConfigurationList')]
     param (
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
@@ -204,43 +204,39 @@
                 Method          = 'GET'
             }
 
-            if ($PSCmdlet.ShouldProcess($ProjectName, $Id ? "Get check configuration: $Id" : "Get Check Configurations: $ResourceType/$ResourceName")) {
-                try {
-                    $results = (Invoke-AdoRestMethod @params)
-                    if ($Id) { $results = @($results) } else {
-                        if ($DefinitionRefIds.Count -gt 0) {
-                            $results = $results.value |
-                                Where-Object { $DefinitionRefIds -contains $_.settings.definitionRef.id }
-                        } else {
-                            $results = $results.value
-                        }
-                    }
-
-                    foreach ($c_ in $results) {
-                        $obj = [ordered]@{
-                            id = $c_.id
-                        }
-                        if ($c_.settings) {
-                            $obj['settings'] = $c_.settings
-                        }
-                        $obj['timeout'] = $c_.timeout
-                        $obj['type'] = $c_.type
-                        $obj['resource'] = $c_.resource
-                        $obj['createdBy'] = $c_.createdBy.id
-                        $obj['createdOn'] = $c_.createdOn
-                        $obj['project'] = $ProjectName
-                        $obj['collectionUri'] = $CollectionUri
-                        [PSCustomObject]$obj
-                    }
-                } catch {
-                    if ($_.ErrorDetails.Message -match 'NotFoundException') {
-                        Write-Warning "Check configuration with ID $Id does not exist, skipping."
+            try {
+                $results = (Invoke-AdoRestMethod @params)
+                if ($Id) { $results = @($results) } else {
+                    if ($DefinitionRefIds.Count -gt 0) {
+                        $results = $results.value |
+                            Where-Object { $DefinitionRefIds -contains $_.settings.definitionRef.id }
                     } else {
-                        throw $_
+                        $results = $results.value
                     }
                 }
-            } else {
-                Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
+
+                foreach ($c_ in $results) {
+                    $obj = [ordered]@{
+                        id = $c_.id
+                    }
+                    if ($c_.settings) {
+                        $obj['settings'] = $c_.settings
+                    }
+                    $obj['timeout'] = $c_.timeout
+                    $obj['type'] = $c_.type
+                    $obj['resource'] = $c_.resource
+                    $obj['createdBy'] = $c_.createdBy.id
+                    $obj['createdOn'] = $c_.createdOn
+                    $obj['project'] = $ProjectName
+                    $obj['collectionUri'] = $CollectionUri
+                    [PSCustomObject]$obj
+                }
+            } catch {
+                if ($_.ErrorDetails.Message -match 'NotFoundException') {
+                    Write-Warning "Check configuration with ID $Id does not exist, skipping."
+                } else {
+                    throw $_
+                }
             }
         } catch {
             throw $_

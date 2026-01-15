@@ -40,7 +40,7 @@
 
         Retrieves the membership relationships for multiple subjects demonstrating pipeline input.
     #>
-    [CmdletBinding(SupportsShouldProcess)]
+    [CmdletBinding()]
     param (
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
@@ -78,18 +78,12 @@
                 Method  = 'GET'
             }
 
-            if ($PSCmdlet.ShouldProcess($CollectionUri, "Get Membership for subject: $SubjectDescriptor in container: $ContainerDescriptor")) {
+            $result = Invoke-AdoRestMethod @params
 
-                $result = Invoke-AdoRestMethod @params
-
-                [PSCustomObject]@{
-                    memberDescriptor    = $result.memberDescriptor
-                    containerDescriptor = $result.containerDescriptor
-                    collectionUri       = $CollectionUri
-                }
-
-            } else {
-                Write-Verbose "Calling Invoke-AdoRestMethod with $($params| ConvertTo-Json -Depth 10)"
+            [PSCustomObject]@{
+                memberDescriptor    = $result.memberDescriptor
+                containerDescriptor = $result.containerDescriptor
+                collectionUri       = $CollectionUri
             }
 
         } catch {

@@ -38,7 +38,7 @@
 
         Resolves multiple storage keys to their corresponding descriptors, demonstrating pipeline input.
     #>
-    [CmdletBinding(SupportsShouldProcess)]
+    [CmdletBinding()]
     param (
         [Parameter(ValueFromPipelineByPropertyName)]
         [string]$CollectionUri = ($env:DefaultAdoCollectionUri -replace 'https://', 'https://vssps.'),
@@ -71,26 +71,22 @@
                 Method  = 'GET'
             }
 
-            if ($PSCmdlet.ShouldProcess($CollectionUri, "Get Descriptor(s) for: $StorageKey")) {
-                try {
-                    $result = (Invoke-AdoRestMethod @params).value
+            try {
+                $result = (Invoke-AdoRestMethod @params).value
 
-                    if ($null -ne $result) {
-                        [PSCustomObject]@{
-                            storageKey    = $StorageKey
-                            value         = $result
-                            collectionUri = $CollectionUri
-                        }
-                    }
-                } catch {
-                    if ($_.ErrorDetails.Message -match 'NotFoundException') {
-                        Write-Warning "StorageKey with ID $StorageKey does not exist in $CollectionUri, skipping."
-                    } else {
-                        throw $_
+                if ($null -ne $result) {
+                    [PSCustomObject]@{
+                        storageKey    = $StorageKey
+                        value         = $result
+                        collectionUri = $CollectionUri
                     }
                 }
-            } else {
-                Write-Verbose "Calling Invoke-AdoRestMethod with $($params| ConvertTo-Json -Depth 10)"
+            } catch {
+                if ($_.ErrorDetails.Message -match 'NotFoundException') {
+                    Write-Warning "StorageKey with ID $StorageKey does not exist in $CollectionUri, skipping."
+                } else {
+                    throw $_
+                }
             }
         } catch {
             throw $_

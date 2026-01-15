@@ -29,6 +29,7 @@
                 subscriptionName = 'my-subscription-1'
             }
             name                             = 'my-endpoint-1'
+            description                      = 'My Azure RM Service Endpoint'
             type                             = 'AzureRM'
             url                              = 'https://management.azure.com/'
             authorization                    = [PSCustomObject]@{

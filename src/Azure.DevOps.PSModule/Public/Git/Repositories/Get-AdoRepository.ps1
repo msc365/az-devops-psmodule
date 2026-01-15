@@ -46,7 +46,7 @@
 
         Retrieves the specified repository from the project.
     #>
-    [CmdletBinding(DefaultParameterSetName = 'ListRepositories', SupportsShouldProcess)]
+    [CmdletBinding(DefaultParameterSetName = 'ListRepositories')]
     [OutputType([pscustomobject])]
     param (
         [Parameter(ValueFromPipelineByPropertyName)]
@@ -120,32 +120,27 @@
                 Method          = 'GET'
             }
 
-            if ($PSCmdlet.ShouldProcess($CollectionUri, $Name ? "Get Repository '$($Name)' in project '$($ProjectName)'" : "Get Repositories for project '$($ProjectName)'")) {
-
-                try {
-                    $results = Invoke-AdoRestMethod @params
-                    $repos = if ($Name) { @($results) } else { $results.value }
-                    foreach ($r_ in $repos) {
-                        [PSCustomObject]@{
-                            id            = $r_.id
-                            name          = $r_.name
-                            project       = $r_.project
-                            defaultBranch = $r_.defaultBranch
-                            url           = $r_.url
-                            remoteUrl     = $r_.remoteUrl
-                            projectName   = $ProjectName
-                            collectionUri = $CollectionUri
-                        }
-                    }
-                } catch {
-                    if ($_.ErrorDetails.Message -match 'NotFoundException') {
-                        Write-Warning "Repository with ID $Name does not exist in project $ProjectName, skipping."
-                    } else {
-                        throw $_
+            try {
+                $results = Invoke-AdoRestMethod @params
+                $repos = if ($Name) { @($results) } else { $results.value }
+                foreach ($r_ in $repos) {
+                    [PSCustomObject]@{
+                        id            = $r_.id
+                        name          = $r_.name
+                        project       = $r_.project
+                        defaultBranch = $r_.defaultBranch
+                        url           = $r_.url
+                        remoteUrl     = $r_.remoteUrl
+                        projectName   = $ProjectName
+                        collectionUri = $CollectionUri
                     }
                 }
-            } else {
-                Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
+            } catch {
+                if ($_.ErrorDetails.Message -match 'NotFoundException') {
+                    Write-Warning "Repository with ID $Name does not exist in project $ProjectName, skipping."
+                } else {
+                    throw $_
+                }
             }
         } catch {
             throw $_

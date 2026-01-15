@@ -57,7 +57,7 @@
 
         Retrieves the specified environments from the project, demonstrating pipeline input.
     #>
-    [CmdletBinding(SupportsShouldProcess, DefaultParameterSetName = 'ListEnvironments')]
+    [CmdletBinding(DefaultParameterSetName = 'ListEnvironments')]
     param (
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
@@ -135,41 +135,37 @@
                 Method          = 'GET'
             }
 
-            if ($PSCmdlet.ShouldProcess($CollectionUri, "Get Environment(s) from: $ProjectName")) {
-                try {
-                    $results = (Invoke-AdoRestMethod @params)
-                    $environments = if ($Id) { @($results) } else { $results.value }
+            try {
+                $results = (Invoke-AdoRestMethod @params)
+                $environments = if ($Id) { @($results) } else { $results.value }
 
-                    foreach ($e_ in $environments) {
-                        $obj = [ordered]@{
-                            id          = $e_.id
-                            name        = $e_.name
-                            description = $e_.description
-                        }
-                        if ($Expands -eq 'resourceReferences') {
-                            $obj['resources'] = $e_.resources
-                        }
-                        $obj['createdBy'] = $e_.createdBy
-                        $obj['createdOn'] = $e_.createdOn
-                        $obj['lastModifiedBy'] = $e_.lastModifiedBy
-                        $obj['lastModifiedOn'] = $e_.lastModifiedOn
-                        $obj['projectName'] = $ProjectName
-                        $obj['collectionUri'] = $CollectionUri
-                        if ($e_.continuationToken) {
-                            $obj['continuationToken'] = $e_.continuationToken
-                        }
-                        # Output the environment object
-                        [PSCustomObject]$obj
+                foreach ($e_ in $environments) {
+                    $obj = [ordered]@{
+                        id          = $e_.id
+                        name        = $e_.name
+                        description = $e_.description
                     }
-                } catch {
-                    if ($_.ErrorDetails.Message -match 'EnvironmentNotFoundException') {
-                        Write-Warning "Environment with ID $Id does not exist, skipping."
-                    } else {
-                        throw $_
+                    if ($Expands -eq 'resourceReferences') {
+                        $obj['resources'] = $e_.resources
                     }
+                    $obj['createdBy'] = $e_.createdBy
+                    $obj['createdOn'] = $e_.createdOn
+                    $obj['lastModifiedBy'] = $e_.lastModifiedBy
+                    $obj['lastModifiedOn'] = $e_.lastModifiedOn
+                    $obj['projectName'] = $ProjectName
+                    $obj['collectionUri'] = $CollectionUri
+                    if ($e_.continuationToken) {
+                        $obj['continuationToken'] = $e_.continuationToken
+                    }
+                    # Output the environment object
+                    [PSCustomObject]$obj
                 }
-            } else {
-                Write-Verbose "Calling Invoke-AdoRestMethod with $($params| ConvertTo-Json -Depth 10)"
+            } catch {
+                if ($_.ErrorDetails.Message -match 'EnvironmentNotFoundException') {
+                    Write-Warning "Environment with ID $Id does not exist, skipping."
+                } else {
+                    throw $_
+                }
             }
         } catch {
             throw $_

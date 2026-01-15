@@ -90,7 +90,7 @@ function Get-AdoClassificationNode {
 
         Retrieves the iteration node at the specified path from the default project and collection.
     #>
-    [CmdletBinding(SupportsShouldProcess, DefaultParameterSetName = 'GetAll', ConfirmImpact = 'None')]
+    [CmdletBinding(DefaultParameterSetName = 'GetAll')]
     param (
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
@@ -194,47 +194,43 @@ function Get-AdoClassificationNode {
                 'Get classification nodes'
             }
 
-            if ($PSCmdlet.ShouldProcess($ProjectName, $shouldProcessOperation)) {
-                try {
-                    $results = (Invoke-AdoRestMethod @params)
+            try {
+                $results = (Invoke-AdoRestMethod @params)
 
-                    $items = if (($PSCmdlet.ParameterSetName -eq 'GetAll' -and $StructureGroup) -or
-                        $PSCmdlet.ParameterSetName -eq 'ByPath') {
-                        # Use array for single node response
-                        @( $results )
-                    } else {
-                        # Use value array for multiple nodes response
-                        $results.value
-                    }
-
-                    foreach ($i_ in $items) {
-                        $obj = [ordered]@{
-                            id            = $i_.id
-                            identifier    = $i_.identifier
-                            name          = $i_.name
-                            structureType = $i_.structureType
-                            path          = $i_.path
-                            hasChildren   = $i_.hasChildren
-                        }
-                        if ($i_.children) {
-                            $obj['children'] = $i_.children
-                        }
-                        if ($i_.attributes) {
-                            $obj['attributes'] = $i_.attributes
-                        }
-                        $obj['projectName'] = $ProjectName
-                        $obj['collectionUri'] = $CollectionUri
-                        [PSCustomObject]$obj
-                    }
-                } catch {
-                    if ($_.ErrorDetails.Message -match 'NotFoundException') {
-                        Write-Warning "Classification node(s) not found in project '$ProjectName', skipping."
-                    } else {
-                        throw $_
-                    }
+                $items = if (($PSCmdlet.ParameterSetName -eq 'GetAll' -and $StructureGroup) -or
+                    $PSCmdlet.ParameterSetName -eq 'ByPath') {
+                    # Use array for single node response
+                    @( $results )
+                } else {
+                    # Use value array for multiple nodes response
+                    $results.value
                 }
-            } else {
-                Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
+
+                foreach ($i_ in $items) {
+                    $obj = [ordered]@{
+                        id            = $i_.id
+                        identifier    = $i_.identifier
+                        name          = $i_.name
+                        structureType = $i_.structureType
+                        path          = $i_.path
+                        hasChildren   = $i_.hasChildren
+                    }
+                    if ($i_.children) {
+                        $obj['children'] = $i_.children
+                    }
+                    if ($i_.attributes) {
+                        $obj['attributes'] = $i_.attributes
+                    }
+                    $obj['projectName'] = $ProjectName
+                    $obj['collectionUri'] = $CollectionUri
+                    [PSCustomObject]$obj
+                }
+            } catch {
+                if ($_.ErrorDetails.Message -match 'NotFoundException') {
+                    Write-Warning "Classification node(s) not found in project '$ProjectName', skipping."
+                } else {
+                    throw $_
+                }
             }
         } catch {
             throw $_

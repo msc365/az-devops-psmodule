@@ -43,7 +43,7 @@
 
         Retrieves multiple processes by name demonstrating pipeline input.
     #>
-    [CmdletBinding(SupportsShouldProcess)]
+    [CmdletBinding()]
     param (
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
@@ -79,28 +79,23 @@
                 Method  = 'GET'
             }
 
-            if ($PSCmdlet.ShouldProcess($CollectionUri, $Name ? "Get Process: $Name" : 'Get Processes')) {
+            $results = Invoke-AdoRestMethod @params
+            $processes = $results.value
 
-                $results = Invoke-AdoRestMethod @params
-                $processes = $results.value
+            if ($Name) {
+                $processes = $processes | Where-Object { $_.name -eq $Name }
+            }
 
-                if ($Name) {
-                    $processes = $processes | Where-Object { $_.name -eq $Name }
+            foreach ($p_ in $processes) {
+                [PSCustomObject]@{
+                    id            = $p_.id
+                    name          = $p_.name
+                    description   = $p_.description
+                    url           = $p_.url
+                    type          = $p_.type
+                    isDefault     = $p_.isDefault
+                    collectionUri = $CollectionUri
                 }
-
-                foreach ($p_ in $processes) {
-                    [PSCustomObject]@{
-                        id            = $p_.id
-                        name          = $p_.name
-                        description   = $p_.description
-                        url           = $p_.url
-                        type          = $p_.type
-                        isDefault     = $p_.isDefault
-                        collectionUri = $CollectionUri
-                    }
-                }
-            } else {
-                Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
             }
         } catch {
             throw $_

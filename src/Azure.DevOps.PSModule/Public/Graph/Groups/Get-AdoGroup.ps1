@@ -76,7 +76,7 @@
     .NOTES
         Retrieves groups in an Azure DevOps organization.
     #>
-    [CmdletBinding(SupportsShouldProcess, DefaultParameterSetName = 'ListGroups')]
+    [CmdletBinding(DefaultParameterSetName = 'ListGroups')]
     [OutputType([PSCustomObject])]
     param (
         [Parameter(ValueFromPipelineByPropertyName)]
@@ -149,48 +149,41 @@
                 Method          = 'GET'
             }
 
-            if ($PSCmdlet.ShouldProcess($CollectionUri, $GroupDescriptor ? "Get Group for $GroupDescriptor" : 'Get Groups')) {
-                try {
-                    $results = Invoke-AdoRestMethod @params
-                    $groups = if ($GroupDescriptor) { @($results) } else { $results.value }
+            try {
+                $results = Invoke-AdoRestMethod @params
+                $groups = if ($GroupDescriptor) { @($results) } else { $results.value }
 
-                    if ($Name) {
-                        $groups = foreach ($n_ in $Name) {
-                            $groups | Where-Object { -not $n_ -or $_.displayName -like $n_ }
-                        }
-                    }
-
-                    foreach ($g_ in $groups) {
-                        $obj = [ordered]@{
-                            displayName   = $g_.displayName
-                            originId      = $g_.originId
-                            principalName = $g_.principalName
-                            origin        = $g_.origin
-                            subjectKind   = $g_.subjectKind
-                            description   = $g_.description
-                            mailAddress   = $g_.mailAddress
-                            descriptor    = $g_.descriptor
-                            collectionUri = $CollectionUri
-                        }
-                        if ($result.continuationToken) {
-                            $obj['continuationToken'] = $result.continuationToken
-                        }
-                        [PSCustomObject]$obj
-                    }
-                } catch {
-                    if ($_.ErrorDetails.Message -match 'InvalidSubjectTypeException') {
-                        Write-Warning "Subject with scope descriptor $ScopeDescriptor does not exist, skipping."
-                    } elseif ($_.ErrorDetails.Message -match 'GraphSubjectNotFoundException') {
-                        Write-Warning "Subject with group descriptor $GroupDescriptor does not exist, skipping."
-                    } else {
-                        throw $_
-                    }
-                }
-            } else {
                 if ($Name) {
-                    $params.Name = $Name
+                    $groups = foreach ($n_ in $Name) {
+                        $groups | Where-Object { -not $n_ -or $_.displayName -like $n_ }
+                    }
                 }
-                Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
+
+                foreach ($g_ in $groups) {
+                    $obj = [ordered]@{
+                        displayName   = $g_.displayName
+                        originId      = $g_.originId
+                        principalName = $g_.principalName
+                        origin        = $g_.origin
+                        subjectKind   = $g_.subjectKind
+                        description   = $g_.description
+                        mailAddress   = $g_.mailAddress
+                        descriptor    = $g_.descriptor
+                        collectionUri = $CollectionUri
+                    }
+                    if ($result.continuationToken) {
+                        $obj['continuationToken'] = $result.continuationToken
+                    }
+                    [PSCustomObject]$obj
+                }
+            } catch {
+                if ($_.ErrorDetails.Message -match 'InvalidSubjectTypeException') {
+                    Write-Warning "Subject with scope descriptor $ScopeDescriptor does not exist, skipping."
+                } elseif ($_.ErrorDetails.Message -match 'GraphSubjectNotFoundException') {
+                    Write-Warning "Subject with group descriptor $GroupDescriptor does not exist, skipping."
+                } else {
+                    throw $_
+                }
             }
 
         } catch {

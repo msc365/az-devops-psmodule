@@ -72,7 +72,7 @@
 
         Retrieves multiple policy configurations by ID using pipeline input.
     #>
-    [CmdletBinding(DefaultParameterSetName = 'ListConfigurations', SupportsShouldProcess)]
+    [CmdletBinding(DefaultParameterSetName = 'ListConfigurations')]
     [OutputType([PSCustomObject])]
     param (
         [Parameter(ValueFromPipelineByPropertyName)]
@@ -155,38 +155,36 @@
                 Method          = 'GET'
             }
 
-            if ($PSCmdlet.ShouldProcess($CollectionUri, $Id ? "Get Policy Configuration: $Id from: $ProjectName" : "Get Policy Configurations from: $ProjectName")) {
-                try {
-                    $results = (Invoke-AdoRestMethod @params)
-                    $configurations = if ($Id) { @($results) } else { $results.value }
+            try {
+                $results = (Invoke-AdoRestMethod @params)
+                $configurations = if ($Id) { @($results) } else { $results.value }
 
-                    foreach ($c_ in $configurations) {
-                        $obj = [ordered]@{
-                            id          = $c_.id
-                            type        = $c_.type
-                            revision    = $c_.revision
-                            isEnabled   = $c_.isEnabled
-                            isBlocking  = $c_.isBlocking
-                            isDeleted   = $c_.isDeleted
-                            settings    = $c_.settings
-                            createdBy   = $c_.createdBy
-                            createdDate = $c_.createdDate
-                        }
-                        if ($c_.continuationToken) {
-                            $obj['continuationToken'] = $c_.continuationToken
-                        }
-                        $obj['projectName'] = $ProjectName
-                        $obj['collectionUri'] = $CollectionUri
+                foreach ($c_ in $configurations) {
+                    $obj = [ordered]@{
+                        id          = $c_.id
+                        type        = $c_.type
+                        revision    = $c_.revision
+                        isEnabled   = $c_.isEnabled
+                        isBlocking  = $c_.isBlocking
+                        isDeleted   = $c_.isDeleted
+                        settings    = $c_.settings
+                        createdBy   = $c_.createdBy
+                        createdDate = $c_.createdDate
+                    }
+                    if ($c_.continuationToken) {
+                        $obj['continuationToken'] = $c_.continuationToken
+                    }
+                    $obj['projectName'] = $ProjectName
+                    $obj['collectionUri'] = $CollectionUri
 
-                        # Output the configuration object
-                        [PSCustomObject]$obj
-                    }
-                } catch {
-                    if ($_.ErrorDetails.Message -match 'NotFoundException') {
-                        Write-Warning "Policy configuration with ID $Id does not exist, skipping."
-                    } else {
-                        throw $_
-                    }
+                    # Output the configuration object
+                    [PSCustomObject]$obj
+                }
+            } catch {
+                if ($_.ErrorDetails.Message -match 'NotFoundException') {
+                    Write-Warning "Policy configuration with ID $Id does not exist, skipping."
+                } else {
+                    throw $_
                 }
             }
 

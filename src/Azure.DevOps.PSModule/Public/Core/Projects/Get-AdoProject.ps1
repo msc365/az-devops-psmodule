@@ -71,7 +71,7 @@
 
         Retrieves multiple projects by their names using filtering.
     #>
-    [CmdletBinding(DefaultParameterSetName = 'ListProjects', SupportsShouldProcess, ConfirmImpact = 'None')]
+    [CmdletBinding(DefaultParameterSetName = 'ListProjects')]
     param (
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
@@ -156,37 +156,33 @@
                 Method          = 'GET'
             }
 
-            if ($PSCmdlet.ShouldProcess($CollectionUri, $Name ? "Get Project: $Name" : 'Get Projects')) {
-                try {
-                    $results = Invoke-AdoRestMethod @params
-                    $projects = if ($Name) { @($results) } else { $results.value }
+            try {
+                $results = Invoke-AdoRestMethod @params
+                $projects = if ($Name) { @($results) } else { $results.value }
 
-                    foreach ($p_ in $projects) {
-                        $obj = [ordered]@{
-                            id            = $p_.id
-                            name          = $p_.name
-                            description   = $p_.description
-                            visibility    = $p_.visibility
-                            state         = $p_.state
-                            defaultTeam   = $p_.DefaultTeam
-                            capabilities  = if ($p_.capabilities) { $p_.capabilities } else { $null }
-                            collectionUri = $CollectionUri
-                        }
-                        if ($results.continuationToken) {
-                            $obj.continuationToken = $results.continuationToken
-                        }
-                        # Output the project object
-                        [PSCustomObject]$obj
+                foreach ($p_ in $projects) {
+                    $obj = [ordered]@{
+                        id            = $p_.id
+                        name          = $p_.name
+                        description   = $p_.description
+                        visibility    = $p_.visibility
+                        state         = $p_.state
+                        defaultTeam   = $p_.DefaultTeam
+                        capabilities  = if ($p_.capabilities) { $p_.capabilities } else { $null }
+                        collectionUri = $CollectionUri
                     }
-                } catch {
-                    if ($_.ErrorDetails.Message -match 'ProjectDoesNotExistWithNameException') {
-                        Write-Warning "Project with ID $Name does not exist, skipping."
-                    } else {
-                        throw $_
+                    if ($results.continuationToken) {
+                        $obj.continuationToken = $results.continuationToken
                     }
+                    # Output the project object
+                    [PSCustomObject]$obj
                 }
-            } else {
-                Write-Verbose "Calling Invoke-AdoRestMethod with $($params| ConvertTo-Json -Depth 10)"
+            } catch {
+                if ($_.ErrorDetails.Message -match 'ProjectDoesNotExistWithNameException') {
+                    Write-Warning "Project with ID $Name does not exist, skipping."
+                } else {
+                    throw $_
+                }
             }
         } catch {
             throw $_

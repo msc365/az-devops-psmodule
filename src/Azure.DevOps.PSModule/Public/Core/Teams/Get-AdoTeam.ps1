@@ -73,7 +73,7 @@
 
         Retrieves the first 5 teams from the specified project.
     #>
-    [CmdletBinding(DefaultParameterSetName = 'ListTeams', SupportsShouldProcess)]
+    [CmdletBinding(DefaultParameterSetName = 'ListTeams')]
     param (
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
@@ -140,31 +140,27 @@
                 Method          = 'GET'
             }
 
-            if ($PSCmdlet.ShouldProcess($CollectionUri, $Name ? "Get Team: $Name in Project: $ProjectName" : "Get Teams for Project: $ProjectName")) {
-                try {
-                    $results = Invoke-AdoRestMethod @params
-                    $teams = if ($Name) { @($results) } else { $results.value }
-                    foreach ($t_ in $teams) {
-                        [PSCustomObject]@{
-                            id            = $t_.id
-                            name          = $t_.name
-                            description   = $t_.description
-                            url           = $t_.url
-                            identityUrl   = $t_.identityUrl
-                            projectId     = $t_.projectId
-                            projectName   = $t_.projectName
-                            collectionUri = $CollectionUri
-                        }
-                    }
-                } catch {
-                    if ($_.ErrorDetails.Message -match 'NotFoundException') {
-                        Write-Warning "Team with ID $Name does not exist, skipping."
-                    } else {
-                        throw $_
+            try {
+                $results = Invoke-AdoRestMethod @params
+                $teams = if ($Name) { @($results) } else { $results.value }
+                foreach ($t_ in $teams) {
+                    [PSCustomObject]@{
+                        id            = $t_.id
+                        name          = $t_.name
+                        description   = $t_.description
+                        url           = $t_.url
+                        identityUrl   = $t_.identityUrl
+                        projectId     = $t_.projectId
+                        projectName   = $t_.projectName
+                        collectionUri = $CollectionUri
                     }
                 }
-            } else {
-                Write-Verbose "Calling Invoke-AdoRestMethod with $($params | ConvertTo-Json -Depth 10)"
+            } catch {
+                if ($_.ErrorDetails.Message -match 'NotFoundException') {
+                    Write-Warning "Team with ID $Name does not exist, skipping."
+                } else {
+                    throw $_
+                }
             }
         } catch {
             throw $_
