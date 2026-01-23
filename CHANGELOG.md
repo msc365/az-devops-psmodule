@@ -11,16 +11,16 @@ Maintenance release focused on removing unnecessary ShouldProcess support from c
 
 ### What's Changed
 
-- fix: Remove ShouldProcess logic from Get-AdoClassificationNode function
-- fix: Update default API version in Get-AdoMembership tests to '7.1-preview.1'
-- fix: Update default API version in Get-AdoMembership cmdlet to '7.1-preview.1'
-- fix: Update ScopeDescriptor parameter to use $projectDescriptor in Get-AdoGroup cmdlet example
-- fix: Remove ShouldProcess support from multiple cmdlets to simplify execution flow
-- fix: Update multiple test files to eliminate the use of the `-Confirm:$false` parameter
-- fix: Remove ShouldProcess support from private cmdlets to simplify execution flow
-- fix: Update private test files to eliminate the use of the -Confirm:$false parameter
-- chore: Update build version to 0.2.2 and improve script analyzer settings
-- chore: Update CHANGELOG to reflect recent changes and fixes
+- fix: Remove ShouldProcess support from multiple cmdlets to simplify execution flow (#92)
+- fix: Update multiple test files to eliminate the use of the `-Confirm:$false` parameter (#92)
+- fix: Update private test files to eliminate the use of the `-Confirm:$false` parameter (#93)
+- fix: Remove ShouldProcess support from private cmdlets to simplify execution flow (#93)
+- fix: Update default API version in Get-AdoMembership tests to '7.1-preview.1' (#94)
+- fix: Update default API version in Get-AdoMembership cmdlet to '7.1-preview.1' (#94)
+- fix: Update ScopeDescriptor parameter to use $projectDescriptor in Get-AdoGroup cmdlet example (#94)
+- fix: Remove ShouldProcess logic from Get-AdoClassificationNode function (#95)
+- chore: Update build version to 0.2.2 and improve script analyzer settings (#95)
+- chore: Update CHANGELOG to reflect recent changes and fixes (#95)
 
 ### Breaking Changes
 - _None_

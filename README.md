@@ -169,7 +169,10 @@ new issues to avoid duplicates.
 ![logo small martin swinkels cloud](.assets/logo-small.png)  
 Part of Martin's Cloud on GitHub
 
-[MIT License](LICENSE) | Copyright (c) 2025-2026 MSc365.eu by Martin Swinkels
+Copyright (c) 2025 MSc365.eu by Martin Swinkels
+
+This project is published under the MIT license.  
+See [MIT License](LICENSE) for details.
 
 <!-- omit from toc -->
 ## Disclaimer

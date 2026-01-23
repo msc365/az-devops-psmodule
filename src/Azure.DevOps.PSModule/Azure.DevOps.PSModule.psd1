@@ -152,13 +152,13 @@
             Tags         = @('Azure', 'DevOps', 'Platform', 'Governance', 'Gov', 'REST', 'API', 'MSc365', 'MSc365.eu')
 
             # A URL to the license for this module.
-            LicenseUri   = 'https://github.com/msc365/az-devops-gov/blob/main/LICENSE'
+            LicenseUri   = 'https://github.com/msc365/az-devops-psmodule/blob/main/LICENSE'
 
             # A URL to the main website for this project.
-            ProjectUri   = 'https://github.com/msc365/az-devops-gov'
+            ProjectUri   = 'https://github.com/msc365/az-devops-psmodule'
 
             # A URL to an icon representing this module.
-            IconUri      = 'https://raw.githubusercontent.com/msc365/az-devops-gov/main/.assets/icon.png?raw=true'
+            IconUri      = 'https://raw.githubusercontent.com/msc365/az-devops-psmodule/main/.assets/icon.png?raw=true'
 
             # ReleaseNotes of this module
             ReleaseNotes = 'https://github.com/msc365/az-devops-psmodule/releases'
