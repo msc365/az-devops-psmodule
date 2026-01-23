@@ -3,10 +3,15 @@
 
 All notable changes to this project will be documented in this file.
 
-## [UNRELEASED]
+## [0.2.2] - 2026-01-23
+
+### Summary
+
+Maintenance release focused on removing unnecessary ShouldProcess support from cmdlets to simplify execution and improve usability. Updated API versions and fixed parameter usage in examples.
 
 ### What's Changed
 
+- fix: Remove ShouldProcess logic from Get-AdoClassificationNode function
 - fix: Update default API version in Get-AdoMembership tests to '7.1-preview.1'
 - fix: Update default API version in Get-AdoMembership cmdlet to '7.1-preview.1'
 - fix: Update ScopeDescriptor parameter to use $projectDescriptor in Get-AdoGroup cmdlet example
@@ -14,6 +19,7 @@ All notable changes to this project will be documented in this file.
 - fix: Update multiple test files to eliminate the use of the `-Confirm:$false` parameter
 - fix: Remove ShouldProcess support from private cmdlets to simplify execution flow
 - fix: Update private test files to eliminate the use of the -Confirm:$false parameter
+- chore: Update build version to 0.2.2 and improve script analyzer settings
 - chore: Update CHANGELOG to reflect recent changes and fixes
 
 ### Breaking Changes
