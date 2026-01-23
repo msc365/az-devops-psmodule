@@ -176,24 +176,6 @@ function Get-AdoClassificationNode {
                 Method          = 'GET'
             }
 
-            $shouldProcessOperation = if ($PSCmdlet.ParameterSetName -eq 'GetAll') {
-                if ($StructureGroup) {
-                    "Get root classification node '$StructureGroup'"
-                } else {
-                    'Get all root classification nodes'
-                }
-            } elseif ($PSCmdlet.ParameterSetName -eq 'ByPath') {
-                if ($Path) {
-                    "Get classification node '$StructureGroup/$Path'"
-                } else {
-                    "Get root classification node '$StructureGroup'"
-                }
-            } elseif ($PSCmdlet.ParameterSetName -eq 'ByNodesIds') {
-                "Get classification node '$($Ids -join ', ')'"
-            } else {
-                'Get classification nodes'
-            }
-
             try {
                 $results = (Invoke-AdoRestMethod @params)
 

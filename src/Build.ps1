@@ -34,7 +34,7 @@ Properties {
     # $script:moduleName = 'Azure.DevOps.PSModule'
 
     # The current release version of the module.
-    $script:buildVersion = [System.Version]'0.2.1'
+    $script:buildVersion = [System.Version]'0.2.2'
 
     # Pre-release label (e.g. 'alpha1', 'beta1', 'rc1'). Set to $null for stable releases.
     $script:prerelease = $null
@@ -154,20 +154,24 @@ Task Test -Depends Build -RequiredVariables Output {
     Write-Host 'Running script analyzer.' -ForegroundColor Magenta
 
     # Get all script files (e.g., .ps1, .psd1 and .psm1 files)
-    $scriptCount = (Get-ChildItem -Path $script:sourcePath -Recurse -Include '*.ps1', '*.psd1', '*.psm1').Count
+    $settingsPath = Join-Path -Path $script:sourcePath -ChildPath 'PSScriptAnalyzerSettings.psd1'
+    $filesToAnalyze = Get-ChildItem -Path $script:sourcePath -Recurse -Include '*.ps1', '*.psm1', '*.psd1' |
+        Where-Object { $_.Name -notlike '*.Tests.ps1' }
+
+    $scriptCount = $filesToAnalyze.Count
 
     # Run script analyzer on scripts
-    $result = Invoke-ScriptAnalyzer -Path $script:sourcePath -Severity Warning
+    $results = $filesToAnalyze | Invoke-ScriptAnalyzer -Settings $settingsPath -Severity Warning
 
-    Write-Output $result
+    Write-Output $results
 
-    $errors = ($result | Where-Object Severity -EQ 'Error').Count
-    $warnings = ($result | Where-Object Severity -EQ 'Warning').Count
-    # $infos = ($result | Where-Object Severity -EQ 'Info').Count
+    $errors = ($results | Where-Object Severity -EQ 'Error').Count
+    $warnings = ($results | Where-Object Severity -EQ 'Warning').Count
+    # $infos = ($results | Where-Object Severity -EQ 'Info').Count
 
     Write-Host "`nEvaluation completed."
     Write-Host "Evaluated: $($scriptCount), " -NoNewline -ForegroundColor Green
-    Write-Host "Violations: $($result.Count), Errors: $($errors), Warnings: $($warnings)`n" -ForegroundColor DarkGray
+    Write-Host "Violations: $($results.Count), Errors: $($errors), Warnings: $($warnings)`n" -ForegroundColor DarkGray
     # Write-Host "Errors: $($errors), Warnings: $($warnings), Informative: $($infos)`n" -ForegroundColor DarkGray
 
     Import-Module Pester -PassThru | Out-Null
