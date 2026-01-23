@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 
 ### What's Changed
 
+- fix: Update default API version in Get-AdoMembership tests to '7.1-preview.1'
 - fix: Update default API version in Get-AdoMembership cmdlet to '7.1-preview.1'
 - fix: Update ScopeDescriptor parameter to use $projectDescriptor in Get-AdoGroup cmdlet example
 - fix: Remove ShouldProcess support from multiple cmdlets to simplify execution flow
