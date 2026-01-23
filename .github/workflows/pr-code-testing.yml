@@ -202,7 +202,7 @@ jobs:
 
           # Code analysis badge
           $analysisColor = if ($analyzerErrors -eq 0 -and $analyzerWarnings -eq 0) { 'brightgreen' } elseif ($analyzerErrors -eq 0) { 'yellow' } else { 'red' }
-          $analysisMessage = if ($analyzerErrors -eq 0 -and $analyzerWarnings -eq 0) { 'passing' } elseif ($analyzerErrors -eq 0) { "0 errors, $analyzerWarnings warnings" } else { "$analyzerErrors errors, $analyzerWarnings warnings" }
+          $analysisMessage = if ($analyzerErrors -eq 0 -and $analyzerWarnings -eq 0) { "$analyzerTotal total" } elseif ($analyzerErrors -eq 0) { "0 errors, $analyzerWarnings warnings" } else { "$analyzerErrors errors, $analyzerWarnings warnings" }
 
           $analysisBadge = @{
             schemaVersion = 1
@@ -237,7 +237,7 @@ jobs:
           gistID: ${{ secrets.GIST_ID }}
           filename: az-devops-psmodule-test-badge.json
           label: code tests
-          message: ${{ env.TEST_FAILED == '0' && 'passing' || format('{0} failing, {1} passing', env.TEST_FAILED, env.TEST_PASSED) }}
+          message: ${{ env.TEST_FAILED == '0' && format('{0}', env.TEST_PASSED) || format('{0} failing, {1} passing', env.TEST_FAILED, env.TEST_PASSED) }}
           color: ${{ env.TEST_FAILED == '0' && 'brightgreen' || 'red' }}
           forceUpdate: true
 
@@ -249,7 +249,7 @@ jobs:
           gistID: ${{ secrets.GIST_ID }}
           filename: az-devops-psmodule-analysis-badge.json
           label: code analysis
-          message: ${{ env.ANALYZER_ERRORS == '0' && env.ANALYZER_WARNINGS == '0' && 'passing' || env.ANALYZER_ERRORS == '0' && format('0 errors, {0} warnings', env.ANALYZER_WARNINGS) || format('{0} errors, {1} warnings', env.ANALYZER_ERRORS, env.ANALYZER_WARNINGS) }}
+          message: ${{ env.ANALYZER_ERRORS == '0' && env.ANALYZER_WARNINGS == '0' && format('{0}', env.ANALYZER_TOTAL) || env.ANALYZER_ERRORS == '0' && format('0 errors, {0} warnings', env.ANALYZER_WARNINGS) || format('{0} errors, {1} warnings', env.ANALYZER_ERRORS, env.ANALYZER_WARNINGS) }}
           color: ${{ env.ANALYZER_ERRORS == '0' && env.ANALYZER_WARNINGS == '0' && 'brightgreen' || env.ANALYZER_ERRORS == '0' && 'yellow' || 'red' }}
           forceUpdate: true
 
