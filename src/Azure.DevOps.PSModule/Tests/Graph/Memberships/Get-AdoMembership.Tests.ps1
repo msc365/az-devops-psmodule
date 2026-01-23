@@ -70,13 +70,13 @@ Describe 'Get-AdoMembership' {
             }
         }
 
-        It 'Should use default API version 7.1' {
+        It 'Should use default API version 7.1-preview.1' {
             # Act
             Get-AdoMembership -CollectionUri $mockCollectionUri -SubjectDescriptor $mockSubjectDescriptor -ContainerDescriptor $mockContainerDescriptor
 
             # Assert
             Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1 -ParameterFilter {
-                $Version -eq '7.1'
+                $Version -eq '7.1-preview.1'
             }
         }
 

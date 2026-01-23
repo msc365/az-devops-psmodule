@@ -54,8 +54,8 @@
 
         [Parameter()]
         [Alias('ApiVersion')]
-        [ValidateSet('7.1', '7.2-preview.1')]
-        [string]$Version = '7.1'
+        [ValidateSet('7.1-preview.1', '7.2-preview.1')]
+        [string]$Version = '7.1-preview.1'
     )
 
     begin {
