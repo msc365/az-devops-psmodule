@@ -54,7 +54,7 @@
     .EXAMPLE
         $params = @{
             SubjectTypes    = 'vssgp'
-            ScopeDescriptor = $prjDscr
+            ScopeDescriptor = $projectDescriptor
             Name            = @(
                 'Project Administrators',
                 'Contributors'
