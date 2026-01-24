@@ -79,7 +79,7 @@ If not provided, the default collection URI from the environment variable `$env:
 
 ```yaml
 Type: System.String
-DefaultValue: ($env:DefaultAdoCollectionUri -replace 'https://', 'https://vssps.')
+DefaultValue: $env:DefaultAdoCollectionUri
 SupportsWildcards: false
 Aliases:
 ParameterSets:

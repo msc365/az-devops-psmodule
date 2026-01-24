@@ -48,7 +48,7 @@
     param (
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
-        [string]$CollectionUri = ($env:DefaultAdoCollectionUri -replace 'https://', 'https://vssps.'),
+        [string]$CollectionUri = $env:DefaultAdoCollectionUri,
 
         [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
         [Alias('Descriptor')]
@@ -68,12 +68,16 @@
         Write-Verbose ("Command: $($MyInvocation.MyCommand.Name)")
         Write-Debug ("CollectionUri: $CollectionUri")
         Write-Debug ("GroupDescriptor: $GroupDescriptor")
-        Write-Debug ("GroupId: $($GroupId -join ',')")
+        Write-Debug ("OriginId: $($OriginId -join ',')")
         Write-Debug ("Version: $Version")
 
         Confirm-Default -Defaults ([ordered]@{
                 'CollectionUri' = $CollectionUri
             })
+
+        if ($CollectionUri -notmatch 'vssps\.') {
+            $CollectionUri = $CollectionUri -replace 'https://', 'https://vssps.'
+        }
     }
 
     process {

@@ -108,7 +108,7 @@ The collection URI of the Azure DevOps collection/organization, e.g., <https://v
 
 ```yaml
 Type: System.String
-DefaultValue: ($env:DefaultAdoCollectionUri -replace 'https://', 'https://vssps.')
+DefaultValue: $env:DefaultAdoCollectionUri
 SupportsWildcards: false
 Aliases: []
 ParameterSets:

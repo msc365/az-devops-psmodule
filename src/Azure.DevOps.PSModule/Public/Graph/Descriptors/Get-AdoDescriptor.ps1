@@ -41,7 +41,7 @@
     [CmdletBinding()]
     param (
         [Parameter(ValueFromPipelineByPropertyName)]
-        [string]$CollectionUri = ($env:DefaultAdoCollectionUri -replace 'https://', 'https://vssps.'),
+        [string]$CollectionUri = $env:DefaultAdoCollectionUri,
 
         [Parameter(Mandatory, ValueFromPipelineByPropertyName, ValueFromPipeline)]
         [string]$StorageKey,
@@ -61,6 +61,10 @@
         Confirm-Default -Defaults ([ordered]@{
                 'CollectionUri' = $CollectionUri
             })
+
+        if ($CollectionUri -notmatch 'vssps\.') {
+            $CollectionUri = $CollectionUri -replace 'https://', 'https://vssps.'
+        }
     }
 
     process {

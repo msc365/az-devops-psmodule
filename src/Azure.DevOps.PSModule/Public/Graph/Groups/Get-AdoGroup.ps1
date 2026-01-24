@@ -80,7 +80,7 @@
     [OutputType([PSCustomObject])]
     param (
         [Parameter(ValueFromPipelineByPropertyName)]
-        [string]$CollectionUri = ($env:DefaultAdoCollectionUri -replace 'https://', 'https://vssps.'),
+        [string]$CollectionUri = $env:DefaultAdoCollectionUri,
 
         [Parameter(ValueFromPipelineByPropertyName, ParameterSetName = 'ListGroups')]
         [string]$ScopeDescriptor,
@@ -118,6 +118,10 @@
         Confirm-Default -Defaults ([ordered]@{
                 'CollectionUri' = $CollectionUri
             })
+
+        if ($CollectionUri -notmatch 'vssps\.') {
+            $CollectionUri = $CollectionUri -replace 'https://', 'https://vssps.'
+        }
     }
 
     process {

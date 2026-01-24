@@ -44,7 +44,7 @@
     param (
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
-        [string]$CollectionUri = ($env:DefaultAdoCollectionUri -replace 'https://', 'https://vssps.'),
+        [string]$CollectionUri = $env:DefaultAdoCollectionUri,
 
         [Parameter(Mandatory, ValueFromPipelineByPropertyName, ValueFromPipeline)]
         [string[]]$SubjectDescriptor,
@@ -68,6 +68,10 @@
         Confirm-Default -Defaults ([ordered]@{
                 'CollectionUri' = $CollectionUri
             })
+
+        if ($CollectionUri -notmatch 'vssps\.') {
+            $CollectionUri = $CollectionUri -replace 'https://', 'https://vssps.'
+        }
     }
 
     process {
