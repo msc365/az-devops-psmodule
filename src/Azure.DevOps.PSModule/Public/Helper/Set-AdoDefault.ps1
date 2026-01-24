@@ -16,7 +16,7 @@
 
         Removes the default Azure DevOps environment variables from the current session.
     #>
-    [CmdletBinding(SupportsShouldProcess)]
+    [CmdletBinding()]
     param (
         [Parameter()]
         [AllowNull()]
@@ -32,40 +32,27 @@
         Write-Debug ("Organization: $Organization")
         Write-Debug ("Project: $Project")
 
-        $result = @{}
+        $result = @{
+            Organization  = $null
+            CollectionUri = $null
+            ProjectName   = $null
+        }
     }
 
     process {
-        try {
-            if ($PSCmdlet.ShouldProcess('Default Azure DevOps environment variables', 'Set')) {
+        # Set for current session environment variables
+        $env:DefaultAdoOrganization = $Organization
+        $result.Organization = $env:DefaultAdoOrganization
 
-                # Set for current session environment variables
-                $env:DefaultAdoOrganization = $Organization
-                $result.Organization = $env:DefaultAdoOrganization
+        $env:DefaultAdoCollectionUri = if (-not [string]::IsNullOrEmpty($Organization)) { "https://dev.azure.com/$Organization" } else { $null }
+        $result.CollectionUri = $env:DefaultAdoCollectionUri
 
-                $env:DefaultAdoCollectionUri = "https://dev.azure.com/$Organization"
-                $result.CollectionUri = $env:DefaultAdoCollectionUri
-
-                $env:DefaultAdoProject = $Project
-                $result.Project = $env:DefaultAdoProject
-
-            } else {
-                Write-Verbose "Settings default session environment variables to: $($result | ConvertTo-Json -Depth 10)"
-            }
-        } catch {
-            throw $_
-        }
+        $env:DefaultAdoProject = $Project
+        $result.ProjectName = $env:DefaultAdoProject
     }
 
     end {
-
-        if ($result) {
-            [PSCustomObject]@{
-                Organization  = $result.Organization
-                CollectionUri = $result.CollectionUri
-                ProjectName   = $result.Project
-            }
-        }
+        [PSCustomObject]$result
 
         Write-Verbose ("Exit: $($MyInvocation.MyCommand.Name)")
     }

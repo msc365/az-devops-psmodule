@@ -50,9 +50,9 @@
 
     begin {
         Write-Verbose ("Command: $($MyInvocation.MyCommand.Name)")
-        Write-Debug ("  Uri: $Uri")
-        Write-Debug ("  Method: $Method")
-        Write-Debug ("  Body: $($Body | ConvertTo-Json -Depth 10)")
+        Write-Verbose ("Uri: $Uri")
+        Write-Verbose ("Method: $Method")
+        Write-Verbose ("Body: $(if($Body) { $Body | ConvertTo-Json -Depth 10 } else { $null })")
 
         if ($script:header.Authorization -match 'Bearer') {
             $params = @{

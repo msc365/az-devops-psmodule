@@ -3,6 +3,37 @@
 
 All notable changes to this project will be documented in this file.
 
+<!-- ## [v0.0.1] - YYYY-MM-DD
+
+### Summary
+- _None_
+
+### What's Changed
+- feat: Add or update feature
+- fix: Fixed issue
+- chore: Common tasks
+- docs: Add or update documentation
+
+### Breaking Changes
+- _None_
+
+<br> -->
+
+## [UNRELEASED]
+
+### Summary
+- _None_
+
+### What's Changed
+- fix: CollectionUri parameter default value logic issue (#100)
+- chore: Update and improve code to achieve 100% code coverage (#101)
+
+
+### Breaking Changes
+- _None_
+
+<br> -->
+
 ## [0.2.2] - 2026-01-23
 
 ### Summary

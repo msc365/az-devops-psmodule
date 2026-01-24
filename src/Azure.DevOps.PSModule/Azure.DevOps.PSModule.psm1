@@ -5,14 +5,14 @@ Write-Verbose $PSScriptRoot
 Write-Verbose 'Import all modules in sub folders'
 
 # First, load any class definitions from Private folder
-$classFiles = Get-ChildItem -Path (Join-Path -Path $PSScriptRoot -ChildPath 'Private') -Filter '*Classes.ps1' -ErrorAction SilentlyContinue
-if ($classFiles) {
-    Write-Verbose '  Loading class definitions first'
-    $classFiles | ForEach-Object {
-        Write-Verbose ('    {0}' -f $_.basename)
-        . $_.FullName
-    }
-}
+# $classFiles = Get-ChildItem -Path (Join-Path -Path $PSScriptRoot -ChildPath 'Private') -Filter '*Classes.ps1' -ErrorAction SilentlyContinue
+# if ($classFiles) {
+#     Write-Verbose '  Loading class definitions first'
+#     $classFiles | ForEach-Object {
+#         Write-Verbose ('    {0}' -f $_.basename)
+#         . $_.FullName
+#     }
+# }
 
 # Then load all other files
 foreach ($folder in @('Private', 'Public')) {

@@ -1,4 +1,4 @@
-﻿BeforeAll {
+BeforeAll {
     # Import the module
     $modulePath = Join-Path -Path $PSScriptRoot -ChildPath '..\..'
     $moduleName = Join-Path -Path $modulePath -ChildPath 'Azure.DevOps.PSModule.psd1'
@@ -29,7 +29,7 @@ Describe 'Set-AdoDefault' {
 
         It 'Should set Organization environment variable' {
             # Act
-            $result = Set-AdoDefault -Organization $mockOrganization -Project $mockProject -Confirm:$false
+            $result = Set-AdoDefault -Organization $mockOrganization -Project $mockProject
 
             # Assert
             $env:DefaultAdoOrganization | Should -Be $mockOrganization
@@ -43,7 +43,7 @@ Describe 'Set-AdoDefault' {
 
         It 'Should set CollectionUri environment variable based on Organization' {
             # Act
-            $result = Set-AdoDefault -Organization $mockOrganization -Project $mockProject -Confirm:$false
+            $result = Set-AdoDefault -Organization $mockOrganization -Project $mockProject
 
             # Assert
             $env:DefaultAdoCollectionUri | Should -Be $expectedCollectionUri
@@ -57,7 +57,7 @@ Describe 'Set-AdoDefault' {
 
         It 'Should set Project environment variable' {
             # Act
-            $result = Set-AdoDefault -Organization $mockOrganization -Project $mockProject -Confirm:$false
+            $result = Set-AdoDefault -Organization $mockOrganization -Project $mockProject
 
             # Assert
             $env:DefaultAdoProject | Should -Be $mockProject
@@ -71,7 +71,7 @@ Describe 'Set-AdoDefault' {
 
         It 'Should return PSCustomObject with expected properties' {
             # Act
-            $result = Set-AdoDefault -Organization $mockOrganization -Project $mockProject -Confirm:$false
+            $result = Set-AdoDefault -Organization $mockOrganization -Project $mockProject
 
             # Assert
             $result.PSObject.Properties.Name | Should -Contain 'Organization'
@@ -86,7 +86,7 @@ Describe 'Set-AdoDefault' {
 
         It 'Should set all environment variables correctly in single call' {
             # Act
-            Set-AdoDefault -Organization $mockOrganization -Project $mockProject -Confirm:$false
+            Set-AdoDefault -Organization $mockOrganization -Project $mockProject
 
             # Assert
             $env:DefaultAdoOrganization | Should -Be $mockOrganization
@@ -111,7 +111,7 @@ Describe 'Set-AdoDefault' {
 
         It 'Should clear Organization when set to null' {
             # Act
-            Set-AdoDefault -Organization $null -Project $mockProject -Confirm:$false
+            Set-AdoDefault -Organization $null -Project $mockProject
 
             # Assert
             $env:DefaultAdoOrganization | Should -BeNullOrEmpty
@@ -124,7 +124,7 @@ Describe 'Set-AdoDefault' {
 
         It 'Should clear Project when set to null' {
             # Act
-            Set-AdoDefault -Organization $mockOrganization -Project $null -Confirm:$false
+            Set-AdoDefault -Organization $mockOrganization -Project $null
 
             # Assert
             $env:DefaultAdoProject | Should -BeNullOrEmpty
@@ -135,13 +135,30 @@ Describe 'Set-AdoDefault' {
             $env:DefaultAdoProject = $null
         }
 
+        It 'Should set CollectionUri to null when Organization is null' {
+            # Arrange - Set an initial value
+            $env:DefaultAdoCollectionUri = $expectedCollectionUri
+
+            # Act
+            $result = Set-AdoDefault -Organization $null -Project $mockProject
+
+            # Assert
+            $env:DefaultAdoCollectionUri | Should -BeNullOrEmpty
+            $result.CollectionUri | Should -BeNullOrEmpty
+
+            # Cleanup
+            $env:DefaultAdoOrganization = $null
+            $env:DefaultAdoCollectionUri = $null
+            $env:DefaultAdoProject = $null
+        }
+
         It 'Should clear all environment variables when both parameters are null' {
             # Act
-            Set-AdoDefault -Organization $null -Project $null -Confirm:$false
+            Set-AdoDefault -Organization $null -Project $null
 
             # Assert
             $env:DefaultAdoOrganization | Should -BeNullOrEmpty
-            $env:DefaultAdoCollectionUri | Should -Match 'https://dev.azure.com/$'
+            $env:DefaultAdoCollectionUri | Should -BeNullOrEmpty
             $env:DefaultAdoProject | Should -BeNullOrEmpty
 
             # Cleanup
@@ -152,11 +169,11 @@ Describe 'Set-AdoDefault' {
 
         It 'Should handle empty string for Organization' {
             # Act
-            Set-AdoDefault -Organization '' -Project $mockProject -Confirm:$false
+            Set-AdoDefault -Organization '' -Project $mockProject
 
             # Assert
             $env:DefaultAdoOrganization | Should -BeNullOrEmpty
-            $env:DefaultAdoCollectionUri | Should -Be 'https://dev.azure.com/'
+            $env:DefaultAdoCollectionUri | Should -BeNullOrEmpty
 
             # Cleanup
             $env:DefaultAdoOrganization = $null
@@ -172,7 +189,7 @@ Describe 'Set-AdoDefault' {
 
         It 'Should accept Organization parameter' {
             # Act & Assert
-            { Set-AdoDefault -Organization $mockOrganization -Confirm:$false } | Should -Not -Throw
+            { Set-AdoDefault -Organization $mockOrganization } | Should -Not -Throw
 
             # Cleanup
             $env:DefaultAdoOrganization = $null
@@ -182,7 +199,7 @@ Describe 'Set-AdoDefault' {
 
         It 'Should accept Project parameter' {
             # Act & Assert
-            { Set-AdoDefault -Project $mockProject -Confirm:$false } | Should -Not -Throw
+            { Set-AdoDefault -Project $mockProject } | Should -Not -Throw
 
             # Cleanup
             $env:DefaultAdoOrganization = $null
@@ -192,7 +209,31 @@ Describe 'Set-AdoDefault' {
 
         It 'Should accept both parameters' {
             # Act & Assert
-            { Set-AdoDefault -Organization $mockOrganization -Project $mockProject -Confirm:$false } | Should -Not -Throw
+            { Set-AdoDefault -Organization $mockOrganization -Project $mockProject } | Should -Not -Throw
+
+            # Cleanup
+            $env:DefaultAdoOrganization = $null
+            $env:DefaultAdoCollectionUri = $null
+            $env:DefaultAdoProject = $null
+        }
+    }
+
+    Context 'Error Handling Tests' {
+        BeforeEach {
+            Mock -ModuleName Azure.DevOps.PSModule Start-Sleep { }
+        }
+
+
+
+        It 'Should execute end block and return result' {
+            # Act - Normal execution tests the end block
+            $result = Set-AdoDefault -Organization $mockOrganization -Project $mockProject
+
+            # Assert - Verify the end block executes and returns the object
+            $result | Should -Not -BeNullOrEmpty
+            $result | Should -BeOfType [PSCustomObject]
+            $result.Organization | Should -Be $mockOrganization
+            $result.ProjectName | Should -Be $mockProject
 
             # Cleanup
             $env:DefaultAdoOrganization = $null
@@ -208,3 +249,4 @@ Describe 'Set-AdoDefault' {
         $env:DefaultAdoProject = $null
     }
 }
+

@@ -12,37 +12,21 @@
         Gets the default Azure DevOps organization and project context.
     #>
     [CmdletBinding()]
-    param (
-    )
+    param ()
 
     begin {
         Write-Verbose ("Command: $($MyInvocation.MyCommand.Name)")
-
-        $result = @{}
     }
 
     process {
-        try {
-            # Get environment variables
-            $result.Organization = $env:DefaultAdoOrganization
-            $result.CollectionUri = $env:DefaultAdoCollectionUri
-            $result.Project = $env:DefaultAdoProject
-
-        } catch {
-            throw $_
+        [PSCustomObject]@{
+            Organization  = $env:DefaultAdoOrganization
+            CollectionUri = $env:DefaultAdoCollectionUri
+            ProjectName   = $env:DefaultAdoProject
         }
     }
 
     end {
-
-        if ($result) {
-            [PSCustomObject]@{
-                Organization  = $result.Organization
-                CollectionUri = $result.CollectionUri
-                ProjectName   = $result.Project
-            }
-        }
-
         Write-Verbose ("Exit: $($MyInvocation.MyCommand.Name)")
     }
 }

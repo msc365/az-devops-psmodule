@@ -17,7 +17,7 @@
     )
 
     begin {
-        Write-Debug ("Command: $($MyInvocation.MyCommand.Name)")
+        Write-Verbose ("Command: $($MyInvocation.MyCommand.Name)")
         $principalAppId = '499b84ac-1321-427f-aa17-267ca6975798'
     }
 
@@ -52,6 +52,6 @@
     }
 
     end {
-        Write-Debug ("Exit: $($MyInvocation.MyCommand.Name)")
+        Write-Verbose ("Exit: $($MyInvocation.MyCommand.Name)")
     }
 }

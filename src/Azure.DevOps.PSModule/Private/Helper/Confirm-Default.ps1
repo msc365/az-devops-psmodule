@@ -9,6 +9,24 @@
 
     .PARAMETER Defaults
         A hashtable containing the default parameters to be checked.
+
+    .EXAMPLE
+        $defaults = @{
+            Organization = 'my-org'
+            Project      = ''
+        }
+        Confirm-Default -Defaults $defaults
+
+        This will throw an error indicating that the 'Project' parameter is required.
+
+    .EXAMPLE
+        $defaults = @{
+            Organization = 'my-org'
+            Project      = 'my-project'
+        }
+        Confirm-Default -Defaults $defaults
+
+        This will pass without errors as all required parameters are set.
     #>
     [CmdletBinding()]
     param (
@@ -17,7 +35,7 @@
     )
 
     begin {
-        Write-Debug ("Command: $($MyInvocation.MyCommand.Name)")
+        Write-Verbose ("Command: $($MyInvocation.MyCommand.Name)")
     }
 
     process {
@@ -37,6 +55,6 @@
     }
 
     end {
-        Write-Debug ("Exit: $($MyInvocation.MyCommand.Name)")
+        Write-Verbose ("Exit: $($MyInvocation.MyCommand.Name)")
     }
 }

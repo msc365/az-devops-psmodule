@@ -8,6 +8,19 @@
 
     .PARAMETER Uri
         The URI to validate.
+
+    .OUTPUTS
+        [bool] Returns $true if the URI is valid; otherwise, throws an error.
+
+    .EXAMPLE
+        Confirm-CollectionUri -Uri 'https://dev.azure.com/my-org'
+
+        This will return $true.
+
+    .EXAMPLE
+        Confirm-CollectionUri -Uri 'https://example.com/my-org'
+
+        This will throw an error indicating the URI is not valid.
     #>
     [CmdletBinding()]
     [OutputType([bool])]
@@ -17,7 +30,7 @@
     )
 
     begin {
-        Write-Debug ("Command: $($MyInvocation.MyCommand.Name)")
+        Write-Verbose ("Command: $($MyInvocation.MyCommand.Name)")
     }
 
     process {
@@ -33,6 +46,6 @@
     }
 
     end {
-        Write-Debug ("Exit: $($MyInvocation.MyCommand.Name)")
+        Write-Verbose ("Exit: $($MyInvocation.MyCommand.Name)")
     }
 }

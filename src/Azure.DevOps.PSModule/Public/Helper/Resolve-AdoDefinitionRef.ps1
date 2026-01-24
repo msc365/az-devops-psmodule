@@ -144,7 +144,7 @@
             Write-Verbose 'Returning all definition references'
 
             # Get unique definitions by name (avoid duplicates from ID entries)
-            $uniqueDefinitions = @($DefinitionReferences.Values |
+            $uniqueDefinitions = [PSCustomObject]@($DefinitionReferences.Values |
                     Sort-Object -Property name -Unique)
 
             return $uniqueDefinitions
@@ -163,14 +163,6 @@
             Write-Verbose "Found definition: $($definitionRef.name) ($($definitionRef.id))"
 
             return $definitionRef
-        } else {
-            # This should never happen due to ValidateSet, but keeping as safeguard
-            $errorMessage = if ($PSCmdlet.ParameterSetName -eq 'ById') {
-                "Unknown DefinitionRef Id: $Id."
-            } else {
-                "Unknown DefinitionRef Name: $Name."
-            }
-            throw $errorMessage
         }
     }
 

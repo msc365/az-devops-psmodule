@@ -1,4 +1,4 @@
-﻿BeforeAll {
+BeforeAll {
     # Import the module
     $modulePath = Join-Path -Path $PSScriptRoot -ChildPath '..\..'
     $moduleName = Join-Path -Path $modulePath -ChildPath 'Azure.DevOps.PSModule.psd1'
@@ -29,7 +29,7 @@ Describe 'Remove-AdoDefault' {
 
         It 'Should remove all default environment variables' {
             # Act
-            Remove-AdoDefault -Confirm:$false
+            Remove-AdoDefault
 
             # Assert
             $env:DefaultAdoOrganization | Should -BeNullOrEmpty
@@ -48,7 +48,7 @@ Describe 'Remove-AdoDefault' {
             $env:DefaultAdoProject = $null
 
             # Act & Assert
-            { Remove-AdoDefault -Confirm:$false } | Should -Not -Throw
+            { Remove-AdoDefault } | Should -Not -Throw
 
             # Cleanup
             $env:DefaultAdoOrganization = $null
@@ -61,7 +61,7 @@ Describe 'Remove-AdoDefault' {
             Mock -ModuleName Azure.DevOps.PSModule Set-AdoDefault { }
 
             # Act
-            Remove-AdoDefault -Confirm:$false
+            Remove-AdoDefault
 
             # Assert
             Should -Invoke Set-AdoDefault -ModuleName Azure.DevOps.PSModule -Times 1
@@ -83,7 +83,7 @@ Describe 'Remove-AdoDefault' {
             }
 
             # Act & Assert
-            { Remove-AdoDefault -Confirm:$false -ErrorAction Stop } | Should -Throw 'Simulated Set-AdoDefault error'
+            { Remove-AdoDefault -ErrorAction Stop } | Should -Throw 'Simulated Set-AdoDefault error'
         }
     }
 
@@ -98,7 +98,7 @@ Describe 'Remove-AdoDefault' {
 
         It 'Should clear Organization environment variable' {
             # Act
-            Remove-AdoDefault -Confirm:$false
+            Remove-AdoDefault
 
             # Assert
             $env:DefaultAdoOrganization | Should -BeNullOrEmpty
@@ -111,7 +111,7 @@ Describe 'Remove-AdoDefault' {
 
         It 'Should clear Project environment variable' {
             # Act
-            Remove-AdoDefault -Confirm:$false
+            Remove-AdoDefault
 
             # Assert
             $env:DefaultAdoProject | Should -BeNullOrEmpty
@@ -124,7 +124,7 @@ Describe 'Remove-AdoDefault' {
 
         It 'Should return result from Set-AdoDefault' {
             # Act
-            $result = Remove-AdoDefault -Confirm:$false
+            $result = Remove-AdoDefault
 
             # Assert
             $result | Should -Not -BeNullOrEmpty
@@ -145,3 +145,4 @@ Describe 'Remove-AdoDefault' {
         $env:DefaultAdoProject = $null
     }
 }
+
