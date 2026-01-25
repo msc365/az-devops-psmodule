@@ -19,18 +19,24 @@ All notable changes to this project will be documented in this file.
 
 <br> -->
 
-## [UNRELEASED]
+## [0.2.3] - 2026-01-25
 
 ### Summary
-- _None_
+
 
 ### What's Changed
 - fix: CollectionUri parameter default value logic issue (#100)
 - chore: Update and improve code to achieve 100% code coverage (#101)
+- fix: Bug `Set-AdoTeamSettings` backlog iteration not updating (#102)
+- fix!: Update output names for consistency in `Add-AdoTeamIteration` and `Get-AdoTeamIteration` cmdlets (#102)  
+  BREAKING CHANGE: Output team and project not available anymore, use teamName and projectName
+- fix: Update property names in test assertions for in `Add-AdoTeamIteration` and `Get-AdoTeamIteration` cmdlets
+- chore: Update CHANGELOG to reflect recent changes and fixes
+- chore: Update build version to 0.2.3
 
 
 ### Breaking Changes
-- _None_
+- With the output names update in `Add-AdoTeamIteration` and `Get-AdoTeamIteration` cmdlets the output names `team` and `project` are not available anymore, use `teamName` and `projectName` instead.
 
 <br> -->
 
