@@ -106,8 +106,8 @@ function Add-AdoTeamIteration {
                         id            = $results.id
                         name          = $results.name
                         attributes    = $results.attributes
-                        team          = $TeamName    # TeamName or TeamId
-                        project       = $ProjectName # ProjectName or ProjectId
+                        teamName      = $TeamName
+                        projectName   = $ProjectName
                         collectionUri = $CollectionUri
                     }
 

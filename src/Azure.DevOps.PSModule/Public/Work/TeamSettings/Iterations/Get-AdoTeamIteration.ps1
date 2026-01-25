@@ -140,8 +140,8 @@ function Get-AdoTeamIteration {
                         id            = $i_.id
                         name          = $i_.name
                         attributes    = $i_.attributes
-                        team          = $TeamName    # TeamName or TeamId
-                        project       = $ProjectName # ProjectName or ProjectId
+                        teamName      = $TeamName
+                        projectName   = $ProjectName
                         collectionUri = $CollectionUri
                     }
                 }
