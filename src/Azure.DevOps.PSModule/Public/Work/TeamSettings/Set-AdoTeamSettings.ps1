@@ -130,7 +130,7 @@ function Set-AdoTeamSettings {
         Write-Debug ("Name: $Name")
         Write-Debug ("WorkingDays: $($WorkingDays -join ',')")
         Write-Debug ("BugsBehavior: $BugsBehavior")
-        Write-Debug ("BacklogIterationId: $BacklogIteration")
+        Write-Debug ("BacklogIteration: $BacklogIteration")
         Write-Debug ("DefaultIterationMacro: $DefaultIterationMacro")
         Write-Debug ("Version: $Version")
 
@@ -151,7 +151,7 @@ function Set-AdoTeamSettings {
             $body = [PSCustomObject]@{}
 
             if ($PSBoundParameters.ContainsKey('BacklogIteration')) {
-                $body | Add-Member -NotePropertyName 'backlogIteration' -NotePropertyValue @{ id = $BacklogIteration }
+                $body | Add-Member -NotePropertyName 'backlogIteration' -NotePropertyValue $BacklogIteration
             }
             if ($PSBoundParameters.ContainsKey('BacklogVisibilities')) {
                 $body | Add-Member -NotePropertyName 'backlogVisibilities' -NotePropertyValue $BacklogVisibilities
