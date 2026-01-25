@@ -153,8 +153,8 @@ Describe 'Get-AdoTeamIteration' {
             $result.id | Should -Be '22222222-2222-2222-2222-222222222222'
             $result.name | Should -Be 'Sprint 2'
             $result.attributes | Should -Not -BeNullOrEmpty
-            $result.team | Should -Be 'TestTeam'
-            $result.project | Should -Be 'TestProject'
+            $result.teamName | Should -Be 'TestTeam'
+            $result.projectName | Should -Be 'TestProject'
             $result.collectionUri | Should -Be 'https://dev.azure.com/my-org'
         }
 

@@ -70,8 +70,8 @@ Describe 'Add-AdoTeamIteration' {
             $result.id | Should -Be '11111111-1111-1111-1111-111111111111'
             $result.name | Should -Be 'Sprint 1'
             $result.attributes | Should -Not -BeNullOrEmpty
-            $result.team | Should -Be 'TestTeam'
-            $result.project | Should -Be 'TestProject'
+            $result.teamName | Should -Be 'TestTeam'
+            $result.projectName | Should -Be 'TestProject'
             $result.collectionUri | Should -Be 'https://dev.azure.com/my-org'
         }
 
