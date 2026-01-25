@@ -23,6 +23,7 @@ All notable changes to this project will be documented in this file.
 
 ### Summary
 
+Hotfix release focused on bug fixes and code quality improvements. Achieved 100% code coverage, resolved CollectionUri parameter logic issues, and standardized output property names for team iteration cmdlets. Includes a breaking change to output naming for better consistency.
 
 ### What's Changed
 - fix: CollectionUri parameter default value logic issue (#100)
