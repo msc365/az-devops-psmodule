@@ -19,6 +19,23 @@ All notable changes to this project will be documented in this file.
 
 <br> -->
 
+## [UNRELEASED]
+
+### Summary
+- _None_
+
+### What's Changed
+- fix(New-AdoProject): Update `Get-AdoProcess` call to include `CollectionUri` parameter ¹
+- fix(New-AdoCheckBranchControl): Update `Get-AdoCheckConfiguration` call to include `CollectionUri` and `ProjectName` parameters ¹
+- fix(New-AdoCheckBusinessHours): Update `Get-AdoCheckConfiguration` call to include `CollectionUri` and `ProjectName` parameters ¹
+
+¹ Workaround: use `Set-AdoDefault -Organization 'devops-org-name' -Project 'devops-project-name'` before calling cmdlet.
+
+### Breaking Changes
+- _None_
+
+<br>
+
 ## [0.2.3] - 2026-01-25
 
 ### Summary
@@ -39,7 +56,7 @@ Hotfix release focused on bug fixes and code quality improvements. Achieved 100%
 ### Breaking Changes
 - With the output names update in `Add-AdoTeamIteration` and `Get-AdoTeamIteration` cmdlets the output names `team` and `project` are not available anymore, use `teamName` and `projectName` instead.
 
-<br> -->
+<br>
 
 ## [0.2.2] - 2026-01-23
 
