@@ -28,6 +28,7 @@ All notable changes to this project will be documented in this file.
 - fix(New-AdoProject): Update `Get-AdoProcess` call to include `CollectionUri` parameter ¹
 - fix(New-AdoCheckBranchControl): Update `Get-AdoCheckConfiguration` call to include `CollectionUri` and `ProjectName` parameters ¹
 - fix(New-AdoCheckBusinessHours): Update `Get-AdoCheckConfiguration` call to include `CollectionUri` and `ProjectName` parameters ¹
+- chore: Add note about unreleased changes in README file
 
 ¹ Workaround: use `Set-AdoDefault -Organization 'devops-org-name' -Project 'devops-project-name'` before calling cmdlet.
 
