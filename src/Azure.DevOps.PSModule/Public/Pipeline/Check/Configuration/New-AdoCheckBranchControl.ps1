@@ -169,7 +169,7 @@
                         ResourceType = $ResourceType
                         ResourceName = $ResourceName
                         Expands      = 'settings'
-                    } | Get-AdoCheckConfiguration
+                    } | Get-AdoCheckConfiguration -CollectionUri $CollectionUri -ProjectName $ProjectName
 
                     $exists = $exists | Where-Object {
                         $_.settings.definitionRef.id -eq '86b05a0c-73e6-4f7d-b3cf-e38f3b39a75b' -and
