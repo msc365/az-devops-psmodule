@@ -94,7 +94,7 @@
             })
 
         # Get process template ID once for efficiency
-        $processTemplate = Get-AdoProcess -Name $Process
+        $processTemplate = Get-AdoProcess -CollectionUri $CollectionUri -Name $Process
         if (-not $processTemplate) {
             throw "Process template '$Process' not found."
         }
