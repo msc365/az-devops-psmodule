@@ -1,4 +1,4 @@
-﻿function Get-AdoProject {
+﻿function Get-AdoUserEntitlements {
     <#
     .SYNOPSIS
         Get a paged set of user entitlements matching the filter criteria. If no filter is is passed, a page from all the
@@ -29,7 +29,7 @@
         Optional. Maximum number of the user entitlements to return. Max value is 10000. Default value is 100
 
     .PARAMETER Version
-        Optional. Version of the API to use. Default is '4.1'.
+        Optional. Version of the API to use. Default is '4.1-preview.1'.
 
     .LINK
         https://learn.microsoft.com/en-us/rest/api/azure/devops/memberentitlementmanagement/user-entitlements/get
@@ -51,6 +51,7 @@
 
         Retrieves the specified user by Id.
     #>
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseSingularNouns', 'Get-AdoUserEntitlements')]
     [CmdletBinding(DefaultParameterSetName = 'ListUsers')]
     param (
         [Parameter(ValueFromPipelineByPropertyName)]
@@ -58,6 +59,7 @@
         [string]$CollectionUri = $env:DefaultAdoCollectionUri,
 
         [Parameter(ValueFromPipelineByPropertyName, ValueFromPipeline, ParameterSetName = 'ByUserId')]
+        [ValidatePattern('^[0-9a-fA-F-]{36}$')]
         [Alias('Id')]
         [string]$UserId,
 
@@ -68,15 +70,15 @@
         [string]$Select,
 
         [Parameter(ParameterSetName = 'ListUsers')]
-        [int]$Skip,
+        [int]$Skip = 0,
 
         [Parameter(ParameterSetName = 'ListUsers')]
-        [int]$Top,
+        [int]$Top = 100,
 
         [Parameter()]
         [Alias('ApiVersion')]
-        [ValidateSet('4.1')]
-        [string]$Version = '4.1'
+        [ValidateSet('4.1-preview.1')]
+        [string]$Version = '4.1-preview.1'
     )
 
     begin {
@@ -85,7 +87,7 @@
         Write-Debug ("UserId: $UserId")
         Write-Debug ("Version: $Version")
 
-        Confirm-Default -Defaults ([ordered]@{
+        Confirm-Default -Defaults ([Ordered]@{
                 'CollectionUri' = $CollectionUri
             })
     }
@@ -93,11 +95,12 @@
     process {
         try {
             $queryParameters = [System.Collections.Generic.List[string]]::new()
+            $organization = $CollectionUri.Split('/')[-1]
 
             if ($UserId) {
-                $uri = "$CollectionUri/_apis/userentitlements/$UserId"
+                $uri = "https://vsaex.dev.azure.com/$organization/_apis/userentitlements/$UserId"
             } else {
-                $uri = "$CollectionUri/_apis/userentitlements"
+                $uri = "https://vsaex.dev.azure.com/$organization/_apis/userentitlements"
 
                 # Build query parameters
                 if ($Top) {
@@ -110,7 +113,7 @@
                     $queryParameters.Add("`$filter=$Filter")
                 }
                 if ($Select) {
-                    $queryParameters.Add("`$filter=$Select")
+                    $queryParameters.Add("`$select=$Select")
                 }
             }
 
@@ -125,23 +128,23 @@
                 $results = Invoke-AdoRestMethod @params
                 $entitlements = if ($UserId) { @($results) } else { $results.value }
 
-                foreach ($p_ in $entitlements) {
+                foreach ($e_ in $entitlements) {
                     $obj = [ordered]@{
-                        accesLevel          = $p_.accesLevel
-                        extensions          = if ($p_.extensions) { $p_.extensions } else { $null }
-                        groupAssigments     = if ($p_.groupAssigments) { $p_.groupAssigments } else { $null }
-                        id                  = $p_.id
-                        lastAccessedDate    = $p_.lastAccessedDate
-                        projectEntitlements = if ($p_.projectEntitlements) { $p_.projectEntitlements } else { $null }
-                        user                = $p_.user
+                        accesLevel          = $e_.accesLevel
+                        extensions          = if ($e_.extensions) { $e_.extensions } else { $null }
+                        groupAssigments     = if ($e_.groupAssigments) { $e_.groupAssigments } else { $null }
+                        id                  = $e_.id
+                        lastAccessedDate    = $e_.lastAccessedDate
+                        projectEntitlements = if ($e_.projectEntitlements) { $e_.projectEntitlements } else { $null }
+                        user                = $e_.user
                     }
 
                     # Output the entitlements object
                     [PSCustomObject]$obj
                 }
             } catch {
-                if ($_.ErrorDetails.Message -match 'UserDoesNotExistWithIdException') {
-                    Write-Warning "User with ID $UserId does not exist, skipping."
+                if ($_.ErrorDetails.Message -match 'MemberNotFoundException') {
+                    Write-Warning "Identity not found with ID $UserId, skipping."
                 } else {
                     throw $_
                 }
