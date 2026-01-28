@@ -130,7 +130,7 @@
 
                 foreach ($e_ in $entitlements) {
                     $obj = [ordered]@{
-                        accesLevel          = $e_.accesLevel
+                        accessLevel         = $e_.accessLevel
                         extensions          = if ($e_.extensions) { $e_.extensions } else { $null }
                         groupAssigments     = if ($e_.groupAssigments) { $e_.groupAssigments } else { $null }
                         id                  = $e_.id
