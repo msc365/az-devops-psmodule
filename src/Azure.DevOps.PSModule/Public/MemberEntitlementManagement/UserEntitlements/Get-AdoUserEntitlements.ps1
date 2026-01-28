@@ -28,8 +28,11 @@
     .PARAMETER Top
         Optional. Maximum number of the user entitlements to return. Max value is 10000. Default value is 100
 
+    .PARAMETER ContinuationToken
+        Optional. An opaque blob used to fetch the next page. If omitted, the cmdlet will automatically continue until all pages are returned.
+
     .PARAMETER Version
-        Optional. Version of the API to use. Default is '4.1-preview.1'.
+        Optional. Version of the API to use. Default is '7.1'.
 
     .LINK
         https://learn.microsoft.com/en-us/rest/api/azure/devops/memberentitlementmanagement/user-entitlements/get
@@ -52,33 +55,36 @@
         Retrieves the specified user by Id.
     #>
     [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseSingularNouns', 'Get-AdoUserEntitlements')]
-    [CmdletBinding(DefaultParameterSetName = 'ListUsers')]
+    [CmdletBinding(DefaultParameterSetName = 'ListUserEntitlements')]
     param (
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
         [string]$CollectionUri = $env:DefaultAdoCollectionUri,
 
-        [Parameter(ValueFromPipelineByPropertyName, ValueFromPipeline, ParameterSetName = 'ByUserId')]
+        [Parameter(ValueFromPipelineByPropertyName, ValueFromPipeline, ParameterSetName = 'GetUserEntitlement')]
         [ValidatePattern('^[0-9a-fA-F-]{36}$')]
         [Alias('Id')]
         [string]$UserId,
 
-        [Parameter(ParameterSetName = 'ListUsers')]
+        [Parameter(ParameterSetName = 'ListUserEntitlements')]
         [string]$Filter,
 
-        [Parameter(ParameterSetName = 'ListUsers')]
+        [Parameter(ParameterSetName = 'ListUserEntitlements')]
         [string]$Select,
 
-        [Parameter(ParameterSetName = 'ListUsers')]
+        [Parameter(ParameterSetName = 'ListUserEntitlements')]
         [int]$Skip = 0,
 
-        [Parameter(ParameterSetName = 'ListUsers')]
+        [Parameter(ParameterSetName = 'ListUserEntitlements')]
         [int]$Top = 100,
+
+        [Parameter(ParameterSetName = 'ListUserEntitlements')]
+        [string]$ContinuationToken,
 
         [Parameter()]
         [Alias('ApiVersion')]
-        [ValidateSet('4.1-preview.1')]
-        [string]$Version = '4.1-preview.1'
+        [ValidateSet('7.1', '7.2-preview.4')]
+        [string]$Version = '7.1'
     )
 
     begin {
@@ -94,61 +100,84 @@
 
     process {
         try {
-            $queryParameters = [System.Collections.Generic.List[string]]::new()
             $organization = $CollectionUri.Split('/')[-1]
-
-            if ($UserId) {
-                $uri = "https://vsaex.dev.azure.com/$organization/_apis/userentitlements/$UserId"
+            $uri = if ($UserId) {
+                "https://vsaex.dev.azure.com/$organization/_apis/userentitlements/$UserId"
             } else {
-                $uri = "https://vsaex.dev.azure.com/$organization/_apis/userentitlements"
+                "https://vsaex.dev.azure.com/$organization/_apis/userentitlements"
+            }
+
+            # Loop until no continuation token is returned
+            do {
+                # Build query parameters for this iteration
+                $queryParameters = [System.Collections.Generic.List[string]]::new()
 
                 # Build query parameters
-                if ($Top) {
-                    $queryParameters.Add("`$top=$Top")
+                if (-not $UserId) {
+                    if ($Top) {
+                        $queryParameters.Add("`$top=$Top")
+                    }
+                    if ($Skip -ge 0) {
+                        $queryParameters.Add("`$skip=$Skip")
+                    }
+                    if ($Filter) {
+                        $queryParameters.Add("`$filter=$Filter")
+                    }
+                    if ($Select) {
+                        $queryParameters.Add("`$select=$Select")
+                    }
                 }
-                if ($Skip) {
-                    $queryParameters.Add("`$skip=$Skip")
-                }
-                if ($Filter) {
-                    $queryParameters.Add("`$filter=$Filter")
-                }
-                if ($Select) {
-                    $queryParameters.Add("`$select=$Select")
-                }
-            }
 
-            $params = @{
-                Uri             = $uri
-                Version         = $Version
-                QueryParameters = if ($queryParameters.Count -gt 0) { $queryParameters -join '&' } else { $null }
-                Method          = 'GET'
-            }
+                # If we have a token (incoming or from previous page), send it (URL-encoded)
+                if ($ContinuationToken) {
+                    $encoded = [System.Net.WebUtility]::UrlEncode($ContinuationToken)
+                    $queryParameters.Add("continuationToken=$encoded")
+                    Write-Verbose "Using continuationToken (encoded): $encoded"
+                }
 
-            try {
-                $results = Invoke-AdoRestMethod @params
-                $entitlements = if ($UserId) { @($results) } else { $results.value }
+                $params = @{
+                    Uri             = $uri
+                    Version         = $Version
+                    QueryParameters = if ($queryParameters.Count -gt 0) { $queryParameters -join '&' } else { $null }
+                    Method          = 'GET'
+                }
 
-                foreach ($e_ in $entitlements) {
-                    $obj = [ordered]@{
-                        accessLevel         = $e_.accessLevel
-                        extensions          = if ($e_.extensions) { $e_.extensions } else { $null }
-                        groupAssigments     = if ($e_.groupAssigments) { $e_.groupAssigments } else { $null }
-                        id                  = $e_.id
-                        lastAccessedDate    = $e_.lastAccessedDate
-                        projectEntitlements = if ($e_.projectEntitlements) { $e_.projectEntitlements } else { $null }
-                        user                = $e_.user
+                try {
+                    $results = Invoke-AdoRestMethod @params
+
+                    # Extract items and output
+                    $entitlements = if ($UserId) { @($results) } else { $results.items }
+
+                    foreach ($e_ in $entitlements) {
+                        [Ordered]@{
+                            accessLevel         = $e_.accessLevel
+                            extensions          = if ($e_.extensions) { $e_.extensions } else { $null }
+                            groupAssigments     = if ($e_.groupAssigments) { $e_.groupAssigments } else { $null }
+                            id                  = $e_.id
+                            lastAccessedDate    = $e_.lastAccessedDate
+                            projectEntitlements = if ($e_.projectEntitlements) { $e_.projectEntitlements } else { $null }
+                            user                = $e_.user
+                        }
                     }
 
-                    # Output the entitlements object
-                    [PSCustomObject]$obj
+                    $ContinuationToken = $null
+
+                    if (-not $ContinuationToken -and $results.PSObject.Properties.Name -contains 'continuationToken') {
+                        $ct = $results.continuationToken
+
+                        if ($ct) {
+                            $ContinuationToken = $ct
+                            Write-Verbose "Continuation token from body: $ContinuationToken"
+                        }
+                    }
+                } catch {
+                    if ($_.ErrorDetails.Message -match 'MemberNotFoundException') {
+                        Write-Warning "Identity not found with ID $UserId, skipping."
+                    } else {
+                        throw $_
+                    }
                 }
-            } catch {
-                if ($_.ErrorDetails.Message -match 'MemberNotFoundException') {
-                    Write-Warning "Identity not found with ID $UserId, skipping."
-                } else {
-                    throw $_
-                }
-            }
+            } while ($ContinuationToken)
         } catch {
             throw $_
         }
