@@ -243,7 +243,6 @@ Initial stable release with core Azure DevOps REST API cmdlets.
 
 <br>
 
-<hr>
+---
 
-<br>
 For detailed release notes from previous versions, see the [releases page](https://github.com/msc365/az-devops-psmodule/releases).
