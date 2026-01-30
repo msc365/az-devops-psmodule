@@ -1,5 +1,5 @@
 <!-- omit from toc -->
-# Azure DevOps PowerShell Module
+# Automating Azure DevOps Tasks [`PowerShell`]
 
 <!-- cSpell: words psake psmodule -->
 <!-- markdownlint-disable no-duplicate-heading -->
@@ -28,7 +28,7 @@ This repository provides a PowerShell module that wraps the Azure DevOps REST AP
 <!-- omit from toc -->
 ## Use Cases
 
-- Automate DevOps workflows and resource deployments
+- Automating Azure DevOps tasks and resource deployments
 - Accelerate onboarding and standardization for cloud teams
 - Implement end-to-end governance from CI/CD pipelines to Azure Resource Manager
 
