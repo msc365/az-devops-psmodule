@@ -28,7 +28,7 @@ All notable changes to this project will be documented in this file.
 - fix(New-AdoProject): Update `Get-AdoProcess` call to include `CollectionUri` parameter ¹
 - fix(New-AdoCheckBranchControl): Update `Get-AdoCheckConfiguration` call to include `CollectionUri` and `ProjectName` parameters ¹
 - fix(New-AdoCheckBusinessHours): Update `Get-AdoCheckConfiguration` call to include `CollectionUri` and `ProjectName` parameters ¹
-- chore: Add note about unreleased changes in README file
+- chore(ReadMe): Add note about unreleased changes
 
 ¹ Workaround: use `Set-AdoDefault -Organization 'devops-org-name' -Project 'devops-project-name'` before calling cmdlet.
 
@@ -98,7 +98,7 @@ This is a maintenance release focused on improving _Environment_ and _FeatureSta
 ### Breaking Changes
 - _None_
 
----
+<br>
 
 ## [0.2.0] - 2026-01-10
 
@@ -131,7 +131,7 @@ Major feature release introducing pipeline approvals and checks, session default
 ### Contributors
 Special thanks to [@Antiohne](https://github.com/Antiohne) for the feature request, detailed feedback, and testing suggestions that shaped this release
 
----
+<br>
 
 ## [0.2.0-alpha4] - 2026-01-05
 
@@ -149,7 +149,7 @@ Added CI/CD testing workflows and cmdlet improvements for better clarity.
 ### Breaking Changes
 - Renamed `New-AdoGroupAsMember` to `Add-AdoGroupMember` for clarity
 
----
+<br>
 
 ## [0.2.0-alpha3] - 2025-12-20
 
@@ -164,7 +164,7 @@ Enhanced approval check configurations with fine-grained control parameters.
 ### Breaking Changes
 - _None_
 
----
+<br>
 
 ## [0.2.0-alpha2] - 2025-12-10
 
@@ -184,7 +184,7 @@ Comprehensive quality improvements through extensive unit testing and standardiz
 - Renamed `New-AdoGroup` to `New-AdoGroupAsMember` for clarity
 - Changed `Remove-AdoProject` to use _Name_ parameter instead of _Id_ for better consistency
 
----
+<br>
 
 ## [0.2.0-alpha1] - 2025-12-01
 
@@ -209,7 +209,7 @@ Major feature release introducing pipeline approvals, checks support, and sessio
 ### Contributors
 Special thanks to [@Antiohne](https://github.com/Antiohne) for the feature request, detailed feedback, and testing suggestions that shaped this release
 
----
+<br>
 
 ## [0.1.1] - 2025-11-01
 
@@ -226,7 +226,7 @@ Maintenance release with API improvements and documentation updates.
 ### Breaking Changes
 - Changed input parameter type from `object` to `string` (JSON) for `New-AdoPolicyConfiguration`, `Set-AdoPolicyConfiguration`, and `Set-AdoTeamSettings`
 
----
+<br>
 
 ## [0.1.0] - 2025-10-15
 
@@ -241,8 +241,8 @@ Initial stable release with core Azure DevOps REST API cmdlets.
 ### Breaking Changes
 - _None_
 
----
-
 <br>
+
+---
 
 For detailed release notes from previous versions, see the [releases page](https://github.com/msc365/az-devops-psmodule/releases).
