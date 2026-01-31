@@ -1,5 +1,5 @@
 <!-- omit from toc -->
-# Azure DevOps PowerShell Module
+# Automating Azure DevOps Tasks [`PowerShell`]
 
 <!-- cSpell: words psake psmodule -->
 <!-- markdownlint-disable no-duplicate-heading -->
@@ -28,7 +28,7 @@ This repository provides a PowerShell module that wraps the Azure DevOps REST AP
 <!-- omit from toc -->
 ## Use Cases
 
-- Automate DevOps workflows and resource deployments
+- Automating Azure DevOps tasks and resource deployments
 - Accelerate onboarding and standardization for cloud teams
 - Implement end-to-end governance from CI/CD pipelines to Azure Resource Manager
 
@@ -43,6 +43,7 @@ This repository provides a PowerShell module that wraps the Azure DevOps REST AP
 - [Commands](#commands)
 - [Requirements](#requirements)
 - [Development](#development)
+- [Contributing](#contributing)
 - [Support](#support)
 - [License](#license)
 
@@ -154,6 +155,10 @@ Invoke-psake .\src\Build.ps1 -taskList Publish
 # Clean up module dir
 Invoke-psake .\src\Build.ps1 -taskList Clean
 ```
+
+## Contributing
+
+We welcome fixes, features, and documentation updates from the community. Please review [CONTRIBUTING.md](CONTRIBUTING.md) for the safety, testing, and workflow expectations before opening a pull request.
 
 ## Support
 
