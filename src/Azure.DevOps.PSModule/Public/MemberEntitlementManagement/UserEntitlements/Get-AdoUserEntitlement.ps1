@@ -1,4 +1,4 @@
-﻿function Get-AdoUserEntitlements {
+﻿function Get-AdoUserEntitlement {
     <#
     .SYNOPSIS
         Get a paged set of user entitlements matching the filter criteria. If no filter is is passed, a page from all the
