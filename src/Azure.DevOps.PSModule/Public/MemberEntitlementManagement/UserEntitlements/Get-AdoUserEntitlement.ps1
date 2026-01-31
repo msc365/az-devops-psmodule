@@ -54,8 +54,8 @@
 
         Retrieves the specified user by Id.
     #>
-    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseSingularNouns', 'Get-AdoUserEntitlements')]
     [CmdletBinding(DefaultParameterSetName = 'ListUserEntitlements')]
+    [OutputType([ordered])]
     param (
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
@@ -149,7 +149,7 @@
                     $entitlements = if ($UserId) { @($results) } else { $results.items }
 
                     foreach ($e_ in $entitlements) {
-                        [Ordered]@{
+                        [ordered]@{
                             accessLevel         = $e_.accessLevel
                             extensions          = if ($e_.extensions) { $e_.extensions } else { $null }
                             groupAssigments     = if ($e_.groupAssigments) { $e_.groupAssigments } else { $null }
@@ -162,7 +162,7 @@
 
                     $ContinuationToken = $null
 
-                    if (-not $ContinuationToken -and $results.PSObject.Properties.Name -contains 'continuationToken') {
+                    if (-not $ContinuationToken -and ($results.PSObject.Properties.Name -contains 'continuationToken')) {
                         $ct = $results.continuationToken
 
                         if ($ct) {

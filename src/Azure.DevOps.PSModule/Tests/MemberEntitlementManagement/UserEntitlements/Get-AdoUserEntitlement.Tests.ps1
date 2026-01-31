@@ -15,25 +15,25 @@ Describe 'Get-AdoUserEntitlement' {
     BeforeAll {
         # Mock data
         $mockEntitlements = @{
-            items = @(
+            items             = @(
                 @{
-                    id = '11111111-1111-1111-1111-111111111111'
+                    id          = '11111111-1111-1111-1111-111111111111'
                     accessLevel = @{ accountLicenseType = 'express' }
-                    user = @{ principalName = 'user1@contoso.com' }
+                    user        = @{ principalName = 'user1@contoso.com' }
                 }
                 @{
-                    id = '22222222-2222-2222-2222-222222222222'
+                    id          = '22222222-2222-2222-2222-222222222222'
                     accessLevel = @{ accountLicenseType = 'stakeholder' }
-                    user = @{ principalName = 'user2@contoso.com' }
+                    user        = @{ principalName = 'user2@contoso.com' }
                 }
             )
             continuationToken = $null
         }
 
         $mockSingleEntitlement = @{
-            id = '11111111-1111-1111-1111-111111111111'
+            id          = '11111111-1111-1111-1111-111111111111'
             accessLevel = @{ accountLicenseType = 'express' }
-            user = @{ principalName = 'user1@contoso.com' }
+            user        = @{ principalName = 'user1@contoso.com' }
         }
     }
 
@@ -135,13 +135,13 @@ Describe 'Get-AdoUserEntitlement' {
             Mock -ModuleName Azure.DevOps.PSModule Invoke-AdoRestMethod {
                 $script:callCount++
                 if ($script:callCount -eq 1) {
-                    return @{
-                        items = @(@{ id = '1' })
+                    return [PSCustomObject]@{
+                        items             = @(@{ id = '1' })
                         continuationToken = 'next123'
                     }
                 } else {
-                    return @{
-                        items = @(@{ id = '2' })
+                    return [PSCustomObject]@{
+                        items             = @(@{ id = '2' })
                         continuationToken = $null
                     }
                 }

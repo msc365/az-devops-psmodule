@@ -9,6 +9,7 @@
     versioning and publishing to the PowerShell Gallery.
 
 .NOTES
+    Requires Az.Accounts module: Install-Module -Name Az.Accounts -Scope CurrentUser -Force
     Requires PSake module: Install-Module -Name PSake -Scope CurrentUser -Force
     Requires Pester module: Install-Module -Name Pester -Scope  CurrentUser -Force
 #>
