@@ -117,7 +117,7 @@
                     if ($Top) {
                         $queryParameters.Add("`$top=$Top")
                     }
-                    if ($Skip -ge 0) {
+                    if ($Skip) {
                         $queryParameters.Add("`$skip=$Skip")
                     }
                     if ($Filter) {
