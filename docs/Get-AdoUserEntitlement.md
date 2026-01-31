@@ -49,19 +49,23 @@ If no filter is is passed, a page from all the account users is returned.
 
 ### EXAMPLE 1
 
+```powershell
 $params = @{
     CollectionUri = 'https://dev.azure.com/my-org'
 }
 Get-AdoUserEntitlements @params -Top 5
+```
 
 Retrieves the first 5 users from the specified organization.
 
 ### EXAMPLE 2
 
+```powershell
 $params = @{
     CollectionUri = 'https://dev.azure.com/my-org'
 }
 Get-AdoUserEntitlements @params -UserId '585edf88-4dd5-4a21-b13b-5770d00ed858'
+```
 
 Retrieves the specified user by Id.
 
