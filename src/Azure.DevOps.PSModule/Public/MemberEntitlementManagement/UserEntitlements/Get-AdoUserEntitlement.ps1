@@ -65,7 +65,6 @@
         Retrieves the specified user by Id.
     #>
     [CmdletBinding(DefaultParameterSetName = 'ListUserEntitlements')]
-    [OutputType([ordered])]
     param (
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateScript({ Confirm-CollectionUri -Uri $_ })]
@@ -162,7 +161,7 @@
                     $entitlements = if ($UserId) { @($results) } else { $results.items }
 
                     foreach ($e_ in $entitlements) {
-                        [ordered]@{
+                        $obj = [ordered]@{
                             accessLevel         = $e_.accessLevel
                             extensions          = if ($e_.extensions) { $e_.extensions } else { $null }
                             groupAssigments     = if ($e_.groupAssigments) { $e_.groupAssigments } else { $null }
@@ -172,6 +171,8 @@
                             user                = $e_.user
                             collectionUri       = $CollectionUri
                         }
+
+                        [PSCustomObject]$obj
                     }
 
                     $ContinuationToken = $null
