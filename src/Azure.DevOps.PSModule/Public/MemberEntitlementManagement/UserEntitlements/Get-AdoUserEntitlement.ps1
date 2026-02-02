@@ -120,7 +120,7 @@
         $params = @{
             CollectionUri = 'https://dev.azure.com/my-org'
         }
-        Get-AdoUserEntitlements @params -Top 5
+        Get-AdoUserEntitlement @params -Top 5
 
         Retrieves the first 5 users from the specified organization.
 
@@ -128,7 +128,7 @@
         $params = @{
             CollectionUri = 'https://dev.azure.com/my-org'
         }
-        Get-AdoUserEntitlements @params -UserId '585edf88-4dd5-4a21-b13b-5770d00ed858'
+        Get-AdoUserEntitlement @params -UserId '585edf88-4dd5-4a21-b13b-5770d00ed858'
 
         Retrieves the specified user by Id.
     #>
