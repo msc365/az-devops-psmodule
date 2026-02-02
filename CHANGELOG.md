@@ -25,7 +25,7 @@ All notable changes to this project will be documented in this file.
 - _None_
 
 ### What's Changed
-- feat: Added user entitlement support (`Get-AdoUserEntitlement`) (#106)
+- feat(Get-AdoUserEntitlement): Add user entitlement support (#106)
 - fix(New-AdoProject): Update `Get-AdoProcess` call to include `CollectionUri` parameter ¹
 - fix(New-AdoCheckBranchControl): Update `Get-AdoCheckConfiguration` call to include `CollectionUri` and `ProjectName` parameters ¹
 - fix(New-AdoCheckBusinessHours): Update `Get-AdoCheckConfiguration` call to include `CollectionUri` and `ProjectName` parameters ¹
