@@ -174,15 +174,18 @@
         Confirm-Default -Defaults ([Ordered]@{
                 'CollectionUri' = $CollectionUri
             })
+
+        if ($CollectionUri -notmatch 'vsaex\.') {
+            $CollectionUri = $CollectionUri -replace 'https://', 'https://vsaex.'
+        }
     }
 
     process {
         try {
-            $organization = $CollectionUri.Split('/')[-1]
             $uri = if ($UserId) {
-                "https://vsaex.dev.azure.com/$organization/_apis/userentitlements/$UserId"
+                "$CollectionUri/_apis/userentitlements/$UserId"
             } else {
-                "https://vsaex.dev.azure.com/$organization/_apis/userentitlements"
+                "$CollectionUri/_apis/userentitlements"
             }
 
             # Loop until no continuation token is returned
