@@ -171,7 +171,7 @@
                             user                = $e_.user
                             collectionUri       = $CollectionUri
                         }
-
+                        # Output the project object
                         [PSCustomObject]$obj
                     }
 
