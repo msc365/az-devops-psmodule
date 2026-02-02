@@ -72,7 +72,7 @@
         [string]$CollectionUri = $env:DefaultAdoCollectionUri,
 
         [Parameter(ValueFromPipelineByPropertyName, ValueFromPipeline, ParameterSetName = 'GetUserEntitlement')]
-        [ValidatePattern('^[0-9a-fA-F-]{36}$')]
+        [ValidatePattern('^[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$')]
         [Alias('Id')]
         [string]$UserId,
 
