@@ -238,6 +238,7 @@
                             lastAccessedDate    = $e_.lastAccessedDate
                             projectEntitlements = if ($e_.projectEntitlements) { $e_.projectEntitlements } else { $null }
                             user                = $e_.user
+                            collectionUri       = $CollectionUri
                         }
                     }
 
