@@ -274,7 +274,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### System.Collections.Specialized.OrderedDictionary
+### PSCustomObject
 
 The dictionary contains user entitlements:
 - `accessLevel`: User's access level denoted by a license.
