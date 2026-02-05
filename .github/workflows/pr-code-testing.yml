@@ -10,6 +10,15 @@ jobs:
   test:
     name: Run Pester Tests
     runs-on: ubuntu-latest
+    outputs:
+      has_src_changes: ${{ steps.src-changes.outputs.HAS_SRC_CHANGES }}
+      test_total: ${{ steps.export-metrics.outputs.test_total }}
+      test_passed: ${{ steps.export-metrics.outputs.test_passed }}
+      test_failed: ${{ steps.export-metrics.outputs.test_failed }}
+      analyzer_total: ${{ steps.export-metrics.outputs.analyzer_total }}
+      analyzer_errors: ${{ steps.export-metrics.outputs.analyzer_errors }}
+      analyzer_warnings: ${{ steps.export-metrics.outputs.analyzer_warnings }}
+      coverage_percent: ${{ steps.export-metrics.outputs.coverage_percent }}
 
     steps:
       - name: Always run - Workflow initialized
@@ -229,42 +238,6 @@ jobs:
 
           Write-Host "Badge data generated successfully" -ForegroundColor Green
 
-      - name: Create pester tests badge gist
-        if: steps.src-changes.outputs.HAS_SRC_CHANGES == 'true'
-        uses: schneegans/dynamic-badges-action@v1.7.0
-        with:
-          auth: ${{ secrets.GIST_TOKEN }}
-          gistID: ${{ secrets.GIST_ID }}
-          filename: az-devops-psmodule-test-badge.json
-          label: code tests
-          message: ${{ env.TEST_FAILED == '0' && format('{0}', env.TEST_PASSED) || format('{0} failing, {1} passing', env.TEST_FAILED, env.TEST_PASSED) }}
-          color: ${{ env.TEST_FAILED == '0' && 'brightgreen' || 'red' }}
-          forceUpdate: true
-
-      - name: Create analysis badge gist
-        if: steps.src-changes.outputs.HAS_SRC_CHANGES == 'true'
-        uses: schneegans/dynamic-badges-action@v1.7.0
-        with:
-          auth: ${{ secrets.GIST_TOKEN }}
-          gistID: ${{ secrets.GIST_ID }}
-          filename: az-devops-psmodule-analysis-badge.json
-          label: code analysis
-          message: ${{ env.ANALYZER_ERRORS == '0' && env.ANALYZER_WARNINGS == '0' && format('{0}', env.ANALYZER_TOTAL) || env.ANALYZER_ERRORS == '0' && format('0 errors, {0} warnings', env.ANALYZER_WARNINGS) || format('{0} errors, {1} warnings', env.ANALYZER_ERRORS, env.ANALYZER_WARNINGS) }}
-          color: ${{ env.ANALYZER_ERRORS == '0' && env.ANALYZER_WARNINGS == '0' && 'brightgreen' || env.ANALYZER_ERRORS == '0' && 'yellow' || 'red' }}
-          forceUpdate: true
-
-      - name: Create coverage badge gist
-        if: steps.src-changes.outputs.HAS_SRC_CHANGES == 'true'
-        uses: schneegans/dynamic-badges-action@v1.7.0
-        with:
-          auth: ${{ secrets.GIST_TOKEN }}
-          gistID: ${{ secrets.GIST_ID }}
-          filename: az-devops-psmodule-coverage-badge.json
-          label: code coverage
-          message: ${{ env.COVERAGE_PERCENT }}%
-          color: ${{ env.COVERAGE_PERCENT >= 80 && 'brightgreen' || env.COVERAGE_PERCENT >= 60 && 'green' || env.COVERAGE_PERCENT >= 40 && 'yellow' || 'red' }}
-          forceUpdate: true
-
       - name: Upload test results
         if: steps.src-changes.outputs.HAS_SRC_CHANGES == 'true'
         uses: actions/upload-artifact@v4
@@ -278,6 +251,19 @@ jobs:
         with:
           name: coverage-results
           path: coverage.xml
+
+      - name: Export badge metrics
+        if: steps.src-changes.outputs.HAS_SRC_CHANGES == 'true'
+        id: export-metrics
+        shell: pwsh
+        run: |
+          "test_total=$env:TEST_TOTAL" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "test_passed=$env:TEST_PASSED" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "test_failed=$env:TEST_FAILED" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "analyzer_total=$env:ANALYZER_TOTAL" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "analyzer_errors=$env:ANALYZER_ERRORS" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "analyzer_warnings=$env:ANALYZER_WARNINGS" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "coverage_percent=$env:COVERAGE_PERCENT" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
 
       - name: Run final results summary
         if: steps.src-changes.outputs.HAS_SRC_CHANGES == 'true'
@@ -295,3 +281,67 @@ jobs:
           }
 
           Write-Host "All checks passed successfully!" -ForegroundColor Green
+
+  badges:
+    name: Publish Badges
+    runs-on: ubuntu-latest
+    needs: test
+    if: ${{ needs.test.outputs.has_src_changes == 'true' && success() }}
+    environment: pr-fork-badges
+
+    steps:
+      - name: Verify gist access
+        shell: pwsh
+        run: |
+          $token = "${{ secrets.GIST_TOKEN }}"
+          $gistId = "${{ secrets.GIST_ID }}"
+
+          if ([string]::IsNullOrWhiteSpace($token) -or [string]::IsNullOrWhiteSpace($gistId)) {
+            Write-Error "Required gist secrets are missing. Ensure both GIST_TOKEN and GIST_ID are defined."
+            exit 1
+          }
+
+          $uri = "https://api.github.com/gists/$gistId"
+          $headers = @{ Authorization = "token $token" }
+
+          try {
+            $response = Invoke-RestMethod -Uri $uri -Headers $headers -ErrorAction Stop
+            Write-Host "Verified gist '$gistId' - description: $($response.description)" -ForegroundColor Green
+          }
+          catch {
+            Write-Error "Unable to reach gist '$gistId': $($_.Exception.Message)"
+            throw
+          }
+
+      - name: Create pester tests badge gist
+        uses: schneegans/dynamic-badges-action@v1.7.0
+        with:
+          auth: ${{ secrets.GIST_TOKEN }}
+          gistID: ${{ secrets.GIST_ID }}
+          filename: az-devops-psmodule-test-badge.json
+          label: code tests
+          message: ${{ needs.test.outputs.test_failed == '0' && format('{0}', needs.test.outputs.test_passed) || format('{0} failing, {1} passing', needs.test.outputs.test_failed, needs.test.outputs.test_passed) }}
+          color: ${{ needs.test.outputs.test_failed == '0' && 'brightgreen' || 'red' }}
+          forceUpdate: true
+
+      - name: Create analysis badge gist
+        uses: schneegans/dynamic-badges-action@v1.7.0
+        with:
+          auth: ${{ secrets.GIST_TOKEN }}
+          gistID: ${{ secrets.GIST_ID }}
+          filename: az-devops-psmodule-analysis-badge.json
+          label: code analysis
+          message: ${{ needs.test.outputs.analyzer_errors == '0' && needs.test.outputs.analyzer_warnings == '0' && format('{0}', needs.test.outputs.analyzer_total) || needs.test.outputs.analyzer_errors == '0' && format('0 errors, {0} warnings', needs.test.outputs.analyzer_warnings) || format('{0} errors, {1} warnings', needs.test.outputs.analyzer_errors, needs.test.outputs.analyzer_warnings) }}
+          color: ${{ needs.test.outputs.analyzer_errors == '0' && needs.test.outputs.analyzer_warnings == '0' && 'brightgreen' || needs.test.outputs.analyzer_errors == '0' && 'yellow' || 'red' }}
+          forceUpdate: true
+
+      - name: Create coverage badge gist
+        uses: schneegans/dynamic-badges-action@v1.7.0
+        with:
+          auth: ${{ secrets.GIST_TOKEN }}
+          gistID: ${{ secrets.GIST_ID }}
+          filename: az-devops-psmodule-coverage-badge.json
+          label: code coverage
+          message: ${{ format('{0}%', needs.test.outputs.coverage_percent) }}
+          color: ${{ needs.test.outputs.coverage_percent >= 80 && 'brightgreen' || needs.test.outputs.coverage_percent >= 60 && 'green' || needs.test.outputs.coverage_percent >= 40 && 'yellow' || 'red' }}
+          forceUpdate: true
