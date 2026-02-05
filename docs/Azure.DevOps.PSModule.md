@@ -45,6 +45,8 @@ A PowerShell module that wraps the Azure DevOps REST API into clean, task-orient
 | &nbsp; • &nbsp; [New-AdoEnvironment](New-AdoEnvironment.md) | Create a new Azure DevOps Pipeline Environment. |
 | &nbsp; • &nbsp; [Set-AdoEnvironment](Set-AdoEnvironment.md) | Update an Azure DevOps Pipeline Environment by its ID. |
 | &nbsp; • &nbsp; [Remove-AdoEnvironment](Remove-AdoEnvironment.md) | Remove an Azure DevOps Pipeline Environment by its ID. |
+| **Member Entitlement Management** | |
+| &nbsp; • &nbsp; [Get-AdoUserEntitlement](Get-AdoUserEntitlement.md) | Get a paged set of user entitlements matching the filter criteria. |
 | **Policies** | |
 | &nbsp; • &nbsp; [Get-AdoPolicyConfiguration](Get-AdoPolicyConfiguration.md) | Gets policy configurations for an Azure DevOps project. |
 | &nbsp; • &nbsp; [New-AdoPolicyConfiguration](New-AdoPolicyConfiguration.md) | Create a new policy configuration for an Azure DevOps project. |
