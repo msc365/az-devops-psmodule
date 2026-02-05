@@ -19,22 +19,25 @@ All notable changes to this project will be documented in this file.
 
 <br> -->
 
-## [UNRELEASED]
+## [0.3.0] - 2026-02-05
 
 ### Summary
 - _None_
 
 ### What's Changed
+- refactor!: Align ContinuationToken process with `Get-AdoUserEntitlement` cmdlet
+- feat(pr-code-testing): Enhance badge creation steps (#110)
 - feat(Get-AdoUserEntitlement): Add user entitlement support (#106)
 - fix(New-AdoProject): Update `Get-AdoProcess` call to include `CollectionUri` parameter ¹
 - fix(New-AdoCheckBranchControl): Update `Get-AdoCheckConfiguration` call to include `CollectionUri` and `ProjectName` parameters ¹
 - fix(New-AdoCheckBusinessHours): Update `Get-AdoCheckConfiguration` call to include `CollectionUri` and `ProjectName` parameters ¹
 - chore(ReadMe): Add note about unreleased changes
+- chore(Build.ps1): Update module version to 0.3.0
 
 ¹ Workaround: use `Set-AdoDefault -Organization 'devops-org-name' -Project 'devops-project-name'` before calling cmdlet.
 
 ### Breaking Changes
-- _None_
+- `Get-AdoEnvironment`, `Get-AdoGroup`, `Get-AdoPolicyConfiguration`, `Get-AdoProject` and `Get-AdoUserEntitlement` no longer exposes the `ContinuationToken` parameter; pagination is now handled internally by the cmdlet.
 
 <br>
 
