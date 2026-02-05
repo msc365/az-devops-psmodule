@@ -287,7 +287,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: test
     if: ${{ needs.test.outputs.has_src_changes == 'true' && success() }}
-    environment: pr-fork-badges
 
     steps:
       - name: Verify gist access
