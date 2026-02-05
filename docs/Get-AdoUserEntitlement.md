@@ -23,14 +23,14 @@ account users is returned.
 
 ### ListUserEntitlements (Default)
 
-```
+```text
 Get-AdoUserEntitlement [-CollectionUri <string>] [-Filter <string>] [-Select <string>] [-Skip <int>]
- [-Top <int>] [-ContinuationToken <string>] [-Version <string>] [<CommonParameters>]
+ [-Top <int>] [-Version <string>] [<CommonParameters>]
 ```
 
 ### GetUserEntitlement
 
-```
+```text
 Get-AdoUserEntitlement [-CollectionUri <string>] [-UserId <string>] [-Version <string>]
  [<CommonParameters>]
 ```
@@ -74,7 +74,7 @@ Retrieves the specified user by Id.
 ### -CollectionUri
 
 Optional.
-The collection URI of the Azure DevOps collection/organization, e.g., https://dev.azure.com/my-org.
+The collection URI of the Azure DevOps collection/organization, e.g., <https://dev.azure.com/my-org>.
 
 ```yaml
 Type: System.String
@@ -87,29 +87,6 @@ ParameterSets:
   IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: true
-  ValueFromRemainingArguments: false
-DontShow: false
-AcceptedValues: []
-HelpMessage: ''
-```
-
-### -ContinuationToken
-
-Optional.
-An opaque blob used to fetch the next page.
-If omitted, the cmdlet will automatically continue until all pages are returned.
-
-```yaml
-Type: System.String
-DefaultValue: ''
-SupportsWildcards: false
-Aliases: []
-ParameterSets:
-- Name: ListUserEntitlements
-  Position: Named
-  IsRequired: false
-  ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
   ValueFromRemainingArguments: false
 DontShow: false
 AcceptedValues: []
@@ -146,7 +123,7 @@ HelpMessage: ''
 Optional.
 Comma (",") separated list of properties to select in the result entitlements.
 names of the properties are
- - 'Projects, 'Extensions' and 'Grouprules'.
+- 'Projects, 'Extensions' and 'Grouprules'.
 
 ```yaml
 Type: System.String
