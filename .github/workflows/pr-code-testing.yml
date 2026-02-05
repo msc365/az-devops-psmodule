@@ -290,6 +290,29 @@ jobs:
     environment: pr-fork-badges
 
     steps:
+      - name: Verify gist access
+        shell: pwsh
+        run: |
+          $token = "${{ secrets.GIST_TOKEN }}"
+          $gistId = "${{ secrets.GIST_ID }}"
+
+          if ([string]::IsNullOrWhiteSpace($token) -or [string]::IsNullOrWhiteSpace($gistId)) {
+            Write-Error "Required gist secrets are missing. Ensure both GIST_TOKEN and GIST_ID are defined."
+            exit 1
+          }
+
+          $uri = "https://api.github.com/gists/$gistId"
+          $headers = @{ Authorization = "token $token" }
+
+          try {
+            $response = Invoke-RestMethod -Uri $uri -Headers $headers -ErrorAction Stop
+            Write-Host "Verified gist '$gistId' - description: $($response.description)" -ForegroundColor Green
+          }
+          catch {
+            Write-Error "Unable to reach gist '$gistId': $($_.Exception.Message)"
+            throw
+          }
+
       - name: Create pester tests badge gist
         uses: schneegans/dynamic-badges-action@v1.7.0
         with:
