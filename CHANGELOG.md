@@ -22,7 +22,7 @@ All notable changes to this project will be documented in this file.
 ## [0.3.0] - 2026-02-05
 
 ### Summary
-- _None_
+In this feature release we focused on member entitlement management, unified pagination across collection-aware cmdlets, and reliability fixes for project and check creation scenarios.
 
 ### What's Changed
 - refactor!: Align ContinuationToken process with `Get-AdoUserEntitlement` cmdlet
@@ -38,6 +38,9 @@ All notable changes to this project will be documented in this file.
 
 ### Breaking Changes
 - `Get-AdoEnvironment`, `Get-AdoGroup`, `Get-AdoPolicyConfiguration`, `Get-AdoProject` and `Get-AdoUserEntitlement` no longer exposes the `ContinuationToken` parameter; pagination is now handled internally by the cmdlet.
+
+### Contributors
+Special thanks to [@Antiohne](https://github.com/Antiohne) for the `Get-AdoUserEntitlement` feature in this release.
 
 <br>
 
