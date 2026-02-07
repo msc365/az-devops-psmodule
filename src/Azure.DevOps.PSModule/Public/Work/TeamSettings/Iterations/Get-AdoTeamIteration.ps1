@@ -108,7 +108,7 @@ function Get-AdoTeamIteration {
 
     process {
         try {
-            $QueryParameters = [System.Collections.Generic.List[string]]::new()
+            $QueryParameters = [List[string]]::new()
 
             if ($Id) {
                 # Get specific iteration by ID

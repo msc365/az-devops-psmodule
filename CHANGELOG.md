@@ -19,6 +19,16 @@ All notable changes to this project will be documented in this file.
 
 <br> -->
 
+## [UNRELEASED]
+
+### What's Changed
+- chore: Using namespace `System.Collections.Generic` declaration at the module root
+
+### Breaking Changes
+- _None_
+
+<br>
+
 ## [0.3.0] - 2026-02-05
 
 ### Summary

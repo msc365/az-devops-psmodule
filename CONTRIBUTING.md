@@ -34,6 +34,9 @@ To make life a bit easier, a `.vscode/settings.json` file is configured to enfor
 - Take notice of the [PowerShell development guidelines](https://learn.microsoft.com/en-us/powershell/scripting/developer/cmdlet/strongly-encouraged-development-guidelines) when you write modules or cmdlets.
 - Take notice of the [PowerShell-Docs](https://learn.microsoft.com/en-us/powershell/scripting/community/contributing/powershell-style-guide) style guide when you write documentation content.
 - Use [PlatyPS](src/PlatyPS.ps1) script with care. Do _NOT_ overwrite current docs, use a `tmp` directory to create your doc file, then adjust to align with reference documentation.
+- Typed helper collections should use `[List[T]]::new()` so we can reuse small mutable lists across pagination loops without re-qualifying `System.Collections.Generic`.
+  
+  > Collections are supported via the module-wide `using namespace System.Collections.Generic`.
 
 ## Conventional commits
 

@@ -72,7 +72,7 @@
 
     process {
         try {
-            $QueryParameters = [System.Collections.Generic.List[string]]::new()
+            $QueryParameters = [List[string]]::new()
             $QueryParameters.Add("projectIds=$($ProjectIds -join ',')")
 
             if ($Deep.IsPresent) {

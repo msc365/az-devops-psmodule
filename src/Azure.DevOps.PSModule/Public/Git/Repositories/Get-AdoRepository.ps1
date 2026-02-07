@@ -94,7 +94,7 @@
 
     process {
         try {
-            $queryParameters = [System.Collections.Generic.List[string]]::new()
+            $queryParameters = [List[string]]::new()
 
             if ($Name) {
                 $uri = "$CollectionUri/$ProjectName/_apis/git/repositories/$Name"

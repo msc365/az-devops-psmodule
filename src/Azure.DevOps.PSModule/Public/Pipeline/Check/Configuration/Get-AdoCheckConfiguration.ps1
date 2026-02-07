@@ -146,8 +146,8 @@
 
     process {
         try {
-            $QueryParameters = [System.Collections.Generic.List[string]]::new()
-            $DefinitionRefIds = [System.Collections.Generic.List[string]]::new()
+            $QueryParameters = [List[string]]::new()
+            $DefinitionRefIds = [List[string]]::new()
 
             if ($id) {
                 $uri = "$CollectionUri/$ProjectName/_apis/pipelines/checks/configurations/$id"

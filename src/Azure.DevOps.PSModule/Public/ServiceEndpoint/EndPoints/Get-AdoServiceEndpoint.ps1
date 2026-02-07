@@ -113,7 +113,7 @@
 
     process {
         try {
-            $QueryParameters = [System.Collections.Generic.List[string]]::new()
+            $QueryParameters = [List[string]]::new()
             if ($PSCmdlet.ParameterSetName -eq 'ByIds') {
                 if ($Ids) {
                     $QueryParameters.Add("endpointIds=$($Ids -join ',')")

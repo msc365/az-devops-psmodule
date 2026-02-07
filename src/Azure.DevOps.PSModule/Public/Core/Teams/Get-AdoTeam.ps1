@@ -117,7 +117,7 @@
     process {
         try {
 
-            $queryParameters = [System.Collections.Generic.List[string]]::new()
+            $queryParameters = [List[string]]::new()
 
             if ($Name) {
                 $uri = "$CollectionUri/_apis/projects/$ProjectName/teams/$Name"

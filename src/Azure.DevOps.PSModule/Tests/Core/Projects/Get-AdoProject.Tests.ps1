@@ -291,5 +291,37 @@ Describe 'Get-AdoProject' {
                 $QueryParameters -like '*continuationToken=token123*'
             }
         }
+
+        It 'Should reuse base query parameters when paging' {
+            # Arrange
+            $firstPage = @{
+                value             = @($mockProjects.value[0])
+                continuationToken = 'token123'
+            }
+            $secondPage = @{
+                value             = @($mockProjects.value[1])
+                continuationToken = $null
+            }
+            $script:invokeCount = 0
+
+            Mock -ModuleName Azure.DevOps.PSModule Invoke-AdoRestMethod {
+                $script:invokeCount++
+                if ($script:invokeCount -eq 1) {
+                    return $firstPage
+                }
+                return $secondPage
+            }
+
+            # Act
+            Get-AdoProject -CollectionUri 'https://dev.azure.com/my-org' -Top 1
+
+            # Assert
+            Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1 -ParameterFilter {
+                $QueryParameters -eq '$top=1'
+            }
+            Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1 -ParameterFilter {
+                $QueryParameters -eq '$top=1&continuationToken=token123'
+            }
+        }
     }
 }

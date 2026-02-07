@@ -1,4 +1,7 @@
-﻿[CmdletBinding()]
+﻿# Using statements
+using namespace System.Collections.Generic
+
+[CmdletBinding()]
 param()
 
 Write-Verbose $PSScriptRoot

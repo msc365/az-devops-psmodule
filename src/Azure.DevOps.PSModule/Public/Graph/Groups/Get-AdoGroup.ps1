@@ -118,7 +118,7 @@
 
     process {
         try {
-            $queryParameters = [System.Collections.Generic.List[string]]::new()
+            $queryParameters = [List[string]]::new()
 
             if ($GroupDescriptor) {
                 $uri = "$CollectionUri/_apis/graph/groups/$GroupDescriptor"
@@ -145,7 +145,7 @@
                 $continuationToken = $null
 
                 do {
-                    $pagedParams = [System.Collections.Generic.List[string]]::new()
+                    $pagedParams = [List[string]]::new()
 
                     if ($queryParameters.Count) {
                         $pagedParams.AddRange($queryParameters)

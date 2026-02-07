@@ -141,7 +141,7 @@ function Get-AdoClassificationNode {
 
     process {
         try {
-            $QueryParameters = [System.Collections.Generic.List[string]]::new()
+            $QueryParameters = [List[string]]::new()
 
             $uri = "$CollectionUri/$ProjectName/_apis/wit/classificationnodes"
 

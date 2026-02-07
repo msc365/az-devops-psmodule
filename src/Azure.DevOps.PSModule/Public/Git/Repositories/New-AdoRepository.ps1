@@ -83,7 +83,7 @@
                 if (-not $projectId) { continue }
             }
 
-            $queryParameters = [System.Collections.Generic.List[string]]::new()
+            $queryParameters = [List[string]]::new()
 
             if ($SourceRef) {
                 $queryParameters.Add("sourceRef=$SourceRef")

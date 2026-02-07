@@ -112,7 +112,7 @@
 
     process {
         try {
-            $queryParameters = [System.Collections.Generic.List[string]]::new()
+            $queryParameters = [List[string]]::new()
 
             if ($Name) {
                 $uri = "$CollectionUri/_apis/projects/$Name"
@@ -150,7 +150,7 @@
                 $continuationToken = $null
 
                 do {
-                    $pagedParams = [System.Collections.Generic.List[string]]::new()
+                    $pagedParams = [List[string]]::new()
 
                     if ($queryParameters.Count) {
                         $pagedParams.AddRange($queryParameters)
