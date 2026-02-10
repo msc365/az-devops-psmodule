@@ -103,6 +103,7 @@
         'New-AdoEnvironment'
         'New-AdoPolicyConfiguration'
         'New-AdoProject'
+        'New-AdoPushInitialCommit'
         'New-AdoRepository'
         'New-AdoServiceEndpoint'
         'New-AdoTeam'

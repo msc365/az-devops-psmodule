@@ -22,6 +22,7 @@ All notable changes to this project will be documented in this file.
 ## [UNRELEASED]
 
 ### What's Changed
+- feat(New-AdoPushInitialCommit): Add cmdlet for creating initial commits in Azure DevOps repositories
 - chore: Using namespace `System.Collections.Generic` declaration at the module root
 
 ### Breaking Changes
