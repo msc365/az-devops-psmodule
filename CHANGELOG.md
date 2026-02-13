@@ -22,6 +22,7 @@ All notable changes to this project will be documented in this file.
 ## [UNRELEASED]
 
 ### What's Changed
+- fix(Get-AdoUserEntitlement): Return `dateCreated` property (#119)
 - feat: Add `ResourceId` parameter to all Check and Approval cmdlets
 - feat: Add `New-AdoPushInitialCommit` cmdlet for creating initial commits in Azure DevOps repositories
 - chore: Using namespace `System.Collections.Generic` declaration at the module root
