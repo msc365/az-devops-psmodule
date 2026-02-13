@@ -19,7 +19,10 @@ All notable changes to this project will be documented in this file.
 
 <br> -->
 
-## [UNRELEASED]
+## [0.4.0]
+
+### Summary
+Feature release adding repository initialization support, enhanced user entitlement data, and improved check/approval resource management.
 
 ### What's Changed
 - feat(Get-AdoUserEntitlement): Add `dateCreated` property to output
