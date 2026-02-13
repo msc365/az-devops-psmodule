@@ -159,6 +159,7 @@
                             id                  = $e_.id
                             user                = $e_.user
                             accessLevel         = $e_.accessLevel
+                            dateCreated         = $e_.dateCreated
                             lastAccessedDate    = $e_.lastAccessedDate
                             projectEntitlements = if ($e_.projectEntitlements) { $e_.projectEntitlements } else { $null }
                             extensions          = if ($e_.extensions) { $e_.extensions } else { $null }
