@@ -4,7 +4,7 @@ external help file: Azure.DevOps.PSModule-Help.xml
 HelpUri: https://learn.microsoft.com/en-us/rest/api/azure/devops/approvalsandchecks/check-configurations/add
 Locale: en-NL
 Module Name: Azure.DevOps.PSModule
-ms.date: 01/03/2026
+ms.date: 02/13/2026
 PlatyPS schema version: 2024-05-01
 title: New-AdoCheckApproval
 -->
@@ -20,13 +20,22 @@ Create a new approval check for a specific resource.
 
 ## SYNTAX
 
-### __AllParameterSets
+### ByResourceName
 
 ```text
-New-AdoCheckApproval [[-CollectionUri] <string>] [[-ProjectName] <string>]
- [-Approvers] <hashtable[]> [-ResourceType] <string> [-ResourceName] <string>
- [[-DefinitionType] <string>] [[-Instructions] <string>]
- [[-MinRequiredApprovers] <int32>] [[-ExecutionOrder] <string>]
+New-AdoCheckApproval -Approvers <hashtable[]> -ResourceType <string> -ResourceName <string>
+ [[-CollectionUri] <string>] [[-ProjectName] <string>] [[-DefinitionType] <string>]
+ [[-Instructions] <string>] [[-MinRequiredApprovers] <int32>] [[-ExecutionOrder] <string>]
+ [[-RequesterCannotBeApprover] <bool>] [[-Timeout] <int32>]
+ [[-Version] <string>] [-WhatIf] [-Confirm] [<CommonParameters>]
+```
+
+### ByResourceId
+
+```text
+New-AdoCheckApproval -Approvers <hashtable[]> -ResourceType <string> -ResourceId <string>
+ [[-CollectionUri] <string>] [[-ProjectName] <string>] [[-DefinitionType] <string>]
+ [[-Instructions] <string>] [[-MinRequiredApprovers] <int32>] [[-ExecutionOrder] <string>]
  [[-RequesterCannotBeApprover] <bool>] [[-Timeout] <int32>]
  [[-Version] <string>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
@@ -40,7 +49,6 @@ This cmdlet has the following aliases,
 
 This function creates a new approval check for a specified resource within an Azure DevOps project.
 When existing configuration is found, it will be returned instead of creating a new one.
-Approval checks ensure that deployments or other operations require approval from designated users before proceeding.
 
 ## EXAMPLES
 
@@ -62,9 +70,29 @@ $params = @{
 New-AdoCheckApproval @params -Verbose
 ```
 
-Creates a new approval check configuration for the specified environment with default parameters.
+Creates a new approval check configuration for the specified environment name with default parameters.
 
 ### EXAMPLE 2
+
+#### PowerShell
+
+```powershell
+$approvers = @(
+    @{ id = '00000000-0000-0000-0000-000000000001' }
+)
+$params = @{
+    CollectionUri = 'https://dev.azure.com/my-org'
+    ProjectName   = 'my-project-1'
+    Approvers     = $approvers
+    ResourceType  = 'environment'
+    ResourceID    = '00000000-0000-0000-0000-000000000100'
+}
+New-AdoCheckApproval @params -Verbose
+```
+
+Creates a new approval check configuration for the specified environment ID with default parameters.
+
+### EXAMPLE 3
 
 #### PowerShell
 
@@ -91,39 +119,6 @@ New-AdoCheckApproval @params -Verbose
 ```
 
 Creates a new approval check configuration for the specified environment with the provided parameters.
-
-### EXAMPLE 3
-
-#### PowerShell
-
-```powershell
-$approvers = @(
-    @{ id = '11111111-1111-1111-1111-111111111111' },
-    @{ id = '22222222-2222-2222-2222-222222222222' }
-)
-
-'my-environment-tst', 'my-environment-prd' | New-AdoCheckApproval -Approvers $approvers -ResourceType 'environment'
-```
-
-Creates approval checks for multiple environments using pipeline input.
-
-### EXAMPLE 4
-
-#### PowerShell
-
-```powershell
-$params = @{
-    CollectionUri  = 'https://dev.azure.com/my-org'
-    ProjectName    = 'my-project-1'
-    Approvers      = @{ id = '00000000-0000-0000-0000-000000000000' }
-    ResourceType   = 'environment'
-    ResourceName   = 'my-environment-tst'
-    DefinitionType = 'preCheckApproval'
-}
-New-AdoCheckApproval @params
-```
-
-Creates a pre-check approval for the specified environment.
 
 ## PARAMETERS
 
@@ -176,7 +171,6 @@ HelpMessage: ''
 
 Mandatory.
 An array of approvers in the format @{ id = 'originId' }.
-Each approver must have an 'id' property containing the Azure DevOps identity ID.
 
 ```yaml
 Type: System.Collections.Hashtable[]
@@ -195,10 +189,56 @@ AcceptedValues: []
 HelpMessage: ''
 ```
 
+### -ResourceId
+
+Mandatory.
+The ID of the resource to which the check will be applied.
+If not provided, the function will attempt to resolve the ID based on the ResourceType and ResourceName.
+
+```yaml
+Type: System.String
+DefaultValue: ''
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: ByResourceId
+  Position: Named
+  IsRequired: true
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -ResourceName
+
+Mandatory.
+The name of the resource to which the check will be applied.
+
+```yaml
+Type: System.String
+DefaultValue: ''
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: ByResourceName
+  Position: Named
+  IsRequired: true
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
 ### -ResourceType
 
 Mandatory.
 The type of resource to which the check will be applied.
+Valid values are 'endpoint', 'environment', 'variablegroup', 'repository'.
 
 ```yaml
 Type: System.String
@@ -221,32 +261,11 @@ AcceptedValues:
 HelpMessage: ''
 ```
 
-### -ResourceName
-
-Mandatory.
-The name of the resource to which the check will be applied.
-
-```yaml
-Type: System.String
-DefaultValue: ''
-SupportsWildcards: false
-Aliases: []
-ParameterSets:
-- Name: (All)
-  Position: Named
-  IsRequired: true
-  ValueFromPipeline: true
-  ValueFromPipelineByPropertyName: true
-  ValueFromRemainingArguments: false
-DontShow: false
-AcceptedValues: []
-HelpMessage: ''
-```
-
 ### -DefinitionType
 
 Optional.
 The type of approval check to create.
+Valid values are 'approval', 'preCheckApproval', and 'postCheckApproval'.
 Default is 'approval'.
 
 ```yaml
@@ -313,13 +332,14 @@ ParameterSets:
   ValueFromRemainingArguments: false
 DontShow: false
 AcceptedValues: []
-HelpMessage: Set to 0 for All.
+HelpMessage: ''
 ```
 
 ### -ExecutionOrder
 
 Optional.
 The execution order of the approvers.
+Valid values are 'anyOrder' and 'inSequence'.
 Default is 'anyOrder'.
 Note: When MinRequiredApprovers is 0, this value is automatically set to 'anyOrder' regardless of the input.
 

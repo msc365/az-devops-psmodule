@@ -22,6 +22,9 @@
     .PARAMETER ResourceName
         Mandatory. The name of the resource to which the check will be applied.
 
+    .PARAMETER ResourceId
+        Mandatory. The ID of the resource to which the check will be applied. If not provided, the function will attempt to resolve the ID based on the ResourceType and ResourceName.
+
     .PARAMETER DefinitionType
         Optional. The type of approval check to create. Valid values are 'approval', 'preCheckApproval', and 'postCheckApproval'. Default is 'approval'.
 
@@ -62,7 +65,22 @@
         }
         New-AdoCheckApproval @params -Verbose
 
-        Creates a new approval check configuration for the specified environment with default parameters.
+        Creates a new approval check configuration for the specified environment name with default parameters.
+
+    .EXAMPLE
+        $approvers = @(
+            @{ id = '00000000-0000-0000-0000-000000000001' }
+        )
+        $params = @{
+            CollectionUri = 'https://dev.azure.com/my-org'
+            ProjectName   = 'my-project-1'
+            Approvers     = $approvers
+            ResourceType  = 'environment'
+            ResourceID    = '00000000-0000-0000-0000-000000000100'
+        }
+        New-AdoCheckApproval @params -Verbose
+
+        Creates a new approval check configuration for the specified environment ID with default parameters.
 
     .EXAMPLE
         $approvers = @(
@@ -104,8 +122,11 @@
         [ValidateSet('endpoint', 'environment', 'variablegroup', 'repository')]
         [string]$ResourceType,
 
-        [Parameter(Mandatory, ValueFromPipelineByPropertyName, ValueFromPipeline)]
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName, ParameterSetName = 'ByResourceName')]
         [string]$ResourceName,
+
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName, ParameterSetName = 'ByResourceId')]
+        [string]$ResourceId,
 
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateSet('approval', 'preCheckApproval', 'postCheckApproval')]
@@ -140,6 +161,7 @@
         Write-Debug ("Approvers: $($Approvers -join ',')")
         Write-Debug ("ResourceType: $ResourceType")
         Write-Debug ("ResourceName: $ResourceName")
+        Write-Debug ("ResourceId: $ResourceId")
         Write-Debug ("DefinitionType: $DefinitionType")
         Write-Debug ("Instructions: $Instructions")
         Write-Debug ("MinRequiredApprovers: $MinRequiredApprovers")
@@ -165,18 +187,20 @@
             # Determine definitionRef based on DefinitionType
             $definitionRef = Resolve-AdoDefinitionRef -Name $DefinitionType
 
-            # Get resource ID
-            switch ($ResourceType) {
-                'environment' {
-                    $typeParams = @{
-                        CollectionUri = $CollectionUri
-                        ProjectName   = $ProjectName
-                        Name          = $ResourceName
+            # Get resource ID if not provided
+            if (-not $ResourceId) {
+                switch ($ResourceType) {
+                    'environment' {
+                        $typeParams = @{
+                            CollectionUri = $CollectionUri
+                            ProjectName   = $ProjectName
+                            Name          = $ResourceName
+                        }
+                        $ResourceId = (Get-AdoEnvironment @typeParams).Id
                     }
-                    $resourceId = (Get-AdoEnvironment @typeParams).Id
-                }
-                default {
-                    throw "ResourceType '$ResourceType' is not supported yet."
+                    default {
+                        throw "ResourceType '$ResourceType' is not supported yet."
+                    }
                 }
             }
 
@@ -200,7 +224,7 @@
                 }
                 resource = @{
                     type = $ResourceType
-                    id   = $resourceId
+                    id   = $ResourceId
                 }
             }
 
@@ -225,12 +249,12 @@
 
                 } catch {
                     if ($_.ErrorDetails.Message -match 'already exists') {
-                        Write-Warning "$($definitionRef.name) already exists for $ResourceType with $ResourceName, trying to get it"
+                        Write-Warning "$($definitionRef.name) already exists for $ResourceType with ID $ResourceId, trying to get it"
 
                         $params.Method = 'GET'
                         $params.QueryParameters = @(
                             "resourceType=$($ResourceType)",
-                            "resourceId=$($resourceId)",
+                            "resourceId=$($ResourceId)",
                             "`$expand=settings"
                         ) -join '&'
 
