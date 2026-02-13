@@ -4,7 +4,7 @@ external help file: Azure.DevOps.PSModule-Help.xml
 HelpUri: https://learn.microsoft.com/en-us/rest/api/azure/devops/approvalsandchecks/check-configurations/add
 Locale: en-NL
 Module Name: Azure.DevOps.PSModule
-ms.date: 01/03/2026
+ms.date: 02/13/2026
 PlatyPS schema version: 2024-05-01
 title: New-AdoCheckBranchControl
 -->
@@ -20,11 +20,21 @@ Create a new branch control check for a specific resource.
 
 ## SYNTAX
 
-### __AllParameterSets
+### ByResourceName
 
 ```text
-New-AdoCheckBranchControl [[-CollectionUri] <string>] [[-ProjectName] <string>]
- [[-DisplayName] <string>] [-ResourceType] <string> [-ResourceName] <string>
+New-AdoCheckBranchControl -ResourceType <string> -ResourceName <string>
+ [[-CollectionUri] <string>] [[-ProjectName] <string>] [[-DisplayName] <string>]
+ [[-AllowedBranches] <string[]>] [[-EnsureProtectionOfBranch] <bool>]
+ [[-AllowUnknownStatusBranches] <bool>] [[-Timeout] <int>] [[-Version] <string>]
+ [-WhatIf] [-Confirm] [<CommonParameters>]
+```
+
+### ByResourceId
+
+```text
+New-AdoCheckBranchControl -ResourceType <string> -ResourceId <string>
+ [[-CollectionUri] <string>] [[-ProjectName] <string>] [[-DisplayName] <string>]
  [[-AllowedBranches] <string[]>] [[-EnsureProtectionOfBranch] <bool>]
  [[-AllowUnknownStatusBranches] <bool>] [[-Timeout] <int>] [[-Version] <string>]
  [-WhatIf] [-Confirm] [<CommonParameters>]
@@ -38,8 +48,7 @@ This cmdlet has the following aliases,
 ## DESCRIPTION
 
 This function creates a new branch control check for a specified resource within an Azure DevOps project.
-Branch control checks ensure that deployments or operations only proceed from allowed branches.
-When existing configuration is found with the same settings, it will be returned instead of creating a new one.
+When existing configuration is found, it will be returned instead of creating a new one.
 
 ## EXAMPLES
 
@@ -49,47 +58,43 @@ When existing configuration is found with the same settings, it will be returned
 
 ```powershell
 $params = @{
-    CollectionUri                  = 'https://dev.azure.com/my-org'
-    ProjectName                    = 'my-project-1'
-    DisplayName                    = 'Branch Control'
-    ResourceType                   = 'environment'
-    ResourceName                   = 'my-environment-tst'
-    AllowedBranches                = 'refs/heads/main', 'refs/heads/release/*'
-    EnsureProtectionOfBranch       = $true
-    AllowUnknownStatusBranches     = $false
-    Timeout                        = 1440
+    CollectionUri              = 'https://dev.azure.com/my-org'
+    ProjectName                = 'my-project-1'
+    DisplayName                = 'Branch Control'
+    ResourceType               = 'environment'
+    ResourceName               = 'my-environment-tst'
+    AllowedBranches            = 'refs/heads/main', 'refs/heads/release/*'
+    EnsureProtectionOfBranch   = $true
+    AllowUnknownStatusBranches = $false
+    Timeout                    = 1440
 }
 New-AdoCheckBranchControl @params
 ```
 
-Creates a new branch control check in the specified project using the provided parameters.
+Creates a new branch control check for the specified environment name with default parameters.
 
 ### EXAMPLE 2
 
 #### PowerShell
 
 ```powershell
-'my-environment-tst', 'my-environment-prd' | New-AdoCheckBranchControl -ResourceType 'environment' -AllowedBranches 'refs/heads/main'
-```
-
-Creates branch control checks for multiple environments using pipeline input.
-
-### EXAMPLE 3
-
-#### PowerShell
-
-```powershell
 $params = @{
+    CollectionUri              = 'https://dev.azure.com/my-org'
+    ProjectName                = 'my-project-1'
+    DisplayName                = 'Branch Control'
     ResourceType               = 'environment'
-    ResourceName               = 'my-environment'
-    AllowedBranches            = 'refs/heads/main', 'refs/heads/develop'
-    EnsureProtectionOfBranch   = $false
-    AllowUnknownStatusBranches = $true
+    ResourceId                 = '00000000-0000-0000-0000-000000000100'
+    AllowedBranches            = 'refs/heads/main', 'refs/heads/release/*'
+    EnsureProtectionOfBranch   = $true
+    AllowUnknownStatusBranches = $false
+    Timeout                    = 1440
 }
 New-AdoCheckBranchControl @params
 ```
 
-Creates a branch control check allowing multiple branches without enforcing branch protection.
+Creates a new branch control check for the specified environment ID using the provided parameters.
+
+
 
 ## PARAMETERS
 
@@ -161,10 +166,56 @@ AcceptedValues: []
 HelpMessage: ''
 ```
 
+### -ResourceId
+
+Mandatory.
+The ID of the resource to which the check will be applied.
+If not provided, the function will attempt to resolve the ID based on the ResourceType and ResourceName.
+
+```yaml
+Type: System.String
+DefaultValue: ''
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: ByResourceId
+  Position: Named
+  IsRequired: true
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -ResourceName
+
+Mandatory.
+The name of the resource to which the check will be applied.
+
+```yaml
+Type: System.String
+DefaultValue: ''
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: ByResourceName
+  Position: Named
+  IsRequired: true
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
 ### -ResourceType
 
 Mandatory.
 The type of resource to which the check will be applied.
+Valid values are 'endpoint', 'environment', 'variablegroup', 'repository'.
 
 ```yaml
 Type: System.String
@@ -187,39 +238,16 @@ AcceptedValues:
 HelpMessage: ''
 ```
 
-### -ResourceName
-
-Mandatory.
-The name of the resource to which the check will be applied.
-
-```yaml
-Type: System.String
-DefaultValue: ''
-SupportsWildcards: false
-Aliases: []
-ParameterSets:
-- Name: (All)
-  Position: Named
-  IsRequired: true
-  ValueFromPipeline: true
-  ValueFromPipelineByPropertyName: true
-  ValueFromRemainingArguments: false
-DontShow: false
-AcceptedValues: []
-HelpMessage: ''
-```
-
 ### -AllowedBranches
 
 Optional.
 A comma-separated list of allowed branches.
 Default is 'refs/heads/main'.
-Supports wildcards for branch patterns (e.g., 'refs/heads/release/*').
 
 ```yaml
 Type: System.String[]
 DefaultValue: refs/heads/main
-SupportsWildcards: true
+SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
