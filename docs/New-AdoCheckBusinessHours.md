@@ -4,7 +4,7 @@ external help file: Azure.DevOps.PSModule-Help.xml
 HelpUri: https://learn.microsoft.com/en-us/rest/api/azure/devops/approvalsandchecks/check-configurations/add
 Locale: en-NL
 Module Name: Azure.DevOps.PSModule
-ms.date: 01/03/2026
+ms.date: 02/13/2026
 PlatyPS schema version: 2024-05-01
 title: New-AdoCheckBusinessHours
 -->
@@ -20,11 +20,21 @@ Create a new business hours check for a specific resource.
 
 ## SYNTAX
 
-### __AllParameterSets
+### ByResourceName
 
 ```text
-New-AdoCheckBusinessHours [[-CollectionUri] <string>] [[-ProjectName] <string>]
- [[-DisplayName] <string>] [-ResourceType] <string> [-ResourceName] <string>
+New-AdoCheckBusinessHours -ResourceType <string> -ResourceName <string>
+ [[-CollectionUri] <string>] [[-ProjectName] <string>] [[-DisplayName] <string>]
+ [[-BusinessDays] <string[]>] [[-TimeZone] <string>] [[-StartTime] <string>]
+ [[-EndTime] <string>] [[-Timeout] <int>] [[-Version] <string>]
+ [-WhatIf] [-Confirm] [<CommonParameters>]
+```
+
+### ByResourceId
+
+```text
+New-AdoCheckBusinessHours -ResourceType <string> -ResourceId <string>
+ [[-CollectionUri] <string>] [[-ProjectName] <string>] [[-DisplayName] <string>]
  [[-BusinessDays] <string[]>] [[-TimeZone] <string>] [[-StartTime] <string>]
  [[-EndTime] <string>] [[-Timeout] <int>] [[-Version] <string>]
  [-WhatIf] [-Confirm] [<CommonParameters>]
@@ -38,8 +48,7 @@ This cmdlet has the following aliases,
 ## DESCRIPTION
 
 This function creates a new business hours check for a specified resource within an Azure DevOps project.
-Business hours checks ensure that deployments or operations only proceed during specified business hours.
-When existing configuration is found with the same settings, it will be returned instead of creating a new one.
+When existing configuration is found, it will be returned instead of creating a new one.
 
 ## EXAMPLES
 
@@ -63,35 +72,29 @@ $params = @{
 New-AdoCheckBusinessHours @params
 ```
 
-Creates a new business hours check in the specified project using the provided parameters.
+Creates a new business hours check for the specified environment name with default parameters.
 
 ### EXAMPLE 2
 
 #### PowerShell
 
 ```powershell
-'my-environment-tst', 'my-environment-prd' | New-AdoCheckBusinessHours -ResourceType 'environment' -TimeZone 'Pacific Standard Time' -StartTime '08:00' -EndTime '17:00'
-```
-
-Creates business hours checks for multiple environments using pipeline input with PST timezone.
-
-### EXAMPLE 3
-
-#### PowerShell
-
-```powershell
 $params = @{
-    ResourceType = 'environment'
-    ResourceName = 'my-environment'
-    BusinessDays = @('Monday', 'Wednesday', 'Friday')
-    TimeZone     = 'Eastern Standard Time'
-    StartTime    = '09:00'
-    EndTime      = '18:00'
+    CollectionUri = 'https://dev.azure.com/my-org'
+    ProjectName   = 'my-project-1'
+    DisplayName   = 'Business Hours'
+    ResourceType  = 'environment'
+    ResourceId    = '00000000-0000-0000-0000-000000000100'
+    BusinessDays  = @('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday')
+    TimeZone      = 'UTC'
+    StartTime     = '04:00'
+    EndTime       = '11:00'
+    Timeout       = 1440
 }
 New-AdoCheckBusinessHours @params
 ```
 
-Creates a business hours check for specific days with Eastern timezone.
+Creates a new business hours check for the specified environment ID with default parameters.
 
 ## PARAMETERS
 
@@ -163,10 +166,56 @@ AcceptedValues: []
 HelpMessage: ''
 ```
 
+### -ResourceId
+
+Mandatory.
+The ID of the resource to which the check will be applied.
+If not provided, the function will attempt to resolve the ID based on the ResourceType and ResourceName.
+
+```yaml
+Type: System.String
+DefaultValue: ''
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: ByResourceId
+  Position: Named
+  IsRequired: true
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -ResourceName
+
+Mandatory.
+The name of the resource to which the check will be applied.
+
+```yaml
+Type: System.String
+DefaultValue: ''
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: ByResourceName
+  Position: Named
+  IsRequired: true
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
 ### -ResourceType
 
 Mandatory.
 The type of resource to which the check will be applied.
+Valid values are 'endpoint', 'environment', 'variablegroup', 'repository'.
 
 ```yaml
 Type: System.String
@@ -189,37 +238,16 @@ AcceptedValues:
 HelpMessage: ''
 ```
 
-### -ResourceName
-
-Mandatory.
-The name of the resource to which the check will be applied.
-
-```yaml
-Type: System.String
-DefaultValue: ''
-SupportsWildcards: false
-Aliases: []
-ParameterSets:
-- Name: (All)
-  Position: Named
-  IsRequired: true
-  ValueFromPipeline: true
-  ValueFromPipelineByPropertyName: true
-  ValueFromRemainingArguments: false
-DontShow: false
-AcceptedValues: []
-HelpMessage: ''
-```
-
 ### -BusinessDays
 
 Optional.
 An array of business days.
+Valid values are 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'.
 Default is Monday to Friday.
 
 ```yaml
 Type: System.String[]
-DefaultValue: @('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday')
+DefaultValue: "@('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday')"
 SupportsWildcards: false
 Aliases: []
 ParameterSets:
