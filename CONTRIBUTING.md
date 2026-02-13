@@ -59,7 +59,7 @@ To make life a bit easier, a `.vscode/settings.json` file is configured to enfor
 - Fork the repository and keep your fork updated by syncing or rebasing from upstream `main` before starting new work.
 - Create feature branches in your fork (for example `feat/<area>-<summary>` or `fix/<issue>-<summary>`) and limit each branch to a single unit of work.
 - Large pull requests are difficult to merge safely; split substantial changes into smaller, reviewable branches and submit separate PRs per feature or fix when possible.
-- Link the related GitHub issue (or reference numbers) in your pull request description so reviewers can trace requirements to code.
+- Link the related GitHub issue (or reference numbers) in your pull request description (not in title) so reviewers can trace requirements to code.
 - Resolve review comments in-place and prefer incremental commits over force-pushing rewritten history so the discussion remains intact.
 
 ## Pull request expectations
