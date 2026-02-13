@@ -20,19 +20,27 @@ Get a list of check configurations for a specific resource.
 
 ## SYNTAX
 
-### ConfigurationList
+### ConfigurationList (Default)
 
 ```text
-Get-AdoCheckConfiguration [[-CollectionUri] <string>] [[-ProjectName] <string>]
- [-ResourceType] <string> [-ResourceName] <string> [[-DefinitionType] <string[]>]
- [[-Expands] <string>] [[-Version] <string>] [<CommonParameters>]
+Get-AdoCheckConfiguration -ResourceType <string> -ResourceName <string> [-CollectionUri <string>]
+ [-ProjectName <string>] [-DefinitionType <string[]>] [-Expands <string>] [-Version <string>]
+ [<CommonParameters>]
+```
+
+### ConfigurationListByResourceId
+
+```text
+Get-AdoCheckConfiguration -ResourceType <string> -ResourceId <string> [-CollectionUri <string>]
+ [-ProjectName <string>] [-DefinitionType <string[]>] [-Expands <string>] [-Version <string>]
+ [<CommonParameters>]
 ```
 
 ### ConfigurationById
 
 ```text
-Get-AdoCheckConfiguration [[-CollectionUri] <string>] [[-ProjectName] <string>]
- [-Id] <int32> [[-Expands] <string>] [[-Version] <string>] [<CommonParameters>]
+Get-AdoCheckConfiguration -Id <int> [-CollectionUri <string>] [-ProjectName <string>]
+ [-Expands <string>] [-Version <string>] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -94,6 +102,22 @@ Retrieves the check configuration with ID 1, including its settings.
 
 ### EXAMPLE 4
 
+```powershell
+$params = @{
+    CollectionUri  = 'https://dev.azure.com/my-org'
+    ProjectName    = 'my-project-1'
+    ResourceType   = 'environment'
+    ResourceId     = '00000000-0000-0000-0000-000000000100'
+    DefinitionType = 'approval'
+    Expands        = 'settings'
+}
+Get-AdoCheckConfiguration @params -Verbose
+```
+
+Retrieves check configurations for the specified environment ID filtered by the 'approval' definition type.
+
+### EXAMPLE 5
+
 #### PowerShell
 
 ```powershell
@@ -108,9 +132,9 @@ $params = @{
 Get-AdoCheckConfiguration @params -Verbose
 ```
 
-Retrieves check configurations for the specified environment filtered by the 'approval' definition type.
+Retrieves check configurations for the specified environment name filtered by the 'approval' definition type.
 
-### EXAMPLE 5
+### EXAMPLE 6
 
 #### PowerShell
 
@@ -223,6 +247,29 @@ AcceptedValues: []
 HelpMessage: ''
 ```
 
+### -ResourceId
+
+Mandatory.
+The ID of the resource to filter the results.
+If not provided, the function will attempt to resolve it based on the ResourceType and ResourceName.
+
+```yaml
+Type: System.String
+DefaultValue: ''
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: ConfigurationListByResourceId
+  Position: Named
+  IsRequired: true
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
 ### -DefinitionType
 
 Optional.
@@ -234,6 +281,12 @@ DefaultValue: ''
 SupportsWildcards: false
 Aliases: []
 ParameterSets:
+- Name: ConfigurationListByResourceId
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
 - Name: ConfigurationList
   Position: Named
   IsRequired: false

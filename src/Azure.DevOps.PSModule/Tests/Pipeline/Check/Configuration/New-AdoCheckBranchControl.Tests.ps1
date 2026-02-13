@@ -56,7 +56,7 @@ Describe 'New-AdoCheckBranchControl' {
 
         It 'Should accept resource names via pipeline' {
             # Act
-            $result = 'TestEnvironment' | New-AdoCheckBranchControl -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -ResourceType 'environment' -Confirm:$false
+            $result = [PSCustomObject]@{ ResourceName = 'TestEnvironment' } | New-AdoCheckBranchControl -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -ResourceType 'environment' -Confirm:$false
 
             # Assert
             $result | Should -Not -BeNullOrEmpty
@@ -107,6 +107,57 @@ Describe 'New-AdoCheckBranchControl' {
 
             # Act & Assert
             { New-AdoCheckBranchControl -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -ResourceType 'environment' -ResourceName 'TestEnvironment' -Confirm:$false } | Should -Throw '*Unauthorized*'
+        }
+    }
+
+    Context 'ParameterSet Tests - ResourceId' {
+        BeforeEach {
+            Mock -ModuleName Azure.DevOps.PSModule Get-AdoCheckConfiguration { return @() }
+            Mock -ModuleName Azure.DevOps.PSModule Invoke-AdoRestMethod { return $mockCreatedConfiguration }
+            Mock -ModuleName Azure.DevOps.PSModule Confirm-Default { }
+        }
+
+        It 'Should create branch control check using ResourceId parameter' {
+            # Act
+            $result = New-AdoCheckBranchControl -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -ResourceType 'environment' -ResourceId '12345' -Confirm:$false
+
+            # Assert
+            $result | Should -Not -BeNullOrEmpty
+            $result.id | Should -Be 1
+            Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1
+        }
+
+        It 'Should NOT call Get-AdoEnvironment when ResourceId is provided' {
+            # Arrange
+            Mock -ModuleName Azure.DevOps.PSModule Get-AdoEnvironment { return $mockEnvironment }
+
+            # Act
+            New-AdoCheckBranchControl -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -ResourceType 'environment' -ResourceId '12345' -Confirm:$false
+
+            # Assert
+            Should -Invoke Get-AdoEnvironment -ModuleName Azure.DevOps.PSModule -Times 0
+        }
+
+        It 'Should accept ResourceId via pipeline' {
+            # Act
+            $result = [PSCustomObject]@{ ResourceId = '12345' } | New-AdoCheckBranchControl -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -ResourceType 'environment' -Confirm:$false
+
+            # Assert
+            $result | Should -Not -BeNullOrEmpty
+        }
+
+        It 'Should work with ResourceId and custom parameters' {
+            # Act
+            $result = New-AdoCheckBranchControl -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -DisplayName 'Custom Control' -ResourceType 'environment' -ResourceId '12345' -AllowedBranches @('refs/heads/develop', 'refs/heads/feature/*') -EnsureProtectionOfBranch $false -AllowUnknownStatusBranches $true -Timeout 720 -Confirm:$false
+
+            # Assert
+            $result | Should -Not -BeNullOrEmpty
+            Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1
+        }
+
+        It 'Should throw error when both ResourceName and ResourceId are provided' {
+            # Act & Assert
+            { New-AdoCheckBranchControl -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -ResourceType 'environment' -ResourceName 'TestEnvironment' -ResourceId '12345' -Confirm:$false } | Should -Throw
         }
     }
 }

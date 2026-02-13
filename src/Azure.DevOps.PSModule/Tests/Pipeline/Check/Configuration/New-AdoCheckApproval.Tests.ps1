@@ -68,7 +68,7 @@ Describe 'New-AdoCheckApproval' {
             $approvers = @(@{ id = '00000000-0000-0000-0000-000000000001' })
 
             # Act
-            $result = 'TestEnvironment' | New-AdoCheckApproval -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -Approvers $approvers -ResourceType 'environment' -Confirm:$false
+            $result = [PSCustomObject]@{ ResourceName = 'TestEnvironment' } | New-AdoCheckApproval -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -Approvers $approvers -ResourceType 'environment' -Confirm:$false
 
             # Assert
             $result | Should -Not -BeNullOrEmpty
@@ -131,6 +131,71 @@ Describe 'New-AdoCheckApproval' {
 
             # Act & Assert
             { New-AdoCheckApproval -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -Approvers $approvers -ResourceType 'environment' -ResourceName 'TestEnvironment' -Confirm:$false } | Should -Throw '*Unauthorized*'
+        }
+    }
+
+    Context 'ParameterSet Tests - ResourceId' {
+        BeforeEach {
+            Mock -ModuleName Azure.DevOps.PSModule Resolve-AdoDefinitionRef { return $mockDefinitionRef }
+            Mock -ModuleName Azure.DevOps.PSModule Get-AdoCheckConfiguration { return @{ value = @() } }
+            Mock -ModuleName Azure.DevOps.PSModule Invoke-AdoRestMethod { return $mockCreatedConfiguration }
+            Mock -ModuleName Azure.DevOps.PSModule Confirm-Default { }
+        }
+
+        It 'Should create approval check using ResourceId parameter' {
+            # Arrange
+            $approvers = @(@{ id = '00000000-0000-0000-0000-000000000001' })
+
+            # Act
+            $result = New-AdoCheckApproval -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -Approvers $approvers -ResourceType 'environment' -ResourceId '12345' -Confirm:$false
+
+            # Assert
+            $result | Should -Not -BeNullOrEmpty
+            $result.id | Should -Be 1
+            Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1
+        }
+
+        It 'Should NOT call Get-AdoEnvironment when ResourceId is provided' {
+            # Arrange
+            $approvers = @(@{ id = '00000000-0000-0000-0000-000000000001' })
+            Mock -ModuleName Azure.DevOps.PSModule Get-AdoEnvironment { return $mockEnvironment }
+
+            # Act
+            New-AdoCheckApproval -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -Approvers $approvers -ResourceType 'environment' -ResourceId '12345' -Confirm:$false
+
+            # Assert
+            Should -Invoke Get-AdoEnvironment -ModuleName Azure.DevOps.PSModule -Times 0
+        }
+
+        It 'Should accept ResourceId via pipeline' {
+            # Arrange
+            $approvers = @(@{ id = '00000000-0000-0000-0000-000000000001' })
+
+            # Act
+            $result = [PSCustomObject]@{ ResourceId = '12345' } | New-AdoCheckApproval -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -Approvers $approvers -ResourceType 'environment' -Confirm:$false
+
+            # Assert
+            $result | Should -Not -BeNullOrEmpty
+        }
+
+        It 'Should work with ResourceId and all optional parameters' {
+            # Arrange
+            $approvers = @(@{ id = '00000000-0000-0000-0000-000000000001' }, @{ id = '00000000-0000-0000-0000-000000000002' })
+
+            # Act
+            $result = New-AdoCheckApproval -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -Approvers $approvers -ResourceType 'environment' -ResourceId '12345' -DefinitionType 'postCheckApproval' -Instructions 'Post-deployment approval' -MinRequiredApprovers 2 -ExecutionOrder 'inSequence' -RequesterCannotBeApprover $true -Timeout 2880 -Confirm:$false
+
+            # Assert
+            $result | Should -Not -BeNullOrEmpty
+            Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1
+        }
+
+        It 'Should throw error when both ResourceName and ResourceId are provided' {
+            # Arrange
+            $approvers = @(@{ id = '00000000-0000-0000-0000-000000000001' })
+
+            # Act & Assert
+            { New-AdoCheckApproval -CollectionUri 'https://dev.azure.com/my-org' -ProjectName 'TestProject' -Approvers $approvers -ResourceType 'environment' -ResourceName 'TestEnvironment' -ResourceId '12345' -Confirm:$false } | Should -Throw
         }
     }
 }

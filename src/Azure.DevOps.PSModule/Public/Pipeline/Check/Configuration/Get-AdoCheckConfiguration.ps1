@@ -19,6 +19,9 @@
     .PARAMETER ResourceName
         Mandatory. The name of the resource to filter the results.
 
+    .PARAMETER ResourceId
+        Mandatory. The ID of the resource to filter the results. If not provided, the function will attempt to resolve it based on the ResourceType and ResourceName.
+
     .PARAMETER DefinitionType
         Optional. The type(s) of check definitions to filter the results.
         Valid values are 'approval', 'preCheckApproval', 'postCheckApproval', 'branchControl', and 'businessHours'.
@@ -74,13 +77,26 @@
             CollectionUri  = 'https://dev.azure.com/my-org'
             ProjectName    = 'my-project-1'
             ResourceType   = 'environment'
+            ResourceId     = '00000000-0000-0000-0000-000000000100'
+            DefinitionType = 'approval'
+            Expands        = 'settings'
+        }
+        Get-AdoCheckConfiguration @params -Verbose
+
+        Retrieves check configurations for the specified environment ID filtered by the 'approval' definition type.
+
+    .EXAMPLE
+        $params = @{
+            CollectionUri  = 'https://dev.azure.com/my-org'
+            ProjectName    = 'my-project-1'
+            ResourceType   = 'environment'
             ResourceName   = 'my-environment-tst'
             DefinitionType = 'approval'
             Expands        = 'settings'
         }
         Get-AdoCheckConfiguration @params -Verbose
 
-        Retrieves check configurations for the specified environment filtered by the 'approval' definition type.
+        Retrieves check configurations for the specified environment name filtered by the 'approval' definition type.
 
     .EXAMPLE
         $params = @{
@@ -106,13 +122,18 @@
         [string]$ProjectName = $env:DefaultAdoProject,
 
         [Parameter(Mandatory, ValueFromPipelineByPropertyName, ParameterSetName = 'ConfigurationList')]
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName, ParameterSetName = 'ConfigurationListByResourceId')]
         [ValidateSet('endpoint', 'environment', 'variablegroup', 'repository')]
         [string]$ResourceType,
 
         [Parameter(Mandatory, ValueFromPipelineByPropertyName, ValueFromPipeline, ParameterSetName = 'ConfigurationList')]
         [string]$ResourceName,
 
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName, ParameterSetName = 'ConfigurationListByResourceId')]
+        [string]$ResourceId,
+
         [Parameter(ValueFromPipelineByPropertyName, ParameterSetName = 'ConfigurationList')]
+        [Parameter(ValueFromPipelineByPropertyName, ParameterSetName = 'ConfigurationListByResourceId')]
         [ValidateSet('approval', 'preCheckApproval', 'postCheckApproval', 'branchControl', 'businessHours')]
         [string[]]$DefinitionType,
 
@@ -135,6 +156,7 @@
         Write-Debug ("ProjectName: $ProjectName")
         Write-Debug ("ResourceType: $ResourceType")
         Write-Debug ("ResourceName: $ResourceName")
+        Write-Debug ("ResourceId: $ResourceId")
         Write-Debug ("Expands: $Expands")
         Write-Debug ("ApiVersion: $Version")
 
@@ -152,24 +174,24 @@
             if ($id) {
                 $uri = "$CollectionUri/$ProjectName/_apis/pipelines/checks/configurations/$id"
             } else {
-                $resourceId = $null
-
-                switch ($ResourceType) {
-                    'environment' {
-                        $typeParams = @{
-                            CollectionUri = $CollectionUri
-                            ProjectName   = $ProjectName
-                            Name          = $ResourceName
+                if (-not $ResourceId) {
+                    switch ($ResourceType) {
+                        'environment' {
+                            $typeParams = @{
+                                CollectionUri = $CollectionUri
+                                ProjectName   = $ProjectName
+                                Name          = $ResourceName
+                            }
+                            $ResourceId = (Get-AdoEnvironment @typeParams).Id
                         }
-                        $resourceId = (Get-AdoEnvironment @typeParams).Id
-                    }
-                    default {
-                        Write-Warning "ResourceType '$ResourceType' is not supported yet."
-                        return
+                        default {
+                            Write-Warning "ResourceType '$ResourceType' is not supported yet."
+                            return
+                        }
                     }
                 }
 
-                if (-not $resourceId) {
+                if (-not $ResourceId) {
                     return
                 }
 
@@ -188,8 +210,8 @@
                 if ($ResourceType) {
                     $QueryParameters.Add("resourceType=$ResourceType")
                 }
-                if ($resourceId) {
-                    $QueryParameters.Add("resourceId=$resourceId")
+                if ($ResourceId) {
+                    $QueryParameters.Add("resourceId=$ResourceId")
                 }
             }
 

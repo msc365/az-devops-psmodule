@@ -63,7 +63,24 @@
         }
         New-AdoCheckBusinessHours @params
 
-        Creates a new business hours check in the specified project using the provided parameters.
+        Creates a new business hours check for the specified environment name with default parameters.
+
+    .EXAMPLE
+        $params = @{
+            CollectionUri = 'https://dev.azure.com/my-org'
+            ProjectName   = 'my-project-1'
+            DisplayName   = 'Business Hours'
+            ResourceType  = 'environment'
+            ResourceId    = '00000000-0000-0000-0000-000000000100'
+            BusinessDays  = @('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday')
+            TimeZone      = 'UTC'
+            StartTime     = '04:00'
+            EndTime       = '11:00'
+            Timeout       = 1440
+        }
+        New-AdoCheckBusinessHours @params
+
+        Creates a new business hours check for the specified environment ID with default parameters.
     #>
     [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseSingularNouns', 'New-AdoCheckBusinessHours')]
     [CmdletBinding(SupportsShouldProcess)]
@@ -83,8 +100,11 @@
         [ValidateSet('endpoint', 'environment', 'variablegroup', 'repository')]
         [string]$ResourceType,
 
-        [Parameter(Mandatory, ValueFromPipelineByPropertyName, ValueFromPipeline)]
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName, ParameterSetName = 'ByResourceName')]
         [string]$ResourceName,
+
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName, ParameterSetName = 'ByResourceId')]
+        [string]$ResourceId,
 
         [Parameter()]
         [ValidateSet('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday')]
@@ -280,18 +300,20 @@
                 Method  = 'POST'
             }
 
-            # Get resource ID
-            switch ($ResourceType) {
-                'environment' {
-                    $typeParams = @{
-                        CollectionUri = $CollectionUri
-                        ProjectName   = $ProjectName
-                        Name          = $ResourceName
+            # Get resource ID, if not provided
+            if (-not $ResourceId) {
+                switch ($ResourceType) {
+                    'environment' {
+                        $typeParams = @{
+                            CollectionUri = $CollectionUri
+                            ProjectName   = $ProjectName
+                            Name          = $ResourceName
+                        }
+                        $ResourceId = (Get-AdoEnvironment @typeParams).Id
                     }
-                    $resourceId = (Get-AdoEnvironment @typeParams).Id
-                }
-                default {
-                    throw "ResourceType '$ResourceType' is not supported yet."
+                    default {
+                        throw "ResourceType '$ResourceType' is not supported yet."
+                    }
                 }
             }
 
@@ -319,7 +341,7 @@
                 timeout  = $Timeout
                 resource = @{
                     type = $ResourceType
-                    id   = $resourceId
+                    id   = $ResourceId
                 }
             }
 
@@ -328,7 +350,7 @@
                     # Check if configuration already exists with the same inputs
                     $exists = [PSCustomObject]@{
                         ResourceType = $ResourceType
-                        ResourceName = $ResourceName
+                        ResourceId   = $ResourceId
                         Expands      = 'settings'
                     } | Get-AdoCheckConfiguration -CollectionUri $CollectionUri -ProjectName $ProjectName
 
@@ -359,7 +381,7 @@
                         [PSCustomObject]$obj
 
                     } else {
-                        Write-Warning "$DisplayName already exists for $ResourceType with $ResourceName, returning existing one"
+                        Write-Warning "$DisplayName already exists for $ResourceType with ID $ResourceId, returning existing one"
 
                         $obj = [ordered]@{
                             id = $exists.id
