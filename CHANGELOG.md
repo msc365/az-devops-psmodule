@@ -19,7 +19,18 @@ All notable changes to this project will be documented in this file.
 
 <br> -->
 
-## [0.4.0]
+
+## [UNRELEASED]
+
+### What's Changed
+- new(Get-AdoUser): Add user support (#)
+
+### Breaking Changes
+- _None_
+
+<br>
+
+## [0.4.0] - 2026-02-13
 
 ### Summary
 Feature release adding repository initialization support, enhanced user entitlement data, and improved check/approval resource management.
