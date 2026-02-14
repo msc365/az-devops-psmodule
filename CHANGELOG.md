@@ -25,7 +25,7 @@ All notable changes to this project will be documented in this file.
 - _None_
 
 ### What's Changed
-- feat(Get-AdoGroup): Add `domain` property to output
+- feat(Get-AdoGroup): Add `domain` property to output (#126)
 
 ### Breaking Changes
 - _None_
