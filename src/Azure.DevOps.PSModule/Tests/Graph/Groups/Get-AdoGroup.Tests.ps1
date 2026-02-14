@@ -18,24 +18,26 @@ Describe 'Get-AdoGroup' {
         $mockScopeDescriptor = 'scp.00000000-0000-0000-0000-000000000002'
 
         $mockGroup1 = [PSCustomObject]@{
-            displayName   = 'Project Administrators'
-            originId      = '00000000-0000-0000-0000-000000000001'
-            principalName = '[TestProject]\Project Administrators'
-            origin        = 'vsts'
             subjectKind   = 'group'
             description   = 'Admin group'
-            mailAddress   = ''
+            domain        = 'vstfs://Classification/TeamProject/00000000-0000-0000-0000-000000000001'
+            principalName = '[TestProject]\Project Administrators'
+            mailAddress   = $null
+            origin        = 'vsts'
+            originId      = '00000000-0000-0000-0000-000000000001'
+            displayName   = 'Project Administrators'
             descriptor    = 'vssgp.00000000-0000-0000-0000-000000000001'
         }
 
         $mockGroup2 = [PSCustomObject]@{
-            displayName   = 'Contributors'
-            originId      = '00000000-0000-0000-0000-000000000002'
-            principalName = '[TestProject]\Contributors'
-            origin        = 'vsts'
             subjectKind   = 'group'
             description   = 'Contributor group'
-            mailAddress   = ''
+            domain        = 'vstfs://Classification/TeamProject/00000000-0000-0000-0000-000000000002'
+            principalName = '[TestProject]\Contributors'
+            mailAddress   = $null
+            origin        = 'vsts'
+            originId      = '00000000-0000-0000-0000-000000000002'
+            displayName   = 'Contributors'
             descriptor    = 'vssgp.00000000-0000-0000-0000-000000000002'
         }
 
@@ -66,11 +68,14 @@ Describe 'Get-AdoGroup' {
             $result = Get-AdoGroup -CollectionUri $mockCollectionUri
 
             # Assert
-            $result[0].PSObject.Properties.Name | Should -Contain 'displayName'
-            $result[0].PSObject.Properties.Name | Should -Contain 'originId'
-            $result[0].PSObject.Properties.Name | Should -Contain 'principalName'
-            $result[0].PSObject.Properties.Name | Should -Contain 'origin'
             $result[0].PSObject.Properties.Name | Should -Contain 'subjectKind'
+            $result[0].PSObject.Properties.Name | Should -Contain 'description'
+            $result[0].PSObject.Properties.Name | Should -Contain 'domain'
+            $result[0].PSObject.Properties.Name | Should -Contain 'principalName'
+            $result[0].PSObject.Properties.Name | Should -Contain 'mailAddress'
+            $result[0].PSObject.Properties.Name | Should -Contain 'origin'
+            $result[0].PSObject.Properties.Name | Should -Contain 'originId'
+            $result[0].PSObject.Properties.Name | Should -Contain 'displayName'
             $result[0].PSObject.Properties.Name | Should -Contain 'descriptor'
             $result[0].PSObject.Properties.Name | Should -Contain 'collectionUri'
         }

@@ -22,7 +22,7 @@
         Optional. The descriptor of a specific group to retrieve. When provided, retrieves a single group by its descriptor.
 
     .PARAMETER Version
-        The API version to use. Default is '7.2-preview.1'.
+        The API version to use for the request. Default is '7.2-preview.1'.
         The -preview flag must be supplied in the api-version for this request to work.
 
     .OUTPUTS
@@ -38,7 +38,7 @@
         - `originId`: The unique identifier from the system of origin. Typically a sid, object id or Guid. Linking and unlinking operations can cause this value to change for a user because the user is not backed by a different provider and has a different unique id in the new provider.
         - `displayName`: This is the non-unique display name of the graph subject. To change this field, you must alter its value in the source provider.
         - `descriptor`: The descriptor is the primary way to reference the graph subject while the system is running. This field will uniquely identify the same graph subject across both Accounts and Organizations.
-        - `collectionUri`: The collection URI.
+        - `collectionUri`: The collection URI used for the query.
 
     .LINK
         - https://learn.microsoft.com/en-us/rest/api/azure/devops/graph/groups/get
@@ -54,7 +54,7 @@
         $projectDescriptor = (Get-AdoDescriptor -StorageKey $project.Id)
 
         $params = @{
-            CollectionUri = 'https://dev.azure.com/my-org'
+            CollectionUri   = 'https://dev.azure.com/my-org'
             ScopeDescriptor = $projectDescriptor
             SubjectTypes    = 'vssgp'
         }
