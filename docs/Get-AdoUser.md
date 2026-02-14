@@ -2,9 +2,9 @@
 document type: cmdlet
 external help file: Azure.DevOps.PSModule-Help.xml
 HelpUri: https://learn.microsoft.com/en-us/rest/api/azure/devops/graph/users/list
-Locale: en-NL
+Locale: nl-NL
 Module Name: Azure.DevOps.PSModule
-ms.date: 01/02/2026
+ms.date: 02-14-2026
 PlatyPS schema version: 2024-05-01
 title: Get-AdoUser
 -->
@@ -20,12 +20,18 @@ Get a single or multiple users in an Azure DevOps organization.
 
 ## SYNTAX
 
-### __AllParameterSets
+### ListUsers (Default)
 
-```text
-Get-AdoUser [[-CollectionUri] <string>] [[-ScopeDescriptor] <string>] [[-SubjectTypes] <string[]>]
- [[-Name] <string[]>] [[-UserDescriptor] <string>] [[-Version] <string>]
- [-WhatIf] [-Confirm] [<CommonParameters>]
+```powershell
+Get-AdoUser [-CollectionUri <string>] [-ScopeDescriptor <string>] [-SubjectTypes <string[]>]
+ [-Name <string[]>] [-Version <string>] [<CommonParameters>]
+```
+
+### ByDescriptor
+
+```powershell
+Get-AdoUser [-CollectionUri <string>] [-UserDescriptor <string>] [-Version <string>]
+ [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -58,42 +64,24 @@ $project = Get-AdoProject -Name 'my-project-1'
 $projectDescriptor = (Get-AdoDescriptor -StorageKey $project.Id)
 
 $params = @{
-    CollectionUri = 'https://dev.azure.com/my-org'
+    CollectionUri   = 'https://dev.azure.com/my-org'
     ScopeDescriptor = $projectDescriptor
-    SubjectTypes    = 'vssgp'
+    SubjectTypes    = 'aad'
 }
 Get-AdoUser @params
 ```
 
-Retrieves all users in the specified project with subject types 'vssgp'.
+Retrieves all users in the specified project with subject types 'aad'.
 
 ### EXAMPLE 3
 
 #### PowerShell
 
 ```powershell
-$params = @{
-    SubjectTypes    = 'vssgp'
-    ScopeDescriptor = $prjDscr
-    Name            = @(
-        'Project Administrators',
-        'Contributors'
-    )
-}
-Get-AdoUser @params
-```
-
-Retrieves the 'Project Administrators' and 'Contributors' users in the specified scope with subject types 'vssgp'.
-
-### EXAMPLE 4
-
-#### PowerShell
-
-```powershell
 @(
-    'vssgp.00000000-0000-0000-0000-000000000000',
-    'vssgp.00000000-0000-0000-0000-000000000001',
-    'vssgp.00000000-0000-0000-0000-000000000002'
+    'aad.00000000-0000-0000-0000-000000000000',
+    'aad.00000000-0000-0000-0000-000000000001',
+    'aad.00000000-0000-0000-0000-000000000002'
 ) | Get-AdoUser
 ```
 
@@ -123,6 +111,30 @@ AcceptedValues: []
 HelpMessage: ''
 ```
 
+### -Name
+
+Optional.
+A user's display name to filter the retrieved results.
+
+```yaml
+Type: System.String[]
+DefaultValue: ''
+SupportsWildcards: false
+Aliases:
+- DisplayName
+- UserName
+ParameterSets:
+- Name: ListUsers
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
 ### -ScopeDescriptor
 
 Optional.
@@ -134,7 +146,7 @@ DefaultValue: ''
 SupportsWildcards: false
 Aliases: []
 ParameterSets:
-- Name: (All)
+- Name: ListUsers
   Position: Named
   IsRequired: false
   ValueFromPipeline: false
@@ -148,42 +160,16 @@ HelpMessage: ''
 ### -SubjectTypes
 
 Optional.
-A comma separated list of user subject subtypes to reduce the retrieved results, e.g. Microsoft.IdentityModel.Claims.ClaimsIdentity
+A comma separated list of user subject subtypes to reduce the retrieved results, e.g.
+'msa', 'aad', 'svc' (service identity), 'imp' (imported identity), etc.
 
 ```yaml
 Type: System.String[]
-DefaultValue: ('vssgp', 'aadgp')
+DefaultValue: "@('msa', 'aad', 'svc', 'imp')"
 SupportsWildcards: false
 Aliases: []
 ParameterSets:
-- Name: (All)
-  Position: Named
-  IsRequired: false
-  ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: true
-  ValueFromRemainingArguments: false
-DontShow: false
-AcceptedValues:
-- vssgp
-- aadgp
-HelpMessage: ''
-```
-
-### -Name
-
-Optional.
-A user's display name to filter the retrieved results.
-Supports wildcards for pattern matching.
-
-```yaml
-Type: System.String[]
-DefaultValue: ''
-SupportsWildcards: false
-Aliases:
-- DisplayName
-- userName
-ParameterSets:
-- Name: Listusers
+- Name: ListUsers
   Position: Named
   IsRequired: false
   ValueFromPipeline: false
@@ -260,22 +246,23 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ### PSCustomObject
 
 Returns one or more user objects with the following properties:
-- displayName: The display name of the user
-- originId: The origin ID of the user
-- principalName: The principal name of the user
-- origin: The origin of the user (e.g., 'aad', 'vsts')
-- subjectKind: The subject kind (e.g., 'user')
-- description: The description of the user
-- mailAddress: The mail address of the user
-- descriptor: The descriptor of the user
-- collectionUri: The collection URI used for the query
-- continuationToken: (Optional) Token for retrieving the next page of results
+- `subjectKind`: This field identifies the type of the graph subject (ex: Group, Scope, User).
+- `directoryAlias`: The short, generally unique name for the user in the backing directory. For AAD users, this corresponds to the mail nickname, which is often but not necessarily similar to the part of the user's mail address before the @ sign. For GitHub users, this corresponds to the GitHub user handle.
+- `domain`: This represents the name of the container of origin for a graph member. (For MSA this is "Windows Live ID", for AD the name of the domain, for AAD the tenantID of the directory, for VSTS groups the ScopeId, etc)
+- `principalName`: This is the PrincipalName of this graph member from the source provider. The source provider may change this field over time and it is not guaranteed to be immutable for the life of the graph member by VSTS.
+- `mailAddress`: The email address of record for a given graph member. This may be different than the principal name.
+- `origin`: The type of source provider for the origin identifier (ex:AD, AAD, MSA)
+- `originId`: The unique identifier from the system of origin. Typically a sid, object id or Guid. Linking and unlinking operations can cause this value to change for a user because the user is not backed by a different provider and has a different unique id in the new provider.
+- `displayName`: This is the non-unique display name of the graph subject. To change this field, you must alter its value in the source provider.
+- `descriptor`: The descriptor is the primary way to reference the graph subject while the system is running. This field will uniquely identify the same graph subject across both Accounts and Organizations.
+- `metaType`: The meta type of the user in the origin, such as "member", "guest", etc. See UserMetaType for the set of possible values.
+- `isDeletedInOrigin`: When true, the group has been deleted in the identity provider
+- `collectionUri`: The collection URI.
 
 ## NOTES
 
-- Retrieves users in an Azure DevOps organization
-- Requires authentication to Azure DevOps. Use `Set-AdoDefault` to configure default organization and project values.
-- The cmdlet automatically retrieves authentication through `Invoke-AdoRestMethod` which calls `New-AdoAuthHeader`.
+Retrieves users in an Azure DevOps organization.
+
 
 ## RELATED LINKS
 

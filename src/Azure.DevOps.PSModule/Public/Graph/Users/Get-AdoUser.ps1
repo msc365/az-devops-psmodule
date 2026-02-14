@@ -19,10 +19,10 @@
         Optional. A user's display name to filter the retrieved results.
 
     .PARAMETER UserDescriptor
-        Optional. The descriptor of the desired user.
+        Optional. The descriptor of a specific user to retrieve. When provided, retrieves a single user by its descriptor.
 
     .PARAMETER Version
-        The API version to use. Default is '7.2-preview.1'.
+        The API version to use for the request. Default is '7.2-preview.1'.
         The -preview flag must be supplied in the api-version for this request to work.
 
     .OUTPUTS

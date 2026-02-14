@@ -23,7 +23,7 @@ All notable changes to this project will be documented in this file.
 ## [UNRELEASED]
 
 ### What's Changed
-- new(Get-AdoUser): Add user support (#)
+- new(Get-AdoUser): Add user support (#124)
 
 ### Breaking Changes
 - _None_
