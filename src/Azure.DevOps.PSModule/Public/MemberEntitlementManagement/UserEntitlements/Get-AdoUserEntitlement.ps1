@@ -29,9 +29,9 @@
         Optional. Version of the API to use. Default is '7.1'.
 
     .OUTPUTS
-        System.Collections.Specialized.OrderedDictionary
+        PSCustomObject
 
-        The dictionary contains user entitlements:
+        Returns one or more user entitlement objects with the following properties:
         - `accessLevel`: User's access level denoted by a license.
         - `extensions`: User's extensions.
         - `groupAssigments`: [Readonly] GroupEntitlements that this user belongs to.

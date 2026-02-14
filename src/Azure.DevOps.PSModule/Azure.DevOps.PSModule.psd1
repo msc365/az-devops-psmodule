@@ -94,6 +94,7 @@
         'Get-AdoTeamIteration'
         'Get-AdoTeamIterationList'
         'Get-AdoTeamSettings'
+        'Get-AdoUser'
         'Get-AdoUserEntitlement'
         'New-AdoCheckApproval'
         'New-AdoCheckBranchControl'
