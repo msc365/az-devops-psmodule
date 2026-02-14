@@ -22,6 +22,9 @@ All notable changes to this project will be documented in this file.
 
 ## [UNRELEASED]
 
+### Summary
+- _None_
+
 ### What's Changed
 - feat(Get-AdoUser): Add user support (#124)
 
@@ -40,6 +43,7 @@ Feature release adding repository initialization support, enhanced user entitlem
 - feat: Add `ResourceId` parameter to all Check and Approval cmdlets
 - feat: Add `New-AdoPushInitialCommit` cmdlet for creating initial commits in Azure DevOps repositories
 - chore: Using namespace `System.Collections.Generic` declaration at the module root
+- chore(Build.ps1): Update module version to 0.4.0
 
 ### Breaking Changes
 - _None_
@@ -86,7 +90,6 @@ Hotfix release focused on bug fixes and code quality improvements. Achieved 100%
 - fix: Update property names in test assertions for in `Add-AdoTeamIteration` and `Get-AdoTeamIteration` cmdlets (#103)
 - chore: Update CHANGELOG to reflect recent changes and fixes
 - chore: Update build version to 0.2.3
-
 
 ### Breaking Changes
 - With the output names update in `Add-AdoTeamIteration` and `Get-AdoTeamIteration` cmdlets the output names `team` and `project` are not available anymore, use `teamName` and `projectName` instead.
