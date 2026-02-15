@@ -253,7 +253,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ### PSCustomObject
 
-Returns one or more user entitlement objects with the following properties:
+The dictionary contains user entitlements:
 - `accessLevel`: User's access level denoted by a license.
 - `extensions`: User's extensions.
 - `groupAssigments`: [Readonly] GroupEntitlements that this user belongs to.
