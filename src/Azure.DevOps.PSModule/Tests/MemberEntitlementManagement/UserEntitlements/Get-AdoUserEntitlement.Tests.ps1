@@ -215,10 +215,10 @@ Describe 'Get-AdoUserEntitlement' {
             Mock -ModuleName Azure.DevOps.PSModule Confirm-Default { }
         }
 
-        It 'Should warn when user does not exist (MemberNotFoundException)' {
-            $exception = New-Object System.Management.Automation.RuntimeException('MemberNotFoundException: User not found')
-            $errorRecord = New-Object System.Management.Automation.ErrorRecord($exception, 'UserNotFound', 'ObjectNotFound', $null)
-            $errorRecord.ErrorDetails = New-Object System.Management.Automation.ErrorDetails('MemberNotFoundException: User not found')
+        It 'Should warn when user entitlement does not exist (UserEntitlementNotFoundException)' {
+            $exception = New-Object System.Management.Automation.RuntimeException('UserEntitlementNotFoundException: User entitlement not found')
+            $errorRecord = New-Object System.Management.Automation.ErrorRecord($exception, 'UserEntitlementNotFoundException', 'ObjectNotFound', $null)
+            $errorRecord.ErrorDetails = New-Object System.Management.Automation.ErrorDetails('UserEntitlementNotFoundException: User entitlement not found')
 
             Mock -ModuleName Azure.DevOps.PSModule Invoke-AdoRestMethod { throw $errorRecord }
 
