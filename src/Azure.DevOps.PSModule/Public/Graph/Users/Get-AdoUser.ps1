@@ -29,18 +29,18 @@
         PSCustomObject
 
         Returns one or more user objects with the following properties:
-        - `subjectKind`: This field identifies the type of the graph subject (ex: Group, Scope, User).
-        - `directoryAlias`: The short, generally unique name for the user in the backing directory. For AAD users, this corresponds to the mail nickname, which is often but not necessarily similar to the part of the user's mail address before the @ sign. For GitHub users, this corresponds to the GitHub user handle.
-        - `domain`: This represents the name of the container of origin for a graph member. (For MSA this is "Windows Live ID", for AD the name of the domain, for AAD the tenantID of the directory, for VSTS groups the ScopeId, etc)
-        - `principalName`: This is the PrincipalName of this graph member from the source provider. The source provider may change this field over time and it is not guaranteed to be immutable for the life of the graph member by VSTS.
-        - `mailAddress`: The email address of record for a given graph member. This may be different than the principal name.
-        - `origin`: The type of source provider for the origin identifier (ex:AD, AAD, MSA)
-        - `originId`: The unique identifier from the system of origin. Typically a sid, object id or Guid. Linking and unlinking operations can cause this value to change for a user because the user is not backed by a different provider and has a different unique id in the new provider.
-        - `displayName`: This is the non-unique display name of the graph subject. To change this field, you must alter its value in the source provider.
-        - `descriptor`: The descriptor is the primary way to reference the graph subject while the system is running. This field will uniquely identify the same graph subject across both Accounts and Organizations.
-        - `metaType`: The meta type of the user in the origin, such as "member", "guest", etc. See UserMetaType for the set of possible values.
-        - `isDeletedInOrigin`: When true, the group has been deleted in the identity provider
-        - `collectionUri`: The collection URI.
+        - subjectKind: This field identifies the type of the graph subject (ex: Group, Scope, User).
+        - directoryAlias: The short, generally unique name for the user in the backing directory. For AAD users, this corresponds to the mail nickname, which is often but not necessarily similar to the part of the user's mail address before the @ sign. For GitHub users, this corresponds to the GitHub user handle.
+        - domain: This represents the name of the container of origin for a graph member. (For MSA this is "Windows Live ID", for AD the name of the domain, for AAD the tenantID of the directory, for VSTS groups the ScopeId, etc)
+        - principalName: This is the PrincipalName of this graph member from the source provider. The source provider may change this field over time and it is not guaranteed to be immutable for the life of the graph member by VSTS.
+        - mailAddress: The email address of record for a given graph member. This may be different than the principal name.
+        - origin: The type of source provider for the origin identifier (ex:AD, AAD, MSA)
+        - originId: The unique identifier from the system of origin. Typically a sid, object id or Guid. Linking and unlinking operations can cause this value to change for a user because the user is not backed by a different provider and has a different unique id in the new provider.
+        - displayName: This is the non-unique display name of the graph subject. To change this field, you must alter its value in the source provider.
+        - descriptor: The descriptor is the primary way to reference the graph subject while the system is running. This field will uniquely identify the same graph subject across both Accounts and Organizations.
+        - metaType: The meta type of the user in the origin, such as "member", "guest", etc. See UserMetaType for the set of possible values.
+        - isDeletedInOrigin: When true, the group has been deleted in the identity provider
+        - collectionUri: The collection URI.
 
     .LINK
         - https://learn.microsoft.com/en-us/rest/api/azure/devops/graph/users/get
