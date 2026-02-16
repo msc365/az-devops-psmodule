@@ -264,16 +264,16 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ### PSCustomObject
 
 Returns one or more group objects with the following properties:
-- `subjectKind`: This field identifies the type of the graph subject (ex: Group, Scope, User).
-- `description`: A short phrase to help human readers disambiguate groups with similar names
-- `domain`: This represents the name of the container of origin for a graph member. (For MSA this is "Windows Live ID", for AD the name of the domain, for AAD the tenantID of the directory, for VSTS groups the ScopeId, etc)
-- `principalName`: This is the PrincipalName of this graph member from the source provider. The source provider may change this field over time and it is not guaranteed to be immutable for the life of the graph member by VSTS.
-- `mailAddress`: The email address of record for a given graph member. This may be different than the principal name.
-- `origin`: The type of source provider for the origin identifier (ex:AD, AAD, MSA)
-- `originId`: The unique identifier from the system of origin. Typically a sid, object id or Guid. Linking and unlinking operations can cause this value to change for a user because the user is not backed by a different provider and has a different unique id in the new provider.
-- `displayName`: This is the non-unique display name of the graph subject. To change this field, you must alter its value in the source provider.
-- `descriptor`: The descriptor is the primary way to reference the graph subject while the system is running. This field will uniquely identify the same graph subject across both Accounts and Organizations.
-- `collectionUri`: The collection URI used for the query.
+- subjectKind: This field identifies the type of the graph subject (ex: Group, Scope, User).
+- description: A short phrase to help human readers disambiguate groups with similar names
+- domain: This represents the name of the container of origin for a graph member. (For MSA this is "Windows Live ID", for AD the name of the domain, for AAD the tenantID of the directory, for VSTS groups the ScopeId, etc)
+- principalName: This is the PrincipalName of this graph member from the source provider. The source provider may change this field over time and it is not guaranteed to be immutable for the life of the graph member by VSTS.
+- mailAddress: The email address of record for a given graph member. This may be different than the principal name.
+- origin: The type of source provider for the origin identifier (ex:AD, AAD, MSA)
+- originId: The unique identifier from the system of origin. Typically a sid, object id or Guid. Linking and unlinking operations can cause this value to change for a user because the user is not backed by a different provider and has a different unique id in the new provider.
+- displayName: This is the non-unique display name of the graph subject. To change this field, you must alter its value in the source provider.
+- descriptor: The descriptor is the primary way to reference the graph subject while the system is running. This field will uniquely identify the same graph subject across both Accounts and Organizations.
+- collectionUri: The collection URI used for the query.
 
 ## NOTES
 
