@@ -32,14 +32,14 @@
         PSCustomObject
 
         Returns one or more user entitlement objects with the following properties:
-        - `accessLevel`: User's access level denoted by a license.
-        - `extensions`: User's extensions.
-        - `groupAssigments`: [Readonly] GroupEntitlements that this user belongs to.
-        - `id`: The unique identifier which matches the Id of the Identity associated with the GraphMember.
-        - `lastAccessedDate`: [Readonly] Date the user last accessed the collection.
-        - `projectEntitlements`: Relation between a project and the user's effective permissions in that project.
-        - `user`: User reference.
-        - `collectionUri`: The collection URI.
+        - accessLevel: User's access level denoted by a license.
+        - extensions: User's extensions.
+        - groupAssigments: [Readonly] GroupEntitlements that this user belongs to.
+        - id: The unique identifier which matches the Id of the Identity associated with the GraphMember.
+        - lastAccessedDate: [Readonly] Date the user last accessed the collection.
+        - projectEntitlements: Relation between a project and the user's effective permissions in that project.
+        - user: User reference.
+        - collectionUri: The collection URI.
 
     .LINK
         https://learn.microsoft.com/en-us/rest/api/azure/devops/memberentitlementmanagement/user-entitlements/get

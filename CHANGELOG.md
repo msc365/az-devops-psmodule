@@ -25,7 +25,7 @@ All notable changes to this project will be documented in this file.
 - _None_
 
 ### What's Changed
-- fix(Get-AdoUserEntitlement): Corrected error handling (#128)
+- fix(Get-AdoUserEntitlement): Correct error handling (#128)
 
 ### Breaking Changes
 - _None_
