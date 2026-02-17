@@ -464,17 +464,6 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ### PSCustomObject
 
-Returns a custom object representing the business hours check configuration:
-- id: The unique identifier of the check configuration
-- settings: The business hours settings including display name, definition reference, inputs, and retry interval
-- timeout: The timeout value in minutes
-- type: The type of check (Task Check)
-- resource: The resource details (type and id)
-- createdBy: The ID of the user who created the check
-- createdOn: The timestamp when the check was created
-- project: The project name
-- collectionUri: The collection URI
-
 ## NOTES
 
 - When a business hours check with the same configuration already exists, the existing check is returned with a warning

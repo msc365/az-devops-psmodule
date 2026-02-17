@@ -205,14 +205,6 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ### PSCustomObject
 
-Returns a newly created environment object with the following properties:
-- id: The unique identifier of the environment
-- name: The name of the environment
-- createdBy: ID of the user who created the environment
-- createdOn: Date and time when the environment was created
-- projectName: The project name
-- collectionUri: The collection URI
-
 ## NOTES
 
 - Requires authentication to Azure DevOps. Use `Set-AdoDefault` to configure default organization and project values.

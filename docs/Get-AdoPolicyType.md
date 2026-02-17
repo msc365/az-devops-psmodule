@@ -234,13 +234,6 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ### PSCustomObject
 
-Returns a custom object with the following properties:
-- **id**: The unique identifier (GUID) of the policy type
-- **displayName**: The friendly display name of the policy type
-- **description**: A detailed description of what the policy type does
-- **projectName**: The name of the project the policy type belongs to
-- **collectionUri**: The collection URI used for the query
-
 ## NOTES
 
 - Requires authentication to Azure DevOps. Use `Set-AdoDefault` to configure default organization and project values.

@@ -412,17 +412,6 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ### PSCustomObject
 
-Returns a team settings object containing:
-- backlogIteration: The backlog iteration configuration
-- backlogVisibilities: Hashtable of backlog level visibilities (Epic, Feature, Requirement categories)
-- bugsBehavior: How bugs are treated ('off', 'asRequirements', or 'asTasks')
-- defaultIteration: The default iteration configuration
-- defaultIterationMacro: Default iteration macro (e.g., '@currentIteration')
-- workingDays: Array of working days for the team
-- url: API URL for the team settings
-- projectName: The name of the project
-- collectionUri: The collection URI
-
 ## NOTES
 
 - Requires authentication to Azure DevOps. Use `Set-AdoDefault` to configure default organization and project values.

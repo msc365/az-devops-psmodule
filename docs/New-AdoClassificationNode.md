@@ -221,18 +221,6 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ### PSCustomObject
 
-Returns a classification node object representing the created node with the following properties:
-- id: The integer ID of the classification node
-- identifier: The GUID identifier of the classification node
-- name: The name of the classification node
-- structureType: The type of structure (area or iteration)
-- path: The full path of the classification node
-- hasChildren: Boolean indicating if the node has child nodes
-- children: (Optional) Array of child classification nodes if present
-- attributes: (Optional) Additional attributes like startDate and finishDate for iterations
-- projectName: The name of the project
-- collectionUri: The collection URI
-
 ## NOTES
 
 - Requires authentication to Azure DevOps. Use `Set-AdoDefault` to configure default organization and project values.

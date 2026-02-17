@@ -6,6 +6,9 @@
     .DESCRIPTION
         This function removes the default Azure DevOps environment variables from both the current session.
 
+    .OUTPUTS
+        PSCustomObject
+
     .EXAMPLE
         Remove-AdoDefault
 

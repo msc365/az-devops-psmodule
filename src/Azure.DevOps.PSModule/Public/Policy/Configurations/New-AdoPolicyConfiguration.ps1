@@ -20,9 +20,7 @@
         Optional. The API version to use for the request. Default is '7.1'.
 
     .OUTPUTS
-        [PSCustomObject]
-
-        The created policy configuration object.
+        PSCustomObject
 
     .LINK
         https://learn.microsoft.com/en-us/rest/api/azure/devops/policy/configurations/create

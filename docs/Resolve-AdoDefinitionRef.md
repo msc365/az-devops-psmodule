@@ -182,11 +182,6 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ### PSCustomObject
 
-Representing the check definition reference with the following properties:
-- displayName: The display name of the check definition (e.g., 'Approval', 'Branch control')
-- name: The camelCase name of the check definition (e.g., 'approval', 'branchControl')
-- id: The unique identifier GUID of the check definition
-
 ## NOTES
 
 - This function uses a static mapping of Azure DevOps check definition types

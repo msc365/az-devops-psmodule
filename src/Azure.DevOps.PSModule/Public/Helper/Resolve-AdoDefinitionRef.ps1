@@ -25,14 +25,7 @@
         Returns all available check definition references.
 
     .OUTPUTS
-        [PSCustomObject]@{
-            name        = '<Definition Name>'
-            id          = '<Definition ID>'
-            displayName = '<Definition Display Name>'
-        }
-
-        Representing the check definition reference with 'name' and 'id' properties.
-        When using -ListAll, returns an array of all definition reference objects.
+        PSCustomObject
 
     .EXAMPLE
         Resolve-AdoDefinitionRef -Name 'approval'
