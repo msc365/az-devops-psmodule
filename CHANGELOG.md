@@ -22,10 +22,10 @@ All notable changes to this project will be documented in this file.
 ## [0.4.1] - 2026-02-17
 
 ### Summary
-- _None_
+
+Maintenance and new feature release adding user retrieval support, enhanced group output, and improved error handling.
 
 ### What's Changed
-
 - feat(Get-AdoUser): Add user support (#125)
 - feat(Get-AdoGroup): Add `domain` property to output (#127)
 - fix(Get-AdoUserEntitlement): Correct error handling (#129)
@@ -37,6 +37,10 @@ All notable changes to this project will be documented in this file.
 
 ### Breaking Changes
 - _None_
+
+### Contributors
+- [@Antiohne](https://github.com/Antiohne)
+- [@msc365admin](https://github.com/msc365admin)
 
 <br>
 
