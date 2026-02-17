@@ -192,13 +192,6 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ### PSCustomObject
 
-The team field value settings for the specified team with the following properties:
-- defaultValue: The default area path value for the team
-- field: Object containing the field reference name and URL
-- values: Array of area path values with includeChildren settings
-- projectName: The project name used in the request
-- collectionUri: The collection URI used in the request
-
 ## NOTES
 
 - Requires authentication to Azure DevOps. Use `Set-AdoDefault` to configure default organization and project values.

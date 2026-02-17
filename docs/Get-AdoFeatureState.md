@@ -150,14 +150,6 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ### PSCustomObject
 
-Returns a collection of feature state objects, each containing:
-- feature: The feature name (Boards, Repos, Pipelines, TestPlans, Artifacts)
-- featureId: The unique identifier for the feature
-- state: The state as text ('enabled' or 'disabled')
-- projectName: The name of the project
-- projectId: The ID of the project
-- collectionUri: The collection URI
-
 ## NOTES
 
 - Requires authentication to Azure DevOps. Use `Set-AdoDefault` to configure default organization and project values.

@@ -293,17 +293,6 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ### PSCustomObject
 
-Returns one or more project objects with the following properties:
-- id: The unique identifier of the project
-- name: The name of the project
-- description: The description of the project
-- visibility: The visibility of the project (public or private)
-- state: The state of the project (wellFormed, createPending, deleted, etc.)
-- defaultTeam: Information about the default team for the project
-- capabilities: Project capabilities if IncludeCapabilities is specified (source control type, process template, etc.)
-- collectionUri: The collection URI the project belongs to
-- continuationToken: Token for retrieving next page of results (only present when listing projects with pagination)
-
 ## NOTES
 
 - Requires authentication to Azure DevOps. Use `Set-AdoDefault` to configure default organization and project values.

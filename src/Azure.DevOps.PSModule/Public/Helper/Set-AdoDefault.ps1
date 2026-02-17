@@ -6,6 +6,9 @@
     .DESCRIPTION
         This function sets the default Azure DevOps environment variables for the current session.
 
+    .OUTPUTS
+        PSCustomObject
+
     .EXAMPLE
         Set-AdoDefault -Organization 'my-org' -Project 'my-project-1'
 

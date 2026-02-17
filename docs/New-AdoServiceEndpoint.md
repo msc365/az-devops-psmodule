@@ -198,21 +198,6 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ### PSCustomObject
 
-Service endpoint object with the following properties:
-- id: The unique identifier of the service endpoint
-- name: The name of the service endpoint
-- type: The type of service endpoint (e.g., AzureRM, GitHub, Docker)
-- description: The description of the service endpoint
-- authorization: Authorization details including scheme and parameters
-- url: The URL of the service endpoint
-- isShared: Whether the endpoint is shared across projects
-- isReady: Whether the endpoint is ready for use
-- owner: The owner of the endpoint (library or agentcloud)
-- data: Additional data associated with the endpoint
-- serviceEndpointProjectReferences: Project references for the endpoint
-- projectName: The project name extracted from configuration
-- collectionUri: The collection URI
-
 ## NOTES
 
 - The cmdlet extracts the project name from Configuration.serviceEndpointProjectReferences[0].projectReference.name.

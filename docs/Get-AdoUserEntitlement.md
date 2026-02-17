@@ -253,17 +253,6 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ### PSCustomObject
 
-The dictionary contains user entitlements:
-- `accessLevel`: User's access level denoted by a license.
-- `extensions`: User's extensions.
-- `groupAssigments`: [Readonly] GroupEntitlements that this user belongs to.
-- `id`: The unique identifier which matches the Id of the Identity associated with the GraphMember.
-- `dateCreated`: [Readonly] Date the member was added to the collection.
-- `lastAccessedDate`: [Readonly] Date the user last accessed the collection.
-- `projectEntitlements`: Relation between a project and the user's effective permissions in that project.
-- `user`: User reference.
-- `collectionUri`: The collection URI.
-
 ## NOTES
 
 - N/A
