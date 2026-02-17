@@ -164,8 +164,8 @@
                 } while ($continuationToken)
 
             } catch {
-                if ($_.ErrorDetails.Message -match 'MemberNotFoundException') {
-                    Write-Warning "Identity not found with ID $UserId, skipping."
+                if ($_.ErrorDetails.Message -match 'UserEntitlementNotFoundException') {
+                    Write-Warning "User entitlement not found for ID $UserId, skipping."
                 } else {
                     throw $_
                 }
