@@ -10,7 +10,7 @@
         The URI to validate.
 
     .OUTPUTS
-        [bool] Returns $true if the URI is valid; otherwise, throws an error.
+        Boolean
 
     .EXAMPLE
         Confirm-CollectionUri -Uri 'https://dev.azure.com/my-org'

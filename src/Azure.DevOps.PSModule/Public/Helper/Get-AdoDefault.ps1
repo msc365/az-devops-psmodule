@@ -6,6 +6,9 @@
     .DESCRIPTION
         This function gets the default Azure DevOps environment variables from the current session.
 
+    .OUTPUTS
+        PSCustomObject
+
     .EXAMPLE
         Get-AdoDefault
 
