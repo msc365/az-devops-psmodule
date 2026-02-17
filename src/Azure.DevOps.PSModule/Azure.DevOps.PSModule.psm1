@@ -5,19 +5,8 @@ using namespace System.Collections.Generic
 param()
 
 Write-Verbose $PSScriptRoot
-Write-Verbose 'Import all modules in sub folders'
+Write-Verbose 'Import all modules'
 
-# First, load any class definitions from Private folder
-# $classFiles = Get-ChildItem -Path (Join-Path -Path $PSScriptRoot -ChildPath 'Private') -Filter '*Classes.ps1' -ErrorAction SilentlyContinue
-# if ($classFiles) {
-#     Write-Verbose '  Loading class definitions first'
-#     $classFiles | ForEach-Object {
-#         Write-Verbose ('    {0}' -f $_.basename)
-#         . $_.FullName
-#     }
-# }
-
-# Then load all other files
 foreach ($folder in @('Private', 'Public')) {
     $root = Join-Path -Path $PSScriptRoot -ChildPath $folder
 
@@ -29,3 +18,6 @@ foreach ($folder in @('Private', 'Public')) {
         $files | ForEach-Object { Write-Verbose ('    {0}' -f $_.basename); . $_.FullName }
     }
 }
+
+# Export only the functions specified in the module manifest
+Export-ModuleMember -Function * -Alias *
