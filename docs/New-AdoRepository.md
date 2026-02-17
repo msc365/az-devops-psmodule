@@ -191,16 +191,6 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ### PSCustomObject
 
-Returns a custom object with the following properties:
-- id: The unique identifier of the repository
-- name: The name of the repository
-- project: The project object containing repository details
-- defaultBranch: The default branch of the repository
-- url: The URL of the repository
-- remoteUrl: The remote URL for cloning the repository
-- projectName: The name of the project containing the repository
-- collectionUri: The collection URI of the Azure DevOps organization
-
 ## NOTES
 
 - Requires authentication to Azure DevOps. Use `Set-AdoDefault` to configure default organization and project values.

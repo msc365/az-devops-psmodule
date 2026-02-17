@@ -181,15 +181,6 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ### PSCustomObject
 
-Returns a custom object with the following properties:
-- displayName: The display name of the group that was added
-- originId: The Origin ID of the Entra ID group
-- principalName: The principal name of the group
-- origin: The origin source of the group
-- subjectKind: The kind of subject (e.g., group)
-- descriptor: The descriptor of the group that was created/added
-- collectionUri: The collection URI where the operation was performed
-
 ## NOTES
 
 - This cmdlet has a high confirm impact and will prompt for confirmation by default

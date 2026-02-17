@@ -147,11 +147,11 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
-- System.String
+- N/A
 
 ## OUTPUTS
 
-- None. This cmdlet does not generate output.
+- None.
 
 ## NOTES
 

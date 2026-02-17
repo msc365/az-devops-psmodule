@@ -394,17 +394,6 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ### PSCustomObject
 
-Returns a collection of check configuration objects, each containing:
-- id: The ID of the check configuration
-- settings: The configuration settings (included when Expands = 'settings')
-- timeout: The timeout value for the check
-- type: The type information for the check
-- resource: The resource information
-- createdBy: The ID of the user who created the configuration
-- createdOn: The date and time when the configuration was created
-- project: The name of the project
-- collectionUri: The collection URI
-
 ## NOTES
 
 - Requires authentication to Azure DevOps. Use `Set-AdoDefault` to configure default organization and project values.

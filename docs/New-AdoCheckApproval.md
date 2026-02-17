@@ -450,24 +450,6 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ### PSCustomObject
 
-Returns a custom object representing the approval check configuration:
-- id: The unique identifier of the check configuration
-- settings: The approval settings object containing:
-  - approvers: Array of approver objects with id property
-  - minRequiredApprovers: Minimum number of required approvers (0 = all)
-  - executionOrder: Order in which approvers must approve (anyOrder or inSequence)
-  - requesterCannotBeApprover: Whether the requester can be an approver
-  - instructions: Instructions for the approvers
-  - blockedApprovers: Array of blocked approvers
-  - definitionRef: Reference to the approval definition with id property
-- timeout: The timeout value in minutes
-- type: The check type object with name and id properties
-- resource: The resource object with type and id properties
-- createdBy: The ID of the user who created the check
-- createdOn: The timestamp when the check was created
-- project: The project name
-- collectionUri: The collection URI
-
 ## NOTES
 
 - When an approval check with the same configuration already exists, the existing check is returned with a warning

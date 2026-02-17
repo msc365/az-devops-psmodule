@@ -24,6 +24,9 @@
 
     .PARAMETER ContentType
         The content type of the request. Default is 'application/json'.
+
+    .OUTPUTS
+        The response from the Azure DevOps Services REST API.
     #>
     [CmdletBinding()]
     param (

@@ -259,18 +259,6 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ### PSCustomObject
 
-Returns one or more group objects with the following properties:
-- displayName: The display name of the group
-- originId: The origin ID of the group
-- principalName: The principal name of the group
-- origin: The origin of the group (e.g., 'aad', 'vsts')
-- subjectKind: The subject kind (e.g., 'group')
-- description: The description of the group
-- mailAddress: The mail address of the group
-- descriptor: The descriptor of the group
-- collectionUri: The collection URI used for the query
-- continuationToken: (Optional) Token for retrieving the next page of results
-
 ## NOTES
 
 - Retrieves groups in an Azure DevOps organization

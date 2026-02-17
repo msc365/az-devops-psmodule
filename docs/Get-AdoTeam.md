@@ -235,16 +235,6 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ### PSCustomObject
 
-Returns one or more team objects with the following properties:
-- id: The unique identifier of the team
-- name: The name of the team
-- description: The description of the team
-- url: The REST API URL for the team
-- identityUrl: The identity URL for the team
-- projectId: The unique identifier of the project the team belongs to
-- projectName: The name of the project the team belongs to
-- collectionUri: The collection URI the team belongs to
-
 ## NOTES
 
 - Both CollectionUri and ProjectName parameters can be set as environment variables ($env:DefaultAdoCollectionUri and $env:DefaultAdoProject) to avoid specifying them in each call
