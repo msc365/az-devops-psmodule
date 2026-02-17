@@ -34,6 +34,7 @@ Maintenance and new feature release adding user retrieval support, enhanced grou
 - docs(contributing): Remove outdated changelog update instruction (#134)
 - chore(build): Update module version to 0.4.1 (#135)
 - chore(v0.4.1): Update changelog and set build version (#135)
+- docs(changelog): Update summary and contributors for version 0.4.1 (#136)
 
 ### Breaking Changes
 - _None_
