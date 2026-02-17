@@ -249,15 +249,6 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ### PSCustomObject
 
-Returns a project object with the following properties:
-- id: The unique identifier of the created project
-- name: The name of the project
-- description: The description of the project
-- visibility: The visibility of the project (Private or Public)
-- state: The state of the project (typically 'wellFormed' after successful creation)
-- defaultTeam: Information about the default team created with the project
-- collectionUri: The collection URI the project belongs to
-
 ## NOTES
 
 - The cmdlet automatically polls for project creation completion before returning

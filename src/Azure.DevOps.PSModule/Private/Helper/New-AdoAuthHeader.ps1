@@ -9,6 +9,9 @@
 
     .PARAMETER PAT
         The personal access token (PAT) to use for the authentication. If not provided, the token is retrieved using Get-AzAccessToken.
+
+    .OUTPUTS
+        None
     #>
     [CmdletBinding()]
     param (

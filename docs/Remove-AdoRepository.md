@@ -169,9 +169,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### None
-
-This cmdlet does not produce output. It removes the specified repository.
+- None
 
 ## NOTES
 

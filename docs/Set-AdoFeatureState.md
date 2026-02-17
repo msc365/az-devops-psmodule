@@ -207,14 +207,6 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ### PSCustomObject
 
-Returns a custom object with the following properties:
-- featureId: The unique identifier for the feature
-- state: The state as text ('enabled' or 'disabled')
-- feature: The feature name that was updated
-- projectName: The name of the project
-- projectId: The ID of the project
-- collectionUri: The collection URI
-
 ## NOTES
 
 - Turning off a feature hides this service for all members of this project.

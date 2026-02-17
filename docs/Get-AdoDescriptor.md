@@ -155,11 +155,6 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ### PSCustomObject
 
-Returns a PSCustomObject with the following properties:
-- **storageKey**: The storage key that was resolved
-- **value**: The descriptor value returned by the API
-- **collectionUri**: The collection URI used for the request
-
 ## NOTES
 
 - Requires authentication to Azure DevOps. Use `Set-AdoDefault` to configure default organization and project values.

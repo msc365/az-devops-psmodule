@@ -34,17 +34,7 @@
         Optional. The API version to use for the request. Default is '7.1'.
 
     .OUTPUTS
-        A custom object containing details about the push operation.
-
-        [PSCustomObject]@{
-            pushId        = The ID of the push operation.
-            commits       = The commits included in the push.
-            refUpdates    = The reference updates for the push.
-            pushedBy      = The user who initiated the push.
-            date          = The date and time of the push.
-            projectName   = The name of the project.
-            collectionUri = The URI of the Azure DevOps collection.
-        }
+        PSCustomObject
 
     .LINK
         https://learn.microsoft.com/en-us/rest/api/azure/devops/git/pushes/get

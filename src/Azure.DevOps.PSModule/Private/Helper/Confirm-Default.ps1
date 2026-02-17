@@ -10,6 +10,9 @@
     .PARAMETER Defaults
         A hashtable containing the default parameters to be checked.
 
+    .OUTPUTS
+        None
+
     .EXAMPLE
         $defaults = @{
             Organization = 'my-org'

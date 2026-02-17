@@ -17,13 +17,7 @@
         Optional. The API version to use. Default is '4.1-preview.1'.
 
     .OUTPUTS
-        [PSCustomObject]@{
-            feature       : Feature name (e.g., 'boards', 'repos', 'pipelines', 'testPlans', 'artifacts')
-            state         : State of the feature (e.g., 'enabled', 'disabled')
-            featureId     : Feature ID (e.g., 'ms.vss-code.version-control')
-            projectName   : Name of the project
-            collectionUri : Collection URI used
-        }
+        PSCustomObject
 
     .LINK
         https://learn.microsoft.com/en-us/rest/api/azure/devops/feature-management/featurestatesquery
