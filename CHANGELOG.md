@@ -19,12 +19,14 @@ All notable changes to this project will be documented in this file.
 
 <br> -->
 
+
 ## [UNRELEASED]
 
 ### Summary
 - _None_
 
 ### What's Changed
+- feat(Get-AdoUser): Add user support (#124)
 - fix(Get-AdoUserEntitlement): Correct error handling (#128)
 
 ### Breaking Changes
@@ -32,7 +34,7 @@ All notable changes to this project will be documented in this file.
 
 <br>
 
-## [0.4.0] - 2026-02-13
+## [0.4.0] - 2026-02-13 - 2026-02-13
 
 ### Summary
 Feature release adding repository initialization support, enhanced user entitlement data, and improved check/approval resource management.
