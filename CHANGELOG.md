@@ -19,15 +19,21 @@ All notable changes to this project will be documented in this file.
 
 <br> -->
 
-## [UNRELEASED]
+## [0.4.1] - 2026-02-17
 
 ### Summary
 - _None_
 
 ### What's Changed
-- feat(Get-AdoUser): Add user support (#124)
-- feat(Get-AdoGroup): Add `domain` property to output (#126)
-- fix(Get-AdoUserEntitlement): Correct error handling (#128)
+
+- feat(Get-AdoUser): Add user support (#125)
+- feat(Get-AdoGroup): Add `domain` property to output (#127)
+- fix(Get-AdoUserEntitlement): Correct error handling (#129)
+- fix(pr-code-testing): Update badge publishing condition (#131)
+- docs: Simplify and align output documentation (#133)
+- docs(contributing): Remove outdated changelog update instruction (#134)
+- chore(build): Update module version to 0.4.1 (#135)
+- chore(v0.4.1): Update changelog and set build version (#135)
 
 ### Breaking Changes
 - _None_
@@ -40,11 +46,14 @@ All notable changes to this project will be documented in this file.
 Feature release adding repository initialization support, enhanced user entitlement data, and improved check/approval resource management.
 
 ### What's Changed
-- feat(Get-AdoUserEntitlement): Add `dateCreated` property to output
-- feat: Add `ResourceId` parameter to all Check and Approval cmdlets
-- feat: Add `New-AdoPushInitialCommit` cmdlet for creating initial commits in Azure DevOps repositories
-- chore: Using namespace `System.Collections.Generic` declaration at the module root
-- chore(Build.ps1): Update module version to 0.4.0
+
+- chore(pr-code-testing): Remove unnecessary environment declaration for badge publishing (#112)
+- chore(namespace): Use System.Collections.Generic declaration at the module root (#115)
+- feat(New-AdoPushInitialCommit): Add cmdlet for creating initial commits (#117)
+- feat: Add ResourceId parameter to all Check and Approval cmdlets (#118)
+- feat(Get-AdoUserEntitlement): Add dateCreated property to output (#120)
+- chore(changelog): Update add dateCreated property to output in changelog (#121)
+- chore(v0.4.0): Update changelog and set build version (#122)
 
 ### Breaking Changes
 - _None_
