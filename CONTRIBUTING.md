@@ -52,7 +52,6 @@ To make life a bit easier, a `.vscode/settings.json` file is configured to enfor
 ## Documentation requirements
 
 - (Re)generate the help files via [src/PlatyPS.ps1](src/PlatyPS.ps1) into a temporary folder, then hand-curate diffs before replacing existing docs to avoid accidental deletions.
-- Update [CHANGELOG.md](CHANGELOG.md) with the user-facing changes grouped under the `UNRELEASED` heading.
 
 ## Branching and PR workflow
 
