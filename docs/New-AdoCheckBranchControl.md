@@ -372,17 +372,6 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ### PSCustomObject
 
-Returns a custom object representing the branch control check configuration:
-- id: The unique identifier of the check configuration
-- settings: The branch control settings including display name, definition reference, and inputs
-- timeout: The timeout value in minutes
-- type: The type of check (Task Check)
-- resource: The resource details (type and id)
-- createdBy: The ID of the user who created the check
-- createdOn: The timestamp when the check was created
-- project: The project name
-- collectionUri: The collection URI
-
 ## NOTES
 
 - When a branch control check with the same configuration already exists, the existing check is returned with a warning

@@ -227,15 +227,6 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ### PSCustomObject
 
-Returns the updated project object with the following properties:
-- id: The unique identifier of the project
-- name: The updated name of the project
-- description: The updated description of the project
-- visibility: The visibility of the project (Private or Public)
-- state: The state of the project
-- defaultTeam: Information about the default team for the project
-- collectionUri: The collection URI the project belongs to
-
 ## NOTES
 
 - The cmdlet accepts either a project ID (GUID) or project name for the Id parameter

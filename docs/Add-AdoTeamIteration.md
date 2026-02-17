@@ -200,14 +200,6 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ### PSCustomObject
 
-The cmdlet returns a PSCustomObject with the following properties:
-- id: The unique identifier of the iteration
-- name: The name of the iteration
-- attributes: The iteration attributes including start date, finish date, and time frame
-- team: The id or name of the team the iteration was added to
-- project: The id or name of the project
-- collectionUri: The collection URI
-
 ## NOTES
 
 - Requires authentication to Azure DevOps. Use `Set-AdoDefault` to configure default organization and project values.

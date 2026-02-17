@@ -162,15 +162,6 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ### PSCustomObject
 
-Returns one or more process objects with the following properties:
-- id: The unique identifier of the process
-- name: The name of the process (Agile, Scrum, CMMI, or Basic)
-- description: A description of the process
-- url: The REST API URL for the process
-- type: The type of the process
-- isDefault: Boolean indicating if this is the default process
-- collectionUri: The collection URI the process belongs to
-
 ## NOTES
 
 - Requires authentication to Azure DevOps. Use `Set-AdoDefault` to configure default organization and project values.

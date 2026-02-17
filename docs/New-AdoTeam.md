@@ -193,16 +193,6 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ### PSCustomObject
 
-Returns a team object with the following properties:
-- id: The unique identifier of the created team
-- name: The name of the team
-- description: The description of the team
-- url: The REST API URL for the team
-- identityUrl: The identity URL for the team
-- projectId: The unique identifier of the project the team belongs to
-- projectName: The name of the project the team belongs to
-- collectionUri: The collection URI the team belongs to
-
 ## NOTES
 
 - The team name must be unique within the project

@@ -289,19 +289,6 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ### PSCustomObject
 
-Returns policy configuration objects with the following properties:
-- id: The unique identifier of the policy configuration
-- type: The policy type object containing the type ID
-- revision: The revision number of the configuration
-- isEnabled: Whether the policy is enabled
-- isBlocking: Whether the policy is blocking
-- isDeleted: Whether the policy is deleted
-- settings: The policy-specific settings object
-- createdBy: The user who created the configuration
-- createdDate: The date the configuration was created
-- projectName: The project name where the configuration exists
-- collectionUri: The collection URI of the Azure DevOps organization
-
 ## NOTES
 
 - Requires authentication to Azure DevOps. Use `Set-AdoDefault` to configure default organization and project values.

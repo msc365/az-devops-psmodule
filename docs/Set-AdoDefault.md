@@ -127,11 +127,6 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ### PSCustomObject
 
-Returns an object with the following properties:
-- Organization: The default Azure DevOps organization name
-- CollectionUri: The default Azure DevOps collection URI
-- ProjectName: The default Azure DevOps project name
-
 ## NOTES
 
 This function sets environment variables for the current session only. These defaults are used by other cmdlets in the module when parameters are not explicitly provided.

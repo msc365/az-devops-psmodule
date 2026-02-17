@@ -302,20 +302,6 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ### PSCustomObject
 
-A custom object containing details about the push operation.
-
-```text
-[PSCustomObject]@{
-    pushId        = The ID of the push operation.
-    commits       = The commits included in the push.
-    refUpdates    = The reference updates for the push.
-    pushedBy      = The user who initiated the push.
-    date          = The date and time of the push.
-    projectName   = The name of the project.
-    collectionUri = The URI of the Azure DevOps collection.
-}
-```
-
 ## NOTES
 - N/A
 
