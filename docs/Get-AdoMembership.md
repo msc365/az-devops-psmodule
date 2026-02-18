@@ -13,15 +13,22 @@ title: Get-AdoMembership
 
 ## SYNOPSIS
 
-Get the membership relationship between a subject and a container in Azure DevOps.
+Get membership relationships
 
 ## SYNTAX
 
-### __AllParameterSets
+### GetMembership
 
 ```text
 Get-AdoMembership [[-CollectionUri] <string>] [-SubjectDescriptor] <string[]>
  [-ContainerDescriptor] <string> [[-Version] <string>] [<CommonParameters>]
+```
+
+### ListMemberships
+
+```text
+Get-AdoMembership [[-CollectionUri] <string>] [-SubjectDescriptor] <string[]>
+ [[-Depth] <int32>] [[-Direction] <string>] [[-Version] <string>] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -31,7 +38,8 @@ This cmdlet has the following aliases,
 
 ## DESCRIPTION
 
-This cmdlet retrieves the membership relationship between a specified subject and container in Azure DevOps.
+This cmdlet retrieves the membership relationships between a specified subject and container in Azure DevOps or
+get all the memberships where this descriptor is a member in the relationship.
 
 ## EXAMPLES
 
@@ -63,6 +71,38 @@ $params = @{
 ```
 
 Retrieves the membership relationships for multiple subjects demonstrating pipeline input.
+
+### EXAMPLE 3
+
+#### PowerShell
+
+```powershell
+$params = @{
+    CollectionUri     = 'https://vssps.dev.azure.com/my-org'
+    SubjectDescriptor = 'aadgp.00000000-0000-0000-0000-000000000000'
+    Depth             = 2
+    Direction         = 'up'
+}
+Get-AdoMembership @params
+```
+
+Retrieves all groups for a user with a depth of 2.
+
+### EXAMPLE 4
+
+#### PowerShell
+
+```powershell
+$params = @{
+    CollectionUri     = 'https://vssps.dev.azure.com/my-org'
+    SubjectDescriptor = 'aadgp.00000000-0000-0000-0000-000000000000'
+    Depth             = 2
+    Direction         = 'down'
+}
+Get-AdoMembership @params
+```
+
+Retrieves all memberships of a group with a depth of 2.
 
 ## PARAMETERS
 
@@ -112,7 +152,7 @@ HelpMessage: ''
 
 ### -ContainerDescriptor
 
-Mandatory.
+Optional.
 A descriptor to the container in the relationship.
 
 ```yaml
@@ -121,9 +161,9 @@ DefaultValue: ''
 SupportsWildcards: false
 Aliases: []
 ParameterSets:
-- Name: (All)
+- Name: GetMembership
   Position: Named
-  IsRequired: true
+  IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: true
   ValueFromRemainingArguments: false
@@ -132,15 +172,65 @@ AcceptedValues: []
 HelpMessage: ''
 ```
 
+### -Depth
+
+Optional.
+The depth of memberships to retrieve when ContainerDescriptor is not specified.
+Default is 1.
+
+```yaml
+Type: System.Int32
+DefaultValue: ''
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: ListMemberships
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -Direction
+
+Optional.
+The direction of memberships to retrieve when ContainerDescriptor is not specified.
+
+The default value for direction is 'up' meaning return all memberships where the subject is a member (e.g. all groups the subject is a member of).
+Alternatively, passing the direction as 'down' will return all memberships where the subject is a container (e.g. all members of the subject group).
+
+```yaml
+Type: System.String
+DefaultValue: ''
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: ListMemberships
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues:
+- up
+- down
+HelpMessage: ''
+```
+
 ### -Version
 
 Optional.
 The API version to use for the request.
-Default is '7.2-preview.1'.
+Default is '7.1-preview.1'.
 
 ```yaml
 Type: System.String
-DefaultValue: 7.2-preview.1
+DefaultValue: 7.1-preview.1
 SupportsWildcards: false
 Aliases:
 - ApiVersion
@@ -153,6 +243,7 @@ ParameterSets:
   ValueFromRemainingArguments: false
 DontShow: false
 AcceptedValues:
+- 7.1-preview.1
 - 7.2-preview.1
 HelpMessage: ''
 ```
@@ -180,3 +271,4 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## RELATED LINKS
 
 - <https://learn.microsoft.com/en-us/rest/api/azure/devops/graph/memberships/get>
+- <https://learn.microsoft.com/en-us/rest/api/azure/devops/graph/memberships/list>

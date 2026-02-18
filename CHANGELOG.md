@@ -19,6 +19,19 @@ All notable changes to this project will be documented in this file.
 
 <br> -->
 
+## [UNRELEASED]
+
+### Summary
+- _None_
+
+### What's Changed
+- feat(Get-AdoMembership): Add list support
+
+### Breaking Changes
+- _None_
+
+<br>
+
 ## [0.4.1] - 2026-02-17
 
 ### Summary

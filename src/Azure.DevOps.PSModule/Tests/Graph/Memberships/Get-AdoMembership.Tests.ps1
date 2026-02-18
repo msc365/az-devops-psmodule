@@ -21,6 +21,19 @@ Describe 'Get-AdoMembership' {
             memberDescriptor    = 'aadgp.00000000-0000-0000-0000-000000000001'
             containerDescriptor = 'vssgp.00000000-0000-0000-0000-000000000002'
         }
+
+        $mockMembershipsList = [PSCustomObject]@{
+            value = @(
+                [PSCustomObject]@{
+                    memberDescriptor    = 'aadgp.00000000-0000-0000-0000-000000000001'
+                    containerDescriptor = 'vssgp.00000000-0000-0000-0000-000000000003'
+                }
+                [PSCustomObject]@{
+                    memberDescriptor    = 'aadgp.00000000-0000-0000-0000-000000000001'
+                    containerDescriptor = 'vssgp.00000000-0000-0000-0000-000000000004'
+                }
+            )
+        }
     }
 
     Context 'Core Functionality Tests' {
@@ -137,6 +150,83 @@ Describe 'Get-AdoMembership' {
         }
     }
 
+    Context 'ListMemberships Parameter Set Tests' {
+        BeforeEach {
+            Mock -ModuleName Azure.DevOps.PSModule Invoke-AdoRestMethod { return $mockMembershipsList }
+            Mock -ModuleName Azure.DevOps.PSModule Confirm-Default { }
+            Mock -ModuleName Azure.DevOps.PSModule Start-Sleep { }
+        }
+
+        It 'Should retrieve memberships without ContainerDescriptor' {
+            # Act
+            $result = Get-AdoMembership -CollectionUri $mockCollectionUri -SubjectDescriptor $mockSubjectDescriptor -Direction 'up'
+
+            # Assert
+            $result | Should -Not -BeNullOrEmpty
+            $result | Should -HaveCount 2
+        }
+
+        It 'Should construct API URI correctly without ContainerDescriptor' {
+            # Act
+            Get-AdoMembership -CollectionUri $mockCollectionUri -SubjectDescriptor $mockSubjectDescriptor -Direction 'up'
+
+            # Assert
+            Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1 -ParameterFilter {
+                $Uri -eq "$mockCollectionUri/_apis/graph/memberships/$mockSubjectDescriptor"
+            }
+        }
+
+        It 'Should include Depth query parameter when specified' {
+            # Act
+            Get-AdoMembership -CollectionUri $mockCollectionUri -SubjectDescriptor $mockSubjectDescriptor -Depth 2
+
+            # Assert
+            Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1 -ParameterFilter {
+                $QueryParameters -eq 'depth=2'
+            }
+        }
+
+        It 'Should include Direction query parameter when specified' {
+            # Act
+            Get-AdoMembership -CollectionUri $mockCollectionUri -SubjectDescriptor $mockSubjectDescriptor -Direction 'up'
+
+            # Assert
+            Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1 -ParameterFilter {
+                $QueryParameters -eq 'direction=up'
+            }
+        }
+
+        It 'Should include both Depth and Direction query parameters when specified' {
+            # Act
+            Get-AdoMembership -CollectionUri $mockCollectionUri -SubjectDescriptor $mockSubjectDescriptor -Depth 2 -Direction 'down'
+
+            # Assert
+            Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1 -ParameterFilter {
+                $QueryParameters -eq 'depth=2&direction=down'
+            }
+        }
+
+        It 'Should accept Direction value "up"' {
+            # Act & Assert
+            { Get-AdoMembership -CollectionUri $mockCollectionUri -SubjectDescriptor $mockSubjectDescriptor -Direction 'up' } | Should -Not -Throw
+        }
+
+        It 'Should accept Direction value "down"' {
+            # Act & Assert
+            { Get-AdoMembership -CollectionUri $mockCollectionUri -SubjectDescriptor $mockSubjectDescriptor -Direction 'down' } | Should -Not -Throw
+        }
+
+        It 'Should return multiple memberships from value array' {
+            # Act
+            $result = Get-AdoMembership -CollectionUri $mockCollectionUri -SubjectDescriptor $mockSubjectDescriptor -Depth 2
+
+            # Assert
+            $result | Should -HaveCount 2
+            $result[0].memberDescriptor | Should -Be $mockSubjectDescriptor
+            $result[1].memberDescriptor | Should -Be $mockSubjectDescriptor
+        }
+    }
+
     Context 'Error Handling Tests' {
         BeforeEach {
             Mock -ModuleName Azure.DevOps.PSModule Confirm-Default { }
@@ -225,12 +315,73 @@ Describe 'Get-AdoMembership' {
             $param.Attributes.Mandatory | Should -Contain $true
         }
 
-        It 'Should have ContainerDescriptor as mandatory parameter' {
+        It 'Should have ContainerDescriptor as optional parameter' {
             # Arrange
             $param = (Get-Command Get-AdoMembership).Parameters['ContainerDescriptor']
 
             # Assert
-            $param.Attributes.Mandatory | Should -Contain $true
+            $param.Attributes.Where({ $_.GetType().Name -eq 'ParameterAttribute' }).Mandatory | Should -Contain $false
+        }
+
+        It 'Should have Depth as optional parameter' {
+            # Arrange
+            $param = (Get-Command Get-AdoMembership).Parameters['Depth']
+
+            # Assert
+            $param.Attributes.Where({ $_.GetType().Name -eq 'ParameterAttribute' }).Mandatory | Should -Contain $false
+        }
+
+        It 'Should have Direction as optional parameter' {
+            # Arrange
+            $param = (Get-Command Get-AdoMembership).Parameters['Direction']
+
+            # Assert
+            $param.Attributes.Where({ $_.GetType().Name -eq 'ParameterAttribute' }).Mandatory | Should -Contain $false
+        }
+    }
+
+    Context 'Parameter Set Tests' {
+        It 'Should have GetMembership parameter set' {
+            # Arrange
+            $paramSets = (Get-Command Get-AdoMembership).ParameterSets
+
+            # Assert
+            $paramSets.Name | Should -Contain 'GetMembership'
+        }
+
+        It 'Should have ListMemberships parameter set' {
+            # Arrange
+            $paramSets = (Get-Command Get-AdoMembership).ParameterSets
+
+            # Assert
+            $paramSets.Name | Should -Contain 'ListMemberships'
+        }
+
+        It 'Should have ContainerDescriptor in GetMembership parameter set' {
+            # Arrange
+            $paramSet = (Get-Command Get-AdoMembership).ParameterSets | Where-Object { $_.Name -eq 'GetMembership' }
+            $param = $paramSet.Parameters | Where-Object { $_.Name -eq 'ContainerDescriptor' }
+
+            # Assert
+            $param | Should -Not -BeNullOrEmpty
+        }
+
+        It 'Should have Depth in ListMemberships parameter set' {
+            # Arrange
+            $paramSet = (Get-Command Get-AdoMembership).ParameterSets | Where-Object { $_.Name -eq 'ListMemberships' }
+            $param = $paramSet.Parameters | Where-Object { $_.Name -eq 'Depth' }
+
+            # Assert
+            $param | Should -Not -BeNullOrEmpty
+        }
+
+        It 'Should have Direction in ListMemberships parameter set' {
+            # Arrange
+            $paramSet = (Get-Command Get-AdoMembership).ParameterSets | Where-Object { $_.Name -eq 'ListMemberships' }
+            $param = $paramSet.Parameters | Where-Object { $_.Name -eq 'Direction' }
+
+            # Assert
+            $param | Should -Not -BeNullOrEmpty
         }
     }
 }
