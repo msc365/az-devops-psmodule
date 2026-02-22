@@ -188,11 +188,11 @@ Describe 'Get-AdoMembership' {
 
         It 'Should include Direction query parameter when specified' {
             # Act
-            Get-AdoMembership -CollectionUri $mockCollectionUri -SubjectDescriptor $mockSubjectDescriptor -Direction 'down'
+            Get-AdoMembership -CollectionUri $mockCollectionUri -SubjectDescriptor $mockSubjectDescriptor -Direction 'up'
 
             # Assert
             Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1 -ParameterFilter {
-                $QueryParameters -eq 'direction=down'
+                $QueryParameters -eq 'direction=up'
             }
         }
 
