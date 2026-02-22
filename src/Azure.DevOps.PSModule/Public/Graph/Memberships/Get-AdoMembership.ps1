@@ -76,7 +76,7 @@
 
         Retrieves all memberships of a group with a depth of 2.
     #>
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName = 'ListMemberships')]
     param (
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateScript({ Confirm-CollectionUri -Uri $_ })]

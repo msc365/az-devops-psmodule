@@ -1,10 +1,10 @@
 <!--
 document type: cmdlet
 external help file: Azure.DevOps.PSModule-Help.xml
-HelpUri: https://learn.microsoft.com/en-us/rest/api/azure/devops/graph/memberships/get
-Locale: en-NL
+HelpUri: 'https://learn.microsoft.com/en-us/rest/api/azure/devops/graph/memberships/get
+Locale: nl-NL
 Module Name: Azure.DevOps.PSModule
-ms.date: 11/01/2025
+ms.date: 02-22-2026
 PlatyPS schema version: 2024-05-01
 title: Get-AdoMembership
 -->
@@ -17,18 +17,18 @@ Get membership relationships
 
 ## SYNTAX
 
-### GetMembership
+### ListMemberships (Default)
 
-```text
-Get-AdoMembership [[-CollectionUri] <string>] [-SubjectDescriptor] <string[]>
- [-ContainerDescriptor] <string> [[-Version] <string>] [<CommonParameters>]
+```powershell
+Get-AdoMembership -SubjectDescriptor <string[]> [-CollectionUri <string>] [-Depth <int>]
+ [-Direction <string>] [-Version <string>] [<CommonParameters>]
 ```
 
-### ListMemberships
+### GetMembership
 
-```text
-Get-AdoMembership [[-CollectionUri] <string>] [-SubjectDescriptor] <string[]>
- [[-Depth] <int32>] [[-Direction] <string>] [[-Version] <string>] [<CommonParameters>]
+```powershell
+Get-AdoMembership -SubjectDescriptor <string[]> [-CollectionUri <string>]
+ [-ContainerDescriptor <string>] [-Version <string>] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -128,28 +128,6 @@ AcceptedValues: []
 HelpMessage: ''
 ```
 
-### -SubjectDescriptor
-
-Mandatory.
-A descriptor to the child subject in the relationship.
-
-```yaml
-Type: System.String[]
-DefaultValue: ''
-SupportsWildcards: false
-Aliases: []
-ParameterSets:
-- Name: (All)
-  Position: Named
-  IsRequired: true
-  ValueFromPipeline: true
-  ValueFromPipelineByPropertyName: true
-  ValueFromRemainingArguments: false
-DontShow: false
-AcceptedValues: []
-HelpMessage: ''
-```
-
 ### -ContainerDescriptor
 
 Optional.
@@ -180,7 +158,7 @@ Default is 1.
 
 ```yaml
 Type: System.Int32
-DefaultValue: ''
+DefaultValue: 0
 SupportsWildcards: false
 Aliases: []
 ParameterSets:
@@ -219,6 +197,28 @@ DontShow: false
 AcceptedValues:
 - up
 - down
+HelpMessage: ''
+```
+
+### -SubjectDescriptor
+
+Mandatory.
+A descriptor to the child subject in the relationship.
+
+```yaml
+Type: System.String[]
+DefaultValue: ''
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: (All)
+  Position: Named
+  IsRequired: true
+  ValueFromPipeline: true
+  ValueFromPipelineByPropertyName: true
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
 HelpMessage: ''
 ```
 
