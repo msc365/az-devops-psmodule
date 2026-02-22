@@ -37,7 +37,7 @@ Describe 'Get-AdoStorageKey' {
             $result | Should -Not -BeNullOrEmpty
             $result.value | Should -Be $mockStorageKeyValue
             $result.subjectDescriptor | Should -Be $mockSubjectDescriptor
-            $result.collectionUri | Should -Be $mockCollectionUri
+            $result.collectionUri | Should -Be 'https://vssps.dev.azure.com/my-org'
         }
 
         It 'Should return PSCustomObject with expected properties' {
@@ -107,16 +107,16 @@ Describe 'Get-AdoStorageKey' {
             Mock -ModuleName Azure.DevOps.PSModule Confirm-Default { }
         }
 
-        It 'Should accept descriptor from pipeline' {
+        It 'Should accept descriptor with collectionUri from pipeline' {
             # Arrange
-            $descriptors = @(
-                'aad.00000000-0000-0000-0000-000000000001',
-                'aad.00000000-0000-0000-0000-000000000002',
-                'aad.00000000-0000-0000-0000-000000000003'
+            $objects = @(
+                [PSCustomObject]@{ SubjectDescriptor = 'aad.00000000-0000-0000-0000-000000000001'; CollectionUri = $mockCollectionUri }
+                [PSCustomObject]@{ SubjectDescriptor = 'aad.00000000-0000-0000-0000-000000000002'; CollectionUri = $mockCollectionUri }
+                [PSCustomObject]@{ SubjectDescriptor = 'aad.00000000-0000-0000-0000-000000000003'; CollectionUri = $mockCollectionUri }
             )
 
             # Act
-            $result = $descriptors | Get-AdoStorageKey -CollectionUri $mockCollectionUri
+            $result = $objects | Get-AdoStorageKey
 
             # Assert
             $result | Should -HaveCount 3
@@ -228,13 +228,14 @@ Describe 'Get-AdoStorageKey' {
         It 'Should transform dev.azure.com to vssps.dev.azure.com' {
             # Arrange
             $devAzureUri = 'https://dev.azure.com/my-org'
+            $expectedUri = "https://vssps.dev.azure.com/my-org/_apis/graph/storagekeys/$mockSubjectDescriptor"
 
             # Act
             Get-AdoStorageKey -CollectionUri $devAzureUri -SubjectDescriptor $mockSubjectDescriptor
 
             # Assert
             Should -Invoke Invoke-AdoRestMethod -ModuleName Azure.DevOps.PSModule -Times 1 -ParameterFilter {
-                $Uri -eq 'https://vssps.dev.azure.com/my-org/_apis/graph/storagekeys/$mockSubjectDescriptor'
+                $Uri -eq $expectedUri
             }
         }
     }
