@@ -19,10 +19,11 @@ All notable changes to this project will be documented in this file.
 
 <br> -->
 
-## [UNRELEASED]
+## [0.4.1] - 2026-02-23
 
 ### Summary
-- _None_
+
+Feature release adding enhanced membership querying and storage key resolution capabilities with improved default parameter behavior.
 
 ### What's Changed
 - feat(Get-AdoMembership): Add list support (#139)
