@@ -34,7 +34,7 @@ Properties {
     # $script:moduleName = 'Azure.DevOps.PSModule'
 
     # The current release version of the module.
-    $script:buildVersion = [System.Version]'0.4.1'
+    $script:buildVersion = [System.Version]'0.4.2'
 
     # Pre-release label (e.g. 'alpha1', 'beta1', 'rc1'). Set to $null for stable releases.
     $script:prerelease = $null
