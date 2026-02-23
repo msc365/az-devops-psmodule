@@ -28,6 +28,7 @@ All notable changes to this project will be documented in this file.
 - feat(Get-AdoMembership): Add list support (#139)
 - feat(Get-AdoStorageKey): Resolve a descriptor to a storage key (#142)
 - bug(Get-AdoMembership): Set ListMemberships parameter set as default (#144)
+- chore(release): Prep module for release v0.4.2 (#145)
 
 ### Breaking Changes
 - _None_
